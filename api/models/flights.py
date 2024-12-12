@@ -30,8 +30,8 @@ class Flight(Base):
 
     fid: Mapped[int] = mapped_column(primary_key=True)
     airtask: Mapped[str] = mapped_column(String(7), nullable=False)
-    flight_type: Mapped[str] = mapped_column(String(4))
-    flight_action: Mapped[str] = mapped_column(String(4))
+    flight_type: Mapped[str] = mapped_column(String(5))
+    flight_action: Mapped[str] = mapped_column(String(5))
     tailnumber: Mapped[int]
     date: Mapped[date]
     origin: Mapped[str] = mapped_column(String(4))
@@ -64,7 +64,7 @@ class Flight(Base):
         return {
             "id": self.fid,
             "airtask": self.airtask,
-            "date": self.date,
+            "date": self.date.strftime("%d-%b-%Y"),
             "origin": self.origin,
             "destination": self.destination,
             "ATD": self.departure_time,
@@ -82,6 +82,9 @@ class Flight(Base):
             "fuel": self.fuel,
         }
 
+    def to_name(self) -> str:
+        return f"1M_{self.airtask}_{self.date}_{self.departure_time}"
+
 
 class FlightPilots(Base):
     """SQLALCHEMY Database class with the Pilots of each flight."""
@@ -93,6 +96,7 @@ class FlightPilots(Base):
         primary_key=True,
     )
     pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip"), primary_key=True)
+    position: Mapped[str] = mapped_column(String(5))
 
     day_landings: Mapped[int]
     night_landings: Mapped[int]
@@ -121,7 +125,7 @@ class FlightPilots(Base):
         response = {
             "name": self.pilot.name,
             "nip": self.pilot.nip,
-            "position": self.pilot.position,
+            "position": self.position,
             "ATR": self.day_landings,
             "ATN": self.night_landings,
             "precapp": self.prec_app,
@@ -156,6 +160,7 @@ class FlightCrew(Base):
     )
 
     crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip"), primary_key=True)
+    position: Mapped[str] = mapped_column(String(5))
 
     bsoc: Mapped[Optional[bool]]  # noqa: UP007
 
@@ -166,7 +171,7 @@ class FlightCrew(Base):
         """Return all model data in JSON format."""
         response = {
             "name": self.crew.name,
-            "position": self.crew.position,
+            "position": self.position,
             "nip": self.crew.nip,
         }
         if self.bsoc:

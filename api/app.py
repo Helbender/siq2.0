@@ -62,7 +62,9 @@ def refresh_expiring_jwts(response: Response) -> Response:
                 data["access_token"] = access_token
                 response.data = json.dumps(data)
         return response  # noqa: TRY300
-    except (RuntimeError, KeyError):
+    except (RuntimeError, KeyError) as e:
+        print("Error")
+        print(e)
         # Case where there is not a valid JWT. Just return the original respone
         return response
 

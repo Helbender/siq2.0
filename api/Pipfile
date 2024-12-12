@@ -11,6 +11,10 @@ flask-jwt-extended = "*"
 pymysql = "*"
 python-dotenv = "*"
 gunicorn = "*"
+google-api-python-client = "*"
+google-auth = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
 
 [dev-packages]
 mypy = "*"

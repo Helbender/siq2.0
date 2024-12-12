@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from config import engine
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import create_access_token, jwt_required, unset_jwt_cookies
+from flask_jwt_extended import create_access_token, unset_jwt_cookies, verify_jwt_in_request, jwt_required
 from functions.sendemail import hash_code, main
 from models.crew import Crew
 from models.pilots import Pilot
@@ -161,23 +161,34 @@ def store_new_passord(nip: int) -> tuple[Response, int]:
 
 
 @api.route("/pilots/<position>", methods=["GET"])
-@jwt_required()  # new line
 def retrieve_pilots(position: str) -> tuple[Response, int]:
     """Placehold."""
+    verify_jwt_in_request()
+    if position in ["PC", "PI"]:
+        stmt = union_all(
+            select(Pilot).where(Pilot.position == "PC"),
+            select(Pilot).where(Pilot.position == "PI"),
+        ).order_by(Pilot.nip.asc())
+    else:
+        stmt = union_all(
+            select(Pilot).where(Pilot.position == "CP"),
+            select(Pilot).where(Pilot.position == "P"),
+            select(Pilot).where(Pilot.position == "PA"),
+        ).order_by(Pilot.nip.asc())
     if request.method == "GET":
         # Retrieve all pilots from db
         with Session(engine) as session:
-            stmt = select(Pilot).where(Pilot.position == position).order_by(Pilot.nip)
-            result = session.execute(stmt).scalars().all()
+            stmt2 = select(Pilot).from_statement(stmt)
+            result = session.execute(stmt2).scalars().all()
             return jsonify([row.to_json(qualification_data=True) for row in result]), 200
 
     return jsonify({"message": "Bad Manual Request"}), 403
 
 
 @api.route("/crew", methods=["GET"])
-@jwt_required()  # new line
 def retrieve_crew() -> tuple[Response, int]:
     """Placehold."""
+    verify_jwt_in_request()
     if request.method == "GET":
         # Retrieve all crew from db
         with Session(engine) as session:

@@ -1,6 +1,6 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-from datetime import date
+from datetime import date, timedelta
 from typing import TYPE_CHECKING, List
 
 from models.users import Base, People, date_init, year_init
@@ -105,24 +105,45 @@ class Qualification(Base):
         return f"\nATR:{self.last_day_landings}\tATN:{self.last_night_landings}\tQA1: {self.last_qa1_date}\n"
 
     def to_json(self) -> dict:
+        unsorted_dict = {
+            "lastQA1": self.last_qa1_date,
+            "lastQA2": self.last_qa2_date,
+            "lastBSP1": self.last_bsp1_date,
+            "lastBSP2": self.last_bsp2_date,
+            "lastTA": self.last_ta_date,
+            "lastVRP1": self.last_vrp1_date,
+            "lastVRP2": self.last_vrp2_date,
+        }
+        sorted_dict: list = sorted(unsorted_dict, reverse=True)
+        oldest_key = sorted_dict[0]
         return {
             # "lastDayLandings": [date for date in self.last_day_landings.split()],  # noqa: ERA001
             "lastDayLandings": list(self.last_day_landings.split()),
             "lastNightLandings": list(self.last_night_landings.split()),
             "lastPrecApp": list(self.last_prec_app.split()),
             "lastNprecApp": list(self.last_nprec_app.split()),
-            "lastQA1": self.last_qa1_date.strftime("%Y-%m-%d"),
-            "lastQA2": self.last_qa2_date.strftime("%Y-%m-%d"),
-            "lastBSP1": self.last_bsp1_date.strftime("%Y-%m-%d"),
-            "lastBSP2": self.last_bsp2_date.strftime("%Y-%m-%d"),
-            "lastTA": self.last_ta_date.strftime("%Y-%m-%d"),
-            "lastVRP1": self.last_vrp1_date.strftime("%Y-%m-%d"),
-            "lastVRP2": self.last_vrp2_date.strftime("%Y-%m-%d"),
+            "lastQA1": self._get_days(self.last_qa1_date)[0],
+            "lastQA2": self._get_days(self.last_qa2_date)[0],
+            "lastBSP1": self._get_days(self.last_bsp1_date)[0],
+            "lastBSP2": self._get_days(self.last_bsp2_date)[0],
+            "lastTA": self._get_days(self.last_ta_date)[0],
+            "lastVRP1": self._get_days(self.last_vrp1_date)[0],
+            "lastVRP2": self._get_days(self.last_vrp2_date)[0],
+            "oldest": [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]],
+            # "oldest": sorted_dict[0][4:],
+            # "oldest": oldest_key[4:],
         }
 
     @staticmethod
+    def _get_days(data: date) -> list[int | str]:
+        today = date.today()  # noqa: DTZ011
+        dias = (data - today + timedelta(days=180)).days
+        expire = (data + timedelta(days=180)).strftime("%d-%b-%Y")
+        return [dias, expire]
+
+    @staticmethod
     def _get_last_five(last: list, number: int, date: str) -> str:
-        for n in range(number):
+        for _ in range(number):
             last.append(date)
             if len(last) > 5:
                 last.sort()

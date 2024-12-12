@@ -1,6 +1,6 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-from datetime import date
+from datetime import date, timedelta
 from typing import TYPE_CHECKING, List
 
 from models.users import Base, People, year_init
@@ -43,8 +43,10 @@ class QualificationCrew(Base):
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
+        oldest_key = "lastBSOC"
         return {
-            "lastBSOC": self.last_bsoc_date.strftime("%Y-%m-%d"),
+            "lastBSOC": self._get_days(self.last_bsoc_date)[0],
+            "oldest": [oldest_key[4:], self._get_days(self.last_bsoc_date)[1]],
         }
 
     def update(self, data: FlightCrew, date: date) -> QualificationCrew:
@@ -53,3 +55,10 @@ class QualificationCrew(Base):
             self.last_bsoc_date = date
 
         return self
+
+    @staticmethod
+    def _get_days(data: date) -> list[int | str]:
+        today = date.today()  # noqa: DTZ011
+        dias = (data - today + timedelta(days=180)).days
+        expire = (data + timedelta(days=180)).strftime("%d-%b-%Y")
+        return [dias, expire]

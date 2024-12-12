@@ -3,7 +3,7 @@ from __future__ import annotations  # noqa: D100, INP001
 from config import CREW_USER, PILOT_USER, engine
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (
-    jwt_required,
+    verify_jwt_in_request,
 )
 from functions.sendemail import hash_code
 from models.crew import Crew, QualificationCrew
@@ -16,9 +16,11 @@ users = Blueprint("users", __name__)
 
 
 # User ROUTES
-@jwt_required()  # new line
+# @jwt_required()  # new line
 @users.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_user() -> tuple[Response, int]:
+    verify_jwt_in_request()
+
     if request.method == "GET":
         result = []
         # Retrieve all users from db
@@ -73,9 +75,11 @@ def retrieve_user() -> tuple[Response, int]:
 
 
 @users.route("/<nip>/<position>", methods=["DELETE", "PATCH"], strict_slashes=False)
-@jwt_required()  # new line
+# @jwt_required()  # new line
 def modify_user(nip: int, position: str) -> tuple[Response, int]:
     """Placehold."""
+    verify_jwt_in_request()
+
     if position in PILOT_USER:
         db = Pilot
     elif position in CREW_USER:

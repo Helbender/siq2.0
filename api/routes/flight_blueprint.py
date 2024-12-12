@@ -5,20 +5,20 @@ from datetime import UTC, date, datetime
 from config import CREW_USER, PILOT_USER, engine
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (
-    jwt_required,
+    verify_jwt_in_request,
 )
+from functions.gdrive import autenticar_drive, enviar_dados_para_pasta
 from models.crew import Crew, QualificationCrew
 from models.flights import Flight, FlightCrew, FlightPilots
 from models.pilots import Pilot, Qualification
 from models.users import year_init
-from sqlalchemy import and_, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 flights = Blueprint("flights", __name__)
 
 
 # FLight ROUTES
-@jwt_required()
 @flights.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_flights() -> tuple[Response, int]:
     """Retrieve all flights from the db and sends to frontend.
@@ -26,6 +26,8 @@ def retrieve_flights() -> tuple[Response, int]:
     Method POST:
     -   Saves a flight to the db
     """
+    verify_jwt_in_request()
+
     # Retrieve all flights from db
     if request.method == "GET":
         flights: list = []
@@ -109,14 +111,23 @@ def retrieve_flights() -> tuple[Response, int]:
             session.refresh(flight)
             print(flight.fid)
 
+        service = autenticar_drive()
+        enviar_dados_para_pasta(
+            service,
+            flight.to_json(),
+            flight.to_name(),
+            "1AlVQSS8A6mu-bVJpP-ux--RKDnqnx4As",
+        )
+
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
 
-@jwt_required()  # new line
+# @jwt_required()  # new line
 @flights.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
     """Handle modifications to the Flights database."""
+    verify_jwt_in_request()
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:
             flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
@@ -155,10 +166,21 @@ def update_qualifications(
         ).scalar_one()
         print(pilot_qualification)
         # Process repetion Qualifications
-        qualification_fields = ["day_landings", "night_landings", "prec_app", "nprec_app"]
+        qualification_fields = [
+            "day_landings",
+            "night_landings",
+            "prec_app",
+            "nprec_app",
+        ]
         # Query the most recent dates for day landings from other flights
         for i in range(len(qualification_fields)):
-            process_repetion_qual(session, flight_id, tripulante, pilot_qualification, qualification_fields[i])
+            process_repetion_qual(
+                session,
+                flight_id,
+                tripulante,
+                pilot_qualification,
+                qualification_fields[i],
+            )
 
         # # Process night landings
         # # Query the most recent dates for day landings from other flights
@@ -195,22 +217,25 @@ def update_qualifications(
             "vrp1",
             "vrp2",
         ]
-
+        print(tripulante.pilot_id)
         for field in qualification_fields:
             print(field)
 
             last_qualification_date = session.execute(
                 select(func.max(Flight.date))
                 .join(FlightPilots)
-                .where(Flight.flight_pilots.any(pilot_id=tripulante.pilot_id))
+                # .where(Flight.flight_pilots.any(pilot_id=tripulante.pilot_id))
+                .where(FlightPilots.pilot_id == tripulante.pilot_id)
                 .where(Flight.fid != flight_id)
-                .where(getattr(FlightPilots, field) == 1),
-            ).scalar()
+                .where(getattr(FlightPilots, field) != 0),
+            ).scalar_one_or_none()
+            print(last_qualification_date)
+
             # Check if Date is None so to set a base Date
-            if last_qualification_date is None:
-                last_qualification_date = date(year_init, 1, 1)
-                # setattr(pilot_qualification, f"last_{field}_date", date(year_init, 1, 1))
-            # else:
+            last_qualification_date = (
+                date(year_init, 1, 1) if last_qualification_date is None else last_qualification_date
+            )
+
             # Update the tripulante's qualifications table
             setattr(pilot_qualification, f"last_{field}_date", last_qualification_date)
 
@@ -223,18 +248,26 @@ def update_qualifications(
         ]
 
         for field in qualification_fields:
-            last_qualification_date = (
-                session.query(func.max(Flight.date))
-                .filter(
-                    and_(
-                        Flight.flight_crew.any(crew_id=tripulante.crew_id),
-                        Flight.fid != flight_id,
-                        (getattr(FlightCrew, field) != None),  # noqa: E711
-                    ),
-                )
-                .scalar()
-            )
-            print(f"\n{tripulante.crew_id}\nLast Qualification {field}: {last_qualification_date}\n\n")
+            last_qualification_date = session.execute(
+                select(func.max(Flight.date))
+                .join(FlightCrew)
+                # .where(Flight.flight_crew.any(pilot_id=tripulante.crew_id))
+                .where(FlightCrew.crew_id == tripulante.crew_id)
+                .where(Flight.fid != flight_id)
+                .where(getattr(FlightCrew, field) != 0),
+            ).scalar_one_or_none()
+            # last_qualification_date = (
+            #     session.query(func.max(Flight.date))
+            #     .filter(
+            #         and_(
+            #             Flight.flight_crew.any(crew_id=tripulante.crew_id),
+            #             Flight.fid != flight_id,
+            #             (getattr(FlightCrew, field) != 0),
+            #         ),
+            #     )
+            #     .scalar()
+            # )
+            # print(f"\n{tripulante.crew_id}\nLast Qualification {field}: {last_qualification_date}\n\n")
             # Check if Date is None so to set a base Date
             if last_qualification_date is None:
                 last_qualification_date = date(year_init, 1, 1)
@@ -273,10 +306,11 @@ def process_repetion_qual(
     qualification_dates.sort(reverse=True)
 
     # Update the qualification record
-    setattr(pilot_qualification, f"last_{qualification_field}", " ".join(qualification_dates[:5]))
-    # qualification_attr = " ".join(qualification_dates[:5])
-    # pilot_qualification.last_day_landings = " ".join(qualification_dates[:5])
-
+    setattr(
+        pilot_qualification,
+        f"last_{qualification_field}",
+        " ".join(qualification_dates[:5]),
+    )
     print(f"After Qual { qualification_field}:\t{getattr(pilot_qualification, f"last_{qualification_field}")}\n")
 
 
@@ -297,6 +331,7 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
         qual_p: Qualification = session.get(Qualification, pilot["nip"])  # type: ignore  # noqa: PGH003
 
         fp = FlightPilots(
+            position=pilot["position"],
             day_landings=int(pilot["ATR"]),
             night_landings=int(pilot["ATN"]),
             prec_app=int(pilot["precapp"]),
@@ -319,6 +354,7 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
         crew_obj: Crew = session.get(Crew, pilot["nip"])  # type: ignore  # noqa: PGH003
         qual_c: QualificationCrew = session.get(QualificationCrew, pilot["nip"])  # type: ignore  # noqa: PGH003
         fp = FlightCrew(
+            position=pilot["position"],
             bsoc=pilot["BSOC"],
         )
         qual_c.update(fp, flight.date)
