@@ -1,7 +1,8 @@
+/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/prop-types */
 import { Text } from "@chakra-ui/react";
 
-const QualificationsPanel = ({ qualification }) => {
+const QualificationsPanel = (props) => {
   function colorFormatter(days) {
     let color = "";
     if (days < 0) return (color = "red");
@@ -22,9 +23,15 @@ const QualificationsPanel = ({ qualification }) => {
 
     return days;
   }
-  let days = getDays(qualification);
+  let days = getDays(props.qualification);
   return (
-    <Text paddingX={2} color="black" bg={colorFormatter(days)}>
+    <Text fontSize={14} color="black" bg={colorFormatter(days)}
+    py={1}
+    borderTopLeftRadius={props.borderTopLeftRadius} 
+    borderTopRightRadius={props.borderTopRightRadius} 
+    borderBottomLeftRadius={props.borderBottomLeftRadius} 
+    borderBottomRightRadius={props.borderBottomRightRadius} 
+>
       {days}
     </Text>
   );

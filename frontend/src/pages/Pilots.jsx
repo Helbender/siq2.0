@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { Grid, useToast } from "@chakra-ui/react";
@@ -7,6 +7,7 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import FileUpload from "./FileUpload";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);
@@ -64,6 +65,8 @@ const Pilots = ({ position }) => {
       gap={4}
       mt="8"
     >
+      {/* <FileUpload></FileUpload> */}
+
       {filteredUsers.map((pilot) => (
         <UserCard key={pilot.nip} user={pilot} />
       ))}

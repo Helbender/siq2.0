@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 import Pilots from "./pages/Pilots";
 import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
@@ -9,6 +10,7 @@ import Footer from "./layout/Footer";
 import AboutPage from "./pages/About";
 import RecoverProcess from "./components/loginComponents/RecoverProcess";
 
+
 import { AuthContext } from "./Contexts/AuthContext";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage";
@@ -19,6 +21,7 @@ function App() {
   // const { token, removeToken, setToken } = useToken();
   const { token, removeToken, setToken } = useContext(AuthContext);
 
+  
   return (
     // <BrowserRouter>
     <HashRouter>

@@ -1,5 +1,6 @@
+/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/prop-types */
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Divider, Text } from "@chakra-ui/react";
 
 const DaysLeftColumn = ({ qualification, dates }) => {
   let today = new Date();
@@ -23,26 +24,22 @@ const DaysLeftColumn = ({ qualification, dates }) => {
     else return (color = "green");
   }
   return (
-    <Box
-      borderColor={"black"}
-      borderWidth={"2px"}
-      //   borderTopRadius={5}
-      //   borderBottomRadius={5}
+    <Box align={"center"}
     >
       <Text
         color="white"
         fontSize={"16"}
         fontWeight={"bold"}
-        align={"center"}
-        bg="grey"
-        paddingX={1}
-        overflow={"hidden"}
+        bg="cyan.700"
+        paddingX={4}
+        // overflow={"hidden"}
       >
         {qualification}
       </Text>
+      <Divider mt={2} mb={1} />
       {days.map((a, i) => {
         return (
-          <Text key={i} bg={colorFormatter(a)}>
+          <Text key={i} bg={colorFormatter(a)} color="black">
             {a}
           </Text>
         );

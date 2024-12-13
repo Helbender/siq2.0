@@ -1,6 +1,8 @@
+/* eslint-disable react/react-in-jsx-scope */
 import Navbar from "../components/Navbar";
 import { Outlet } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
+import FileUpload from "../pages/FileUpload";
 
 export default function Master() {
   return (
