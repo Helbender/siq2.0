@@ -7,7 +7,7 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import FileUpload from "./FileUpload";
+import FileUpload from "../components/FileUpload";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);

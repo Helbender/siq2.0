@@ -1,12 +1,12 @@
 from __future__ import annotations  # noqa: D100, INP001
 
+import os
 from datetime import UTC, date, datetime
 
 from config import CREW_USER, PILOT_USER, engine
+from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import (
-    verify_jwt_in_request,
-)
+from flask_jwt_extended import jwt_required, verify_jwt_in_request
 from functions.gdrive import autenticar_drive, enviar_dados_para_pasta
 from models.crew import Crew, QualificationCrew
 from models.flights import Flight, FlightCrew, FlightPilots
@@ -16,6 +16,10 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 flights = Blueprint("flights", __name__)
+# Load enviroment variables
+load_dotenv(dotenv_path="./.env")
+
+ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
 
 
 # FLight ROUTES
@@ -96,6 +100,13 @@ def retrieve_flights() -> tuple[Response, int]:
             fuel=f["fuel"],
         )
 
+        service = autenticar_drive()
+        enviar_dados_para_pasta(
+            service=service,
+            dados=flight.to_json(),
+            nome_arquivo_drive=flight.get_file_name(),
+            id_pasta=ID_PASTA_VOO,
+        )
         with Session(engine, autoflush=False) as session:
             session.add(flight)
             pilot: dict
@@ -111,23 +122,15 @@ def retrieve_flights() -> tuple[Response, int]:
             session.refresh(flight)
             print(flight.fid)
 
-        service = autenticar_drive()
-        enviar_dados_para_pasta(
-            service,
-            flight.to_json(),
-            flight.to_name(),
-            "1AlVQSS8A6mu-bVJpP-ux--RKDnqnx4As",
-        )
-
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
 
-# @jwt_required()  # new line
+@jwt_required()  # new line
 @flights.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
-    """Handle modifications to the Flights database."""
     verify_jwt_in_request()
+    """Handle modifications to the Flights database."""
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:
             flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()

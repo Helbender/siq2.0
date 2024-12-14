@@ -11,9 +11,7 @@ from sqlalchemy import create_engine, exc
 load_dotenv(dotenv_path="./.env")
 
 DB_PASS: str = os.environ.get("DB_PASS", "")  # Ensure to set this in your .env file
-DB_USER = os.environ.get(
-    "DB_USER", "esqpt_siq2"
-)  # Ensure to set this in your .env file
+DB_USER = os.environ.get("DB_USER", "esqpt_siq2")  # Ensure to set this in your .env file
 DB_HOST = os.environ.get("DB_HOST", "esq502.pt")
 DB_PORT = os.environ.get("DB_PORT", 3306)
 DB_NAME = os.environ.get("DB_NAME", "esqpt_siq")

@@ -12,6 +12,7 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt,
     get_jwt_identity,
+    verify_jwt_in_request,
 )
 from routes.api_blueprint import api
 
@@ -21,6 +22,8 @@ from routes.api_blueprint import api
 load_dotenv(dotenv_path="./.env")
 JWT_KEY: str = os.environ.get("JWT_KEY", "")
 APPLY_CORS: bool = bool(os.environ.get("APPLY_CORS", False))
+print(JWT_KEY)
+
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = JWT_KEY
@@ -43,14 +46,12 @@ if APPLY_CORS:
         supports_credentials=True,
     )
 
-# Main api resgistration
-app.register_blueprint(api, url_prefix="/api")
-
 
 # apli login routes
 @app.after_request
 def refresh_expiring_jwts(response: Response) -> Response:
     """Handle Token Expiration."""
+    verify_jwt_in_request()
     try:
         exp_timestamp = get_jwt()["exp"]
         now = datetime.now(timezone.utc)
@@ -68,6 +69,9 @@ def refresh_expiring_jwts(response: Response) -> Response:
         # Case where there is not a valid JWT. Just return the original respone
         return response
 
+
+# Main api resgistration
+app.register_blueprint(api, url_prefix="/api")
 
 if __name__ == "__main__":
     app.run(port=5051, debug=True)  # noqa: S201

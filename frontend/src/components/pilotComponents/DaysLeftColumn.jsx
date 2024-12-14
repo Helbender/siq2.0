@@ -32,7 +32,6 @@ const DaysLeftColumn = ({ qualification, dates }) => {
         fontWeight={"bold"}
         bg="cyan.700"
         paddingX={4}
-        // overflow={"hidden"}
       >
         {qualification}
       </Text>

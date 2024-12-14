@@ -27,7 +27,7 @@ const PilotCard = ({ user }) => {
         <Flex gap={4}>
           <Flex flex={"1"} flexDirection={"row"} align="center" gap={"5"}>
             <Circle
-              bg={user.position === "PC" ? "blue.500" : "green"}
+              bg={user.position === "PI" ? "red.700": user.position === "PC"? "blue.500" : "green"}
               size="40px"
               boxShadow="dark-lg"
               pt={"1"}
@@ -42,12 +42,13 @@ const PilotCard = ({ user }) => {
       <CardBody>
         <Stack>
           <Flex m={"auto"} flexDirection={"row"} justifyContent={"center"} backgroundColor={"#1a202c"} borderRadius={10} gap={2} p={3}>
-            {!!user.qualification?.lastDayLandings ? (
+            <DaysLeftColumn qualification={"ATD"} dates={user.qualification?.lastDayLandings} />
+            {/* {!!user.qualification?.lastDayLandings ? (
               <DaysLeftColumn
                 qualification={"ATD"}
                 dates={user.qualification.lastDayLandings}
               />
-            ) : null}
+            ) : null} */}
             {!!user.qualification?.lastNightLandings ? (
               <DaysLeftColumn
                 qualification={"ATN"}

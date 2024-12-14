@@ -82,8 +82,8 @@ class Flight(Base):
             "fuel": self.fuel,
         }
 
-    def to_name(self) -> str:
-        return f"1M_{self.airtask}_{self.date}_{self.departure_time}"
+    def get_file_name(self) -> str:
+        return f"1M {self.airtask} {self.date.strftime("%d%b%Y")} {self.departure_time.strip(":")}.1m"
 
 
 class FlightPilots(Base):

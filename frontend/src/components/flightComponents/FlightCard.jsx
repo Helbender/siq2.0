@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/jsx-key */
 /* eslint-disable react/prop-types */
 import {
@@ -26,13 +27,18 @@ import axios from "axios";
 import StyledText from "../styledcomponents/StyledText";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { useContext } from "react";
+import { AuthContext } from "../../Contexts/AuthContext";
 
 const FlightCard = ({ flight }) => {
   const { flights, setFlights } = useContext(FlightContext);
+  const { token } = useContext(AuthContext);
+  
   const toast = useToast();
   const handleDeleteFlight = async (id) => {
     try {
-      const res = await axios.delete(`/api/flights/${id}`);
+      const res = await axios.delete(`/api/flights/${id}`,{
+        headers: { Authorization: "Bearer " + token },
+      });
       // console.log(res.data);
       if (res.data?.deleted_id) {
         console.log(`Deleted flight ${res.data?.deleted_id}`);
@@ -63,7 +69,7 @@ const FlightCard = ({ flight }) => {
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
       <CardHeader>
         <Flex align={"center"}>
-          <Heading>{flight.airtask}</Heading>
+          <Heading>{flight.airtask + flight.id}</Heading>
           <Spacer />
           <Heading as="h3">{flight.ATD}</Heading>
           <IconButton
