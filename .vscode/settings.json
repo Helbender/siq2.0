@@ -1,0 +1,27 @@
+{
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.organizeImports": "explicit"
+    }
+    },
+
+    "eslint.enable": true,
+    "eslint.useFlatConfig":true,
+    // "eslint.options": {"overrideConfigFile":"./frontend/eslint.config.js"},
+    "eslint.validate": ["javascript","javascriptreact","html"],
+    "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit",
+        },
+    "ruff.lineLength": 120,
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+    "editor.formatOnType": false, // required
+    "editor.formatOnPaste": true, // optional
+    "editor.formatOnSave": true, // optional
+    "editor.formatOnSaveMode": "file", // required to format on save
+    // "files.autoSave": "onFocusChange", // optional but recommended
+    "vs-code-prettier-eslint.prettierLast": true,
+    // ] // set as "true" to run 'prettier' last not first
+}
