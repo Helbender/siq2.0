@@ -20,10 +20,11 @@ import {
   Switch,
   useToast,
   Select,
+  position,
   // Stack,
 } from "@chakra-ui/react";
 import { FaEdit, FaPlus } from "react-icons/fa";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
@@ -32,10 +33,18 @@ import { BiTrash } from "react-icons/bi";
 function CreateUserModal({ edit, add, isDelete, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const [inputs, setInputs] = useState(user);
-
+  const [inputs, setInputs] = useState(user || {});
   const { token } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
+
+  // Update inputs when user changes
+  useEffect(() => {
+    if (user) {
+      setInputs(user);
+    } else {
+      setInputs({ position: "Default" });
+    }
+  }, [user]); // Runs every time user changes
 
   const handleInputsChange = async (event) => {
     event.preventDefault();
@@ -46,7 +55,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
     try {
       console.log(inputs);
-      const res = await axios.post(`/api/users`, inputs, {
+      const res = await axios.post("/api/users", inputs, {
         headers: { Authorization: "Bearer " + token },
       });
       toast({ title: "User created successfully", status: "success" });
@@ -56,7 +65,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       onClose();
     } catch (error) {
       toast({ title: "Error saving user", status: "error" });
-      console.error("Error sasving user:", error);
+      console.error("Error saving user:", error);
     }
   };
   const handleEditUser = async (e) => {
@@ -163,7 +172,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                 <FormControl>
                   <FormLabel>Função</FormLabel>
                   <Select
-                    value={inputs?.position ? inputs.position : ""}
+                    value={inputs?.position ? inputs.position : "Default"}
                     name="position"
                     onChange={handleInputsChange}
                   >

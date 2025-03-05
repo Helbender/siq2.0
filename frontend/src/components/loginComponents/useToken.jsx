@@ -16,6 +16,7 @@ function useToken() {
   function removeToken() {
     sessionStorage.removeItem("token");
     setToken(null);
+    console.log("Token Removed");
   }
 
   return {

@@ -14,10 +14,10 @@ export const UserProvider = ({ children }) => {
 
   const getSavedPilots = async () => {
     try {
-      const res = await axios.get(`/api/users`, {
+      const res = await axios.get("/api/users", {
         headers: { Authorization: "Bearer " + token },
       });
-      console.log(res.data);
+      // console.log(res.data);
       setPilotos(res.data || []);
     } catch (error) {
       console.log(error);
@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-    console.log("Users Loaded");
+    // console.log("Users Loaded");
     getSavedPilots();
   }, []);
 

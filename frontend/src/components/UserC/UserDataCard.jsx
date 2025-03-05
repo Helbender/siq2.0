@@ -1,7 +1,4 @@
-/* eslint-disable react/prop-types */
 import {
-  Box,
-  HStack,
   Card,
   CardHeader,
   Flex,
@@ -11,7 +8,6 @@ import {
   useColorModeValue,
   CardBody,
   CardFooter,
-  Text,
   VStack,
   Spacer,
   useToast,

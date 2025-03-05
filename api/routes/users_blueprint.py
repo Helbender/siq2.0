@@ -2,9 +2,7 @@ from __future__ import annotations  # noqa: D100, INP001
 
 from config import CREW_USER, PILOT_USER, engine
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import (
-    verify_jwt_in_request,
-)
+from flask_jwt_extended import jwt_required, verify_jwt_in_request
 from functions.sendemail import hash_code
 from models.crew import Crew, QualificationCrew
 from models.pilots import Pilot, Qualification
@@ -16,13 +14,13 @@ users = Blueprint("users", __name__)
 
 
 # User ROUTES
-# @jwt_required()  # new line
+@jwt_required()  # new line
 @users.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_user() -> tuple[Response, int]:
     verify_jwt_in_request()
 
     if request.method == "GET":
-        result = []
+        result: list = []
         # Retrieve all users from db
         with Session(engine) as session:
             for db in [User, Pilot, Crew]:
@@ -34,6 +32,7 @@ def retrieve_user() -> tuple[Response, int]:
     # Adds new user to db
     if request.method == "POST":
         user = request.get_json()
+        print(user)
         with Session(engine) as session:
             if user["position"] in PILOT_USER:
                 new_user = Pilot(
@@ -107,7 +106,7 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
             for k, v in user.items():
                 if k == "qualification":
                     continue
-                print(k, v)
+                # print(k, v)
                 setattr(modified_pilot, k, v)
 
             session.commit()

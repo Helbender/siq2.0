@@ -18,41 +18,25 @@ import {
   Divider,
   Select,
   useToast,
+  IconButton,
 } from "@chakra-ui/react";
 import { useState, useEffect, useContext } from "react";
 import PilotInput from "./PilotInput";
 import axios from "axios";
+
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
+import { BiEdit } from "react-icons/bi";
+import { useNavigate } from "react-router-dom";
 
-function CreateFlightModal() {
+function EditFlightModal({ flight, navigate }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { flights, setFlights } = useContext(FlightContext);
+  // const { flights, setFlights \1                       } = useContext(FlightContext);
   const { token } = useContext(AuthContext);
-
   const toast = useToast();
 
   const [pilotos, setPilotos] = useState([]);
-  let today = new Date();
-  const [inputs, setInputs] = useState({
-    airtask: "",
-    flightType: "",
-    flightAction: "",
-    date: `${today.toISOString().substring(0, 10)}`,
-    origin: "",
-    destination: "",
-    ATD: "",
-    ATA: "",
-    ATE: "",
-    tailNumber: "",
-    totalLandings: "",
-    passengers: "",
-    doe: "",
-    cargo: "",
-    numberOfCrew: "",
-    orm: "",
-    fuel: "",
-  });
+  const [inputs, setInputs] = useState(flight);
 
   let pilotList = [0, 1, 2, 3, 4, 5];
 
@@ -72,44 +56,40 @@ function CreateFlightModal() {
     console.log(time);
     return time;
   };
-  const handleCreateFlight = async (e) => {
-    e.preventDefault();
-    let data = inputs;
-    !data.flight_pilots ? (data.flight_pilots = []) : null;
-    for (let i = 0; i < 6; i++) {
-      console.log(i);
-      if (Object.hasOwn(inputs, `pilot${i}`)) {
-        console.log(true);
-        data.flight_pilots[i] = inputs[`pilot${i}`];
-        delete data[`pilot${i}`];
-      }
-    }
-    console.log(data);
+
+  const handleEditFlight = async (id) => {
     try {
-      // console.log(token);
-      const res = await axios.post("/api/flights", data, {
+      const res = await axios.patch(`/api/flights/${id}`, inputs, {
         headers: { Authorization: "Bearer " + token },
       });
-      if (res.status === 201) {
-        console.log(res);
+      console.log(res.data);
+      // if (res.data?.deleted_id) {
+      //   console.log(`Deleted flight ${res.data?.deleted_id}`);
+
+      //   setFlights(flights.filter((flight) => flight.id != id));
+      // }
+    } catch (error) {
+      if (error.response.status === 401) {
+        navigate("/");
         toast({
-          title: "Sucesso",
-          description: `Voo colocado com sucesso. ID: ${res.data?.message}`,
-          status: "success",
+          title: "Erro de autenticação",
+          description: "Por favor faça login outra vez",
+          status: "error",
           duration: 5000,
           position: "bottom",
         });
-        // data.id = res.data?.message;
-        setFlights([...flights, data]);
       }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: error.data?.message,
-        status: "error",
-        duration: 5000,
-        position: "right",
-      });
+
+      if (error.response.status === 404) {
+        toast({
+          title: "Erro a editar o modelo",
+          description: `ID is ${id}. Voo não encontrado.\nExperimente fazer refresh à página`,
+          status: "error",
+          duration: 5000,
+          position: "bottom",
+        });
+      }
+      // window.location.reload(false);
       console.log(error.response);
     }
   };
@@ -126,19 +106,23 @@ function CreateFlightModal() {
   };
   useEffect(() => {
     getSavedPilots();
+    console.log(flight);
   }, []);
 
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Novo Modelo
-      </Button>
+      <IconButton
+        variant="ghost"
+        colorScheme="yellow"
+        size={"lg"}
+        onClick={onOpen}
+        icon={<BiEdit />}
+      />
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        {/* <form onSubmit={handleCreateFlight}> */}
         <ModalContent minWidth={"1200px"}>
-          <ModalHeader>Novo Modelo 1M</ModalHeader>
+          <ModalHeader textAlign={"center"}>Editar Modelo</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack>
@@ -441,37 +425,37 @@ function CreateFlightModal() {
               colorScheme="blue"
               mr={3}
               type="submit"
-              onClick={handleCreateFlight}
+              onClick={() => handleEditFlight(flight.id)}
             >
-              Add
+              Modificar
             </Button>
             <Button
               colorScheme="blue"
               mr={3}
               onClick={() => {
                 onClose();
-                setInputs({
-                  airtask: "",
-                  flightType: "",
-                  flightAction: "",
-                  date: `${today.toISOString().substring(0, 10)}`,
-                  origin: "",
-                  destination: "",
-                  ATD: "",
-                  ATA: "",
-                  ATE: "",
-                  tailNumber: "",
-                  totalLandings: "",
-                  passengers: "",
-                  doe: "",
-                  cargo: "",
-                  numberOfCrew: "",
-                  orm: "",
-                  fuel: "",
-                });
+                // setInputs({
+                //   airtask: "",
+                //   flightType: "",
+                //   flightAction: "",
+                //   date: `${today.toISOString().substring(0, 10)}`,
+                //   origin: "",
+                //   destination: "",
+                //   ATD: "",
+                //   ATA: "",
+                //   ATE: "",
+                //   tailNumber: "",
+                //   totalLandings: "",
+                //   passengers: "",
+                //   doe: "",
+                //   cargo: "",
+                //   numberOfCrew: "",
+                //   orm: "",
+                //   fuel: "",
+                // });
               }}
             >
-              Close
+              Fechar
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -481,4 +465,4 @@ function CreateFlightModal() {
   );
 }
 
-export default CreateFlightModal;
+export default EditFlightModal;

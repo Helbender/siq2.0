@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-/* eslint-disable react/prop-types */
+
 import {
   Box,
   FormControl,
@@ -27,58 +27,37 @@ function LoginPage() {
   const toast = useToast();
   const navigateRecover = () => navigate("/recover");
 
-  const [timeoutId, setTimeoutId] = useState(null);
-
-  const startTimeout = (delay) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId); // Clear any existing timeout
-    }
-
-    // Set a new timeout
-    const id = setTimeout(() => {
-      console.log("Timeout executed!");
-      removeToken();
-      navigate("/");
-    }, delay);
-
-    // Store the new timeout ID
-    setTimeoutId(id);
-  };
-
-  function logMeIn(event) {
-    axios({
-      method: "POST",
-      url: "/api/token",
-      data: {
+  const logMeIn = async () => {
+    try {
+      const data = {
         nip: loginForm.nip,
         password: loginForm.password,
-      },
-    })
-      .then((response) => {
+      };
+      const response = await axios.post("/api/token", data);
+      if (response.status === 201) {
+        console.log(response);
+        console.log(response.data.access_token);
         setToken(response.data.access_token);
-        startTimeout(1 * 60 * 60 * 1000);
-        navigate("/");
-      })
-      .catch((error) => {
-        if (error.response) {
-          const errorMessage = error.response.data?.message;
+        navigate("/flights");
+      }
+    } catch (error) {
+      if (error.response) {
+        const errorMessage = error.response.data?.message;
 
-          toast({
-            title: "Login failed.",
-            description: errorMessage,
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-            position: "top",
-          });
-          console.log(error.response);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        }
-      });
-
-    event.preventDefault();
-  }
+        toast({
+          title: "Login failed.",
+          description: errorMessage,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+        console.log(error.response);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+    }
+  };
   function handleChange(event) {
     const { value, name } = event.target;
     setloginForm((prev) => ({ ...prev, [name]: value }));
@@ -105,7 +84,7 @@ function LoginPage() {
           />
         </FormControl>
 
-        <FormControl mt="2">
+        <FormControl mt="2" onSubmit={logMeIn}>
           <FormLabel textAlign={"center"}>Password</FormLabel>
           <Input
             type="password"
@@ -126,7 +105,7 @@ function LoginPage() {
         >
           Recover Password
         </Link>
-        <Button mt="10" onClick={logMeIn}>
+        <Button mt="10" onClick={logMeIn} type="submit">
           Login
         </Button>
       </Stack>

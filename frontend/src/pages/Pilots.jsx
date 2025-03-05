@@ -1,17 +1,14 @@
-/* eslint-disable react/react-in-jsx-scope */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/prop-types */
+import React from "react";
 import { Grid, useToast } from "@chakra-ui/react";
 import UserCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import FileUpload from "../components/FileUpload";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  // const [filteredUsers, setFilteredUsers] = useState([]);
   const { token, removeToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +37,7 @@ const Pilots = ({ position }) => {
         position: "bottom",
       });
       setPilotos(res.data || []);
-      setFilteredUsers(res.data || []);
+      // setFilteredUsers(res.data || []);
     } catch (error) {
       console.log(error);
       console.log(error.response.status);
@@ -67,7 +64,7 @@ const Pilots = ({ position }) => {
     >
       {/* <FileUpload></FileUpload> */}
 
-      {filteredUsers.map((pilot) => (
+      {pilotos.map((pilot) => (
         <UserCard key={pilot.nip} user={pilot} />
       ))}
     </Grid>

@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import {
   Box,
   Button,
@@ -46,25 +45,22 @@ function Header() {
   const User = getUser();
 
   // }
-  function handleLogout() {
-    axios({
-      method: "POST",
-      url: "/api/logout",
-    })
-      .then(() => {
-        removeToken();
-        navigate("/");
-      })
-      .catch((error) => {
-        removeToken();
-        navigate("/");
-        if (error.response) {
-          console.log(error.response);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        }
-      });
-  }
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post("/api/logout");
+      console.log(response.status);
+      navigate("/");
+      removeToken();
+    } catch (error) {
+      removeToken();
+      navigate("/");
+      if (error.response) {
+        console.log(error.response);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+    }
+  };
 
   return (
     <Box

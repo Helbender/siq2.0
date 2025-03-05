@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 from config import CREW_USER, PILOT_USER, engine
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import jwt_required, verify_jwt_in_request
+from flask_jwt_extended import verify_jwt_in_request
 from functions.gdrive import autenticar_drive, enviar_dados_para_pasta
 from models.crew import Crew, QualificationCrew
 from models.flights import Flight, FlightCrew, FlightPilots
@@ -60,6 +60,7 @@ def retrieve_flights() -> tuple[Response, int]:
                         flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
                     else:
                         flights[i]["flight_pilots"].append(flight_pilot.to_json())
+                        # print(flight_pilot.to_json())
 
                 stmt3 = select(FlightCrew).where(FlightCrew.flight_id == row.fid)
                 flight_crews = session.execute(stmt3).scalars()
@@ -100,13 +101,6 @@ def retrieve_flights() -> tuple[Response, int]:
             fuel=f["fuel"],
         )
 
-        service = autenticar_drive()
-        enviar_dados_para_pasta(
-            service=service,
-            dados=flight.to_json(),
-            nome_arquivo_drive=flight.get_file_name(),
-            id_pasta=ID_PASTA_VOO,
-        )
         with Session(engine, autoflush=False) as session:
             session.add(flight)
             pilot: dict
@@ -120,17 +114,68 @@ def retrieve_flights() -> tuple[Response, int]:
                 # pass
             session.commit()
             session.refresh(flight)
-            print(flight.fid)
+        service = autenticar_drive()
+        enviar_dados_para_pasta(
+            service=service,
+            dados=flight.to_json(),
+            nome_arquivo_drive=flight.get_file_name(),
+            id_pasta=ID_PASTA_VOO,
+        )
 
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
 
-@jwt_required()  # new line
 @flights.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
-    verify_jwt_in_request()
     """Handle modifications to the Flights database."""
+    verify_jwt_in_request()
+
+    if request.method == "PATCH":
+        f: dict = request.get_json()
+        with Session(engine, autoflush=False) as session:
+            flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
+
+            flight.airtask = (f["airtask"],)
+            flight.date = datetime.strptime(f["date"], "%d-%b-%Y").replace(tzinfo=UTC).date()
+            flight.origin = (f["origin"],)
+            flight.destination = (f["destination"],)
+            flight.departure_time = (f["ATD"],)
+            flight.arrival_time = (f["ATA"],)
+            flight.flight_type = (f["flightType"],)
+            flight.flight_action = (f["flightAction"],)
+            flight.tailnumber = (f["tailNumber"],)
+            flight.total_time = (f["ATE"],)
+            flight.atr = (f["totalLandings"],)
+            flight.passengers = (f["passengers"],)
+            flight.doe = (f["doe"],)
+            flight.cargo = (f["cargo"],)
+            flight.number_of_crew = (f["numberOfCrew"],)
+            flight.orm = (f["orm"],)
+            flight.fuel = (f["fuel"],)
+
+            # session.add(flight)
+            pilot: dict
+
+            for i in range(6):
+                for pilot in f["flight_pilots"]:
+                    print("\n", pilot)
+            #     # try:
+            #     add_crew_and_pilots(session, flight, pilot)
+            # except KeyError:
+            # pass
+            session.commit()
+            session.refresh(flight)
+        # service = autenticar_drive()
+        # enviar_dados_para_pasta(
+        #     service=service,
+        #     dados=flight.to_json(),
+        #     nome_arquivo_drive=flight.get_file_name(),
+        #     id_pasta=ID_PASTA_VOO,
+        # )
+
+        return jsonify({"msg": "Flight changed"}), 201
+
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:
             flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
@@ -139,7 +184,6 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             # Iterate over each pilot in the flight
             for pilot in flight.flight_pilots:
-                print(pilot.pilot_id)
                 update_qualifications(flight_id, session, pilot)
 
             # Iterate over each crew in the flight
@@ -167,7 +211,7 @@ def update_qualifications(
         pilot_qualification: Qualification = session.execute(
             select(Qualification).filter_by(pilot_id=tripulante.pilot_id),
         ).scalar_one()
-        print(pilot_qualification)
+
         # Process repetion Qualifications
         qualification_fields = [
             "day_landings",
@@ -289,7 +333,7 @@ def process_repetion_qual(
 
     Used for repetion based qualifications
     """
-    print(f"\nProcessing { qualification_field}")
+    print(f"\nProcessing {qualification_field}")
     recent_qualications = session.execute(
         select(Flight.date, getattr(FlightPilots, qualification_field))  # FlightPilots.day_landings)
         .join(FlightPilots)
@@ -300,7 +344,7 @@ def process_repetion_qual(
         # .limit(5 - len(day_landings_dates)),
     ).all()
 
-    print(f"\nRecent { qualification_field}:\t{recent_qualications}\n")
+    print(f"\nRecent {qualification_field}:\t{recent_qualications}\n")
 
     # Ensure there are no more than 5 entries
     qualification_dates = [date[0].strftime("%Y-%m-%d") for date in recent_qualications]
@@ -314,7 +358,7 @@ def process_repetion_qual(
         f"last_{qualification_field}",
         " ".join(qualification_dates[:5]),
     )
-    print(f"After Qual { qualification_field}:\t{getattr(pilot_qualification, f"last_{qualification_field}")}\n")
+    print(f"After Qual {qualification_field}:\t{getattr(pilot_qualification, f'last_{qualification_field}')}\n")
 
 
 def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:

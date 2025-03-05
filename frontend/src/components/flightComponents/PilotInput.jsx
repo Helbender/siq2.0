@@ -1,4 +1,3 @@
-/* eslint-disable no-extra-boolean-cast */
 /* eslint-disable react/prop-types */
 import { FormControl, GridItem, Input, Select, Flex } from "@chakra-ui/react";
 import { useState } from "react";

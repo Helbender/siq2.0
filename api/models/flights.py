@@ -131,20 +131,13 @@ class FlightPilots(Base):
             "precapp": self.prec_app,
             "nprecapp": self.nprec_app,
         }
-        if self.qa1:
-            response["QA1"] = self.qa1
-        if self.qa2:
-            response["QA2"] = self.qa2
-        if self.bsp1:
-            response["BSP1"] = self.bsp1
-        if self.bsp2:
-            response["BSP2"] = self.bsp2
-        if self.ta:
-            response["TA"] = self.ta
-        if self.vrp1:
-            response["VRP1"] = self.vrp1
-        if self.vrp2:
-            response["VRP2"] = self.vrp2
+        response["QA1"] = self.qa1
+        response["QA2"] = self.qa2
+        response["BSP1"] = self.bsp1
+        response["BSP2"] = self.bsp2
+        response["TA"] = self.ta
+        response["VRP1"] = self.vrp1
+        response["VRP2"] = self.vrp2
 
         return response
 
@@ -174,6 +167,5 @@ class FlightCrew(Base):
             "position": self.position,
             "nip": self.crew.nip,
         }
-        if self.bsoc:
-            response["BSOC"] = self.bsoc
+        response["BSOC"] = self.bsoc
         return response

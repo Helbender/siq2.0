@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from config import engine
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import create_access_token, unset_jwt_cookies, verify_jwt_in_request, jwt_required
+from flask_jwt_extended import create_access_token, unset_jwt_cookies, verify_jwt_in_request
 from functions.sendemail import hash_code, main
 from models.crew import Crew
 from models.pilots import Pilot
@@ -31,7 +31,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
     login_data: dict = request.get_json()
     nip: int = login_data["nip"]
     password: str = login_data["password"]
-
+    print(login_data)
     with Session(engine) as session:
         if nip == "admin" and password == "admin":
             stmt = union_all(
@@ -46,7 +46,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
                     identity=nip,
                 )
                 response = {"access_token": access_token}
-                return response, 200
+                return response, 201
             return {"message": "Can not login as admin. Db already populated"}, 401
 
         stmt = union_all(
@@ -60,6 +60,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
 
         if tripulante is not None:
             if hash_code(password) != tripulante.password:
+                print("Wrong Password")
                 return {"message": "Wrong password"}, 401
 
             access_token = create_access_token(
@@ -67,7 +68,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
                 additional_claims={"admin": tripulante.admin, "name": tripulante.name},
             )
             response = {"access_token": access_token}
-            return response, 200
+            return response, 201
 
         return {"message": f"No user with the NIP {nip}"}, 404
 

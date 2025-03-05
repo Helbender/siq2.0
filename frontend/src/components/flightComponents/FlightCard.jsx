@@ -1,6 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
-/* eslint-disable react/jsx-key */
-/* eslint-disable react/prop-types */
 import {
   Stack,
   Card,
@@ -28,15 +25,17 @@ import StyledText from "../styledcomponents/StyledText";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { useContext } from "react";
 import { AuthContext } from "../../Contexts/AuthContext";
+import EditFlightModal from "./EditFlightModal";
+import { useNavigate } from "react-router-dom";
 
 const FlightCard = ({ flight }) => {
   const { flights, setFlights } = useContext(FlightContext);
   const { token } = useContext(AuthContext);
-  
+  const navigate = useNavigate();
   const toast = useToast();
   const handleDeleteFlight = async (id) => {
     try {
-      const res = await axios.delete(`/api/flights/${id}`,{
+      const res = await axios.delete(`/api/flights/${id}`, {
         headers: { Authorization: "Bearer " + token },
       });
       // console.log(res.data);
@@ -69,8 +68,10 @@ const FlightCard = ({ flight }) => {
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
       <CardHeader>
         <Flex align={"center"}>
-          <Heading>{flight.airtask + flight.id}</Heading>
+          <Heading>{flight.airtask}</Heading>
           <Spacer />
+          <EditFlightModal flight={flight} navigate={navigate} />
+
           <Heading as="h3">{flight.ATD}</Heading>
           <IconButton
             variant="ghost"

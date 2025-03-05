@@ -1,18 +1,13 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, Response
+from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
-    create_access_token,
-    get_jwt,
-    get_jwt_identity,
-    verify_jwt_in_request,
 )
 from routes.api_blueprint import api
 
@@ -48,30 +43,27 @@ if APPLY_CORS:
 
 
 # apli login routes
-@app.after_request
-def refresh_expiring_jwts(response: Response) -> Response:
-    """Handle Token Expiration."""
-    verify_jwt_in_request()
-    try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
-        if target_timestamp > exp_timestamp:
-            access_token = create_access_token(identity=get_jwt_identity())
-            data = response.get_json()
-            if type(data) is dict:
-                data["access_token"] = access_token
-                response.data = json.dumps(data)
-        return response  # noqa: TRY300
-    except (RuntimeError, KeyError) as e:
-        print("Error")
-        print(e)
-        # Case where there is not a valid JWT. Just return the original respone
-        return response
+# @app.after_request
+# def refresh_expiring_jwts(response: Response) -> Response:
+#     """Handle Token Expiration."""
+#     try:
+#         exp_timestamp = get_jwt()["exp"]
+#         now = datetime.now(timezone.utc)
+#         target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+#         if target_timestamp > exp_timestamp:
+#             access_token = create_access_token(identity=get_jwt_identity())
+#             data = response.get_json()
+#             if type(data) is dict:
+#                 data["access_token"] = access_token
+#                 response.data = json.dumps(data)
+#         return response  # noqa: TRY300
+#     except (RuntimeError, KeyError) as e:
+#         print(f"\nError\n{e}\n")
+#         # Case where there is not a valid JWT. Just return the original respone
+#         return response
 
 
 # Main api resgistration
 app.register_blueprint(api, url_prefix="/api")
-
 if __name__ == "__main__":
     app.run(port=5051, debug=True)  # noqa: S201
