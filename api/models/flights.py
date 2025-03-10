@@ -3,7 +3,7 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date  # noqa: TCH003
 from typing import TYPE_CHECKING, List, Optional
 
-from models.users import Base
+from models.users import Base  # type: ignore
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     Mapped,
@@ -12,8 +12,8 @@ from sqlalchemy.orm import (
 )
 
 if TYPE_CHECKING:
-    from crew import Crew
-    from pilots import Pilot
+    from crew import Crew  # type: ignore
+    from pilots import Pilot  # type: ignore
 
 
 class Flight(Base):
@@ -55,9 +55,9 @@ class Flight(Base):
         cascade="all, delete-orphan",
     )
 
-    def __repr__(self) -> dict:
+    def __repr__(self) -> str:
         """Print Dictionary the instance attributes."""
-        return self.to_json()
+        return self.to_json().__repr__()
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
@@ -83,7 +83,7 @@ class Flight(Base):
         }
 
     def get_file_name(self) -> str:
-        return f"1M {self.airtask} {self.date.strftime("%d%b%Y")} {self.departure_time.strip(":")}.1m"
+        return f"1M {self.airtask} {self.date.strftime('%d%b%Y')} {self.departure_time.strip(':')}.1m"
 
 
 class FlightPilots(Base):

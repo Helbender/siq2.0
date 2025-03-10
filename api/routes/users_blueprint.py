@@ -20,6 +20,7 @@ def retrieve_user() -> tuple[Response, int]:
     verify_jwt_in_request()
 
     if request.method == "GET":
+        print("Getting users")
         result: list = []
         # Retrieve all users from db
         with Session(engine) as session:

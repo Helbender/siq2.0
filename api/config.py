@@ -18,8 +18,8 @@ DB_NAME = os.environ.get("DB_NAME", "esqpt_siq")
 
 # connection_string = "sqlite:///database/mydb.db"
 
-PILOT_USER = ["PI", "PC", "CP", "P", "PA"]
-CREW_USER = ["OC", "OCI", "OCA", "CT", "CTA", "CTI"]
+PILOT_USER: list = ["PI", "PC", "CP", "P", "PA"]
+CREW_USER: list = ["OC", "OCI", "OCA", "CT", "CTA", "CTI"]
 
 # Define connection string
 connection_string = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

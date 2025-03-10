@@ -3,15 +3,15 @@ from __future__ import annotations  # noqa: D100, INP001
 import os
 from datetime import UTC, date, datetime
 
-from config import CREW_USER, PILOT_USER, engine
+from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
-from functions.gdrive import autenticar_drive, enviar_dados_para_pasta
-from models.crew import Crew, QualificationCrew
-from models.flights import Flight, FlightCrew, FlightPilots
-from models.pilots import Pilot, Qualification
-from models.users import year_init
+from functions.gdrive import autenticar_drive, enviar_dados_para_pasta  # type: ignore
+from models.crew import Crew, QualificationCrew  # type: ignore
+from models.flights import Flight, FlightCrew, FlightPilots  # type: ignore
+from models.pilots import Pilot, Qualification  # type: ignore
+from models.users import year_init  # type: ignore
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -114,14 +114,16 @@ def retrieve_flights() -> tuple[Response, int]:
                 # pass
             session.commit()
             session.refresh(flight)
-        service = autenticar_drive()
-        enviar_dados_para_pasta(
-            service=service,
-            dados=flight.to_json(),
-            nome_arquivo_drive=flight.get_file_name(),
-            id_pasta=ID_PASTA_VOO,
-        )
-
+        try:
+            service = autenticar_drive()
+            enviar_dados_para_pasta(
+                service=service,
+                dados=flight.to_json(),
+                nome_arquivo_drive=flight.get_file_name(),
+                id_pasta=ID_PASTA_VOO,
+            )
+        except Exception as e:
+            print(f"\nErro\n{e}")
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 

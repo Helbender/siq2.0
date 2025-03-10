@@ -9,8 +9,8 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 
-year_init = 2020
-date_init = f"{year_init}-01-01"
+year_init: int = 2020
+date_init: str = f"{year_init}-01-01"
 
 
 class Base(DeclarativeBase):

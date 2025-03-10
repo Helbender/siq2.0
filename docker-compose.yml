@@ -1,6 +1,6 @@
 services:
   api:
-    image: siq-api:0.5
+    image: docker.io/helbender/siq-api:0.5
     restart: always
     build: ./api
     # ports:
@@ -10,7 +10,7 @@ services:
     # environment:
     #   - APPLY_CORS=1
   frontend:
-    image: siq-frontend:0.5
+    image: docker.io/helbender/siq-frontend:0.5
     restart: always
     build: ./frontend
     ports:

@@ -3,7 +3,7 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date, timedelta
 from typing import TYPE_CHECKING, List
 
-from models.users import Base, People, year_init
+from models.users import Base, People, year_init  # type: ignore
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
     Mapped,
@@ -12,7 +12,7 @@ from sqlalchemy.orm import (
 )
 
 if TYPE_CHECKING:
-    from flights import FlightCrew
+    from flights import FlightCrew  # type: ignore
 
 
 class Crew(People, Base):
