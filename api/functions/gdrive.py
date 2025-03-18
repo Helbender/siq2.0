@@ -40,11 +40,7 @@ def main():
         service = build("drive", "v3", credentials=creds)
 
         # Call the Drive v3 API
-        results = (
-            service.files()
-            .list(pageSize=10, fields="nextPageToken, files(id, name)")
-            .execute()
-        )
+        results = service.files().list(pageSize=10, fields="nextPageToken, files(id, name)").execute()
         items = results.get("files", [])
 
         if not items:
@@ -62,13 +58,16 @@ def main():
 def autenticar_drive():
     creds = None
     # Verificar se há credenciais armazenadas
-    try:
+    if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    except Exception:
-        # Caso contrário, iniciar o fluxo de autenticação
-        flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-        creds = flow.run_local_server(port=0)
-        # Salvar as credenciais para uso futuro
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
@@ -82,11 +81,7 @@ def enviar_para_drive(service, arquivo_local, nome_arquivo_drive):
     media = MediaFileUpload(arquivo_local, resumable=True)
 
     # Criar o arquivo no Google Drive
-    arquivo = (
-        service.files()
-        .create(body=file_metadata, media_body=media, fields="id")
-        .execute()
-    )
+    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
     print(f"Arquivo enviado com sucesso. ID do arquivo: {arquivo.get('id')}")
 
@@ -104,18 +99,10 @@ def enviar_dados_para_pasta(service, dados, nome_arquivo_drive, id_pasta):
     }
 
     # Fazer upload do arquivo
-    media = MediaIoBaseUpload(
-        buffer, mimetype="application/octet-stream", resumable=True
-    )
-    arquivo = (
-        service.files()
-        .create(body=file_metadata, media_body=media, fields="id")
-        .execute()
-    )
+    media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
+    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
-    print(
-        f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}"
-    )
+    print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
 
 
 # Usar as funções
