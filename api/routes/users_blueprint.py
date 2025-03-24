@@ -1,12 +1,12 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-from config import CREW_USER, PILOT_USER, engine
+from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import jwt_required, verify_jwt_in_request
-from functions.sendemail import hash_code
-from models.crew import Crew, QualificationCrew
-from models.pilots import Pilot, Qualification
-from models.users import User
+from functions.sendemail import hash_code  # type: ignore
+from models.crew import Crew, QualificationCrew  # type: ignore
+from models.pilots import Pilot, Qualification  # type: ignore
+from models.users import User  # type: ignore
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
@@ -109,8 +109,10 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
                     continue
                 # print(k, v)
                 setattr(modified_pilot, k, v)
-
-            session.commit()
+            try:
+                session.commit()
+            except Exception:
+                return jsonify({"message": "You can not change the NIP. Create a new user instead."}), 403
             return jsonify(modified_pilot.to_json()), 200
 
     return jsonify({"message": "Bad Manual Request"}), 403

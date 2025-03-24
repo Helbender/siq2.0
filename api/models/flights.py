@@ -102,6 +102,12 @@ class FlightPilots(Base):
     night_landings: Mapped[int]
     prec_app: Mapped[int]
     nprec_app: Mapped[int]
+
+    cto: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    sid: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    mono: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    nfp: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+
     qa1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     qa2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)  # noqa: UP007
     bsp1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
@@ -138,6 +144,10 @@ class FlightPilots(Base):
         response["TA"] = self.ta
         response["VRP1"] = self.vrp1
         response["VRP2"] = self.vrp2
+        response["CTO"] = self.cto
+        response["sid"] = self.sid
+        response["mono"] = self.mono
+        response["nfp"] = self.nfp
 
         return response
 

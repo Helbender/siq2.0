@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+
 from models.crew import Crew, QualificationCrew  # noqa: F401
 from models.flights import Flight, FlightCrew, FlightPilots  # noqa: F401
 from models.pilots import Pilot, Qualification  # noqa: F401
