@@ -9,7 +9,7 @@ export const FlightContext = createContext();
 // Create a provider component
 export const FlightProvider = ({ children }) => {
   const [flights, setFlights] = useState([]);
-  const { token, removeToken } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
 
   const getSavedFlights = async () => {
     try {
@@ -33,7 +33,7 @@ export const FlightProvider = ({ children }) => {
 
   useEffect(() => {
     getSavedFlights();
-    // console.log("Flights Loaded");
+    console.log("Flights Loaded");
     // console.log(flights);
   }, []);
 

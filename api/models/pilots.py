@@ -86,8 +86,10 @@ class Qualification(Base):
 
         if data.cto and date > self.last_cto:
             self.last_cto = date
-
-        if data.sid and date > self.last_sid:
+        try:
+            if data.sid and date > self.last_sid:
+                self.last_sid = date
+        except TypeError:
             self.last_sid = date
 
         if data.mono and date > self.last_mono:

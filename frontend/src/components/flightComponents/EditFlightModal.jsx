@@ -62,7 +62,7 @@ function EditFlightModal({ flight, navigate }) {
       const res = await axios.patch(`/api/flights/${id}`, inputs, {
         headers: { Authorization: "Bearer " + token },
       });
-      console.log(res.data);
+      // console.log(res.data);
       // if (res.data?.deleted_id) {
       //   console.log(`Deleted flight ${res.data?.deleted_id}`);
 
@@ -106,7 +106,7 @@ function EditFlightModal({ flight, navigate }) {
   };
   useEffect(() => {
     getSavedPilots();
-    console.log(flight);
+    // console.log(flight);
   }, []);
 
   return (

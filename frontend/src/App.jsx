@@ -23,44 +23,44 @@ function App() {
 
   return (
     <HashRouter>
-      <FlightProvider>
-        <UserProvider>
-          <Header />
-          {!token && token !== "" && token !== undefined ? (
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <LoginPage setToken={setToken} removeToken={removeToken} />
-                }
-              />
-              <Route path="/recover" element={<RecoverPass />} />
-              <Route
-                exact
-                path="/recovery/:token/:email"
-                element={<RecoverProcess />}
-              />
-              <Route path="/about" element={<AboutPage />} />
-            </Routes>
-          ) : (
-            <Fragment>
-              <Routes>
-                <Route index element={<Navigate replace to="flights" />} />
-                <Route path="/flights" index element={<Flights />} />
-                <Route path="/users" element={<UserManagementPage />} />
+      {/* <UserProvider>
+        <FlightProvider> */}
+      <Header />
+      {!token && token !== "" && token !== undefined ? (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <LoginPage setToken={setToken} removeToken={removeToken} />
+            }
+          />
+          <Route path="/recover" element={<RecoverPass />} />
+          <Route
+            exact
+            path="/recovery/:token/:email"
+            element={<RecoverProcess />}
+          />
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      ) : (
+        <Fragment>
+          <Routes>
+            <Route index element={<Navigate replace to="flights" />} />
+            <Route path="/flights" index element={<Flights />} />
+            <Route path="/users" element={<UserManagementPage />} />
 
-                <Route path="/" element={<Master />}>
-                  <Route path="/pilots" element={<Pilots position="PC" />} />
-                  <Route path="/co-pilots" element={<Pilots position="CP" />} />
-                  <Route path="/crew" element={<Crew />} />
-                </Route>
-                <Route path="/about" element={<AboutPage />} />
-              </Routes>
-            </Fragment>
-          )}
-          <Footer />
-        </UserProvider>
-      </FlightProvider>
+            <Route path="/" element={<Master />}>
+              <Route path="/pilots" element={<Pilots position="PC" />} />
+              <Route path="/co-pilots" element={<Pilots position="CP" />} />
+              <Route path="/crew" element={<Crew />} />
+            </Route>
+            <Route path="/about" element={<AboutPage />} />
+          </Routes>
+        </Fragment>
+      )}
+      <Footer />
+      {/* </FlightProvider>
+      </UserProvider> */}
     </HashRouter>
   );
 }

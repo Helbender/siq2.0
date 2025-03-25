@@ -20,5 +20,6 @@ root.render(
         </FlightProvider>
       </AuthProvider>
     </ChakraProvider>
+    ,
   </React.StrictMode>,
 );

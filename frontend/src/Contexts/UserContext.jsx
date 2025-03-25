@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-    // console.log("Users Loaded");
+    console.log("Users Loaded");
     getSavedPilots();
   }, []);
 

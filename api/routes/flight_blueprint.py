@@ -374,9 +374,16 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
     if "QUAL1" in pilot and pilot["QUAL1"] != "":
         pilot[pilot["QUAL1"]] = True
     if "QUAL2" in pilot and pilot["QUAL2"] != "":
-        pilot[pilot["QUAL1"]] = True
+        pilot[pilot["QUAL2"]] = True
+    if "QUAL3" in pilot and pilot["QUAL3"] != "":
+        pilot[pilot["QUAL3"]] = True
+    if "QUAL4" in pilot and pilot["QUAL4"] != "":
+        pilot[pilot["QUAL4"]] = True
+
     if pilot["position"] in PILOT_USER:
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003
+        if pilot_obj is None:
+            return
         qual_p: Qualification = session.get(Qualification, pilot["nip"])  # type: ignore  # noqa: PGH003
 
         fp = FlightPilots(
@@ -392,6 +399,10 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
             ta=pilot["TA"],
             vrp1=pilot["VRP1"],
             vrp2=pilot["VRP2"],
+            cto=pilot["CTO"],
+            sid=pilot["SID"],
+            mono=pilot["MONO"],
+            nfp=pilot["NFP"],
         )
 
         qual_p.update(fp, flight.date)
@@ -401,6 +412,8 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
 
     elif pilot["position"] in CREW_USER:
         crew_obj: Crew = session.get(Crew, pilot["nip"])  # type: ignore  # noqa: PGH003
+        if crew_obj is None:
+            return
         qual_c: QualificationCrew = session.get(QualificationCrew, pilot["nip"])  # type: ignore  # noqa: PGH003
         fp = FlightCrew(
             position=pilot["position"],

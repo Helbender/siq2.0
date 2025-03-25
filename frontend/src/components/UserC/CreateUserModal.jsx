@@ -91,7 +91,11 @@ function CreateUserModal({ edit, add, isDelete, user }) {
 
       onClose();
     } catch (error) {
-      toast({ title: "Error adding user", status: "error" });
+      toast({
+        title: "Error adding user",
+        description: error.response.data.message,
+        status: "error",
+      });
       console.error("Error adding user:", error);
     }
   };

@@ -145,9 +145,9 @@ class FlightPilots(Base):
         response["VRP1"] = self.vrp1
         response["VRP2"] = self.vrp2
         response["CTO"] = self.cto
-        response["sid"] = self.sid
-        response["mono"] = self.mono
-        response["nfp"] = self.nfp
+        response["SID"] = self.sid
+        response["MONO"] = self.mono
+        response["NFP"] = self.nfp
 
         return response
 

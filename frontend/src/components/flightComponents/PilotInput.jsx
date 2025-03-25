@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { FormControl, GridItem, Input, Select, Flex } from "@chakra-ui/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
   const [name, setName] = useState([]);
@@ -20,6 +20,10 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
     TA: false,
     VRP1: false,
     VRP2: false,
+    CTO: false,
+    SID: false,
+    MONO: false,
+    NFP: false,
     BSOC: false,
   });
 
@@ -45,11 +49,35 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
     if (e.target.value === "PC") {
       setPilotSelect("PC");
       setNip("");
-      setQualP(["QA1", "QA2", "BSP1", "BSP2", "TA", "VRP1", "VRP2"]);
+      setQualP([
+        "QA1",
+        "QA2",
+        "BSP1",
+        "BSP2",
+        "TA",
+        "VRP1",
+        "VRP2",
+        "CTO",
+        "SID",
+        "MONO",
+        "NFP",
+      ]);
     } else if (e.target.value === "CP") {
       setPilotSelect("CP");
       setNip("");
-      setQualP(["QA1", "QA2", "BSP1", "BSP2", "TA", "VRP1", "VRP2"]);
+      setQualP([
+        "QA1",
+        "QA2",
+        "BSP1",
+        "BSP2",
+        "TA",
+        "VRP1",
+        "VRP2",
+        "CTO",
+        "SID",
+        "MONO",
+        "NFP",
+      ]);
     } else if (e.target.value === "OC") {
       setPilotSelect("OC");
       setNip("");
@@ -57,13 +85,14 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
     }
   };
   return (
-    <GridItem
-      colSpan={9}
-      alignSelf={"center"}
-      alignContent={"center"}
-      alignItems={"center"}
+    <Fragment
+    // colSpan={12}
+    // alignSelf={"center"}
+    // alignContent={"center"}
+    // alignItems={"center"}
     >
-      <Flex flexDirection={"row"} mt={2}>
+      {/* <Flex flexDirection={"row"} mt={2}> */}
+      <GridItem>
         <FormControl ml={5} alignItems={"center"}>
           <Select
             name="posição"
@@ -78,9 +107,12 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             <option value="OC">OC</option>
           </Select>
         </FormControl>
+      </GridItem>
+      <GridItem colSpan={2}>
         <FormControl mx={1}>
           <Select
             name="name"
+            textAlign={"center"}
             type="text"
             onChange={(e) => {
               let nip = handleNipForm(e.target.value);
@@ -104,33 +136,30 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             })}
           </Select>
         </FormControl>
+      </GridItem>
+      <GridItem>
         <FormControl mx={1} isReadOnly alignSelf={"center"}>
-          <Input
-            // border="1px"
-            // borderColor="gray"
-            // borderRadius="5px"
-            textAlign={"center"}
-            value={nip}
-          >
-            {/* {!!nip ? nip : "-"} */}
-          </Input>
+          <Input textAlign={"center"} value={nip}></Input>
         </FormControl>
-        <FormControl mx={1}>
-          <Input
-            name="ATR"
-            type="number"
-            onChange={(e) => {
-              setPilot({
-                ...pilot,
-                ATR: e.target.value,
-              });
-              let newpilot = { ...pilot, ATR: e.target.value };
-              console.log(pilotNumber);
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
-            }}
-          />
-        </FormControl>
+      </GridItem>
+
+      <FormControl mx={1}>
+        <Input
+          name="ATR"
+          type="number"
+          onChange={(e) => {
+            setPilot({
+              ...pilot,
+              ATR: e.target.value,
+            });
+            let newpilot = { ...pilot, ATR: e.target.value };
+            console.log(pilotNumber);
+            let newinput = { ...inputs, [pilotNumber]: newpilot };
+            setInputs(newinput);
+          }}
+        />
+      </FormControl>
+      <GridItem>
         <FormControl mx={1}>
           <Input
             name="ATN"
@@ -146,6 +175,8 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             }}
           />
         </FormControl>
+      </GridItem>
+      <GridItem>
         <FormControl mx={1}>
           <Input
             name="PrecApp"
@@ -161,6 +192,9 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             }}
           />
         </FormControl>
+      </GridItem>
+
+      <GridItem>
         <FormControl mx={1}>
           <Input
             name="NPrecApp"
@@ -179,6 +213,9 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             }}
           />
         </FormControl>
+      </GridItem>
+
+      <GridItem>
         <FormControl mx={1}>
           <Select
             name="Qual1"
@@ -203,6 +240,9 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             })}
           </Select>
         </FormControl>
+      </GridItem>
+
+      <GridItem>
         <FormControl mx={1}>
           <Select
             name="Qual2"
@@ -227,8 +267,64 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             })}
           </Select>
         </FormControl>
-      </Flex>
-    </GridItem>
+      </GridItem>
+
+      <GridItem>
+        <FormControl mx={1}>
+          <Select
+            name="Qual3"
+            placeholder=" "
+            type="text"
+            onChange={(e) => {
+              setPilot({
+                ...pilot,
+                QUAL3: e.target.value,
+              });
+              let newpilot = { ...pilot, QUAL3: e.target.value };
+              let newinput = { ...inputs, [pilotNumber]: newpilot };
+              setInputs(newinput);
+            }}
+          >
+            {qualP.map((qual, i) => {
+              return (
+                <option key={i} value={qual}>
+                  {qual}
+                </option>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </GridItem>
+
+      <GridItem>
+        <FormControl mx={1}>
+          <Select
+            name="Qual4"
+            placeholder=" "
+            type="text"
+            onChange={(e) => {
+              setPilot({
+                ...pilot,
+                QUAL4: e.target.value,
+              });
+              let newpilot = { ...pilot, QUAL4: e.target.value };
+              let newinput = { ...inputs, [pilotNumber]: newpilot };
+              setInputs(newinput);
+            }}
+          >
+            {qualP.map((qual, i) => {
+              return (
+                <option key={i} value={qual}>
+                  {qual}
+                </option>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </GridItem>
+
+      {/* </Flex> */}
+    </Fragment>
   );
 };
 

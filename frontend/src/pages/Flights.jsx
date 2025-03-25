@@ -16,10 +16,11 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
 export default function Flights() {
+  const { flights } = useContext(FlightContext);
   const [filteredFlights, setFilteredFlights] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   useColorModeValue();
-  const { flights } = useContext(FlightContext);
+  // console.log("Flights from Flight Page");
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Flights() {
         .some((field) => field.includes(searchTerm.toLowerCase())),
     );
     setFilteredFlights(results);
+    console.log(results);
   }, [searchTerm, flights]);
 
   return (
@@ -67,7 +69,7 @@ export default function Flights() {
         {filteredFlights.length
           ? !!filteredFlights.length &&
             filteredFlights
-              .slice(0, 5)
+              .slice(0, 10)
               .map((flight) => <FlightCard key={flight.id} flight={flight} />)
           : null}
       </Stack>

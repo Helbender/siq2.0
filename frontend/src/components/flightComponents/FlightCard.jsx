@@ -30,8 +30,9 @@ import { useNavigate } from "react-router-dom";
 
 const FlightCard = ({ flight }) => {
   const { flights, setFlights } = useContext(FlightContext);
+  console.log("Flights from the Flight Card");
   const { token } = useContext(AuthContext);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const toast = useToast();
   const handleDeleteFlight = async (id) => {
     try {
@@ -70,7 +71,7 @@ const FlightCard = ({ flight }) => {
         <Flex align={"center"}>
           <Heading>{flight.airtask}</Heading>
           <Spacer />
-          <EditFlightModal flight={flight} navigate={navigate} />
+          {/* <EditFlightModal flight={flight} navigate={navigate} /> */}
 
           <Heading as="h3">{flight.ATD}</Heading>
           <IconButton
@@ -81,10 +82,12 @@ const FlightCard = ({ flight }) => {
             icon={<BiTrash />}
           />
           <Spacer />
-          <Heading>{
-            `${l.toLocaleDateString("pt-pt")}`
-            // `${l.getDate()}-${l.getMonth() + 1}-${l.getFullYear()}`
-          }</Heading>
+          <Heading>
+            {
+              // `${l.toLocaleDateString("pt-pt")}`
+              flight.date
+            }
+          </Heading>
         </Flex>
         <Divider />
       </CardHeader>
@@ -171,12 +174,31 @@ const FlightCard = ({ flight }) => {
                 if (pilot.VRP2) {
                   qualification = [...qualification, "VRP2"];
                 }
+                if (pilot.CTO) {
+                  qualification = [...qualification, "CTO"];
+                }
+                if (pilot.SID) {
+                  qualification = [...qualification, "SID"];
+                }
+                if (pilot.MONO) {
+                  qualification = [...qualification, "MONO"];
+                }
+                if (pilot.NFP) {
+                  qualification = [...qualification, "NFP"];
+                }
                 if (pilot.QUAL1) {
                   qualification = [...qualification, pilot.QUAL1];
                 }
                 if (pilot.QUAL2) {
                   qualification = [...qualification, pilot.QUAL2];
                 }
+                let texto = "";
+                for (let i = 0; i < qualification.length; i++) {
+                  // console.log(qualification[i]);
+                  texto = texto + " " + qualification[i];
+                }
+                // console.log(texto);
+                // console.log("first");
                 return (
                   <Tr key={pilot.nip}>
                     <Td textAlign={"center"}>{pilot.nip}</Td>
@@ -187,9 +209,10 @@ const FlightCard = ({ flight }) => {
                     <Td textAlign={"center"}>{pilot.precapp}</Td>
                     <Td textAlign={"center"}>{pilot.nprecapp}</Td>
                     <Td textAlign={"center"}>
-                      {qualification.length === 2
+                      {texto}
+                      {/* {qualification.length === 2
                         ? `${qualification[0]} and ${qualification[1]}`
-                        : qualification[0]}
+                        : qualification[0]} */}
                     </Td>
                   </Tr>
                 );

@@ -24,15 +24,17 @@ import PilotInput from "./PilotInput";
 import axios from "axios";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
+import { UserContext } from "../../Contexts/UserContext";
 
 function CreateFlightModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { flights, setFlights } = useContext(FlightContext);
+  const { pilotos, setPilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
 
   const toast = useToast();
 
-  const [pilotos, setPilotos] = useState([]);
+  // const [pilotos, setPilotos] = useState([]);
   let today = new Date();
   const [inputs, setInputs] = useState({
     airtask: "",
@@ -113,20 +115,20 @@ function CreateFlightModal() {
       console.log(error.response);
     }
   };
-  const getSavedPilots = async () => {
-    try {
-      const res = await axios.get("/api/users", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      // console.log(res);
-      setPilotos(res.data || []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    getSavedPilots();
-  }, []);
+  // const getSavedPilots = async () => {
+  //   try {
+  //     const res = await axios.get("/api/users", {
+  //       headers: { Authorization: "Bearer " + token },
+  //     });
+  //     // console.log(res);
+  //     setPilotos(res.data || []);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getSavedPilots();
+  // }, []);
 
   return (
     <>
@@ -152,7 +154,10 @@ function CreateFlightModal() {
                     textAlign={"center"}
                     value={inputs.airtask}
                     onChange={(e) =>
-                      setInputs({ ...inputs, airtask: e.target.value })
+                      setInputs({
+                        ...inputs,
+                        airtask: e.target.value.toUpperCase(),
+                      })
                     }
                   />
                 </FormControl>
@@ -412,17 +417,23 @@ function CreateFlightModal() {
                 alignItems={"center"}
                 // alignContent={"center"}
                 // alignSelf={"center"}
-                templateColumns="repeat(9, 1fr)"
+                templateColumns="repeat(12, 1fr)"
               >
                 <GridItem textAlign={"center"}>Posição</GridItem>
-                <GridItem textAlign={"center"}>Nome</GridItem>
+                <GridItem textAlign={"center"} colSpan={2}>
+                  Nome
+                </GridItem>
                 <GridItem textAlign={"center"}>NIP</GridItem>
                 <GridItem textAlign={"center"}>ATR</GridItem>
                 <GridItem textAlign={"center"}>ATN</GridItem>
-                <GridItem textAlign={"center"}>PrecApp</GridItem>
-                <GridItem textAlign={"center"}>NPrecApp</GridItem>
-                <GridItem textAlign={"center"}>Qual1</GridItem>
-                <GridItem textAlign={"center"}>Qual2</GridItem>
+                <GridItem textAlign={"center"}>Precisão</GridItem>
+                <GridItem textAlign={"center"}>Não Precisão</GridItem>
+                <GridItem textAlign={"center"} colSpan={4}>
+                  Qualificações
+                </GridItem>
+                {/* <GridItem textAlign={"center"}>Qual2</GridItem>
+                <GridItem textAlign={"center"}>Qual3</GridItem>
+                <GridItem textAlign={"center"}>Qual4</GridItem> */}
 
                 {pilotList.map((number) => (
                   <PilotInput
