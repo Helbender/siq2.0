@@ -135,7 +135,7 @@ class Qualification(Base):
         return f"\nATR:{self.last_day_landings}\tATN:{self.last_night_landings}\tQA1: {self.last_qa1_date}\n"
 
     def to_json(self) -> dict:
-        unsorted_dict = {
+        unsorted_dict: dict = {
             "lastQA1": self.last_qa1_date,
             "lastQA2": self.last_qa2_date,
             "lastBSP1": self.last_bsp1_date,
@@ -148,8 +148,9 @@ class Qualification(Base):
             "lastMONO": self.last_mono_date,
             "lastNFP": self.last_nfp_date,
         }
-        sorted_dict: list = sorted(unsorted_dict, reverse=True)
-        oldest_key = sorted_dict[0]
+        # sorted_dict: dict = dict(sorted(unsorted_dict.items(), key=lambda keyval: keyval[1]))
+        # print(sorted_dict)
+        oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)
         return {
             # "lastDayLandings": [date for date in self.last_day_landings.split()],  # noqa: ERA001
             "lastDayLandings": list(self.last_day_landings.split()),
