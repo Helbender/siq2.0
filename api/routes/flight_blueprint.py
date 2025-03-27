@@ -30,7 +30,7 @@ def retrieve_flights() -> tuple[Response, int]:
     Method POST:
     -   Saves a flight to the db
     """
-    verify_jwt_in_request()
+    # verify_jwt_in_request()
 
     # Retrieve all flights from db
     if request.method == "GET":
@@ -257,15 +257,7 @@ def update_qualifications(
         # print(f"After Qual ATR:\t{pilot_qualification.last_night_landings}\n")
 
         # For each qualification type, find the last relevant flight before the one being deleted
-        qualification_fields = [
-            "qa1",
-            "qa2",
-            "bsp1",
-            "bsp2",
-            "ta",
-            "vrp1",
-            "vrp2",
-        ]
+        qualification_fields = ["qa1", "qa2", "bsp1", "bsp2", "ta", "vrp1", "vrp2", "cto", "sid", "mono", "nfp"]
         print(tripulante.pilot_id)
         for field in qualification_fields:
             print(field)

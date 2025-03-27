@@ -21,11 +21,12 @@ export const UserProvider = ({ children }) => {
       setPilotos(res.data || []);
     } catch (error) {
       console.log(error);
-      // console.log(error.response?.status);
-      // if (error.response.status === 401) {
-      //   console.log("Removing Token");
-      //   removeToken();
-      // }
+      console.log(error.response.status);
+      if (error.response.status === 401) {
+        console.log("Removing Token");
+        removeToken();
+        // navigate("/");
+      }
     }
   };
   useEffect(() => {

@@ -28,9 +28,8 @@ import { AuthContext } from "../../Contexts/AuthContext";
 import EditFlightModal from "./EditFlightModal";
 import { useNavigate } from "react-router-dom";
 
-const FlightCard = ({ flight }) => {
+const FlightCard = ({ flight, setFilteredFlights }) => {
   const { flights, setFlights } = useContext(FlightContext);
-  console.log("Flights from the Flight Card");
   const { token } = useContext(AuthContext);
   // const navigate = useNavigate();
   const toast = useToast();
@@ -42,8 +41,15 @@ const FlightCard = ({ flight }) => {
       // console.log(res.data);
       if (res.data?.deleted_id) {
         console.log(`Deleted flight ${res.data?.deleted_id}`);
-
+        toast({
+          title: "Voo Apagado",
+          description: `ID is ${id}.`,
+          status: "info",
+          duration: 5000,
+          position: "bottom",
+        });
         setFlights(flights.filter((flight) => flight.id != id));
+        setFilteredFlights(flights.filter((flight) => flight.id != id));
       }
     } catch (error) {
       if (error.response.status === 404) {

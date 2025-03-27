@@ -21,7 +21,7 @@ class Pilot(People, Base):
     qualification: Mapped[Qualification] = relationship(
         "Qualification",
         back_populates="pilot",
-        cascade="all, delete",
+        cascade="all, delete-orphan",
         passive_deletes=True,
     )
     flight_pilots: Mapped[List[FlightPilots]] = relationship(back_populates="pilot")
@@ -54,12 +54,22 @@ class Qualification(Base):
     last_bsp1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_bsp2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_ta_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_vrp1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
+    last_vrp1_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
     last_vrp2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_cto: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_sid: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_mono: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_nfp: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
+    last_cto_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_sid_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_mono_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_nfp_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
 
     def update(self, data: FlightPilots, date: date) -> Qualification:
         """Update with Last qualification date."""
@@ -84,19 +94,19 @@ class Qualification(Base):
         if data.vrp2 and date > self.last_vrp2_date:
             self.last_vrp2_date = date
 
-        if data.cto and date > self.last_cto:
-            self.last_cto = date
+        if data.cto and date > self.last_cto_date:
+            self.last_cto_date = date
         try:
-            if data.sid and date > self.last_sid:
-                self.last_sid = date
+            if data.sid and date > self.last_sid_date:
+                self.last_sid_date = date
         except TypeError:
             self.last_sid = date
 
-        if data.mono and date > self.last_mono:
-            self.last_mono = date
+        if data.mono and date > self.last_mono_date:
+            self.last_mono_date = date
 
-        if data.nfp and date > self.last_nfp:
-            self.last_nfp = date
+        if data.nfp and date > self.last_nfp_date:
+            self.last_nfp_date = date
 
         self.last_day_landings = Qualification._get_last_five(
             self.last_day_landings.split(),
@@ -133,7 +143,10 @@ class Qualification(Base):
             "lastTA": self.last_ta_date,
             "lastVRP1": self.last_vrp1_date,
             "lastVRP2": self.last_vrp2_date,
-            "lastCTO": self.last_cto,
+            "lastCTO": self.last_cto_date,
+            "lastSID": self.last_sid_date,
+            "lastMONO": self.last_mono_date,
+            "lastNFP": self.last_nfp_date,
         }
         sorted_dict: list = sorted(unsorted_dict, reverse=True)
         oldest_key = sorted_dict[0]
@@ -150,7 +163,10 @@ class Qualification(Base):
             "lastTA": self._get_days(self.last_ta_date)[0],
             "lastVRP1": self._get_days(self.last_vrp1_date)[0],
             "lastVRP2": self._get_days(self.last_vrp2_date)[0],
-            "lastCTO": self._get_days(self.last_cto)[0],
+            "lastCTO": self._get_days(self.last_cto_date)[0],
+            "lastSID": self._get_days(self.last_sid_date)[0],
+            "lastMONO": self._get_days(self.last_mono_date)[0],
+            "lastNFP": self._get_days(self.last_nfp_date)[0],
             "oldest": [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]],
             # "oldest": sorted_dict[0][4:],
             # "oldest": oldest_key[4:],

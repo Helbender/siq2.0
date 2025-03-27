@@ -4,11 +4,11 @@ import json
 import os.path
 
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
+from google.oauth2.credentials import Credentials  # type:ignore
+from google_auth_oauthlib.flow import InstalledAppFlow  # type:ignore
+from googleapiclient.discovery import build  # type:ignore
+from googleapiclient.errors import HttpError  # type:ignore
+from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload  # type:ignore
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
@@ -115,7 +115,4 @@ if __name__ == "__main__":
     nome_arquivo_drive = "dados_no_drive.bin"
 
     # Enviar o arquivo ao Google Drive
-    enviar_dados_para_pasta(service, arquivo_local, nome_arquivo_drive)
-
-# if __name__ == "__main__":
-#   main()
+    # enviar_dados_para_pasta(service, arquivo_local, nome_arquivo_drive)

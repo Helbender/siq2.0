@@ -10,29 +10,33 @@ const QualificationsPanel = (props) => {
     // eslint-disable-next-line no-unused-vars
     else return (color = "green");
   }
-  function getDays(date) {
-    let today = new Date();
-    let qualificationDate = new Date(date);
-    let semester = new Date(qualificationDate);
-    semester.setDate(qualificationDate.getDate() + 180);
-    let days = Math.round(
-      (qualificationDate.setDate(qualificationDate.getDate() + 180) -
-        today.getTime()) /
-        86400000,
-    );
+  // function getDays(date) {
+  //   let today = new Date();
+  //   let qualificationDate = new Date(date);
+  //   let semester = new Date(qualificationDate);
+  //   semester.setDate(qualificationDate.getDate() + 180);
+  //   let days = Math.round(
+  //     (qualificationDate.setDate(qualificationDate.getDate() + 180) -
+  //       today.getTime()) /
+  //       86400000,
+  //   );
 
-    return days;
-  }
-  let days = getDays(props.qualification);
+  //   return days;
+  // }
+  // let days = getDays(props.qualification);
   return (
-    <Text fontSize={14} color="black" bg={colorFormatter(days)}
-    py={1}
-    borderTopLeftRadius={props.borderTopLeftRadius} 
-    borderTopRightRadius={props.borderTopRightRadius} 
-    borderBottomLeftRadius={props.borderBottomLeftRadius} 
-    borderBottomRightRadius={props.borderBottomRightRadius} 
->
-      {days}
+    <Text
+      align={"center"}
+      fontSize={14}
+      color="black"
+      bg={colorFormatter(props.qualification)}
+      py={1}
+      borderTopLeftRadius={props.borderTopLeftRadius}
+      borderTopRightRadius={props.borderTopRightRadius}
+      borderBottomLeftRadius={props.borderBottomLeftRadius}
+      borderBottomRightRadius={props.borderBottomRightRadius}
+    >
+      {props.qualification}
     </Text>
   );
 };

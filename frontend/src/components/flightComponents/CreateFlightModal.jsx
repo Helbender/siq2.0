@@ -26,10 +26,10 @@ import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 
-function CreateFlightModal() {
+function CreateFlightModal({ setFilteredFlights }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { flights, setFlights } = useContext(FlightContext);
-  const { pilotos, setPilotos } = useContext(UserContext);
+  const { pilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
 
   const toast = useToast();
@@ -103,6 +103,7 @@ function CreateFlightModal() {
         });
         // data.id = res.data?.message;
         setFlights([...flights, data]);
+        setFilteredFlights([...flights, data]);
       }
     } catch (error) {
       toast({
@@ -115,20 +116,6 @@ function CreateFlightModal() {
       console.log(error.response);
     }
   };
-  // const getSavedPilots = async () => {
-  //   try {
-  //     const res = await axios.get("/api/users", {
-  //       headers: { Authorization: "Bearer " + token },
-  //     });
-  //     // console.log(res);
-  //     setPilotos(res.data || []);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getSavedPilots();
-  // }, []);
 
   return (
     <>

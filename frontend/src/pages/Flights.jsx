@@ -42,7 +42,6 @@ export default function Flights() {
         .some((field) => field.includes(searchTerm.toLowerCase())),
     );
     setFilteredFlights(results);
-    console.log(results);
   }, [searchTerm, flights]);
 
   return (
@@ -70,7 +69,13 @@ export default function Flights() {
           ? !!filteredFlights.length &&
             filteredFlights
               .slice(0, 10)
-              .map((flight) => <FlightCard key={flight.id} flight={flight} />)
+              .map((flight) => (
+                <FlightCard
+                  key={flight.id}
+                  flight={flight}
+                  setFilteredFlights={setFilteredFlights}
+                />
+              ))
           : null}
       </Stack>
     </VStack>

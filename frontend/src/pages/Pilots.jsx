@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, useToast } from "@chakra-ui/react";
-import UserCard from "../components/pilotComponents/PilotCard";
+import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import axios from "axios";
@@ -65,7 +65,7 @@ const Pilots = ({ position }) => {
       {/* <FileUpload></FileUpload> */}
 
       {pilotos.map((pilot) => (
-        <UserCard key={pilot.nip} user={pilot} />
+        <PilotCard key={pilot.nip} user={pilot} />
       ))}
     </Grid>
   );

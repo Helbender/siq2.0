@@ -16,6 +16,7 @@ import QualificationsPanel from "./QualificationsPanel";
 import StandardText from "../styledcomponents/StandardText";
 
 const PilotCard = ({ user }) => {
+  console.log(user);
   return (
     <Card
       bg={useColorModeValue("gray.400", "gray.700")}
@@ -86,14 +87,19 @@ const PilotCard = ({ user }) => {
             ) : null}
           </Flex>
           <Spacer />
-          <Grid mt={5} templateColumns="repeat(7,1fr)" gap={0}>
+          <Grid mt={5} templateColumns="repeat(11,1fr)" gap={0}>
             <StandardText text="QA1" borderTopLeftRadius={10} />
             <StandardText text="QA2" />
             <StandardText text="BSP1" />
             <StandardText text="BSP2" />
             <StandardText text="TA" />
             <StandardText text="VRP1" />
-            <StandardText text="VRP2" borderTopRightRadius={10} />
+            <StandardText text="VRP2" />
+            <StandardText text="CTO" />
+            <StandardText text="SID" />
+            <StandardText text="MONO" />
+            <StandardText text="NFP" borderTopRightRadius={10} />
+
             <QualificationsPanel
               maxW={10}
               qualification={user.qualification?.lastQA1}
@@ -122,6 +128,22 @@ const PilotCard = ({ user }) => {
             <QualificationsPanel
               maxW={10}
               qualification={user.qualification?.lastVRP2}
+            />
+            <QualificationsPanel
+              maxW={10}
+              qualification={user.qualification?.lastCTO}
+            />
+            <QualificationsPanel
+              maxW={10}
+              qualification={user.qualification?.lastSID}
+            />
+            <QualificationsPanel
+              maxW={10}
+              qualification={user.qualification?.lastMONO}
+            />
+            <QualificationsPanel
+              maxW={10}
+              qualification={user.qualification?.lastNFP}
               borderBottomRightRadius={10}
             />
           </Grid>

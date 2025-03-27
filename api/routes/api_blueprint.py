@@ -3,15 +3,15 @@ from __future__ import annotations  # noqa: D100, INP001
 import json
 from datetime import datetime, timedelta, timezone
 
-from config import engine
+from config import engine  # type:ignore
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import create_access_token, unset_jwt_cookies, verify_jwt_in_request
-from functions.sendemail import hash_code, main
-from models.crew import Crew
-from models.pilots import Pilot
-from models.users import User
-from routes.flight_blueprint import flights
-from routes.users_blueprint import users
+from functions.sendemail import hash_code, main  # type:ignore
+from models.crew import Crew  # type:ignore
+from models.pilots import Pilot  # type:ignore
+from models.users import User  # type:ignore
+from routes.flight_blueprint import flights  # type:ignore
+from routes.users_blueprint import users  # type:ignore
 from sqlalchemy import select, union_all
 from sqlalchemy.orm import Session
 
@@ -31,7 +31,6 @@ def create_token() -> tuple[Response | dict[str, str], int]:
     login_data: dict = request.get_json()
     nip: int = login_data["nip"]
     password: str = login_data["password"]
-    print(login_data)
     with Session(engine) as session:
         if nip == "admin" and password == "admin":
             stmt = union_all(
