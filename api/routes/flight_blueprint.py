@@ -7,7 +7,7 @@ from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
-from functions.gdrive import autenticar_drive, enviar_dados_para_pasta  # type: ignore
+from functions.gdrive import upload_with_service_account  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.flights import Flight, FlightCrew, FlightPilots  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
@@ -20,6 +20,7 @@ flights = Blueprint("flights", __name__)
 load_dotenv(dotenv_path="./.env")
 
 ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
+print(f"ID do .env: {ID_PASTA_VOO}")
 
 
 # FLight ROUTES
@@ -115,12 +116,15 @@ def retrieve_flights() -> tuple[Response, int]:
             session.commit()
             session.refresh(flight)
         try:
-            service = autenticar_drive()
-            enviar_dados_para_pasta(
-                service=service,
-                dados=flight.to_json(),
-                nome_arquivo_drive=flight.get_file_name(),
-                id_pasta=ID_PASTA_VOO,
+            # service = autenticar_drive()
+            # enviar_dados_para_pasta(
+            #     service=service,
+            #     dados=flight.to_json(),
+            #     nome_arquivo_drive=flight.get_file_name(),
+            #     id_pasta=ID_PASTA_VOO,
+            # )
+            upload_with_service_account(
+                dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
             )
         except Exception as e:
             print(f"\nErro\n{e}")

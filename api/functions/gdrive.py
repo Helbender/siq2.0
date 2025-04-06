@@ -5,6 +5,7 @@ import os.path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials  # type:ignore
+from google.oauth2 import service_account  # type:ignore
 from google_auth_oauthlib.flow import InstalledAppFlow  # type:ignore
 from googleapiclient.discovery import build  # type:ignore
 from googleapiclient.errors import HttpError  # type:ignore
@@ -101,6 +102,38 @@ def enviar_dados_para_pasta(service, dados, nome_arquivo_drive, id_pasta):
     # Fazer upload do arquivo
     media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
     arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+
+    print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
+
+
+def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: str):
+    """
+    Faz o upload de um arquivo ao Google Drive usando Service Account.
+    :param service_account_json_path: Caminho para o arquivo JSON da conta de serviço
+    :param file_name: Nome do arquivo no Drive
+    :param file_path: Caminho local do arquivo
+    """
+    # Carrega credenciais do arquivo JSON
+    credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+
+    # Cria o cliente para a API do Drive
+    service = build("drive", "v3", credentials=credentials)
+
+    dados_binarios = base64.b64encode(json.dumps(dados).encode("utf-8"))
+    # dados_binarios = json.dumps(dados).encode("utf-8")
+    buffer = io.BytesIO(dados_binarios)
+    print(f"Pasta do Google Drive: {id_pasta}.")
+    # Metadados do arquivo
+    file_metadata = {
+        "name": nome_arquivo_drive,
+        "parents": [id_pasta],  # Especifica a pasta de destino
+    }
+    # Faz o upload
+    media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
+    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+
+    # media = MediaFileUpload(file_path, resumable=True)
+    # uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
     print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
 

@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS  # type: ignore
 from flask_jwt_extended import (
     JWTManager,
 )
@@ -14,10 +14,10 @@ from routes.api_blueprint import api
 # logging.basicConfig(level=logging.DEBUG)  # noqa: ERA001
 # logger = logging.getLogger(__name__)  # noqa: ERA001
 
+
 load_dotenv(dotenv_path="./.env")
 JWT_KEY: str = os.environ.get("JWT_KEY", "")
 APPLY_CORS: bool = bool(os.environ.get("APPLY_CORS", False))
-print(JWT_KEY)
 
 
 app = Flask(__name__)
