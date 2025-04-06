@@ -26,7 +26,7 @@ import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 
-function CreateFlightModal({ setFilteredFlights }) {
+function CreateFlightModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { flights, setFlights } = useContext(FlightContext);
   const { pilotos } = useContext(UserContext);
@@ -101,9 +101,9 @@ function CreateFlightModal({ setFilteredFlights }) {
           duration: 5000,
           position: "bottom",
         });
-        // data.id = res.data?.message;
         setFlights([...flights, data]);
-        setFilteredFlights([...flights, data]);
+        // setFilteredFlights([...flights, data]);
+        onClose();
       }
     } catch (error) {
       toast({

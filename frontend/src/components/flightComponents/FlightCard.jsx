@@ -7,7 +7,6 @@ import {
   Heading,
   Divider,
   CardBody,
-  IconButton,
   Spacer,
   Table,
   Thead,
@@ -16,61 +15,25 @@ import {
   Th,
   Td,
   TableContainer,
-  useToast,
 } from "@chakra-ui/react";
-import { BiTrash } from "react-icons/bi";
 import { useColorMode } from "@chakra-ui/react";
-import axios from "axios";
 import StyledText from "../styledcomponents/StyledText";
-import { FlightContext } from "../../Contexts/FlightsContext";
-import { useContext } from "react";
-import { AuthContext } from "../../Contexts/AuthContext";
-import EditFlightModal from "./EditFlightModal";
-import { useNavigate } from "react-router-dom";
+import DeleteFlightModal from "./DeleteFlightModal";
 
-const FlightCard = ({ flight, setFilteredFlights }) => {
-  const { flights, setFlights } = useContext(FlightContext);
-  const { token } = useContext(AuthContext);
-  // const navigate = useNavigate();
-  const toast = useToast();
-  const handleDeleteFlight = async (id) => {
-    try {
-      const res = await axios.delete(`/api/flights/${id}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      // console.log(res.data);
-      if (res.data?.deleted_id) {
-        console.log(`Deleted flight ${res.data?.deleted_id}`);
-        toast({
-          title: "Voo Apagado",
-          description: `ID is ${id}.`,
-          status: "info",
-          duration: 5000,
-          position: "bottom",
-        });
-        setFlights(flights.filter((flight) => flight.id != id));
-        setFilteredFlights(flights.filter((flight) => flight.id != id));
-      }
-    } catch (error) {
-      if (error.response.status === 404) {
-        toast({
-          title: "Erro a apagar",
-          description: `ID is ${id}. Voo não encontrado.\nExperimente fazer refresh à página`,
-          status: "error",
-          duration: 5000,
-          position: "bottom",
-        });
-      }
-      // window.location.reload(false);
-      console.log(error.response);
-    }
-  };
+const FlightCard = ({ flight }) => {
   // console.log(flight);
   // eslint-disable-next-line no-unused-vars
-  const { colorMode, toggleColorMode } = useColorMode();
+  const { colorMode } = useColorMode();
 
-  const l = new Date(Date.parse(flight.date));
-
+  // const l = new Date(Date.parse(flight.date));
+  //Add a function that give todays date in dd-mmm-yyyy format
+  const today = new Date();
+  const todayString = today.toLocaleDateString("pt-pt", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  console.log(todayString);
   return (
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
       <CardHeader>
@@ -80,18 +43,20 @@ const FlightCard = ({ flight, setFilteredFlights }) => {
           {/* <EditFlightModal flight={flight} navigate={navigate} /> */}
 
           <Heading as="h3">{flight.ATD}</Heading>
-          <IconButton
+          {/* <IconButton
             variant="ghost"
             colorScheme="red"
             size={"lg"}
             onClick={() => handleDeleteFlight(flight.id)}
             icon={<BiTrash />}
-          />
+          /> */}
+          <DeleteFlightModal flight={flight} />
           <Spacer />
           <Heading>
             {
               // `${l.toLocaleDateString("pt-pt")}`
               flight.date
+              // todayString
             }
           </Heading>
         </Flex>
