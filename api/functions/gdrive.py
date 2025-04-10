@@ -119,33 +119,127 @@ def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: 
     # Cria o cliente para a API do Drive
     service = build("drive", "v3", credentials=credentials)
 
+    # Separa a nata do nome do ficheiro
+    data: str = nome_arquivo_drive.split()[2]
+    nome_pasta_dia: str = data[:2]
+    nome_pasta_mes: str = data[2:5]
+    nome_pasta_ano: str = data[-4:]
+    # Retira o mês do nome do ficheiro
+    # Retira o dia do nome do ficheiro
+
+    # 2) Garante que a pasta do ano exista dentro da pasta raiz
+    pasta_ano_id = get_or_create_folder(service, id_pasta, nome_pasta_ano)
+
+    # 3) Garante que a pasta do mês exista dentro da pasta raiz
+    pasta_mes_id = get_or_create_folder(service, pasta_ano_id, nome_pasta_mes)
+
+    # 4) Garante que a pasta do dia exista dentro da pasta do mês
+    pasta_dia_id = get_or_create_folder(service, pasta_mes_id, nome_pasta_dia)
+
     dados_binarios = base64.b64encode(json.dumps(dados).encode("utf-8"))
     # dados_binarios = json.dumps(dados).encode("utf-8")
     buffer = io.BytesIO(dados_binarios)
-    print(f"Pasta do Google Drive: {id_pasta}.")
+
     # Metadados do arquivo
     file_metadata = {
         "name": nome_arquivo_drive,
-        "parents": [id_pasta],  # Especifica a pasta de destino
+        "parents": [pasta_dia_id],  # Especifica a pasta de destino
     }
     # Faz o upload
     media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
     arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
-    # media = MediaFileUpload(file_path, resumable=True)
-    # uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-
     print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
+
+
+def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
+    """
+    Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.
+    Se não existir, cria a pasta.
+    Retorna o ID da pasta encontrada ou criada.
+    """
+    # 1) Tenta achar a pasta por nome dentro de parent_id
+    query = (
+        f"name = '{folder_name}' "
+        f"and mimeType = 'application/vnd.google-apps.folder' "
+        f"and '{parent_id}' in parents "
+        f"and trashed = false"
+    )
+    response = service.files().list(q=query, fields="files(id, name)").execute()
+    files = response.get("files", [])
+
+    if files:
+        # Retorna o primeiro ID encontrado
+        return files[0]["id"]
+    else:
+        # 2) Se não encontrou, cria a pasta
+        folder_metadata = {
+            "name": folder_name,
+            "parents": [parent_id],
+            "mimeType": "application/vnd.google-apps.folder",
+        }
+        folder = service.files().create(body=folder_metadata, fields="id").execute()
+        return folder.get("id")
+
+
+def upload_dict_with_service_account(
+    dados: dict,
+    nome_arquivo_drive: str,
+    id_pasta_raiz: str,
+    credentials_path="credentials.json",
+):
+    """
+    Converte um dicionário Python em JSON (em memória) e faz upload no Drive,
+    organizando o arquivo em pastas de Mês/Dia dentro da pasta raiz informada.
+    """
+    # 1) Autentica com Service Account
+    credentials = service_account.Credentials.from_service_account_file(credentials_path, scopes=SCOPES)
+    service = build("drive", "v3", credentials=credentials)
+
+    # 2) Gera nomes de pasta baseados na data
+    hoje = datetime.now()
+    pasta_mes = hoje.strftime("%Y-%m")  # Ex: "2025-03"
+    pasta_dia = hoje.strftime("%Y-%m-%d")  # Ex: "2025-03-10"
+
+    # 3) Garante que a pasta do mês exista dentro da pasta raiz
+    pasta_mes_id = get_or_create_folder(service, id_pasta_raiz, pasta_mes)
+
+    # 4) Garante que a pasta do dia exista dentro da pasta do mês
+    pasta_dia_id = get_or_create_folder(service, pasta_mes_id, pasta_dia)
+
+    # 5) Converte o dicionário em JSON e cria um buffer em memória
+    data_bytes = json.dumps(dados).encode("utf-8")
+    buffer = io.BytesIO(data_bytes)
+
+    file_metadata = {
+        "name": nome_arquivo_drive,
+        "parents": [pasta_dia_id],  # arquivo vai para a pasta do dia
+    }
+
+    media = MediaIoBaseUpload(buffer, mimetype="application/json", resumable=True)
+
+    # 6) Faz o upload do arquivo
+    uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+
+    print(f"Upload concluído! ID do arquivo: {uploaded_file.get('id')}")
 
 
 # Usar as funções
 if __name__ == "__main__":
+    nome_ficheiro: str = "1M 00A1731 07Apr2025 12:05"
+    data = nome_ficheiro.split()[2]
+    print(data)
+
+    dia = data[:2]
+    mes = data[2:5]
+    ano = data[-4:]
+    print(dia, mes, ano)
     # Conectar ao Google Drive
-    service = autenticar_drive()
+    # service = autenticar_drive()
 
     # Nome do arquivo local e o nome que terá no Drive
-    arquivo_local = "functions/dados.bin"  # Arquivo que você quer enviar
-    nome_arquivo_drive = "dados_no_drive.bin"
+    # arquivo_local = "functions/dados.bin"  # Arquivo que você quer enviar
+    # nome_arquivo_drive = "dados_no_drive.bin"
 
     # Enviar o arquivo ao Google Drive
     # enviar_dados_para_pasta(service, arquivo_local, nome_arquivo_drive)

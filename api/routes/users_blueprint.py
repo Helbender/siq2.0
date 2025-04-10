@@ -2,7 +2,7 @@ from __future__ import annotations  # noqa: D100, INP001
 
 from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import jwt_required, verify_jwt_in_request
+from flask_jwt_extended import verify_jwt_in_request
 from functions.sendemail import hash_code  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
@@ -14,11 +14,8 @@ users = Blueprint("users", __name__)
 
 
 # User ROUTES
-@jwt_required()  # new line
 @users.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_user() -> tuple[Response, int]:
-    verify_jwt_in_request()
-
     if request.method == "GET":
         print("Getting users")
         result: list = []
@@ -32,6 +29,7 @@ def retrieve_user() -> tuple[Response, int]:
 
     # Adds new user to db
     if request.method == "POST":
+        verify_jwt_in_request()
         user = request.get_json()
         print(user)
         with Session(engine) as session:
@@ -75,7 +73,6 @@ def retrieve_user() -> tuple[Response, int]:
 
 
 @users.route("/<nip>/<position>", methods=["DELETE", "PATCH"], strict_slashes=False)
-# @jwt_required()  # new line
 def modify_user(nip: int, position: str) -> tuple[Response, int]:
     """Placehold."""
     verify_jwt_in_request()

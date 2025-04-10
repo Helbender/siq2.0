@@ -16,11 +16,11 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 flights = Blueprint("flights", __name__)
+
 # Load enviroment variables
 load_dotenv(dotenv_path="./.env")
 
 ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
-print(f"ID do .env: {ID_PASTA_VOO}")
 
 
 # FLight ROUTES
@@ -75,7 +75,7 @@ def retrieve_flights() -> tuple[Response, int]:
                     else:
                         flights[i]["flight_pilots"].append(flight_crew.to_json())
                 i += 1
-            return jsonify(flights), 200
+        return jsonify(flights), 200
 
     # Retrieves flight from Frontend and saves is to DB
     if request.method == "POST":
@@ -269,7 +269,6 @@ def update_qualifications(
             last_qualification_date = session.execute(
                 select(func.max(Flight.date))
                 .join(FlightPilots)
-                # .where(Flight.flight_pilots.any(pilot_id=tripulante.pilot_id))
                 .where(FlightPilots.pilot_id == tripulante.pilot_id)
                 .where(Flight.fid != flight_id)
                 .where(getattr(FlightPilots, field) != 0),
@@ -367,14 +366,16 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
     pilot["precapp"] = 0 if pilot["precapp"] == "" else pilot["precapp"]
     pilot["nprecapp"] = 0 if pilot["nprecapp"] == "" else pilot["nprecapp"]
 
-    if "QUAL1" in pilot and pilot["QUAL1"] != "":
-        pilot[pilot["QUAL1"]] = True
-    if "QUAL2" in pilot and pilot["QUAL2"] != "":
-        pilot[pilot["QUAL2"]] = True
-    if "QUAL3" in pilot and pilot["QUAL3"] != "":
-        pilot[pilot["QUAL3"]] = True
-    if "QUAL4" in pilot and pilot["QUAL4"] != "":
-        pilot[pilot["QUAL4"]] = True
+    for i in range(1, 5):
+        QUAL = "QUAL" + str(i)
+        if QUAL in pilot and pilot[QUAL] != "":
+            pilot[pilot[QUAL]] = True
+    # if "QUAL2" in pilot and pilot["QUAL2"] != "":
+    #     pilot[pilot["QUAL2"]] = True
+    # if "QUAL3" in pilot and pilot["QUAL3"] != "":
+    #     pilot[pilot["QUAL3"]] = True
+    # if "QUAL4" in pilot and pilot["QUAL4"] != "":
+    #     pilot[pilot["QUAL4"]] = True
 
     if pilot["position"] in PILOT_USER:
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003
