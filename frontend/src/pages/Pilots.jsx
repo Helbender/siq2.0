@@ -57,13 +57,11 @@ const Pilots = ({ position }) => {
       templateColumns={{
         base: "1fr",
         md: "repeat(2,1fr)",
-        lg: "repeat(3,1fr)",
+        // lg: "repeat(3,1fr)",
       }}
       gap={4}
       mt="8"
     >
-      {/* <FileUpload></FileUpload> */}
-
       {pilotos.map((pilot) => (
         <PilotCard key={pilot.nip} user={pilot} />
       ))}

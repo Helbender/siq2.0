@@ -20,7 +20,7 @@ function Footer() {
       <Spacer />
 
       <Text mb={1} fontSize="lg" fontWeight="bold">
-        Esquadra 502 @ 2024
+        Esquadra 502
       </Text>
       <Spacer />
       <Text textAlign="right" mb={1} fontSize="sm" fontWeight="italic">

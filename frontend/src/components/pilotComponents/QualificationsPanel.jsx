@@ -1,43 +1,45 @@
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/prop-types */
-import { Text } from "@chakra-ui/react";
+import { HStack, Spacer, Text } from "@chakra-ui/react";
 
 const QualificationsPanel = (props) => {
   function colorFormatter(days) {
     let color = "";
-    if (days < 0) return (color = "red");
+    if (days < 0) return (color = "red.600");
     if (days < 45) return (color = "yellow");
     // eslint-disable-next-line no-unused-vars
     else return (color = "green");
   }
-  // function getDays(date) {
-  //   let today = new Date();
-  //   let qualificationDate = new Date(date);
-  //   let semester = new Date(qualificationDate);
-  //   semester.setDate(qualificationDate.getDate() + 180);
-  //   let days = Math.round(
-  //     (qualificationDate.setDate(qualificationDate.getDate() + 180) -
-  //       today.getTime()) /
-  //       86400000,
-  //   );
-
-  //   return days;
-  // }
-  // let days = getDays(props.qualification);
   return (
-    <Text
-      align={"center"}
-      fontSize={14}
-      color="black"
-      bg={colorFormatter(props.qualification)}
-      py={1}
-      borderTopLeftRadius={props.borderTopLeftRadius}
-      borderTopRightRadius={props.borderTopRightRadius}
-      borderBottomLeftRadius={props.borderBottomLeftRadius}
-      borderBottomRightRadius={props.borderBottomRightRadius}
-    >
-      {props.qualification}
-    </Text>
+    <HStack gap={0}>
+      <Text
+        align={"center"}
+        alignContent={"center"}
+        fontSize={14}
+        color="black"
+        py={1}
+        minH={"40px"}
+        minWidth={"60px"}
+        px={2}
+        bg={colorFormatter(props.qualification[0])}
+        borderTopLeftRadius={props.borderTopLeftRadius}
+        borderTopRightRadius={props.borderTopRightRadius}
+        borderBottomLeftRadius={props.borderBottomLeftRadius}
+        borderBottomRightRadius={props.borderBottomRightRadius}
+      >
+        {props.qualification[0]}
+      </Text>
+      <Spacer />
+      <Text
+        py={1}
+        px={2}
+        textAlign={"right"}
+        minHeight={10}
+        alignContent={"center"}
+      >
+        {props.qualification[1]}
+      </Text>
+    </HStack>
   );
 };
 

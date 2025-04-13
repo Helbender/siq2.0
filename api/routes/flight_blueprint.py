@@ -108,7 +108,7 @@ def retrieve_flights() -> tuple[Response, int]:
 
             # for i in range(6):
             for pilot in f["flight_pilots"]:
-                print("\n", pilot)
+                # print("\n", pilot)
                 # try:
                 add_crew_and_pilots(session, flight, pilot)
                 # except KeyError:
@@ -262,9 +262,9 @@ def update_qualifications(
 
         # For each qualification type, find the last relevant flight before the one being deleted
         qualification_fields = ["qa1", "qa2", "bsp1", "bsp2", "ta", "vrp1", "vrp2", "cto", "sid", "mono", "nfp"]
-        print(tripulante.pilot_id)
+        # print(tripulante.pilot_id)
         for field in qualification_fields:
-            print(field)
+            # print(field)
 
             last_qualification_date = session.execute(
                 select(func.max(Flight.date))
@@ -273,7 +273,7 @@ def update_qualifications(
                 .where(Flight.fid != flight_id)
                 .where(getattr(FlightPilots, field) != 0),
             ).scalar_one_or_none()
-            print(last_qualification_date)
+            # print(last_qualification_date)
 
             # Check if Date is None so to set a base Date
             last_qualification_date = (
@@ -330,7 +330,7 @@ def process_repetion_qual(
 
     Used for repetion based qualifications
     """
-    print(f"\nProcessing {qualification_field}")
+    # print(f"\nProcessing {qualification_field}")
     recent_qualications = session.execute(
         select(Flight.date, getattr(FlightPilots, qualification_field))  # FlightPilots.day_landings)
         .join(FlightPilots)
@@ -341,7 +341,7 @@ def process_repetion_qual(
         # .limit(5 - len(day_landings_dates)),
     ).all()
 
-    print(f"\nRecent {qualification_field}:\t{recent_qualications}\n")
+    # print(f"\nRecent {qualification_field}:\t{recent_qualications}\n")
 
     # Ensure there are no more than 5 entries
     qualification_dates = [date[0].strftime("%Y-%m-%d") for date in recent_qualications]
@@ -355,7 +355,7 @@ def process_repetion_qual(
         f"last_{qualification_field}",
         " ".join(qualification_dates[:5]),
     )
-    print(f"After Qual {qualification_field}:\t{getattr(pilot_qualification, f'last_{qualification_field}')}\n")
+    # print(f"After Qual {qualification_field}:\t{getattr(pilot_qualification, f'last_{qualification_field}')}\n")
 
 
 def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:

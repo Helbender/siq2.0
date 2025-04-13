@@ -1,7 +1,21 @@
 /* eslint-disable react/prop-types */
-import { FormControl, GridItem, Input, Select, Flex } from "@chakra-ui/react";
+import { FormControl, GridItem, Input, Select } from "@chakra-ui/react";
 import { Fragment, useState } from "react";
 
+const PILOT_QUALIFICATIONS = [
+  "QA1",
+  "QA2",
+  "BSP1",
+  "BSP2",
+  "TA",
+  "VRP1",
+  "VRP2",
+  "CTO",
+  "SID",
+  "MONO",
+  "NFP",
+];
+const CREW_QUALIFICATIONS = ["BSOC"];
 const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
   const [name, setName] = useState([]);
   const [nip, setNip] = useState("");
@@ -30,58 +44,37 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
   const handleNipForm = (name) => {
     console.log(name);
     let temp = pilotos.filter((piloto) => piloto.name == name);
-    // console.log(temp[0].nip);
     setNip(temp[0].nip);
     return temp[0].nip;
   };
   const setPilotSelect = (p) => {
-    setName(pilotos.filter((piloto) => piloto.position == p));
     setPilot({
       ...pilot,
       position: p,
     });
     let newpilot = { ...pilot, position: p };
+    if (p === "PI") {
+      p = "PC";
+    }
+    setName(pilotos.filter((piloto) => piloto.position == p));
     let newinput = { ...inputs, [pilotNumber]: newpilot };
     setInputs(newinput);
   };
   const handlePositionSelect = (e) => {
     e.preventDefault();
-    if (e.target.value === "PC") {
-      setPilotSelect("PC");
+    console.log(e.target.value);
+    if (e.target.value === "PC" || e.target.value === "PI") {
+      setPilotSelect(e.target.value);
       setNip("");
-      setQualP([
-        "QA1",
-        "QA2",
-        "BSP1",
-        "BSP2",
-        "TA",
-        "VRP1",
-        "VRP2",
-        "CTO",
-        "SID",
-        "MONO",
-        "NFP",
-      ]);
+      setQualP(PILOT_QUALIFICATIONS);
     } else if (e.target.value === "CP") {
       setPilotSelect("CP");
       setNip("");
-      setQualP([
-        "QA1",
-        "QA2",
-        "BSP1",
-        "BSP2",
-        "TA",
-        "VRP1",
-        "VRP2",
-        "CTO",
-        "SID",
-        "MONO",
-        "NFP",
-      ]);
+      setQualP(PILOT_QUALIFICATIONS);
     } else if (e.target.value === "OC") {
       setPilotSelect("OC");
       setNip("");
-      setQualP(["BSOC"]);
+      setQualP(CREW_QUALIFICATIONS);
     }
   };
   return (
@@ -102,6 +95,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             maxW={20}
             textAlign={"center"}
           >
+            <option value="PI">PI</option>
             <option value="PC">PC</option>
             <option value="CP">CP</option>
             <option value="OC">OC</option>

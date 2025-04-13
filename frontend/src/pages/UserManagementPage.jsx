@@ -80,9 +80,9 @@ function UserManagementPage() {
               <Th>Name</Th>
               <Th>Rank</Th>
               <Th>Position</Th>
-              <Th>Email</Th>
+              {/* <Th>Email</Th> */}
               <Th>Admin</Th>
-              <Th>Squadron</Th>
+              {/* <Th>Squadron</Th> */}
               <Th></Th>
             </Tr>
           </Thead>
@@ -93,7 +93,7 @@ function UserManagementPage() {
                 <Td>{user.name}</Td>
                 <Td>{user.rank}</Td>
                 <Td>{user.position}</Td>
-                <Td>{user.email}</Td>
+                {/* <Td>{user.email}</Td> */}
                 <Td>
                   {user.admin ? (
                     <IoCheckmarkCircleSharp size={"30px"} color="green" />
@@ -101,7 +101,7 @@ function UserManagementPage() {
                     <IoCloseCircleSharp size={"30px"} color="red" />
                   )}
                 </Td>
-                <Td>{user.squadron}</Td>
+                {/* <Td>{user.squadron}</Td> */}
                 <Td>
                   <HStack spacing={2} align="center">
                     <CreateUserModal edit={true} user={user} />

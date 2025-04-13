@@ -182,48 +182,6 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
         return folder.get("id")
 
 
-def upload_dict_with_service_account(
-    dados: dict,
-    nome_arquivo_drive: str,
-    id_pasta_raiz: str,
-    credentials_path="credentials.json",
-):
-    """
-    Converte um dicionário Python em JSON (em memória) e faz upload no Drive,
-    organizando o arquivo em pastas de Mês/Dia dentro da pasta raiz informada.
-    """
-    # 1) Autentica com Service Account
-    credentials = service_account.Credentials.from_service_account_file(credentials_path, scopes=SCOPES)
-    service = build("drive", "v3", credentials=credentials)
-
-    # 2) Gera nomes de pasta baseados na data
-    hoje = datetime.now()
-    pasta_mes = hoje.strftime("%Y-%m")  # Ex: "2025-03"
-    pasta_dia = hoje.strftime("%Y-%m-%d")  # Ex: "2025-03-10"
-
-    # 3) Garante que a pasta do mês exista dentro da pasta raiz
-    pasta_mes_id = get_or_create_folder(service, id_pasta_raiz, pasta_mes)
-
-    # 4) Garante que a pasta do dia exista dentro da pasta do mês
-    pasta_dia_id = get_or_create_folder(service, pasta_mes_id, pasta_dia)
-
-    # 5) Converte o dicionário em JSON e cria um buffer em memória
-    data_bytes = json.dumps(dados).encode("utf-8")
-    buffer = io.BytesIO(data_bytes)
-
-    file_metadata = {
-        "name": nome_arquivo_drive,
-        "parents": [pasta_dia_id],  # arquivo vai para a pasta do dia
-    }
-
-    media = MediaIoBaseUpload(buffer, mimetype="application/json", resumable=True)
-
-    # 6) Faz o upload do arquivo
-    uploaded_file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-
-    print(f"Upload concluído! ID do arquivo: {uploaded_file.get('id')}")
-
-
 # Usar as funções
 if __name__ == "__main__":
     nome_ficheiro: str = "1M 00A1731 07Apr2025 12:05"

@@ -19,7 +19,7 @@ import {
   Select,
   useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import PilotInput from "./PilotInput";
 import axios from "axios";
 import { FlightContext } from "../../Contexts/FlightsContext";
@@ -79,16 +79,12 @@ function CreateFlightModal() {
     let data = inputs;
     !data.flight_pilots ? (data.flight_pilots = []) : null;
     for (let i = 0; i < 6; i++) {
-      console.log(i);
       if (Object.hasOwn(inputs, `pilot${i}`)) {
-        console.log(true);
         data.flight_pilots[i] = inputs[`pilot${i}`];
         delete data[`pilot${i}`];
       }
     }
-    console.log(data);
     try {
-      // console.log(token);
       const res = await axios.post("/api/flights", data, {
         headers: { Authorization: "Bearer " + token },
       });
@@ -101,9 +97,8 @@ function CreateFlightModal() {
           duration: 5000,
           position: "bottom",
         });
+        data.id = res.data?.message;
         setFlights([...flights, data]);
-        // setFilteredFlights([...flights, data]);
-        onClose();
       }
     } catch (error) {
       toast({
@@ -123,9 +118,13 @@ function CreateFlightModal() {
         Novo Modelo
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        scrollBehavior="inside"
+        size={"full"}
+      >
         <ModalOverlay />
-        {/* <form onSubmit={handleCreateFlight}> */}
         <ModalContent minWidth={"1200px"}>
           <ModalHeader>Novo Modelo 1M</ModalHeader>
           <ModalCloseButton />
@@ -473,7 +472,6 @@ function CreateFlightModal() {
             </Button>
           </ModalFooter>
         </ModalContent>
-        {/* </form> */}
       </Modal>
     </>
   );

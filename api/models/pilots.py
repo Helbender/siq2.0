@@ -3,13 +3,14 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date, timedelta
 from typing import TYPE_CHECKING, List
 
-from models.users import Base, People, date_init, year_init  # type: ignore
+from models.users import Base, People, year_init, date_init  # type: ignore
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
 )
+
 
 if TYPE_CHECKING:
     from flights import FlightPilots  # type: ignore
@@ -49,6 +50,19 @@ class Qualification(Base):
     last_night_landings: Mapped[str] = mapped_column(String(55), default=date_init)
     last_prec_app: Mapped[str] = mapped_column(String(55), default=date_init)
     last_nprec_app: Mapped[str] = mapped_column(String(55), default=date_init)
+    # last_day_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
+    # last_night_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
+    # last_prec_app_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
+    # last_nprec_app_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
+
     last_qa1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_qa2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_bsp1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
@@ -73,40 +87,12 @@ class Qualification(Base):
 
     def update(self, data: FlightPilots, date: date) -> Qualification:
         """Update with Last qualification date."""
-        if data.qa1 and date > self.last_qa1_date:
-            self.last_qa1_date = date
+        attr_list = [column.name[5:-5] for column in self.__table__.columns]
+        attr_list = attr_list[5:]
 
-        if data.qa2 and date > self.last_qa2_date:
-            self.last_qa2_date = date
-
-        if data.bsp1 and date > self.last_bsp1_date:
-            self.last_bsp1_date = date
-
-        if data.bsp2 and date > self.last_bsp2_date:
-            self.last_bsp2_date = date
-
-        if data.ta and date > self.last_ta_date:
-            self.last_ta_date = date
-
-        if data.vrp1 and date > self.last_vrp1_date:
-            self.last_vrp1_date = date
-
-        if data.vrp2 and date > self.last_vrp2_date:
-            self.last_vrp2_date = date
-
-        if data.cto and date > self.last_cto_date:
-            self.last_cto_date = date
-        try:
-            if data.sid and date > self.last_sid_date:
-                self.last_sid_date = date
-        except TypeError:
-            self.last_sid = date
-
-        if data.mono and date > self.last_mono_date:
-            self.last_mono_date = date
-
-        if data.nfp and date > self.last_nfp_date:
-            self.last_nfp_date = date
+        for item in attr_list:
+            if getattr(data, item):
+                setattr(self, f"last_{item}_date", date)
 
         self.last_day_landings = Qualification._get_last_five(
             self.last_day_landings.split(),
@@ -135,43 +121,33 @@ class Qualification(Base):
         return f"\nATR:{self.last_day_landings}\tATN:{self.last_night_landings}\tQA1: {self.last_qa1_date}\n"
 
     def to_json(self) -> dict:
-        unsorted_dict: dict = {
-            "lastQA1": self.last_qa1_date,
-            "lastQA2": self.last_qa2_date,
-            "lastBSP1": self.last_bsp1_date,
-            "lastBSP2": self.last_bsp2_date,
-            "lastTA": self.last_ta_date,
-            "lastVRP1": self.last_vrp1_date,
-            "lastVRP2": self.last_vrp2_date,
-            "lastCTO": self.last_cto_date,
-            "lastSID": self.last_sid_date,
-            "lastMONO": self.last_mono_date,
-            "lastNFP": self.last_nfp_date,
-        }
-        # sorted_dict: dict = dict(sorted(unsorted_dict.items(), key=lambda keyval: keyval[1]))
-        # print(sorted_dict)
+        # Gets the columns names for standard qualifications
+        attr_list = [column.name for column in self.__table__.columns]
+        attr_list = attr_list[5:]
+
+        unsorted_dict: dict = {}
+
+        for item in attr_list:
+            print(f"Item: {item}")
+            value = getattr(self, item)
+            print(f"Value: {value}. Type: {type(value)}")
+            unsorted_dict[f"last{item[5:-5].upper()}"] = value
+
         oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)
-        return {
-            # "lastDayLandings": [date for date in self.last_day_landings.split()],  # noqa: ERA001
+
+        final_dict: dict = {
             "lastDayLandings": list(self.last_day_landings.split()),
             "lastNightLandings": list(self.last_night_landings.split()),
             "lastPrecApp": list(self.last_prec_app.split()),
             "lastNprecApp": list(self.last_nprec_app.split()),
-            "lastQA1": self._get_days(self.last_qa1_date)[0],
-            "lastQA2": self._get_days(self.last_qa2_date)[0],
-            "lastBSP1": self._get_days(self.last_bsp1_date)[0],
-            "lastBSP2": self._get_days(self.last_bsp2_date)[0],
-            "lastTA": self._get_days(self.last_ta_date)[0],
-            "lastVRP1": self._get_days(self.last_vrp1_date)[0],
-            "lastVRP2": self._get_days(self.last_vrp2_date)[0],
-            "lastCTO": self._get_days(self.last_cto_date)[0],
-            "lastSID": self._get_days(self.last_sid_date)[0],
-            "lastMONO": self._get_days(self.last_mono_date)[0],
-            "lastNFP": self._get_days(self.last_nfp_date)[0],
-            "oldest": [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]],
-            # "oldest": sorted_dict[0][4:],
-            # "oldest": oldest_key[4:],
         }
+
+        for k, v in unsorted_dict.items():
+            print(type(v))
+            final_dict[k] = self._get_days(v)
+        final_dict["oldest"] = [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]]
+        print(final_dict)
+        return final_dict
 
     @staticmethod
     def _get_days(data: date, validade: int = 180) -> list[int | str]:

@@ -1,9 +1,9 @@
- 
 /* eslint-disable react/prop-types */
 import {
   Card,
   Text,
-  Box,
+  Grid,
+  GridItem,
   CardBody,
   CardHeader,
   Heading,
@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import QualificationsPanel from "../pilotComponents/QualificationsPanel";
-
+import StandardText from "../styledcomponents/StandardText";
 const CrewCard = ({ user }) => {
   return (
     <Card bg={useColorModeValue("gray.200", "gray.700")} boxShadow={"xl"}>
@@ -28,46 +28,28 @@ const CrewCard = ({ user }) => {
         </Flex>
       </CardHeader>
       <CardBody>
-        <Flex flexDirection={"row"}>
-          {/* {!!user.qualification?.lastDayLandings ? (
-            <DaysLeftColumn
-              qualification={"BSOC"}
-              dates={user.qualification.lastBSOC}
-            />
-          ) : null}
-          {!!user.qualification?.lastNightLandings ? (
-            <DaysLeftColumn
-              qualification={"ATN"}
-              dates={user.qualification.lastNightLandings}
-            />
-          ) : null}
-          {!!user.qualification?.lastPrecApp ? (
-            <DaysLeftColumn
-              qualification={"P"}
-              dates={user.qualification.lastPrecApp}
-            />
-          ) : null}
-          {!!user.qualification?.lastNprecApp ? (
-            <DaysLeftColumn
-              qualification={"NP"}
-              dates={user.qualification.lastNprecApp}
-            />
-          ) : null} */}
-          <Box borderColor={"black"} borderWidth={"2px"}>
-            <Text
-              color="white"
-              fontSize={"16"}
-              fontWeight={"bold"}
-              align={"center"}
-              paddingX={2}
-              bg="grey"
-            >
-              BSOC
-            </Text>
-          </Box>
-          <Box borderColor={"black"} borderWidth={"2px"}>
-            <QualificationsPanel qualification={user.qualification?.lastBSOC} />
-          </Box>
+        <Flex
+          m={"auto"}
+          flexDirection={"column"}
+          backgroundColor={"#1a202c"}
+          borderRadius={10}
+          gap={2}
+          p={3}
+        >
+          <Text fontWeight={"bold"}>Alerta</Text>
+          <Grid
+            my={1}
+            rowGap={1}
+            columnGap={1}
+            templateColumns={"repeat(3,1fr)"}
+          >
+            <StandardText text="BSOC" />
+            <GridItem colSpan={2}>
+              <QualificationsPanel
+                qualification={user.qualification?.lastBSOC}
+              />
+            </GridItem>
+          </Grid>
         </Flex>
       </CardBody>
     </Card>

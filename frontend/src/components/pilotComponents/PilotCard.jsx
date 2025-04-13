@@ -10,6 +10,9 @@ import {
   Grid,
   Stack,
   Spacer,
+  HStack,
+  VStack,
+  GridItem,
 } from "@chakra-ui/react";
 import DaysLeftColumn from "./DaysLeftColumn";
 import QualificationsPanel from "./QualificationsPanel";
@@ -55,19 +58,12 @@ const PilotCard = ({ user }) => {
             borderRadius={10}
             gap={2}
             p={3}
-            // minH={"180px"}
+            minHeight={"180px"}
           >
             <DaysLeftColumn
               qualification={"ATD"}
               dates={user.qualification?.lastDayLandings}
             />
-            {/* {!!user.qualification?.lastDayLandings ? (
-              <DaysLeftColumn
-                qualification={"ATD"}
-                dates={user.qualification.lastDayLandings}
-              />
-            ) : null} */}
-            {/* {user.qualification?.lastNightLandings ? ( */}
             <DaysLeftColumn
               qualification={"ATN"}
               dates={user.qualification.lastNightLandings}
@@ -86,67 +82,234 @@ const PilotCard = ({ user }) => {
               />
             ) : null}
           </Flex>
-          <Spacer />
-          <Grid mt={5} templateColumns="repeat(11,1fr)" gap={0}>
-            <StandardText text="QA1" borderTopLeftRadius={10} />
-            <StandardText text="QA2" />
-            <StandardText text="BSP1" />
-            <StandardText text="BSP2" />
-            <StandardText text="TA" />
-            <StandardText text="VRP1" />
-            <StandardText text="VRP2" />
-            <StandardText text="CTO" />
-            <StandardText text="SID" />
-            <StandardText text="MONO" />
-            <StandardText text="NFP" borderTopRightRadius={10} />
 
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastQA1}
-              borderBottomLeftRadius={10}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastQA2}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastBSP1}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastBSP2}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastTA}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastVRP1}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastVRP2}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastCTO}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastSID}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastMONO}
-            />
-            <QualificationsPanel
-              maxW={10}
-              qualification={user.qualification?.lastNFP}
-              borderBottomRightRadius={10}
-            />
-          </Grid>
+          <Spacer />
+          <Flex
+            m={"auto"}
+            flexDirection={"column"}
+            // justifyContent={"center"}
+            backgroundColor={"#1a202c"}
+            borderRadius={10}
+            gap={2}
+            p={3}
+            // minHeight={"180px"}
+          >
+            <Text fontWeight={"bold"}>Pronto para Alerta</Text>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(6,1fr)"}
+              // bg={"teal.100"}
+            >
+              <StandardText text="QA1" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastQA1}
+                />
+              </GridItem>
+              <StandardText text="QA2" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastQA2}
+                />
+              </GridItem>
+              <StandardText text="BSP1" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastBSP1}
+                />
+              </GridItem>
+              <StandardText text="BSP2" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="BSP2"
+                  qualification={user.qualification?.lastBSP2}
+                />
+              </GridItem>
+              <StandardText text="TA" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="TA"
+                  qualification={user.qualification?.lastTA}
+                />
+              </GridItem>
+            </Grid>
+          </Flex>
+          <Flex
+            m={"auto"}
+            flexDirection={"column"}
+            // justifyContent={"center"}
+            backgroundColor={"#1a202c"}
+            borderRadius={10}
+            gap={2}
+            p={3}
+            // minHeight={"180px"}
+          >
+            <Text fontWeight={"bold"}>ISR</Text>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(6,1fr)"}
+              // bg={"teal.100"}
+            >
+              <StandardText text="VRP1" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="VRP1"
+                  qualification={user.qualification?.lastVRP1}
+                />
+              </GridItem>
+              <StandardText text="VRP2" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastVRP2}
+                />
+              </GridItem>
+            </Grid>
+          </Flex>
+          <Flex
+            m={"auto"}
+            flexDirection={"column"}
+            backgroundColor={"#1a202c"}
+            borderRadius={10}
+            gap={2}
+            p={3}
+          >
+            <Text fontWeight={"bold"}>Currencies</Text>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(6,1fr)"}
+            >
+              <StandardText text="CTO" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastCTO}
+                />
+              </GridItem>
+
+              <StandardText text="SID" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastSID}
+                />
+              </GridItem>
+
+              <StandardText text="MONO" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastMONO}
+                />
+              </GridItem>
+
+              <StandardText text="NFP" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastNFP}
+                />
+              </GridItem>
+            </Grid>
+          </Flex>
+          {/* <HStack mt={5} gap={0}>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(3,1fr)"}
+            >
+              <StandardText text="QA1" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastQA1}
+                />
+              </GridItem>
+              <StandardText text="QA2" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastQA2}
+                />
+              </GridItem>
+
+              <StandardText text="BSP1" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastBSP1}
+                />
+              </GridItem>
+              <StandardText text="BSP2" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="BSP2"
+                  qualification={user.qualification?.lastBSP2}
+                />
+              </GridItem>
+              <StandardText text="TA" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="TA"
+                  qualification={user.qualification?.lastTA}
+                />
+              </GridItem>
+              <StandardText text="VRP1" />
+
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualificationName="VRP1"
+                  qualification={user.qualification?.lastVRP1}
+                />
+              </GridItem>
+            </Grid>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(3,1fr)"}
+            >
+              <StandardText text="VRP2" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastVRP2}
+                />
+              </GridItem>
+
+              <StandardText text="CTO" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastCTO}
+                />
+              </GridItem>
+
+              <StandardText text="SID" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastSID}
+                />
+              </GridItem>
+
+              <StandardText text="MONO" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastMONO}
+                />
+              </GridItem>
+
+              <StandardText text="NFP" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastNFP}
+                />
+              </GridItem>
+            </Grid>
+          </HStack> */}
           <Text
             borderRadius={5}
             bg="rgba(229,62,62,0.7)"

@@ -173,23 +173,23 @@ function Header() {
                       </ChakraLink>
                       <Spacer />
 
-                      {/* {admin ? ( */}
-                      <ChakraLink
-                        p={2}
-                        color="teal.500"
-                        fontSize="lg"
-                        onClick={() => {
-                          navigate("/users");
-                          onClose();
-                        }}
-                      >
-                        <Flex align="center">
-                          <FaTools />
+                      {User.admin ? (
+                        <ChakraLink
+                          p={2}
+                          color="teal.500"
+                          fontSize="lg"
+                          onClick={() => {
+                            navigate("/users");
+                            onClose();
+                          }}
+                        >
+                          <Flex align="center">
+                            <FaTools />
 
-                          <Box ml={2}>Utilizadores</Box>
-                        </Flex>
-                      </ChakraLink>
-                      {/* ) : null} */}
+                            <Box ml={2}>Utilizadores</Box>
+                          </Flex>
+                        </ChakraLink>
+                      ) : null}
 
                       <ChakraLink
                         p={2}

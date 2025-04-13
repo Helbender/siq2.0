@@ -45,7 +45,7 @@ class QualificationCrew(Base):
         """Return all model data in JSON format."""
         oldest_key = "lastBSOC"
         return {
-            "lastBSOC": self._get_days(self.last_bsoc_date)[0],
+            "lastBSOC": self._get_days(self.last_bsoc_date),
             "oldest": [oldest_key[4:], self._get_days(self.last_bsoc_date)[1]],
         }
 
