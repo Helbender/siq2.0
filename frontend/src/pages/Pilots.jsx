@@ -8,7 +8,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);
-  // const [filteredUsers, setFilteredUsers] = useState([]);
   const { token, removeToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,7 +36,6 @@ const Pilots = ({ position }) => {
         position: "bottom",
       });
       setPilotos(res.data || []);
-      // setFilteredUsers(res.data || []);
     } catch (error) {
       console.log(error);
       console.log(error.response.status);

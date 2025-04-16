@@ -21,7 +21,7 @@ class Crew(People, Base):
     qualification: Mapped[QualificationCrew] = relationship(
         "QualificationCrew",
         back_populates="crew",
-        cascade="all, delete",
+        cascade="all, delete-orphan",
         passive_deletes=True,
     )
     flight_crew: Mapped[List[FlightCrew]] = relationship(back_populates="crew")

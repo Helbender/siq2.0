@@ -72,6 +72,7 @@ class Qualification(Base):
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
     last_vrp2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
+
     last_cto_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
@@ -118,7 +119,7 @@ class Qualification(Base):
         return self
 
     def __repr__(self) -> str:
-        return f"\nATR:{self.last_day_landings}\tATN:{self.last_night_landings}\tQA1: {self.last_qa1_date}\n"
+        return self.to_json().__repr__()
 
     def to_json(self) -> dict:
         # Gets the columns names for standard qualifications
@@ -128,9 +129,9 @@ class Qualification(Base):
         unsorted_dict: dict = {}
 
         for item in attr_list:
-            print(f"Item: {item}")
+            # print(f"Item: {item}")
             value = getattr(self, item)
-            print(f"Value: {value}. Type: {type(value)}")
+            # print(f"Value: {value}")a =
             unsorted_dict[f"last{item[5:-5].upper()}"] = value
 
         oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)
@@ -143,10 +144,12 @@ class Qualification(Base):
         }
 
         for k, v in unsorted_dict.items():
-            print(type(v))
-            final_dict[k] = self._get_days(v)
+            # print(type(v))
+            if k[4:] in ["CTO", "SID", "MONO", "NFP"]:
+                final_dict[k] = self._get_days(v, 45)
+            else:
+                final_dict[k] = self._get_days(v)
         final_dict["oldest"] = [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]]
-        print(final_dict)
         return final_dict
 
     @staticmethod

@@ -25,7 +25,8 @@ def retrieve_user() -> tuple[Response, int]:
                 stmt = select(db).order_by(db.nip)
                 if session.execute(stmt).scalars().all() is not None:
                     result.extend(session.execute(stmt).scalars().all())
-            return jsonify([row.to_json() for row in result]), 200
+            ordered_list: list = sorted([row.to_json() for row in result], key=lambda x: x["nip"])
+            return jsonify(ordered_list), 200
 
     # Adds new user to db
     if request.method == "POST":

@@ -191,6 +191,7 @@ const PilotCard = ({ user }) => {
               <GridItem colSpan={2}>
                 <QualificationsPanel
                   qualification={user.qualification?.lastCTO}
+                  type={2}
                 />
               </GridItem>
 
@@ -198,6 +199,7 @@ const PilotCard = ({ user }) => {
               <GridItem colSpan={2}>
                 <QualificationsPanel
                   qualification={user.qualification?.lastSID}
+                  type={2}
                 />
               </GridItem>
 
@@ -205,6 +207,7 @@ const PilotCard = ({ user }) => {
               <GridItem colSpan={2}>
                 <QualificationsPanel
                   qualification={user.qualification?.lastMONO}
+                  type={2}
                 />
               </GridItem>
 
@@ -212,6 +215,7 @@ const PilotCard = ({ user }) => {
               <GridItem colSpan={2}>
                 <QualificationsPanel
                   qualification={user.qualification?.lastNFP}
+                  type={2}
                 />
               </GridItem>
             </Grid>
