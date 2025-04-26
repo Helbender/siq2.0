@@ -7,9 +7,9 @@ const DaysLeftColumn = ({ qualification, dates }) => {
   let days = dates.map((date) => {
     let qualificationDate = new Date(date);
     let semester = new Date(qualificationDate);
-    semester.setDate(qualificationDate.getDate() + 180);
+    semester.setDate(qualificationDate.getDate() + 45);
     let days = Math.round(
-      (qualificationDate.setDate(qualificationDate.getDate() + 180) -
+      (qualificationDate.setDate(qualificationDate.getDate() + 45) -
         today.getTime()) /
         86400000,
     );
@@ -19,13 +19,12 @@ const DaysLeftColumn = ({ qualification, dates }) => {
   function colorFormatter(days) {
     let color = "";
     if (days < 0) return (color = "red");
-    if (days < 45) return (color = "yellow");
+    if (days < 10) return (color = "yellow");
     // eslint-disable-next-line no-unused-vars
     else return (color = "green");
   }
   return (
-    <Box align={"center"}
-    >
+    <Box align={"center"}>
       <Text
         color="white"
         fontSize={"16"}

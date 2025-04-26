@@ -115,6 +115,7 @@ class FlightPilots(Base):
     ta: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     vrp1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     vrp2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    bskit: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
 
     pilot: Mapped[Pilot] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
@@ -148,6 +149,7 @@ class FlightPilots(Base):
         response["SID"] = self.sid
         response["MONO"] = self.mono
         response["NFP"] = self.nfp
+        response["BSKIT"] = self.bskit
 
         return response
 

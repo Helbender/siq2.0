@@ -43,7 +43,7 @@ class Pilot(People, Base):
 class Qualification(Base):
     __tablename__ = "qualifications"
 
-    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip"), primary_key=True)
+    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True)
     pilot: Mapped[Pilot] = relationship(back_populates="qualification")
 
     last_day_landings: Mapped[str] = mapped_column(String(55), default=date_init)
@@ -83,6 +83,9 @@ class Qualification(Base):
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
     last_nfp_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_bskit_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
 

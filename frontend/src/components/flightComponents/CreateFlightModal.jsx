@@ -84,12 +84,22 @@ function CreateFlightModal() {
         delete data[`pilot${i}`];
       }
     }
+    toast({
+      title: "A adicionar voo",
+      description: "Em processo.",
+      status: "loading",
+      duration: 5000,
+      isClosable: true,
+      position: "bottom",
+    });
+    console.log(data);
     try {
       const res = await axios.post("/api/flights", data, {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.status === 201) {
         console.log(res);
+        toast.closeAll();
         toast({
           title: "Sucesso",
           description: `Voo colocado com sucesso. ID: ${res.data?.message}`,
@@ -101,14 +111,16 @@ function CreateFlightModal() {
         setFlights([...flights, data]);
       }
     } catch (error) {
+      toast.closeAll();
+
       toast({
-        title: "Erro",
-        description: error.data?.message,
+        title: `Erro com o código ${error.response.status}`,
+        description: error.response.data.message,
         status: "error",
-        duration: 5000,
-        position: "right",
+        duration: 10000,
+        position: "bottom",
       });
-      console.log(error.response);
+      console.log(error.response.data.message);
     }
   };
 
@@ -404,6 +416,8 @@ function CreateFlightModal() {
                 // alignContent={"center"}
                 // alignSelf={"center"}
                 templateColumns="repeat(12, 1fr)"
+                rowGap={2}
+                columnGap={4}
               >
                 <GridItem textAlign={"center"}>Posição</GridItem>
                 <GridItem textAlign={"center"} colSpan={2}>

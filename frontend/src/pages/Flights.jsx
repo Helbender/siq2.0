@@ -13,20 +13,23 @@ import CreateFlightModal from "../components/flightComponents/CreateFlightModal"
 import { useContext, useEffect, useState } from "react";
 import { FlightContext } from "../Contexts/FlightsContext";
 import { AuthContext } from "../Contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Flights() {
   const { flights } = useContext(FlightContext);
   const [filteredFlights, setFilteredFlights] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
   useColorModeValue();
   // console.log("Flights from Flight Page");
-  const { token } = useContext(AuthContext);
+  const { token, removeToken } = useContext(AuthContext);
 
   useEffect(() => {
     if (!token && token !== "" && token !== undefined) {
-      console.log("Checking Token");
-      Navigate("/");
+      console.log("Removing Token");
+      removeToken();
+      navigate("/");
     }
     const results = flights.filter((flight) =>
       [

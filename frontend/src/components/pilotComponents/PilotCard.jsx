@@ -25,6 +25,7 @@ const PilotCard = ({ user }) => {
       bg={useColorModeValue("gray.400", "gray.700")}
       boxShadow={"xl"}
       // maxW={"1000px"}
+      // minW="550px"
     >
       <CardHeader>
         <Flex gap={4}>
@@ -87,12 +88,10 @@ const PilotCard = ({ user }) => {
           <Flex
             m={"auto"}
             flexDirection={"column"}
-            // justifyContent={"center"}
             backgroundColor={"#1a202c"}
             borderRadius={10}
             gap={2}
             p={3}
-            // minHeight={"180px"}
           >
             <Text fontWeight={"bold"}>Pronto para Alerta</Text>
             <Grid
@@ -100,9 +99,10 @@ const PilotCard = ({ user }) => {
               rowGap={1}
               columnGap={1}
               templateColumns={"repeat(6,1fr)"}
-              // bg={"teal.100"}
             >
-              <StandardText text="QA1" />
+              <GridItem alignContent={"center"}>
+                <StandardText text="QA1" />
+              </GridItem>
               <GridItem colSpan={2}>
                 <QualificationsPanel
                   qualification={user.qualification?.lastQA1}

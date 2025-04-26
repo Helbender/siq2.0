@@ -11,10 +11,9 @@ const StandardText = (props) => {
       fontSize={"14"}
       fontWeight={"bold"}
       paddingX={2}
-      // width={"60px"}
-      // maxW={"80px"}
       paddingY={1}
       bg="cyan.700"
+      h="100%"
       borderTopLeftRadius={props.borderTopLeftRadius}
       borderTopRightRadius={props.borderTopRightRadius}
       borderBottomLeftRadius={props.borderBottomLeftRadius}

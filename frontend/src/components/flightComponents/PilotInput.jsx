@@ -10,39 +10,45 @@ const PILOT_QUALIFICATIONS = [
   "TA",
   "VRP1",
   "VRP2",
+  "BSKIT",
   "CTO",
   "SID",
   "MONO",
   "NFP",
 ];
 const CREW_QUALIFICATIONS = ["BSOC"];
+const BASE_PILOT = {
+  nip: "",
+  name: "",
+  ATR: 0,
+  ATN: 0,
+  precapp: 0,
+  nprecapp: 0,
+  QA1: false,
+  QA2: false,
+  BSP1: false,
+  BSP2: false,
+  TA: false,
+  VRP1: false,
+  VRP2: false,
+  CTO: false,
+  SID: false,
+  MONO: false,
+  NFP: false,
+  BSKIT: false,
+  BSOC: false,
+};
 const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
   const [name, setName] = useState([]);
   const [nip, setNip] = useState("");
   const [qualP, setQualP] = useState([]);
-  const [pilot, setPilot] = useState({
-    nip: "",
-    name: "",
-    ATR: 0,
-    ATN: 0,
-    precapp: 0,
-    nprecapp: 0,
-    QA1: false,
-    QA2: false,
-    BSP1: false,
-    BSP2: false,
-    TA: false,
-    VRP1: false,
-    VRP2: false,
-    CTO: false,
-    SID: false,
-    MONO: false,
-    NFP: false,
-    BSOC: false,
-  });
+  const [pilot, setPilot] = useState(BASE_PILOT);
+  const [selectedName, setSelectedName] = useState("");
 
   const handleNipForm = (name) => {
-    console.log(name);
+    // console.log(name);
+    // console.log(!name);
+    if (!name) return setNip("");
     let temp = pilotos.filter((piloto) => piloto.name == name);
     setNip(temp[0].nip);
     return temp[0].nip;
@@ -53,29 +59,63 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
       position: p,
     });
     let newpilot = { ...pilot, position: p };
-    if (p === "PI") {
-      p = "PC";
-    }
-    setName(pilotos.filter((piloto) => piloto.position == p));
+
+    let filteredPilots = pilotos.filter((piloto) => {
+      if (p === "PC") {
+        return piloto.position === "PI" || piloto.position === "PC";
+      } else if (p === "OC") {
+        return piloto.position === "OCI" || piloto.position === "OC";
+      } else if (p === "P") {
+        return (
+          piloto.position === "PI" ||
+          piloto.position === "PC" ||
+          piloto.position === "P"
+        );
+      } else if (p === "CT") {
+        return piloto.position === "CTI" || piloto.position === "CT";
+      } else {
+        return piloto.position === p;
+      }
+    });
+
+    setName(filteredPilots);
     let newinput = { ...inputs, [pilotNumber]: newpilot };
     setInputs(newinput);
   };
   const handlePositionSelect = (e) => {
     e.preventDefault();
-    console.log(e.target.value);
-    if (e.target.value === "PC" || e.target.value === "PI") {
+    setNip("");
+    setSelectedName("");
+    if (!e.target.value) {
+      let newinput = inputs;
+      delete newinput[pilotNumber];
+      setPilot(BASE_PILOT);
+      setInputs(newinput);
+
+      return;
+    }
+
+    if (
+      e.target.value === "PC" ||
+      e.target.value === "PI" ||
+      e.target.value === "P"
+    ) {
       setPilotSelect(e.target.value);
-      setNip("");
+      // setNip("");
       setQualP(PILOT_QUALIFICATIONS);
     } else if (e.target.value === "CP") {
       setPilotSelect("CP");
-      setNip("");
+      // setNip("");
       setQualP(PILOT_QUALIFICATIONS);
-    } else if (e.target.value === "OC") {
+    } else if (
+      e.target.value === "OC" ||
+      e.target.value === "OCI" ||
+      e.target.value === "OCA"
+    ) {
       setPilotSelect("OC");
-      setNip("");
       setQualP(CREW_QUALIFICATIONS);
     }
+    // setNip("");
   };
   return (
     <Fragment
@@ -84,21 +124,34 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
     // alignContent={"center"}
     // alignItems={"center"}
     >
-      {/* <Flex flexDirection={"row"} mt={2}> */}
       <GridItem>
-        <FormControl ml={5} alignItems={"center"}>
+        <FormControl
+          m="auto"
+          // alignItems={"center"}
+          // alignContent={"center"}
+        >
           <Select
+            m="auto"
             name="posição"
             placeholder=" "
             type="text"
             onChange={handlePositionSelect}
-            maxW={20}
+            maxW={"100px"}
             textAlign={"center"}
           >
             <option value="PI">PI</option>
             <option value="PC">PC</option>
+            <option value="P">P</option>
             <option value="CP">CP</option>
+            <option value="OCI">OCI</option>
             <option value="OC">OC</option>
+            <option value="OCA">OCA</option>
+            <option value="CT">CT</option>
+            <option value="CTI">CTI</option>
+            <option value="CTA">CTA</option>
+            <option value="OPV">OPV</option>
+            <option value="OPVI">OPVI</option>
+            <option value="OPVA">OPVA</option>
           </Select>
         </FormControl>
       </GridItem>
@@ -108,8 +161,11 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             name="name"
             textAlign={"center"}
             type="text"
+            value={selectedName}
             onChange={(e) => {
-              let nip = handleNipForm(e.target.value);
+              const selected = e.target.value;
+              setSelectedName(selected);
+              const nip = handleNipForm(selected);
               setPilot({
                 ...pilot,
                 name: e.target.value,
@@ -137,22 +193,24 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
         </FormControl>
       </GridItem>
 
-      <FormControl mx={1}>
-        <Input
-          name="ATR"
-          type="number"
-          onChange={(e) => {
-            setPilot({
-              ...pilot,
-              ATR: e.target.value,
-            });
-            let newpilot = { ...pilot, ATR: e.target.value };
-            console.log(pilotNumber);
-            let newinput = { ...inputs, [pilotNumber]: newpilot };
-            setInputs(newinput);
-          }}
-        />
-      </FormControl>
+      <GridItem>
+        <FormControl mx={1}>
+          <Input
+            name="ATR"
+            type="number"
+            onChange={(e) => {
+              setPilot({
+                ...pilot,
+                ATR: e.target.value,
+              });
+              let newpilot = { ...pilot, ATR: e.target.value };
+              console.log(pilotNumber);
+              let newinput = { ...inputs, [pilotNumber]: newpilot };
+              setInputs(newinput);
+            }}
+          />
+        </FormControl>
+      </GridItem>
       <GridItem>
         <FormControl mx={1}>
           <Input

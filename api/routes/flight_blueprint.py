@@ -12,8 +12,9 @@ from models.crew import Crew, QualificationCrew  # type: ignore
 from models.flights import Flight, FlightCrew, FlightPilots  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
 from models.users import year_init  # type: ignore
-from sqlalchemy import func, select
+from sqlalchemy import func, select, exc
 from sqlalchemy.orm import Session
+
 
 flights = Blueprint("flights", __name__)
 
@@ -80,8 +81,8 @@ def retrieve_flights() -> tuple[Response, int]:
     # Retrieves flight from Frontend and saves is to DB
     if request.method == "POST":
         f: dict = request.get_json()
-        for k, v in f.items():
-            print(f"{k}: {v}")
+        # for k, v in f.items():
+        #     print(f"{k}: {v}")
         flight = Flight(
             airtask=f["airtask"],
             date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
@@ -113,8 +114,16 @@ def retrieve_flights() -> tuple[Response, int]:
                 add_crew_and_pilots(session, flight, pilot)
                 # except KeyError:
                 # pass
-            session.commit()
-            session.refresh(flight)
+            try:
+                session.flush()
+            except exc.IntegrityError as e:
+                session.rollback()
+                print("\n", e.orig.__repr__())
+                return jsonify({"message": e.orig.__repr__()}), 400
+            else:
+                session.commit()
+                session.refresh(flight)
+
         try:
             # service = autenticar_drive()
             # enviar_dados_para_pasta(

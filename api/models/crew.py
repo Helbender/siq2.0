@@ -37,7 +37,7 @@ class Crew(People, Base):
 class QualificationCrew(Base):
     __tablename__ = "qualifications_crew"
 
-    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip"), primary_key=True)
+    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True)
     crew: Mapped[Crew] = relationship(back_populates="qualification")
     last_bsoc_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
 

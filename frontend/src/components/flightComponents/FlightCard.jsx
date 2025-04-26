@@ -33,7 +33,6 @@ const FlightCard = ({ flight }) => {
     month: "short",
     year: "numeric",
   });
-  console.log(todayString);
   return (
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
       <CardHeader>

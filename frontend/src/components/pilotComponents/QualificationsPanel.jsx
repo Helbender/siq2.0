@@ -1,6 +1,6 @@
 /* eslint-disable react/react-in-jsx-scope */
 /* eslint-disable react/prop-types */
-import { HStack, Spacer, Text } from "@chakra-ui/react";
+import { HStack, Text } from "@chakra-ui/react";
 
 const QualificationsPanel = (props) => {
   const type = props.type === 2 ? 10 : 45;
@@ -12,15 +12,15 @@ const QualificationsPanel = (props) => {
     else return (color = "green");
   }
   return (
-    <HStack gap={0}>
+    <HStack gap={0} h="100%">
       <Text
         align={"center"}
         alignContent={"center"}
         fontSize={14}
         color="black"
         py={1}
-        minH={"40px"}
-        minWidth={"60px"}
+        h="100%"
+        // w={"50%"}
         px={2}
         bg={colorFormatter(props.qualification[0])}
         borderTopLeftRadius={props.borderTopLeftRadius}
@@ -30,13 +30,13 @@ const QualificationsPanel = (props) => {
       >
         {props.qualification[0]}
       </Text>
-      <Spacer />
+      {/* <Spacer /> */}
       <Text
         py={1}
         px={2}
         textAlign={"right"}
-        minHeight={10}
         alignContent={"center"}
+        isTruncated
       >
         {props.qualification[1]}
       </Text>

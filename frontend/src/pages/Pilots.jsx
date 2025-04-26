@@ -54,8 +54,8 @@ const Pilots = ({ position }) => {
       mx="5"
       templateColumns={{
         base: "1fr",
-        md: "repeat(2,1fr)",
-        // lg: "repeat(3,1fr)",
+        lg: "repeat(2,1fr)",
+        xl: "repeat(3,1fr)",
       }}
       gap={4}
       mt="8"
