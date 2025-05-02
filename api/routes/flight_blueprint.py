@@ -29,8 +29,8 @@ ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
 def retrieve_flights() -> tuple[Response, int]:
     """Retrieve all flights from the db and sends to frontend.
 
-    Method POST:
-    -   Saves a flight to the db
+    Returns:
+        tuple[Response, int]: _description_
     """
     # verify_jwt_in_request()
 
@@ -81,8 +81,6 @@ def retrieve_flights() -> tuple[Response, int]:
     # Retrieves flight from Frontend and saves is to DB
     if request.method == "POST":
         f: dict = request.get_json()
-        # for k, v in f.items():
-        #     print(f"{k}: {v}")
         flight = Flight(
             airtask=f["airtask"],
             date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
@@ -125,13 +123,6 @@ def retrieve_flights() -> tuple[Response, int]:
                 session.refresh(flight)
 
         try:
-            # service = autenticar_drive()
-            # enviar_dados_para_pasta(
-            #     service=service,
-            #     dados=flight.to_json(),
-            #     nome_arquivo_drive=flight.get_file_name(),
-            #     id_pasta=ID_PASTA_VOO,
-            # )
             upload_with_service_account(
                 dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
             )
@@ -169,25 +160,13 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             flight.orm = (f["orm"],)
             flight.fuel = (f["fuel"],)
 
-            # session.add(flight)
             pilot: dict
 
             for i in range(6):
                 for pilot in f["flight_pilots"]:
                     print("\n", pilot)
-            #     # try:
-            #     add_crew_and_pilots(session, flight, pilot)
-            # except KeyError:
-            # pass
             session.commit()
             session.refresh(flight)
-        # service = autenticar_drive()
-        # enviar_dados_para_pasta(
-        #     service=service,
-        #     dados=flight.to_json(),
-        #     nome_arquivo_drive=flight.get_file_name(),
-        #     id_pasta=ID_PASTA_VOO,
-        # )
 
         return jsonify({"msg": "Flight changed"}), 201
 
@@ -243,31 +222,6 @@ def update_qualifications(
                 pilot_qualification,
                 qualification_fields[i],
             )
-
-        # # Process night landings
-        # # Query the most recent dates for day landings from other flights
-        # recent_night_landings = session.execute(
-        #     select(Flight.date, FlightPilots.night_landings)
-        #     .join(FlightPilots)
-        #     .where(Flight.flight_pilots.any(pilot_id=tripulante.pilot_id))
-        #     .where(Flight.fid != flight_id)
-        #     .where(FlightPilots.night_landings > 0)
-        #     .order_by(Flight.date.desc()),
-        #     # .limit(5 - len(night_landings_dates)),
-        # ).all()
-
-        # print(f"\nRecent night:\t{recent_night_landings}\n")
-
-        # # Ensure there are no more than 5 entries
-        # night_landings_dates = [date[0].strftime("%Y-%m-%d") for date in recent_night_landings]
-
-        # # Sort the dates in reverse chronological order
-        # night_landings_dates.sort(reverse=True)
-
-        # # Update the qualification record
-        # pilot_qualification.last_night_landings = " ".join(night_landings_dates[:5])
-
-        # print(f"After Qual ATR:\t{pilot_qualification.last_night_landings}\n")
 
         # For each qualification type, find the last relevant flight before the one being deleted
         qualification_fields = ["qa1", "qa2", "bsp1", "bsp2", "ta", "vrp1", "vrp2", "cto", "sid", "mono", "nfp"]
@@ -370,21 +324,20 @@ def process_repetion_qual(
 def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
     """Check type of crew and add it to respective Model Object."""
     # Garanties data integrety while introducing several flights
-    pilot["ATR"] = 0 if pilot["ATR"] == "" else pilot["ATR"]
-    pilot["ATN"] = 0 if pilot["ATN"] == "" else pilot["ATN"]
-    pilot["precapp"] = 0 if pilot["precapp"] == "" else pilot["precapp"]
-    pilot["nprecapp"] = 0 if pilot["nprecapp"] == "" else pilot["nprecapp"]
+    for k in ["ATR", "ATN", "precapp", "nprecapp"]:
+        try:
+            pilot[k] = 0 if pilot[k] == "" else pilot[k]
+        except KeyError:
+            pilot[k] = 0
 
-    for i in range(1, 5):
+    # pilot["ATN"] = 0 if pilot["ATN"] == "" else pilot["ATN"]
+    # pilot["precapp"] = 0 if pilot["precapp"] == "" else pilot["precapp"]
+    # pilot["nprecapp"] = 0 if pilot["nprecapp"] == "" else pilot["nprecapp"]
+
+    for i in range(1, 7):
         QUAL = "QUAL" + str(i)
         if QUAL in pilot and pilot[QUAL] != "":
             pilot[pilot[QUAL]] = True
-    # if "QUAL2" in pilot and pilot["QUAL2"] != "":
-    #     pilot[pilot["QUAL2"]] = True
-    # if "QUAL3" in pilot and pilot["QUAL3"] != "":
-    #     pilot[pilot["QUAL3"]] = True
-    # if "QUAL4" in pilot and pilot["QUAL4"] != "":
-    #     pilot[pilot["QUAL4"]] = True
 
     if pilot["position"] in PILOT_USER:
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003

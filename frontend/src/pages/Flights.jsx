@@ -40,6 +40,7 @@ export default function Flights() {
         flight.origin,
         flight.destination,
         flight.tailNumber,
+        flight.id,
       ]
         .map((field) => (field ? field.toString().toLowerCase() : ""))
         .some((field) => field.includes(searchTerm.toLowerCase())),

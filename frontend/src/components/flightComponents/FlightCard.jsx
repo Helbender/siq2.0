@@ -1,4 +1,5 @@
 import {
+  Box,
   Stack,
   Card,
   Flex,
@@ -19,6 +20,7 @@ import {
 import { useColorMode } from "@chakra-ui/react";
 import StyledText from "../styledcomponents/StyledText";
 import DeleteFlightModal from "./DeleteFlightModal";
+import EditFlightModal from "./EditFlightModal";
 
 const FlightCard = ({ flight }) => {
   // console.log(flight);
@@ -39,7 +41,7 @@ const FlightCard = ({ flight }) => {
         <Flex align={"center"}>
           <Heading>{flight.airtask}</Heading>
           <Spacer />
-          {/* <EditFlightModal flight={flight} navigate={navigate} /> */}
+          <EditFlightModal flight={flight} />
 
           <Heading as="h3">{flight.ATD}</Heading>
           {/* <IconButton
@@ -62,6 +64,11 @@ const FlightCard = ({ flight }) => {
         <Divider />
       </CardHeader>
       <CardBody>
+        {/* <Stack>
+          <Text alignContent={"center"} textAlign={"center"}>
+            {"ID: "}
+            {flight.id}
+          </Text> */}
         <Flex alignItems={"top"}>
           <Stack>
             <Text>{`${flight.flightType} / ${flight.flightAction}`}</Text>
@@ -73,7 +80,6 @@ const FlightCard = ({ flight }) => {
               query={"Nº TRIP:"}
               text={`Nº TRIP: ${flight.numberOfCrew}`}
             />
-
             <StyledText
               query={"Aterragens:"}
               text={`Aterragens: ${flight.totalLandings}`}
@@ -82,7 +88,6 @@ const FlightCard = ({ flight }) => {
           <Spacer />
           <Stack>
             <StyledText query={"ORM:"} text={`ORM: ${flight.orm}`} />
-
             <StyledText
               query={["PAX:", "DOE:", "/"]}
               text={
@@ -105,6 +110,7 @@ const FlightCard = ({ flight }) => {
             />
           </Stack>
         </Flex>
+        {/* </Stack> */}
         <Divider my="5" />
         <TableContainer>
           <Table size={"sm"}>

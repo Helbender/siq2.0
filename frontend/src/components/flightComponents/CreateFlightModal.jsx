@@ -18,6 +18,7 @@ import {
   Divider,
   Select,
   useToast,
+  position,
 } from "@chakra-ui/react";
 import { useState, useContext } from "react";
 import PilotInput from "./PilotInput";
@@ -31,12 +32,15 @@ function CreateFlightModal() {
   const { flights, setFlights } = useContext(FlightContext);
   const { pilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
-
   const toast = useToast();
+
+  const [crewMembers, setCrewMembers] = useState(
+    Array(4).fill({ position: "", name: "" }),
+  );
 
   // const [pilotos, setPilotos] = useState([]);
   let today = new Date();
-  const [inputs, setInputs] = useState({
+  const [flightdata, setFlightdata] = useState({
     airtask: "",
     flightType: "",
     flightAction: "",
@@ -56,8 +60,9 @@ function CreateFlightModal() {
     fuel: "",
   });
 
-  let pilotList = [0, 1, 2, 3, 4, 5];
-
+  const addCrewMember = () => {
+    setCrewMembers([...crewMembers, { position: "", name: "" }]);
+  };
   const getTimeDiff = (time1, time2) => {
     time1 = time1.split(":");
     time2 = time2.split(":");
@@ -76,11 +81,11 @@ function CreateFlightModal() {
   };
   const handleCreateFlight = async (e) => {
     e.preventDefault();
-    let data = inputs;
+    let data = flightdata;
     !data.flight_pilots ? (data.flight_pilots = []) : null;
     for (let i = 0; i < 6; i++) {
-      if (Object.hasOwn(inputs, `pilot${i}`)) {
-        data.flight_pilots[i] = inputs[`pilot${i}`];
+      if (Object.hasOwn(flightdata, `pilot${i}`)) {
+        data.flight_pilots[i] = flightdata[`pilot${i}`];
         delete data[`pilot${i}`];
       }
     }
@@ -150,10 +155,10 @@ function CreateFlightModal() {
                     type="text"
                     isRequired
                     textAlign={"center"}
-                    value={inputs.airtask}
+                    value={flightdata.airtask}
                     onChange={(e) =>
-                      setInputs({
-                        ...inputs,
+                      setFlightdata({
+                        ...flightdata,
                         airtask: e.target.value.toUpperCase(),
                       })
                     }
@@ -166,9 +171,12 @@ function CreateFlightModal() {
                     type="text"
                     isRequired
                     placeholder=" "
-                    value={inputs.flightType}
+                    value={flightdata.flightType}
                     onChange={(e) =>
-                      setInputs({ ...inputs, flightType: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        flightType: e.target.value,
+                      })
                     }
                   >
                     <option value="ADEM">ADEM</option>
@@ -199,9 +207,12 @@ function CreateFlightModal() {
                     type="text"
                     isRequired
                     placeholder=" "
-                    value={inputs.flightAction}
+                    value={flightdata.flightAction}
                     onChange={(e) =>
-                      setInputs({ ...inputs, flightAction: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        flightAction: e.target.value,
+                      })
                     }
                   >
                     <option value="OPER">OPER</option>
@@ -218,9 +229,9 @@ function CreateFlightModal() {
                   <Input
                     name="date"
                     type="date"
-                    value={inputs.date}
+                    value={flightdata.date}
                     onChange={(e) =>
-                      setInputs({ ...inputs, date: e.target.value })
+                      setFlightdata({ ...flightdata, date: e.target.value })
                     }
                   />
                 </FormControl>
@@ -234,9 +245,9 @@ function CreateFlightModal() {
                     // as="text"
                     name="departure_time"
                     type="time"
-                    value={inputs.ATD}
+                    value={flightdata.ATD}
                     onChange={(e) =>
-                      setInputs({ ...inputs, ATD: e.target.value })
+                      setFlightdata({ ...flightdata, ATD: e.target.value })
                     }
                   />
                 </FormControl>
@@ -245,9 +256,9 @@ function CreateFlightModal() {
                   <Input
                     name="arrival_time"
                     type="time"
-                    value={inputs.ATA}
+                    value={flightdata.ATA}
                     onChange={(e) => {
-                      setInputs({ ...inputs, ATA: e.target.value });
+                      setFlightdata({ ...flightdata, ATA: e.target.value });
                     }}
                   />
                 </FormControl>
@@ -256,15 +267,15 @@ function CreateFlightModal() {
                   <Input
                     textAlign="center"
                     type="time"
-                    defaultValue={inputs.ATE}
+                    defaultValue={flightdata.ATE}
                     // onChange={(e) => {
                     //   setInputs({ ...inputs, ATE: e.target.value });
                     // }}
                     // isReadOnly
                     onFocusCapture={() =>
-                      setInputs({
-                        ...inputs,
-                        ATE: getTimeDiff(inputs.ATD, inputs.ATA),
+                      setFlightdata({
+                        ...flightdata,
+                        ATE: getTimeDiff(flightdata.ATD, flightdata.ATA),
                       })
                     }
                   />
@@ -275,10 +286,10 @@ function CreateFlightModal() {
                     textAlign="center"
                     name="origin"
                     type="text"
-                    value={inputs.origin}
+                    value={flightdata.origin}
                     onChange={(e) =>
-                      setInputs({
-                        ...inputs,
+                      setFlightdata({
+                        ...flightdata,
                         origin: e.target.value.toUpperCase(),
                       })
                     }
@@ -290,16 +301,13 @@ function CreateFlightModal() {
                     textAlign="center"
                     name="destination"
                     type="text"
-                    value={inputs.destination}
+                    value={flightdata.destination}
                     onChange={(e) =>
-                      setInputs({
-                        ...inputs,
+                      setFlightdata({
+                        ...flightdata,
                         destination: e.target.value.toUpperCase(),
                       })
                     }
-                    // onInput={(e) =>
-                    //   (e.target.value = ("" + e.target.value).toUpperCase())
-                    // }
                   />
                 </FormControl>
               </Flex>
@@ -311,9 +319,12 @@ function CreateFlightModal() {
                     type="number"
                     isRequired
                     placeholder=" "
-                    value={inputs.tailNumber}
+                    value={flightdata.tailNumber}
                     onChange={(e) =>
-                      setInputs({ ...inputs, tailNumber: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        tailNumber: e.target.value,
+                      })
                     }
                   >
                     <option value={16701}>16701</option>
@@ -336,9 +347,12 @@ function CreateFlightModal() {
                     textAlign="center"
                     name="aterragens"
                     type="number"
-                    value={inputs.totalLandings}
+                    value={flightdata.totalLandings}
                     onChange={(e) =>
-                      setInputs({ ...inputs, totalLandings: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        totalLandings: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -347,9 +361,12 @@ function CreateFlightModal() {
                   <Input
                     textAlign={"center"}
                     type="number"
-                    value={inputs.numberOfCrew}
+                    value={flightdata.numberOfCrew}
                     onChange={(e) =>
-                      setInputs({ ...inputs, numberOfCrew: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        numberOfCrew: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -359,9 +376,12 @@ function CreateFlightModal() {
                     textAlign={"center"}
                     name="passengers"
                     type="number"
-                    value={inputs.passengers}
+                    value={flightdata.passengers}
                     onChange={(e) =>
-                      setInputs({ ...inputs, passengers: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        passengers: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -371,9 +391,9 @@ function CreateFlightModal() {
                     textAlign={"center"}
                     name="doe"
                     type="number"
-                    value={inputs.doe}
+                    value={flightdata.doe}
                     onChange={(e) =>
-                      setInputs({ ...inputs, doe: e.target.value })
+                      setFlightdata({ ...flightdata, doe: e.target.value })
                     }
                   />
                 </FormControl>
@@ -382,9 +402,9 @@ function CreateFlightModal() {
                   <Input
                     name="cargo"
                     type="number"
-                    value={inputs.cargo}
+                    value={flightdata.cargo}
                     onChange={(e) =>
-                      setInputs({ ...inputs, cargo: e.target.value })
+                      setFlightdata({ ...flightdata, cargo: e.target.value })
                     }
                   />
                 </FormControl>
@@ -392,9 +412,9 @@ function CreateFlightModal() {
                   <FormLabel textAlign={"center"}>ORM</FormLabel>
                   <Input
                     type="number"
-                    value={inputs.orm}
+                    value={flightdata.orm}
                     onChange={(e) =>
-                      setInputs({ ...inputs, orm: e.target.value })
+                      setFlightdata({ ...flightdata, orm: e.target.value })
                     }
                   />
                 </FormControl>
@@ -403,9 +423,9 @@ function CreateFlightModal() {
                   <Input
                     placeholder="Kg"
                     type="number"
-                    value={inputs.fuel}
+                    value={flightdata.fuel}
                     onChange={(e) =>
-                      setInputs({ ...inputs, fuel: e.target.value })
+                      setFlightdata({ ...flightdata, fuel: e.target.value })
                     }
                   />
                 </FormControl>
@@ -415,11 +435,13 @@ function CreateFlightModal() {
                 alignItems={"center"}
                 // alignContent={"center"}
                 // alignSelf={"center"}
-                templateColumns="repeat(12, 1fr)"
+                templateColumns="repeat(15, 1fr)"
                 rowGap={2}
                 columnGap={4}
               >
-                <GridItem textAlign={"center"}>Posição</GridItem>
+                <GridItem maxW={"100px"} textAlign={"center"}>
+                  Posição
+                </GridItem>
                 <GridItem textAlign={"center"} colSpan={2}>
                   Nome
                 </GridItem>
@@ -428,23 +450,26 @@ function CreateFlightModal() {
                 <GridItem textAlign={"center"}>ATN</GridItem>
                 <GridItem textAlign={"center"}>Precisão</GridItem>
                 <GridItem textAlign={"center"}>Não Precisão</GridItem>
-                <GridItem textAlign={"center"} colSpan={4}>
+                <GridItem textAlign={"center"} colSpan={6}>
                   Qualificações
                 </GridItem>
-                {/* <GridItem textAlign={"center"}>Qual2</GridItem>
-                <GridItem textAlign={"center"}>Qual3</GridItem>
-                <GridItem textAlign={"center"}>Qual4</GridItem> */}
-
-                {pilotList.map((number) => (
+                <GridItem m="auto" />
+                {crewMembers.map((member, index) => (
                   <PilotInput
-                    key={number}
-                    inputs={inputs}
-                    setInputs={setInputs}
-                    pilotNumber={`pilot${number}`}
+                    key={index}
+                    index={index}
+                    flightdata={flightdata}
+                    setFlightdata={setFlightdata}
                     pilotos={pilotos}
+                    member={member}
+                    setCrewMembers={setCrewMembers}
+                    crewMembers={crewMembers}
                   />
                 ))}
               </Grid>
+              <Button mt={5} onClick={addCrewMember} mx="auto">
+                + Adicionar Tripulante
+              </Button>
             </Stack>
           </ModalBody>
           <ModalFooter>
@@ -454,14 +479,14 @@ function CreateFlightModal() {
               type="submit"
               onClick={handleCreateFlight}
             >
-              Add
+              Registar Voo
             </Button>
             <Button
               colorScheme="blue"
               mr={3}
               onClick={() => {
                 onClose();
-                setInputs({
+                setFlightdata({
                   airtask: "",
                   flightType: "",
                   flightAction: "",
@@ -482,7 +507,7 @@ function CreateFlightModal() {
                 });
               }}
             >
-              Close
+              Fechar
             </Button>
           </ModalFooter>
         </ModalContent>

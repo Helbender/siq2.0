@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { FormControl, GridItem, Input, Select } from "@chakra-ui/react";
+import { FormControl, GridItem, Input, Select, Button } from "@chakra-ui/react";
 import { Fragment, useState } from "react";
 
 const PILOT_QUALIFICATIONS = [
@@ -17,128 +17,107 @@ const PILOT_QUALIFICATIONS = [
   "NFP",
 ];
 const CREW_QUALIFICATIONS = ["BSOC"];
-const BASE_PILOT = {
-  nip: "",
-  name: "",
-  ATR: 0,
-  ATN: 0,
-  precapp: 0,
-  nprecapp: 0,
-  QA1: false,
-  QA2: false,
-  BSP1: false,
-  BSP2: false,
-  TA: false,
-  VRP1: false,
-  VRP2: false,
-  CTO: false,
-  SID: false,
-  MONO: false,
-  NFP: false,
-  BSKIT: false,
-  BSOC: false,
-};
-const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
-  const [name, setName] = useState([]);
+// const BASE_PILOT = {
+//   nip: "",
+//   name: "",
+//   ATR: 0,
+//   ATN: 0,
+//   precapp: 0,
+//   nprecapp: 0,
+//   QA1: false,
+//   QA2: false,
+//   BSP1: false,
+//   BSP2: false,
+//   TA: false,
+//   VRP1: false,
+//   VRP2: false,
+//   CTO: false,
+//   SID: false,
+//   MONO: false,
+//   NFP: false,
+//   BSKIT: false,
+//   BSOC: false,
+// };
+const PilotInput = ({
+  index,
+  flightdata,
+  setFlightdata,
+  pilotos,
+  member,
+  setCrewMembers,
+  crewMembers,
+}) => {
   const [nip, setNip] = useState("");
   const [qualP, setQualP] = useState([]);
-  const [pilot, setPilot] = useState(BASE_PILOT);
-  const [selectedName, setSelectedName] = useState("");
 
   const handleNipForm = (name) => {
-    // console.log(name);
-    // console.log(!name);
-    if (!name) return setNip("");
+    if (name === "") {
+      setNip("");
+      return "";
+    }
     let temp = pilotos.filter((piloto) => piloto.name == name);
     setNip(temp[0].nip);
     return temp[0].nip;
   };
-  const setPilotSelect = (p) => {
-    setPilot({
-      ...pilot,
-      position: p,
-    });
-    let newpilot = { ...pilot, position: p };
 
-    let filteredPilots = pilotos.filter((piloto) => {
-      if (p === "PC") {
-        return piloto.position === "PI" || piloto.position === "PC";
-      } else if (p === "OC") {
-        return piloto.position === "OCI" || piloto.position === "OC";
-      } else if (p === "P") {
-        return (
-          piloto.position === "PI" ||
-          piloto.position === "PC" ||
-          piloto.position === "P"
-        );
-      } else if (p === "CT") {
-        return piloto.position === "CTI" || piloto.position === "CT";
-      } else {
-        return piloto.position === p;
-      }
-    });
-
-    setName(filteredPilots);
-    let newinput = { ...inputs, [pilotNumber]: newpilot };
-    setInputs(newinput);
-  };
-  const handlePositionSelect = (e) => {
-    e.preventDefault();
-    setNip("");
-    setSelectedName("");
-    if (!e.target.value) {
-      let newinput = inputs;
-      delete newinput[pilotNumber];
-      setPilot(BASE_PILOT);
-      setInputs(newinput);
-
-      return;
-    }
-
-    if (
-      e.target.value === "PC" ||
-      e.target.value === "PI" ||
-      e.target.value === "P"
-    ) {
-      setPilotSelect(e.target.value);
-      // setNip("");
+  const handlePositionSelect = (position) => {
+    if (position === "PC" || position === "PI" || position === "P") {
       setQualP(PILOT_QUALIFICATIONS);
-    } else if (e.target.value === "CP") {
-      setPilotSelect("CP");
-      // setNip("");
+    } else if (position === "CP") {
       setQualP(PILOT_QUALIFICATIONS);
-    } else if (
-      e.target.value === "OC" ||
-      e.target.value === "OCI" ||
-      e.target.value === "OCA"
-    ) {
-      setPilotSelect("OC");
+    } else if (position === "OC" || position === "OCI" || position === "OCA") {
       setQualP(CREW_QUALIFICATIONS);
     }
-    // setNip("");
+  };
+  const handleCrewChange = (index, field, value) => {
+    console.log(field, value);
+    const updated = [...crewMembers];
+    if (field === "name") {
+      updated[index].nip = handleNipForm(value);
+    }
+    updated[index] = { ...updated[index], [field]: value };
+    if (field === "position") {
+      handlePositionSelect(value);
+      console.log(true);
+      updated[index].name = "";
+      updated[index].nip = "";
+      setNip("");
+    }
+    setCrewMembers(updated);
+    setFlightdata((prev) => ({
+      ...prev,
+      flight_pilots: updated,
+    }));
+    console.log(updated);
+  };
+  const removeCrewMember = (index) => {
+    const updated = crewMembers.filter((_, i) => i !== index);
+    setCrewMembers(updated);
+    setFlightdata((prev) => ({
+      ...prev,
+      flight_pilots: updated,
+    }));
   };
   return (
-    <Fragment
-    // colSpan={12}
-    // alignSelf={"center"}
-    // alignContent={"center"}
-    // alignItems={"center"}
-    >
-      <GridItem>
-        <FormControl
-          m="auto"
-          // alignItems={"center"}
-          // alignContent={"center"}
-        >
+    <Fragment>
+      <GridItem maxW={"100px"}>
+        <FormControl m="auto">
           <Select
             m="auto"
             name="posição"
             placeholder=" "
             type="text"
-            onChange={handlePositionSelect}
-            maxW={"100px"}
+            onChange={(e) => {
+              handleCrewChange(index, "position", e.target.value);
+            }}
+            maxW={"100%"}
             textAlign={"center"}
           >
+            {/* {Object.keys(crewByRole).map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))} */}
             <option value="PI">PI</option>
             <option value="PC">PC</option>
             <option value="P">P</option>
@@ -161,52 +140,52 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             name="name"
             textAlign={"center"}
             type="text"
-            value={selectedName}
+            placeholder="Selecione"
+            isDisabled={!member.position}
+            value={member.name}
             onChange={(e) => {
-              const selected = e.target.value;
-              setSelectedName(selected);
-              const nip = handleNipForm(selected);
-              setPilot({
-                ...pilot,
-                name: e.target.value,
-                nip: nip,
-              });
-              let newpilot = { ...pilot, name: e.target.value, nip: nip };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "name", e.target.value);
+              handleNipForm(e.target.value);
             }}
           >
-            <option value=""> </option>
-            {name.map((cat, i) => {
-              return (
-                <option key={i} value={cat.name}>
-                  {cat.name}
+            {pilotos
+              .filter((crew) => {
+                if (member.position === "PC") {
+                  return crew.position === "PI" || crew.position === "PC";
+                } else if (member.position === "OC") {
+                  return crew.position === "OCI" || crew.position === "OC";
+                } else if (member.position === "P") {
+                  return (
+                    crew.position === "PI" ||
+                    crew.position === "PC" ||
+                    crew.position === "P"
+                  );
+                } else if (member.position === "CT") {
+                  return crew.position === "CTI" || crew.position === "CT";
+                } else {
+                  return crew.position === member.position;
+                }
+              })
+              .map((crew) => (
+                <option key={crew.name} value={crew.name}>
+                  {crew.name}
                 </option>
-              );
-            })}
+              ))}
           </Select>
         </FormControl>
       </GridItem>
       <GridItem>
         <FormControl mx={1} isReadOnly alignSelf={"center"}>
-          <Input textAlign={"center"} value={nip}></Input>
+          <Input textAlign={"center"} value={nip} isReadOnly></Input>
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Input
             name="ATR"
             type="number"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                ATR: e.target.value,
-              });
-              let newpilot = { ...pilot, ATR: e.target.value };
-              console.log(pilotNumber);
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "ATR", e.target.value);
             }}
           />
         </FormControl>
@@ -217,13 +196,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             name="ATN"
             type="number"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                ATN: e.target.value,
-              });
-              let newpilot = { ...pilot, ATN: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "ATN", e.target.value);
             }}
           />
         </FormControl>
@@ -234,39 +207,22 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             name="PrecApp"
             type="number"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                precapp: e.target.value,
-              });
-              let newpilot = { ...pilot, precapp: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "precapp", e.target.value);
             }}
           />
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Input
             name="NPrecApp"
             type="number"
             onChange={(e) => {
-              // if (e.target.value === "") {
-              //   e.target.value = 0;
-              // }
-              setPilot({
-                ...pilot,
-                nprecapp: e.target.value,
-              });
-              let newpilot = { ...pilot, nprecapp: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "nprecapp", e.target.value);
             }}
           />
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Select
@@ -274,13 +230,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             placeholder=" "
             type="text"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                QUAL1: e.target.value,
-              });
-              let newpilot = { ...pilot, QUAL1: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "QUAL1", e.target.value);
             }}
           >
             {qualP.map((qual, i) => {
@@ -293,7 +243,6 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
           </Select>
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Select
@@ -301,13 +250,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             placeholder=" "
             type="text"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                QUAL2: e.target.value,
-              });
-              let newpilot = { ...pilot, QUAL2: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "QUAL2", e.target.value);
             }}
           >
             {qualP.map((qual, i) => {
@@ -320,7 +263,6 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
           </Select>
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Select
@@ -328,13 +270,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             placeholder=" "
             type="text"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                QUAL3: e.target.value,
-              });
-              let newpilot = { ...pilot, QUAL3: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "QUAL3", e.target.value);
             }}
           >
             {qualP.map((qual, i) => {
@@ -347,7 +283,6 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
           </Select>
         </FormControl>
       </GridItem>
-
       <GridItem>
         <FormControl mx={1}>
           <Select
@@ -355,13 +290,7 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
             placeholder=" "
             type="text"
             onChange={(e) => {
-              setPilot({
-                ...pilot,
-                QUAL4: e.target.value,
-              });
-              let newpilot = { ...pilot, QUAL4: e.target.value };
-              let newinput = { ...inputs, [pilotNumber]: newpilot };
-              setInputs(newinput);
+              handleCrewChange(index, "QUAL4", e.target.value);
             }}
           >
             {qualP.map((qual, i) => {
@@ -374,8 +303,53 @@ const PilotInput = ({ inputs, setInputs, pilotNumber, pilotos }) => {
           </Select>
         </FormControl>
       </GridItem>
-
-      {/* </Flex> */}
+      <GridItem>
+        <FormControl mx={1}>
+          <Select
+            name="Qual5"
+            placeholder=" "
+            type="text"
+            onChange={(e) => {
+              handleCrewChange(index, "QUAL5", e.target.value);
+            }}
+          >
+            {qualP.map((qual, i) => {
+              return (
+                <option key={i} value={qual}>
+                  {qual}
+                </option>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <FormControl mx={1}>
+          <Select
+            name="Qual6"
+            placeholder=" "
+            type="text"
+            onChange={(e) => {
+              handleCrewChange(index, "QUAL6", e.target.value);
+            }}
+          >
+            {qualP.map((qual, i) => {
+              return (
+                <option key={i} value={qual}>
+                  {qual}
+                </option>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </GridItem>
+      <Button
+        colorScheme="red"
+        size="sm"
+        onClick={() => removeCrewMember(index)}
+      >
+        Remover
+      </Button>
     </Fragment>
   );
 };

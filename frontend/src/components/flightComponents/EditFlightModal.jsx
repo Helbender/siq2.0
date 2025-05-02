@@ -24,20 +24,16 @@ import { useState, useEffect, useContext } from "react";
 import PilotInput from "./PilotInput";
 import axios from "axios";
 
-import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { BiEdit } from "react-icons/bi";
-import { useNavigate } from "react-router-dom";
 
-function EditFlightModal({ flight, navigate }) {
+function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  // const { flights, setFlights \1                       } = useContext(FlightContext);
   const { token } = useContext(AuthContext);
   const toast = useToast();
-
   const [pilotos, setPilotos] = useState([]);
   const [inputs, setInputs] = useState(flight);
-
+  // console.log(inputs);
   let pilotList = [0, 1, 2, 3, 4, 5];
 
   const getTimeDiff = (time1, time2) => {
@@ -56,6 +52,31 @@ function EditFlightModal({ flight, navigate }) {
     console.log(time);
     return time;
   };
+  function formatDateToISO(dateStr) {
+    const months = {
+      Jan: "01",
+      Feb: "02",
+      Mar: "03",
+      Apr: "04",
+      May: "05",
+      Jun: "06",
+      Jul: "07",
+      Aug: "08",
+      Sep: "09",
+      Oct: "10",
+      Nov: "11",
+      Dec: "12",
+    };
+
+    const [day, monAbbr, year] = dateStr.split("-");
+    const month = months[monAbbr];
+
+    if (!month) {
+      return dateStr;
+    }
+
+    return `${year}-${month}-${day.padStart(2, "0")}`;
+  }
 
   const handleEditFlight = async (id) => {
     try {
@@ -70,7 +91,6 @@ function EditFlightModal({ flight, navigate }) {
       // }
     } catch (error) {
       if (error.response.status === 401) {
-        navigate("/");
         toast({
           title: "Erro de autenticação",
           description: "Por favor faça login outra vez",
@@ -199,7 +219,7 @@ function EditFlightModal({ flight, navigate }) {
                   <Input
                     name="date"
                     type="date"
-                    value={inputs.date}
+                    value={formatDateToISO(inputs.date)}
                     onChange={(e) =>
                       setInputs({ ...inputs, date: e.target.value })
                     }
@@ -396,21 +416,27 @@ function EditFlightModal({ flight, navigate }) {
                 alignItems={"center"}
                 // alignContent={"center"}
                 // alignSelf={"center"}
-                templateColumns="repeat(9, 1fr)"
+                templateColumns="repeat(14, 1fr)"
               >
-                <GridItem textAlign={"center"}>Posição</GridItem>
-                <GridItem textAlign={"center"}>Nome</GridItem>
+                <GridItem maxW={"100px"} textAlign={"center"}>
+                  Posição
+                </GridItem>
+                <GridItem textAlign={"center"} colSpan={2}>
+                  Nome
+                </GridItem>
                 <GridItem textAlign={"center"}>NIP</GridItem>
                 <GridItem textAlign={"center"}>ATR</GridItem>
                 <GridItem textAlign={"center"}>ATN</GridItem>
                 <GridItem textAlign={"center"}>PrecApp</GridItem>
                 <GridItem textAlign={"center"}>NPrecApp</GridItem>
-                <GridItem textAlign={"center"}>Qual1</GridItem>
-                <GridItem textAlign={"center"}>Qual2</GridItem>
+                <GridItem textAlign={"center"} colSpan={6}>
+                  Qualificações
+                </GridItem>
 
                 {pilotList.map((number) => (
                   <PilotInput
                     key={number}
+                    number={number}
                     inputs={inputs}
                     setInputs={setInputs}
                     pilotNumber={`pilot${number}`}
