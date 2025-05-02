@@ -47,7 +47,7 @@ const PilotInput = ({
   setCrewMembers,
   crewMembers,
 }) => {
-  const [nip, setNip] = useState("");
+  const [nip, setNip] = useState(member.nip);
   const [qualP, setQualP] = useState([]);
 
   const handleNipForm = (name) => {
@@ -107,6 +107,7 @@ const PilotInput = ({
             name="posição"
             placeholder=" "
             type="text"
+            value={member.position}
             onChange={(e) => {
               handleCrewChange(index, "position", e.target.value);
             }}
@@ -184,6 +185,7 @@ const PilotInput = ({
           <Input
             name="ATR"
             type="number"
+            value={member.ATR}
             onChange={(e) => {
               handleCrewChange(index, "ATR", e.target.value);
             }}
@@ -195,6 +197,7 @@ const PilotInput = ({
           <Input
             name="ATN"
             type="number"
+            value={member.ATN}
             onChange={(e) => {
               handleCrewChange(index, "ATN", e.target.value);
             }}
@@ -206,6 +209,7 @@ const PilotInput = ({
           <Input
             name="PrecApp"
             type="number"
+            value={member.precapp}
             onChange={(e) => {
               handleCrewChange(index, "precapp", e.target.value);
             }}
@@ -217,6 +221,7 @@ const PilotInput = ({
           <Input
             name="NPrecApp"
             type="number"
+            value={member.nprecapp}
             onChange={(e) => {
               handleCrewChange(index, "nprecapp", e.target.value);
             }}
@@ -229,6 +234,7 @@ const PilotInput = ({
             name="Qual1"
             placeholder=" "
             type="text"
+            value={member.QUAL1}
             onChange={(e) => {
               handleCrewChange(index, "QUAL1", e.target.value);
             }}
@@ -249,6 +255,7 @@ const PilotInput = ({
             name="Qual2"
             placeholder=" "
             type="text"
+            value={member.QUAL2}
             onChange={(e) => {
               handleCrewChange(index, "QUAL2", e.target.value);
             }}
@@ -269,6 +276,7 @@ const PilotInput = ({
             name="Qual3"
             placeholder=" "
             type="text"
+            value={member.QUAL3}
             onChange={(e) => {
               handleCrewChange(index, "QUAL3", e.target.value);
             }}
@@ -289,6 +297,7 @@ const PilotInput = ({
             name="Qual4"
             placeholder=" "
             type="text"
+            value={member.QUAL4}
             onChange={(e) => {
               handleCrewChange(index, "QUAL4", e.target.value);
             }}
@@ -309,6 +318,7 @@ const PilotInput = ({
             name="Qual5"
             placeholder=" "
             type="text"
+            value={member.QUAL5}
             onChange={(e) => {
               handleCrewChange(index, "QUAL5", e.target.value);
             }}
@@ -329,6 +339,7 @@ const PilotInput = ({
             name="Qual6"
             placeholder=" "
             type="text"
+            value={member.QUAL6}
             onChange={(e) => {
               handleCrewChange(index, "QUAL6", e.target.value);
             }}

@@ -23,18 +23,25 @@ import {
 import { useState, useEffect, useContext } from "react";
 import PilotInput from "./PilotInput";
 import axios from "axios";
-
+import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
+import { UserContext } from "../../Contexts/UserContext";
+
 import { BiEdit } from "react-icons/bi";
 
 function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [flightdata, setFlightdata] = useState(flight);
+  const { flights, setFlights } = useContext(FlightContext);
+  const { pilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
+
   const toast = useToast();
-  const [pilotos, setPilotos] = useState([]);
-  const [inputs, setInputs] = useState(flight);
   // console.log(inputs);
-  let pilotList = [0, 1, 2, 3, 4, 5];
+
+  const [crewMembers, setCrewMembers] = useState(
+    flightdata?.flight_pilots || [],
+  );
 
   const getTimeDiff = (time1, time2) => {
     time1 = time1.split(":");
@@ -78,17 +85,26 @@ function EditFlightModal({ flight }) {
     return `${year}-${month}-${day.padStart(2, "0")}`;
   }
 
+  const addCrewMember = () => {
+    setCrewMembers([...crewMembers, { position: "", name: "" }]);
+  };
   const handleEditFlight = async (id) => {
     try {
-      const res = await axios.patch(`/api/flights/${id}`, inputs, {
+      const res = await axios.patch(`/api/flights/${id}`, flightdata, {
         headers: { Authorization: "Bearer " + token },
       });
-      // console.log(res.data);
-      // if (res.data?.deleted_id) {
-      //   console.log(`Deleted flight ${res.data?.deleted_id}`);
-
-      //   setFlights(flights.filter((flight) => flight.id != id));
-      // }
+      if (res.status === 200) {
+        setFlights((prevFlights) =>
+          prevFlights.map((f) => (f.id === id ? flightdata : f)),
+        );
+        toast({
+          title: "Voo modificado com sucesso",
+          // description: "Por favor faça login outra vez",
+          status: "success",
+          duration: 5000,
+          position: "bottom",
+        });
+      }
     } catch (error) {
       if (error.response.status === 401) {
         toast({
@@ -113,21 +129,21 @@ function EditFlightModal({ flight }) {
       console.log(error.response);
     }
   };
-  const getSavedPilots = async () => {
-    try {
-      const res = await axios.get("/api/users", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      // console.log(res);
-      setPilotos(res.data || []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    getSavedPilots();
-    // console.log(flight);
-  }, []);
+  // const getSavedPilots = async () => {
+  //   try {
+  //     const res = await axios.get("/api/users", {
+  //       headers: { Authorization: "Bearer " + token },
+  //     });
+  //     // console.log(res);
+  //     setPilotos(res.data || []);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getSavedPilots();
+  //   // console.log(flight);
+  // }, []);
 
   return (
     <>
@@ -154,9 +170,12 @@ function EditFlightModal({ flight }) {
                     type="text"
                     isRequired
                     textAlign={"center"}
-                    value={inputs.airtask}
+                    value={flightdata.airtask}
                     onChange={(e) =>
-                      setInputs({ ...inputs, airtask: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        airtask: e.target.value.toLocaleUpperCase(),
+                      })
                     }
                   />
                 </FormControl>
@@ -167,9 +186,12 @@ function EditFlightModal({ flight }) {
                     type="text"
                     isRequired
                     placeholder=" "
-                    value={inputs.flightType}
+                    value={flightdata.flightType}
                     onChange={(e) =>
-                      setInputs({ ...inputs, flightType: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        flightType: e.target.value,
+                      })
                     }
                   >
                     <option value="ADEM">ADEM</option>
@@ -200,9 +222,12 @@ function EditFlightModal({ flight }) {
                     type="text"
                     isRequired
                     placeholder=" "
-                    value={inputs.flightAction}
+                    value={flightdata.flightAction}
                     onChange={(e) =>
-                      setInputs({ ...inputs, flightAction: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        flightAction: e.target.value,
+                      })
                     }
                   >
                     <option value="OPER">OPER</option>
@@ -219,9 +244,9 @@ function EditFlightModal({ flight }) {
                   <Input
                     name="date"
                     type="date"
-                    value={formatDateToISO(inputs.date)}
+                    value={formatDateToISO(flightdata.date)}
                     onChange={(e) =>
-                      setInputs({ ...inputs, date: e.target.value })
+                      setFlightdata({ ...flightdata, date: e.target.value })
                     }
                   />
                 </FormControl>
@@ -235,9 +260,9 @@ function EditFlightModal({ flight }) {
                     // as="text"
                     name="departure_time"
                     type="time"
-                    value={inputs.ATD}
+                    value={flightdata.ATD}
                     onChange={(e) =>
-                      setInputs({ ...inputs, ATD: e.target.value })
+                      setFlightdata({ ...flightdata, ATD: e.target.value })
                     }
                   />
                 </FormControl>
@@ -246,9 +271,9 @@ function EditFlightModal({ flight }) {
                   <Input
                     name="arrival_time"
                     type="time"
-                    value={inputs.ATA}
+                    value={flightdata.ATA}
                     onChange={(e) => {
-                      setInputs({ ...inputs, ATA: e.target.value });
+                      setFlightdata({ ...flightdata, ATA: e.target.value });
                     }}
                   />
                 </FormControl>
@@ -257,15 +282,15 @@ function EditFlightModal({ flight }) {
                   <Input
                     textAlign="center"
                     type="time"
-                    defaultValue={inputs.ATE}
+                    defaultValue={flightdata.ATE}
                     // onChange={(e) => {
                     //   setInputs({ ...inputs, ATE: e.target.value });
                     // }}
                     // isReadOnly
                     onFocusCapture={() =>
-                      setInputs({
-                        ...inputs,
-                        ATE: getTimeDiff(inputs.ATD, inputs.ATA),
+                      setFlightdata({
+                        ...flightdata,
+                        ATE: getTimeDiff(flightdata.ATD, flightdata.ATA),
                       })
                     }
                   />
@@ -276,10 +301,10 @@ function EditFlightModal({ flight }) {
                     textAlign="center"
                     name="origin"
                     type="text"
-                    value={inputs.origin}
+                    value={flightdata.origin}
                     onChange={(e) =>
-                      setInputs({
-                        ...inputs,
+                      setFlightdata({
+                        ...flightdata,
                         origin: e.target.value.toUpperCase(),
                       })
                     }
@@ -291,16 +316,13 @@ function EditFlightModal({ flight }) {
                     textAlign="center"
                     name="destination"
                     type="text"
-                    value={inputs.destination}
+                    value={flightdata.destination}
                     onChange={(e) =>
-                      setInputs({
-                        ...inputs,
+                      setFlightdata({
+                        ...flightdata,
                         destination: e.target.value.toUpperCase(),
                       })
                     }
-                    // onInput={(e) =>
-                    //   (e.target.value = ("" + e.target.value).toUpperCase())
-                    // }
                   />
                 </FormControl>
               </Flex>
@@ -312,9 +334,12 @@ function EditFlightModal({ flight }) {
                     type="number"
                     isRequired
                     placeholder=" "
-                    value={inputs.tailNumber}
+                    value={flightdata.tailNumber}
                     onChange={(e) =>
-                      setInputs({ ...inputs, tailNumber: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        tailNumber: e.target.value,
+                      })
                     }
                   >
                     <option value={16701}>16701</option>
@@ -337,9 +362,12 @@ function EditFlightModal({ flight }) {
                     textAlign="center"
                     name="aterragens"
                     type="number"
-                    value={inputs.totalLandings}
+                    value={flightdata.totalLandings}
                     onChange={(e) =>
-                      setInputs({ ...inputs, totalLandings: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        totalLandings: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -348,9 +376,12 @@ function EditFlightModal({ flight }) {
                   <Input
                     textAlign={"center"}
                     type="number"
-                    value={inputs.numberOfCrew}
+                    value={flightdata.numberOfCrew}
                     onChange={(e) =>
-                      setInputs({ ...inputs, numberOfCrew: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        numberOfCrew: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -360,9 +391,12 @@ function EditFlightModal({ flight }) {
                     textAlign={"center"}
                     name="passengers"
                     type="number"
-                    value={inputs.passengers}
+                    value={flightdata.passengers}
                     onChange={(e) =>
-                      setInputs({ ...inputs, passengers: e.target.value })
+                      setFlightdata({
+                        ...flightdata,
+                        passengers: e.target.value,
+                      })
                     }
                   />
                 </FormControl>
@@ -372,9 +406,9 @@ function EditFlightModal({ flight }) {
                     textAlign={"center"}
                     name="doe"
                     type="number"
-                    value={inputs.doe}
+                    value={flightdata.doe}
                     onChange={(e) =>
-                      setInputs({ ...inputs, doe: e.target.value })
+                      setFlightdata({ ...flightdata, doe: e.target.value })
                     }
                   />
                 </FormControl>
@@ -383,9 +417,9 @@ function EditFlightModal({ flight }) {
                   <Input
                     name="cargo"
                     type="number"
-                    value={inputs.cargo}
+                    value={flightdata.cargo}
                     onChange={(e) =>
-                      setInputs({ ...inputs, cargo: e.target.value })
+                      setFlightdata({ ...flightdata, cargo: e.target.value })
                     }
                   />
                 </FormControl>
@@ -393,9 +427,9 @@ function EditFlightModal({ flight }) {
                   <FormLabel textAlign={"center"}>ORM</FormLabel>
                   <Input
                     type="number"
-                    value={inputs.orm}
+                    value={flightdata.orm}
                     onChange={(e) =>
-                      setInputs({ ...inputs, orm: e.target.value })
+                      setFlightdata({ ...flightdata, orm: e.target.value })
                     }
                   />
                 </FormControl>
@@ -404,9 +438,9 @@ function EditFlightModal({ flight }) {
                   <Input
                     placeholder="Kg"
                     type="number"
-                    value={inputs.fuel}
+                    value={flightdata.fuel}
                     onChange={(e) =>
-                      setInputs({ ...inputs, fuel: e.target.value })
+                      setFlightdata({ ...flightdata, fuel: e.target.value })
                     }
                   />
                 </FormControl>
@@ -416,7 +450,7 @@ function EditFlightModal({ flight }) {
                 alignItems={"center"}
                 // alignContent={"center"}
                 // alignSelf={"center"}
-                templateColumns="repeat(14, 1fr)"
+                templateColumns="repeat(15, 1fr)"
               >
                 <GridItem maxW={"100px"} textAlign={"center"}>
                   Posição
@@ -432,18 +466,24 @@ function EditFlightModal({ flight }) {
                 <GridItem textAlign={"center"} colSpan={6}>
                   Qualificações
                 </GridItem>
+                <GridItem m="auto" />
 
-                {pilotList.map((number) => (
+                {crewMembers.map((member, index) => (
                   <PilotInput
-                    key={number}
-                    number={number}
-                    inputs={inputs}
-                    setInputs={setInputs}
-                    pilotNumber={`pilot${number}`}
+                    key={index}
+                    index={index}
+                    flightdata={flightdata}
+                    setFlightdata={setFlightdata}
                     pilotos={pilotos}
+                    member={member}
+                    setCrewMembers={setCrewMembers}
+                    crewMembers={crewMembers}
                   />
                 ))}
               </Grid>
+              <Button mt={5} onClick={addCrewMember} mx="auto">
+                + Adicionar Tripulante
+              </Button>
             </Stack>
           </ModalBody>
           <ModalFooter>

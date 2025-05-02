@@ -3,10 +3,11 @@ from __future__ import annotations  # noqa: D100, INP001
 import os
 from datetime import UTC, date, datetime
 
+from flask_jwt_extended import verify_jwt_in_request
+
 from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import verify_jwt_in_request
 from functions.gdrive import upload_with_service_account  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.flights import Flight, FlightCrew, FlightPilots  # type: ignore
@@ -32,7 +33,6 @@ def retrieve_flights() -> tuple[Response, int]:
     Returns:
         tuple[Response, int]: _description_
     """
-    # verify_jwt_in_request()
 
     # Retrieve all flights from db
     if request.method == "GET":
@@ -80,6 +80,8 @@ def retrieve_flights() -> tuple[Response, int]:
 
     # Retrieves flight from Frontend and saves is to DB
     if request.method == "POST":
+        verify_jwt_in_request()
+
         f: dict = request.get_json()
         flight = Flight(
             airtask=f["airtask"],
@@ -135,9 +137,9 @@ def retrieve_flights() -> tuple[Response, int]:
 @flights.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
     """Handle modifications to the Flights database."""
-    verify_jwt_in_request()
 
     if request.method == "PATCH":
+        verify_jwt_in_request()
         f: dict = request.get_json()
         with Session(engine, autoflush=False) as session:
             flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
@@ -162,13 +164,53 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             pilot: dict
 
-            for i in range(6):
-                for pilot in f["flight_pilots"]:
-                    print("\n", pilot)
+            for pilot in f["flight_pilots"]:
+                update_qualifications(flight_id, session, pilot)
+                add_crew_and_pilots(session, flight, pilot)
+                # print("\n", pilot)
+                # if pilot["position"] in PILOT_USER:
+                #     flight_pilot: FlightPilots = session.execute(
+                #         select(FlightPilots)
+                #         .where(FlightPilots.flight_id == flight.fid)
+                #         .where(
+                #             FlightPilots.pilot_id == pilot["nip"],
+                #         ),
+                #     ).scalar_one_or_none()
+                #     print(f"Flight Pilot Object: {flight_pilot}")
+                #     if flight_pilot is not None:
+                #         flight_pilot.position = pilot["position"]
+                #         flight_pilot.day_landings = int(pilot["ATR"])
+                #         flight_pilot.night_landings = int(pilot["ATN"])
+                #         flight_pilot.prec_app = int(pilot["precapp"])
+                #         flight_pilot.nprec_app = int(pilot["nprecapp"])
+                #         flight_pilot.qa1 = pilot["QA1"]
+                #         flight_pilot.qa2 = pilot["QA2"]
+                #         flight_pilot.bsp1 = pilot["BSP1"]
+                #         flight_pilot.bsp2 = pilot["BSP2"]
+                #         flight_pilot.ta = pilot["TA"]
+                #         flight_pilot.vrp1 = pilot["VRP1"]
+                #         flight_pilot.vrp2 = pilot["VRP2"]
+                #         flight_pilot.cto = pilot["CTO"]
+                #         flight_pilot.sid = pilot["SID"]
+                #         flight_pilot.mono = pilot["MONO"]
+                #         flight_pilot.nfp = pilot["NFP"]
+
+                # elif pilot["position"] in CREW_USER:
+                #     flight_crew: FlightCrew = session.execute(
+                #         select(FlightCrew)
+                #         .where(FlightCrew.flight_id == flight.fid)
+                #         .where(
+                #             FlightCrew.crew_id == pilot["nip"],
+                #         ),
+                #     ).scalar_one_or_none()
+                #     if flight_crew is not None:
+                #         flight_crew.position = pilot["position"]
+                #         flight_crew.bsoc = pilot["BSOC"]
+
             session.commit()
             session.refresh(flight)
 
-        return jsonify({"msg": "Flight changed"}), 201
+        return jsonify({"msg": "Flight changed"}), 200
 
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:
@@ -340,6 +382,9 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
             pilot[pilot[QUAL]] = True
 
     if pilot["position"] in PILOT_USER:
+        for k in ["QA1", "QA2", "BSP1", "BSP2", "TA", "VRP1", "VRP2", "CTO", "SID", "MONO", "NFP"]:
+            if k not in pilot.keys():
+                pilot[k] = False
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003
         if pilot_obj is None:
             return
@@ -370,6 +415,9 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
         flight.flight_pilots.append(fp)
 
     elif pilot["position"] in CREW_USER:
+        for k in ["BSOC"]:
+            if k not in pilot.keys():
+                pilot[k] = False
         crew_obj: Crew = session.get(Crew, pilot["nip"])  # type: ignore  # noqa: PGH003
         if crew_obj is None:
             return
