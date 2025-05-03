@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Contexts/AuthContext";
 
 function LoginPage() {
-  const { removeToken, setToken } = useContext(AuthContext);
+  const { setToken } = useContext(AuthContext);
 
   const [loginForm, setloginForm] = useState({
     nip: "",
@@ -28,6 +28,14 @@ function LoginPage() {
   const navigateRecover = () => navigate("/recover");
 
   const logMeIn = async () => {
+    toast({
+      title: "A efetuar login.",
+      description: "Agarde um momento.",
+      status: "loading",
+      duration: 5000,
+      isClosable: true,
+      position: "bottom",
+    });
     try {
       const data = {
         nip: loginForm.nip,
@@ -35,6 +43,13 @@ function LoginPage() {
       };
       const response = await axios.post("/api/token", data);
       if (response.status === 201) {
+        toast({
+          title: "Logado com sucesso.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
         console.log(response);
         console.log(response.data.access_token);
         setToken(response.data.access_token);
@@ -71,44 +86,50 @@ function LoginPage() {
       alignItems={{ sm: "center", md: "top" }}
       overflowY="auto"
     >
-      <Stack>
-        <Heading mb={"25px"}>Esquadra 502</Heading>
-        <FormControl>
-          <FormLabel textAlign={"center"}>NIP</FormLabel>
-          <Input
-            type="text"
-            value={loginForm.nip}
-            name="nip"
-            placeholder="NIP"
-            onChange={handleChange}
-          />
-        </FormControl>
-
-        <FormControl mt="2" onSubmit={logMeIn}>
-          <FormLabel textAlign={"center"}>Password</FormLabel>
-          <Input
-            type="password"
-            value={loginForm.password}
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-          />
-        </FormControl>
-        <Link
-          mt={4}
-          color="teal.500"
-          fontWeight="bold"
-          onClick={navigateRecover}
-          aria-label="Recover Password"
-          width={["80%", "60%", "100%"]} // Adjust link width for small screens and larger screens
-          textAlign="center"
-        >
-          Recover Password
-        </Link>
-        <Button mt="10" onClick={logMeIn} type="submit">
-          Login
-        </Button>
-      </Stack>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          logMeIn();
+        }}
+      >
+        <Stack>
+          <Heading mb={"25px"}>Esquadra 502</Heading>
+          <FormControl>
+            <FormLabel textAlign={"center"}>NIP</FormLabel>
+            <Input
+              type="text"
+              value={loginForm.nip}
+              name="nip"
+              placeholder="NIP"
+              onChange={handleChange}
+            />
+          </FormControl>
+          <FormControl mt="2" onSubmit={logMeIn}>
+            <FormLabel textAlign={"center"}>Password</FormLabel>
+            <Input
+              type="password"
+              value={loginForm.password}
+              name="password"
+              placeholder="Password"
+              onChange={handleChange}
+            />
+          </FormControl>
+          <Link
+            mt={4}
+            color="teal.500"
+            fontWeight="bold"
+            onClick={navigateRecover}
+            aria-label="Recover Password"
+            width={["80%", "60%", "100%"]} // Adjust link width for small screens and larger screens
+            textAlign="center"
+          >
+            Recover Password
+          </Link>
+          <Button mt="10" onClick={logMeIn} type="submit">
+            Login
+          </Button>
+        </Stack>
+      </form>
     </Box>
   );
 }

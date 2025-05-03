@@ -1,6 +1,14 @@
 /* eslint-disable react/prop-types */
-import { FormControl, GridItem, Input, Select, Button } from "@chakra-ui/react";
+import {
+  FormControl,
+  GridItem,
+  Input,
+  Select,
+  Button,
+  IconButton,
+} from "@chakra-ui/react";
 import { Fragment, useState } from "react";
+import { FaMinus } from "react-icons/fa";
 
 const PILOT_QUALIFICATIONS = [
   "QA1",
@@ -354,13 +362,22 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <Button
+      <GridItem justifyContent={"flex-end"} display={"flex"}>
+        <IconButton
+          icon={<FaMinus />}
+          colorScheme="red"
+          onClick={() => removeCrewMember(index)}
+          aria-label="Edit User"
+          maxW={"50%"}
+        />
+      </GridItem>
+      {/* <Button
         colorScheme="red"
         size="sm"
         onClick={() => removeCrewMember(index)}
       >
         Remover
-      </Button>
+      </Button> */}
     </Fragment>
   );
 };

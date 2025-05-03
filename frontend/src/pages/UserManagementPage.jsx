@@ -27,7 +27,7 @@ import { IoCloseCircleSharp } from "react-icons/io5";
 
 function UserManagementPage() {
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
+  const { token, getUser } = useContext(AuthContext);
   const { pilotos } = useContext(UserContext);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +35,7 @@ function UserManagementPage() {
   const sendEmail = useSendEmail();
   const toast = useToast();
 
+  const User = getUser();
   const checkToken = () => {
     if (!token && token !== "" && token !== undefined) {
       navigate("/");
@@ -43,20 +44,25 @@ function UserManagementPage() {
   checkToken();
   // Filter users based on search term
   useEffect(() => {
-    const results = pilotos.filter((user) =>
-      [
-        user.nip,
-        user.name,
-        user.rank,
-        user.position,
-        user.email,
-        user.admin ? "Yes" : "No",
-        user.squadron,
-      ]
-        .map((field) => (field ? field.toString().toLowerCase() : ""))
-        .some((field) => field.includes(searchTerm.toLowerCase())),
-    );
-    setFilteredUsers(results);
+    if (User.admin) {
+      const results = pilotos.filter((user) =>
+        [
+          user.nip,
+          user.name,
+          user.rank,
+          user.position,
+          user.email,
+          user.admin ? "Yes" : "No",
+          user.squadron,
+        ]
+          .map((field) => (field ? field.toString().toLowerCase() : ""))
+          .some((field) => field.includes(searchTerm.toLowerCase())),
+      );
+      setFilteredUsers(results);
+    } else {
+      const results = pilotos.filter((u) => u.name === User.name);
+      setFilteredUsers(results);
+    }
   }, [searchTerm, pilotos]);
   return (
     <Container maxW="90%" py={6} mb={35}>

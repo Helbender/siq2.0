@@ -20,8 +20,8 @@ import {
   Switch,
   useToast,
   Select,
+  Tooltip,
   position,
-  // Stack,
 } from "@chakra-ui/react";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { useState, useContext, useEffect } from "react";
@@ -33,18 +33,19 @@ import { BiTrash } from "react-icons/bi";
 function CreateUserModal({ edit, add, isDelete, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const [inputs, setInputs] = useState(user || {});
+  const [inputs, setInputs] = useState(
+    user || { position: "Default", squadron: "502 - Elefantes" },
+  );
   const { token } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
-
   // Update inputs when user changes
-  useEffect(() => {
-    if (user) {
-      setInputs(user);
-    } else {
-      setInputs({ position: "Default" });
-    }
-  }, [user]); // Runs every time user changes
+  // useEffect(() => {
+  //   if (user) {
+  //     setInputs(user);
+  //   } else {
+  //     setInputs({ position: "Default" });
+  //   }
+  // }, [user]); // Runs every time user changes
 
   const handleInputsChange = async (event) => {
     event.preventDefault();
@@ -143,7 +144,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
         <ModalOverlay />
         <ModalContent>
           {add ? (
-            <ModalHeader>Novo Utilizador</ModalHeader>
+            <ModalHeader textAlign={"center"}>Novo Utilizador</ModalHeader>
           ) : edit ? (
             <ModalHeader>Editar Utilizador</ModalHeader>
           ) : (
@@ -166,12 +167,14 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                 </FormControl>
                 <FormControl>
                   <FormLabel>NIP</FormLabel>
-                  <Input
-                    value={inputs?.nip}
-                    name="nip"
-                    placeholder="NIP"
-                    onChange={handleInputsChange}
-                  ></Input>
+                  <Tooltip hasArrow label="Introduza o NIP sem modúlo">
+                    <Input
+                      value={inputs?.nip}
+                      name="nip"
+                      placeholder="NIP"
+                      onChange={handleInputsChange}
+                    ></Input>
+                  </Tooltip>
                 </FormControl>
                 <FormControl>
                   <FormLabel>Função</FormLabel>
@@ -205,19 +208,24 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                     value={inputs?.name ? inputs.name : ""}
                     name="name"
                     flexGrow={"2"}
-                    placeholder="Nome"
+                    placeholder="Primeiro e Último Nome"
                     onChange={handleInputsChange}
                   ></Input>
                 </FormControl>
                 <FormControl>
                   <FormLabel>Email</FormLabel>
-                  <Input
-                    value={inputs?.email ? inputs.email : ""}
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    onChange={handleInputsChange}
-                  ></Input>
+                  <Tooltip
+                    hasArrow
+                    label="O email serve para trocar/recuperar a password"
+                  >
+                    <Input
+                      value={inputs?.email ? inputs.email : ""}
+                      name="email"
+                      type="email"
+                      placeholder="Email"
+                      onChange={handleInputsChange}
+                    ></Input>
+                  </Tooltip>
                 </FormControl>
                 <HStack>
                   <FormControl align={"center"}>
@@ -237,7 +245,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                   <FormControl>
                     <FormLabel>Esquadra</FormLabel>
                     <Input
-                      value={inputs?.squadron}
+                      value={inputs.squadron}
                       name="squadron"
                       type="text"
                       placeholder="Esquadra"

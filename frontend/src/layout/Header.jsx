@@ -189,7 +189,23 @@ function Header() {
                             <Box ml={2}>Utilizadores</Box>
                           </Flex>
                         </ChakraLink>
-                      ) : null}
+                      ) : (
+                        <ChakraLink
+                          p={2}
+                          color="teal.500"
+                          fontSize="lg"
+                          onClick={() => {
+                            navigate("/users");
+                            onClose();
+                          }}
+                        >
+                          <Flex align="center">
+                            <FaTools />
+
+                            <Box ml={2}>Utilizador</Box>
+                          </Flex>
+                        </ChakraLink>
+                      )}
 
                       <ChakraLink
                         p={2}
