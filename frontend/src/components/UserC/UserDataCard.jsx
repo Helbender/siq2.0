@@ -17,6 +17,14 @@ import StyledText from "../styledcomponents/StyledText";
 import { FaMailBulk } from "react-icons/fa";
 import { useSendEmail } from "../../Functions/useSendEmail";
 
+const colors = {
+  PI: "red.500",
+  PC: "blue.900",
+  P: "blue.500",
+  CP: "blue.300",
+  OC: "green",
+  Default: "violet.500",
+};
 function UserDataCard({ user }) {
   const toast = useToast();
   const sendEmail = useSendEmail();
@@ -26,14 +34,13 @@ function UserDataCard({ user }) {
         <Flex gap={4}>
           <Flex flex={"1"} flexDirection={"row"} align="center" gap={"5"}>
             <Circle
-              bg={user.position === "PC" ? "blue.500" : "green"}
+              bg={colors[user.position] || colors["Default"]}
               size="40px"
               boxShadow="dark-lg"
-              pt={"1"}
             >
               {user.position}
             </Circle>
-            <Heading size="sm">{`${user.rank} ${user.name}`}</Heading>
+            <Heading size="md">{`${user.rank} ${user.name}`}</Heading>
           </Flex>
         </Flex>
       </CardHeader>

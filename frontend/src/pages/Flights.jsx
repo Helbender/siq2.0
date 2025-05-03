@@ -47,7 +47,13 @@ export default function Flights() {
     );
     setFilteredFlights(results);
   }, [searchTerm, flights]);
-
+  useEffect(() => {
+    if (!token && token !== "" && token !== undefined) {
+      console.log("Removing Token");
+      removeToken();
+      navigate("/");
+    }
+  }, []);
   return (
     <VStack mt={10}>
       <Flex w={"1000px"} alignItems={"center"} flex={"row"}>
@@ -63,10 +69,7 @@ export default function Flights() {
         </FormControl>
         <Spacer />
 
-        <Text mr={10}>
-          {`Voos filtrados: ${filteredFlights.length}`}
-          {/* {!searchTerm ? null : `Voos filtrados: ${filteredFlights.length}`} */}
-        </Text>
+        <Text mr={10}>{`Voos filtrados: ${filteredFlights.length}`}</Text>
       </Flex>
       <Stack gap={5} mt="8" overflowY="scroll" w={"90%"} maxW={"1200px"}>
         {filteredFlights.length

@@ -11,49 +11,6 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-# Dicionário que queremos salvar
-# meu_dicionario = {"nome": "João", "idade": 30, "cidade": "Lisboa"}
-
-# flights: list = []
-# i = 0
-
-# with Session(engine) as session:
-#     stmt = select(Flight).order_by(Flight.date.desc())
-#     flights_obj = session.execute(stmt).scalars()
-
-#     # Iterates through flights and creates JSON response
-#     for row in flights_obj:
-#         flights.append(row.to_json())  # Flight main data to JSON
-
-#         # Retrieves the Pilots from the DB
-#         stmt2 = select(FlightPilots).where(FlightPilots.flight_id == row.fid)
-#         flight_pilots = session.execute(stmt2).scalars()
-
-#         # Creates Empty list of pilots and crew to append to JSON
-#         flights[i]["flight_pilots"] = []  # "flight_pilots" key used for compatability with the FRONTEND
-
-#         for flight_pilot in flight_pilots:
-#             result = session.execute(
-#                 select(Pilot).where(Pilot.nip == flight_pilot.pilot_id),
-#             ).scalar_one_or_none()
-#             if result is None:
-#                 flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
-#             else:
-#                 flights[i]["flight_pilots"].append(flight_pilot.to_json())
-
-#         stmt3 = select(FlightCrew).where(FlightCrew.flight_id == row.fid)
-#         flight_crews = session.execute(stmt3).scalars()
-
-#         for flight_crew in flight_crews:
-#             result_crew = session.execute(
-#                 select(Crew).where(Crew.nip == flight_crew.crew_id),
-#             ).scalar_one_or_none()
-#             if result_crew is None:
-#                 flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
-#             else:
-#                 flights[i]["flight_pilots"].append(flight_crew.to_json())
-#         i += 1
-
 
 def download():
     with Session(engine) as session:
@@ -131,12 +88,3 @@ def teste(a):
 
 if __name__ == "__main__":
     download()
-    # service = autenticar_drive()
-    # print("\nservice autenticated\n")
-    # for flight in flights:
-    #     enviar_dados_para_pasta(
-    #         service,
-    #         flight,
-    #         f"1M_{flight['airtask']}_{flight['date']}_{flight['ATD']}",
-    #         "1AlVQSS8A6mu-bVJpP-ux--RKDnqnx4As",
-    #     )

@@ -34,10 +34,19 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [inputs, setInputs] = useState(
-    user || { position: "Default", squadron: "502 - Elefantes" },
+    user ?? {
+      rank: "",
+      nip: "",
+      name: "",
+      email: "",
+      position: "Default",
+      admin: false,
+      squadron: "502 - Elefantes",
+    },
   );
-  const { token } = useContext(AuthContext);
+  const { token, getUser } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
+  const User = getUser();
   // Update inputs when user changes
   // useEffect(() => {
   //   if (user) {
@@ -47,11 +56,14 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   //   }
   // }, [user]); // Runs every time user changes
 
+  //Updates inputs when filling the form
   const handleInputsChange = async (event) => {
     event.preventDefault();
     const { value, name } = event.target;
     setInputs(() => ({ ...inputs, [name]: value }));
   };
+
+  //Submits the form
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -62,6 +74,15 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       toast({ title: "User created successfully", status: "success" });
 
       setPilotos([...pilotos, res.data]);
+      // setInputs({
+      //   rank: "",
+      //   nip: "",
+      //   name: "",
+      //   email: "",
+      //   position: "Default",
+      //   admin: false,
+      //   squadron: "502 - Elefantes",
+      // });
       setInputs([]);
       onClose();
     } catch (error) {
@@ -69,6 +90,8 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       console.error("Error saving user:", error);
     }
   };
+
+  //Edits the user
   const handleEditUser = async (e) => {
     e.preventDefault();
 
@@ -101,6 +124,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     }
   };
 
+  //Deletes the user
   const handleDeletePilot = async () => {
     try {
       const res = await axios.delete(
@@ -228,20 +252,22 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                   </Tooltip>
                 </FormControl>
                 <HStack>
-                  <FormControl align={"center"}>
-                    <FormLabel textAlign={"center"}>Admin</FormLabel>
-                    <Switch
-                      name="admin"
-                      isChecked={inputs?.admin ? inputs.admin : ""}
-                      onChange={(e) => {
-                        setInputs(() => ({
-                          ...inputs,
-                          ["admin"]: e.target.checked,
-                        }));
-                        console.log(inputs);
-                      }}
-                    />
-                  </FormControl>
+                  {User.admin ? (
+                    <FormControl align={"center"}>
+                      <FormLabel textAlign={"center"}>Admin</FormLabel>
+                      <Switch
+                        name="admin"
+                        isChecked={inputs?.admin ? inputs.admin : false}
+                        onChange={(e) => {
+                          setInputs((prev) => ({
+                            ...prev,
+                            admin: e.target.checked,
+                          }));
+                          console.log(inputs);
+                        }}
+                      />
+                    </FormControl>
+                  ) : null}
                   <FormControl>
                     <FormLabel>Esquadra</FormLabel>
                     <Input
@@ -281,7 +307,6 @@ function CreateUserModal({ edit, add, isDelete, user }) {
               mr={3}
               onClick={() => {
                 onClose();
-                // setInputs([]);
               }}
             >
               Close
