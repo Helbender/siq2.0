@@ -166,50 +166,55 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             for pilot in f["flight_pilots"]:
                 update_qualifications(flight_id, session, pilot)
-                add_crew_and_pilots(session, flight, pilot)
-                # print("\n", pilot)
-                # if pilot["position"] in PILOT_USER:
-                #     flight_pilot: FlightPilots = session.execute(
-                #         select(FlightPilots)
-                #         .where(FlightPilots.flight_id == flight.fid)
-                #         .where(
-                #             FlightPilots.pilot_id == pilot["nip"],
-                #         ),
-                #     ).scalar_one_or_none()
-                #     print(f"Flight Pilot Object: {flight_pilot}")
-                #     if flight_pilot is not None:
-                #         flight_pilot.position = pilot["position"]
-                #         flight_pilot.day_landings = int(pilot["ATR"])
-                #         flight_pilot.night_landings = int(pilot["ATN"])
-                #         flight_pilot.prec_app = int(pilot["precapp"])
-                #         flight_pilot.nprec_app = int(pilot["nprecapp"])
-                #         flight_pilot.qa1 = pilot["QA1"]
-                #         flight_pilot.qa2 = pilot["QA2"]
-                #         flight_pilot.bsp1 = pilot["BSP1"]
-                #         flight_pilot.bsp2 = pilot["BSP2"]
-                #         flight_pilot.ta = pilot["TA"]
-                #         flight_pilot.vrp1 = pilot["VRP1"]
-                #         flight_pilot.vrp2 = pilot["VRP2"]
-                #         flight_pilot.cto = pilot["CTO"]
-                #         flight_pilot.sid = pilot["SID"]
-                #         flight_pilot.mono = pilot["MONO"]
-                #         flight_pilot.nfp = pilot["NFP"]
+                add_crew_and_pilots(session, flight, pilot, edit=True)
+            #     # print("\n", pilot)
+            #     # if pilot["position"] in PILOT_USER:
+            #     #     flight_pilot: FlightPilots = session.execute(
+            #     #         select(FlightPilots)
+            #     #         .where(FlightPilots.flight_id == flight.fid)
+            #     #         .where(
+            #     #             FlightPilots.pilot_id == pilot["nip"],
+            #     #         ),
+            #     #     ).scalar_one_or_none()
+            #     #     print(f"Flight Pilot Object: {flight_pilot}")
+            #     #     if flight_pilot is not None:
+            #     #         flight_pilot.position = pilot["position"]
+            #     #         flight_pilot.day_landings = int(pilot["ATR"])
+            #     #         flight_pilot.night_landings = int(pilot["ATN"])
+            #     #         flight_pilot.prec_app = int(pilot["precapp"])
+            #     #         flight_pilot.nprec_app = int(pilot["nprecapp"])
+            #     #         flight_pilot.qa1 = pilot["QA1"]
+            #     #         flight_pilot.qa2 = pilot["QA2"]
+            #     #         flight_pilot.bsp1 = pilot["BSP1"]
+            #     #         flight_pilot.bsp2 = pilot["BSP2"]
+            #     #         flight_pilot.ta = pilot["TA"]
+            #     #         flight_pilot.vrp1 = pilot["VRP1"]
+            #     #         flight_pilot.vrp2 = pilot["VRP2"]
+            #     #         flight_pilot.cto = pilot["CTO"]
+            #     #         flight_pilot.sid = pilot["SID"]
+            #     #         flight_pilot.mono = pilot["MONO"]
+            #     #         flight_pilot.nfp = pilot["NFP"]
 
-                # elif pilot["position"] in CREW_USER:
-                #     flight_crew: FlightCrew = session.execute(
-                #         select(FlightCrew)
-                #         .where(FlightCrew.flight_id == flight.fid)
-                #         .where(
-                #             FlightCrew.crew_id == pilot["nip"],
-                #         ),
-                #     ).scalar_one_or_none()
-                #     if flight_crew is not None:
-                #         flight_crew.position = pilot["position"]
-                #         flight_crew.bsoc = pilot["BSOC"]
+            #     # elif pilot["position"] in CREW_USER:
+            #     #     flight_crew: FlightCrew = session.execute(
+            #     #         select(FlightCrew)
+            #     #         .where(FlightCrew.flight_id == flight.fid)
+            #     #         .where(
+            #     #             FlightCrew.crew_id == pilot["nip"],
+            #     #         ),
+            #     #     ).scalar_one_or_none()
+            #     #     if flight_crew is not None:
+            #     #         flight_crew.position = pilot["position"]
+            #     #         flight_crew.bsoc = pilot["BSOC"]
 
             session.commit()
             session.refresh(flight)
-
+        # try:
+        #     upload_with_service_account(
+        #         dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
+        #     )
+        # except Exception as e:
+        #     print(f"\nErro\n{e}")
         return jsonify({"msg": "Flight changed"}), 200
 
     if request.method == "DELETE":
@@ -363,7 +368,7 @@ def process_repetion_qual(
     # print(f"After Qual {qualification_field}:\t{getattr(pilot_qualification, f'last_{qualification_field}')}\n")
 
 
-def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
+def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> None:
     """Check type of crew and add it to respective Model Object."""
     # Garanties data integrety while introducing several flights
     for k in ["ATR", "ATN", "precapp", "nprecapp"]:
@@ -390,29 +395,55 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
             return
         qual_p: Qualification = session.get(Qualification, pilot["nip"])  # type: ignore  # noqa: PGH003
 
-        fp = FlightPilots(
-            position=pilot["position"],
-            day_landings=int(pilot["ATR"]),
-            night_landings=int(pilot["ATN"]),
-            prec_app=int(pilot["precapp"]),
-            nprec_app=int(pilot["nprecapp"]),
-            qa1=pilot["QA1"],
-            qa2=pilot["QA2"],
-            bsp1=pilot["BSP1"],
-            bsp2=pilot["BSP2"],
-            ta=pilot["TA"],
-            vrp1=pilot["VRP1"],
-            vrp2=pilot["VRP2"],
-            cto=pilot["CTO"],
-            sid=pilot["SID"],
-            mono=pilot["MONO"],
-            nfp=pilot["NFP"],
-        )
+        # Check if the pilot already exists in the database and edit it if true
+        if edit:
+            # Update the existing FlightPilots object
+            flight_pilot: FlightPilots = session.execute(
+                select(FlightPilots)
+                .where(FlightPilots.flight_id == flight.fid)
+                .where(FlightPilots.pilot_id == pilot["nip"]),
+            ).scalar_one_or_none()
+            if flight_pilot is not None:
+                flight_pilot.position = pilot["position"]
+                flight_pilot.day_landings = int(pilot["ATR"])
+                flight_pilot.night_landings = int(pilot["ATN"])
+                flight_pilot.prec_app = int(pilot["precapp"])
+                flight_pilot.nprec_app = int(pilot["nprecapp"])
+                flight_pilot.qa1 = pilot["QA1"]
+                flight_pilot.qa2 = pilot["QA2"]
+                flight_pilot.bsp1 = pilot["BSP1"]
+                flight_pilot.bsp2 = pilot["BSP2"]
+                flight_pilot.ta = pilot["TA"]
+                flight_pilot.vrp1 = pilot["VRP1"]
+                flight_pilot.vrp2 = pilot["VRP2"]
+                flight_pilot.cto = pilot["CTO"]
+                flight_pilot.sid = pilot["SID"]
+                flight_pilot.mono = pilot["MONO"]
+                flight_pilot.nfp = pilot["NFP"]
+        else:
+            flight_pilot = FlightPilots(
+                position=pilot["position"],
+                day_landings=int(pilot["ATR"]),
+                night_landings=int(pilot["ATN"]),
+                prec_app=int(pilot["precapp"]),
+                nprec_app=int(pilot["nprecapp"]),
+                qa1=pilot["QA1"],
+                qa2=pilot["QA2"],
+                bsp1=pilot["BSP1"],
+                bsp2=pilot["BSP2"],
+                ta=pilot["TA"],
+                vrp1=pilot["VRP1"],
+                vrp2=pilot["VRP2"],
+                cto=pilot["CTO"],
+                sid=pilot["SID"],
+                mono=pilot["MONO"],
+                nfp=pilot["NFP"],
+            )
 
-        qual_p.update(fp, flight.date)
+        qual_p.update(flight_pilot, flight.date)
 
-        pilot_obj.flight_pilots.append(fp)
-        flight.flight_pilots.append(fp)
+        pilot_obj.flight_pilots.append(flight_pilot)
+        flight.flight_pilots.append(flight_pilot)
 
     elif pilot["position"] in CREW_USER:
         for k in ["BSOC"]:
@@ -422,13 +453,23 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict) -> None:
         if crew_obj is None:
             return
         qual_c: QualificationCrew = session.get(QualificationCrew, pilot["nip"])  # type: ignore  # noqa: PGH003
-        fp = FlightCrew(
-            position=pilot["position"],
-            bsoc=pilot["BSOC"],
-        )
-        qual_c.update(fp, flight.date)
 
-        crew_obj.flight_crew.append(fp)
-        flight.flight_crew.append(fp)
+        if edit:
+            # Update the existing FlightCrew object
+            flight_crew: FlightCrew = session.execute(
+                select(FlightCrew).where(FlightCrew.flight_id == flight.fid).where(FlightCrew.crew_id == pilot["nip"]),
+            ).scalar_one_or_none()
+            if flight_crew is not None:
+                flight_crew.position = pilot["position"]
+                flight_crew.bsoc = pilot["BSOC"]
+        else:
+            flight_crew = FlightCrew(
+                position=pilot["position"],
+                bsoc=pilot["BSOC"],
+            )
+        qual_c.update(flight_crew, flight.date)
+
+        crew_obj.flight_crew.append(flight_crew)
+        flight.flight_crew.append(flight_crew)
     else:
         print("Not a valid Crew Member")

@@ -43,6 +43,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
             if tripulante is None:
                 access_token = create_access_token(
                     identity=nip,
+                    additional_claims={"admin": True, "name": "ADMIN"},
                 )
                 response = {"access_token": access_token}
                 return response, 201
