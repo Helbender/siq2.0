@@ -15,7 +15,8 @@ from models.pilots import Pilot, Qualification  # type: ignore
 from models.users import year_init  # type: ignore
 from sqlalchemy import func, select, exc
 from sqlalchemy.orm import Session
-
+from functions.pdfcreator import criar_pdf_memoria, combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
+from functions.gdrive import enviar_para_drive  # type: ignore
 
 flights = Blueprint("flights", __name__)
 
@@ -23,6 +24,7 @@ flights = Blueprint("flights", __name__)
 load_dotenv(dotenv_path="./.env")
 
 ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
+ID_PASTA_PDF = os.environ.get("ID_PASTA_PDF", "")
 
 
 # FLight ROUTES
@@ -37,7 +39,6 @@ def retrieve_flights() -> tuple[Response, int]:
     # Retrieve all flights from db
     if request.method == "GET":
         flights: list = []
-        i = 0
 
         with Session(engine) as session:
             stmt = select(Flight).order_by(Flight.date.desc())
@@ -45,37 +46,9 @@ def retrieve_flights() -> tuple[Response, int]:
 
             # Iterates through flights and creates JSON response
             for row in flights_obj:
+                # print(row.to_json())
                 flights.append(row.to_json())  # Flight main data to JSON
 
-                # Retrieves the Pilots from the DB
-                stmt2 = select(FlightPilots).where(FlightPilots.flight_id == row.fid)
-                flight_pilots = session.execute(stmt2).scalars()
-
-                # Creates Empty list of pilots and crew to append to JSON
-                flights[i]["flight_pilots"] = []  # "flight_pilots" key used for compatability with the FRONTEND
-
-                for flight_pilot in flight_pilots:
-                    result = session.execute(
-                        select(Pilot).where(Pilot.nip == flight_pilot.pilot_id),
-                    ).scalar_one_or_none()
-                    if result is None:
-                        flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
-                    else:
-                        flights[i]["flight_pilots"].append(flight_pilot.to_json())
-                        # print(flight_pilot.to_json())
-
-                stmt3 = select(FlightCrew).where(FlightCrew.flight_id == row.fid)
-                flight_crews = session.execute(stmt3).scalars()
-
-                for flight_crew in flight_crews:
-                    result = session.execute(
-                        select(Crew).where(Crew.nip == flight_crew.crew_id),
-                    ).scalar_one_or_none()
-                    if result is None:
-                        flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
-                    else:
-                        flights[i]["flight_pilots"].append(flight_crew.to_json())
-                i += 1
         return jsonify(flights), 200
 
     # Retrieves flight from Frontend and saves is to DB
@@ -83,6 +56,7 @@ def retrieve_flights() -> tuple[Response, int]:
         verify_jwt_in_request()
 
         f: dict = request.get_json()
+        # print(f)
         flight = Flight(
             airtask=f["airtask"],
             date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
@@ -109,11 +83,7 @@ def retrieve_flights() -> tuple[Response, int]:
 
             # for i in range(6):
             for pilot in f["flight_pilots"]:
-                # print("\n", pilot)
-                # try:
                 add_crew_and_pilots(session, flight, pilot)
-                # except KeyError:
-                # pass
             try:
                 session.flush()
             except exc.IntegrityError as e:
@@ -122,14 +92,21 @@ def retrieve_flights() -> tuple[Response, int]:
                 return jsonify({"message": e.orig.__repr__()}), 400
             else:
                 session.commit()
-                session.refresh(flight)
 
-        try:
-            upload_with_service_account(
-                dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
-            )
-        except Exception as e:
-            print(f"\nErro\n{e}")
+                upload_with_service_account(dados=f, nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO)
+                # enviar_para_drive(
+                #     criar_pdf_memoria(dados_voo=f),
+                #     nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
+                #     id_pasta=ID_PASTA_PDF,
+                # )
+                enviar_para_drive(
+                    combinar_template_e_conteudo(
+                        template_pdf_path="functions/Mod1M.pdf",
+                        conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
+                    ),
+                    nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
+                    id_pasta=ID_PASTA_PDF,
+                )
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
@@ -141,6 +118,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
     if request.method == "PATCH":
         verify_jwt_in_request()
         f: dict = request.get_json()
+
         with Session(engine, autoflush=False) as session:
             flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
 
@@ -165,56 +143,24 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             pilot: dict
 
             for pilot in f["flight_pilots"]:
+                print("\n", pilot["name"])
                 update_qualifications(flight_id, session, pilot)
                 add_crew_and_pilots(session, flight, pilot, edit=True)
-            #     # print("\n", pilot)
-            #     # if pilot["position"] in PILOT_USER:
-            #     #     flight_pilot: FlightPilots = session.execute(
-            #     #         select(FlightPilots)
-            #     #         .where(FlightPilots.flight_id == flight.fid)
-            #     #         .where(
-            #     #             FlightPilots.pilot_id == pilot["nip"],
-            #     #         ),
-            #     #     ).scalar_one_or_none()
-            #     #     print(f"Flight Pilot Object: {flight_pilot}")
-            #     #     if flight_pilot is not None:
-            #     #         flight_pilot.position = pilot["position"]
-            #     #         flight_pilot.day_landings = int(pilot["ATR"])
-            #     #         flight_pilot.night_landings = int(pilot["ATN"])
-            #     #         flight_pilot.prec_app = int(pilot["precapp"])
-            #     #         flight_pilot.nprec_app = int(pilot["nprecapp"])
-            #     #         flight_pilot.qa1 = pilot["QA1"]
-            #     #         flight_pilot.qa2 = pilot["QA2"]
-            #     #         flight_pilot.bsp1 = pilot["BSP1"]
-            #     #         flight_pilot.bsp2 = pilot["BSP2"]
-            #     #         flight_pilot.ta = pilot["TA"]
-            #     #         flight_pilot.vrp1 = pilot["VRP1"]
-            #     #         flight_pilot.vrp2 = pilot["VRP2"]
-            #     #         flight_pilot.cto = pilot["CTO"]
-            #     #         flight_pilot.sid = pilot["SID"]
-            #     #         flight_pilot.mono = pilot["MONO"]
-            #     #         flight_pilot.nfp = pilot["NFP"]
-
-            #     # elif pilot["position"] in CREW_USER:
-            #     #     flight_crew: FlightCrew = session.execute(
-            #     #         select(FlightCrew)
-            #     #         .where(FlightCrew.flight_id == flight.fid)
-            #     #         .where(
-            #     #             FlightCrew.crew_id == pilot["nip"],
-            #     #         ),
-            #     #     ).scalar_one_or_none()
-            #     #     if flight_crew is not None:
-            #     #         flight_crew.position = pilot["position"]
-            #     #         flight_crew.bsoc = pilot["BSOC"]
 
             session.commit()
             session.refresh(flight)
-        # try:
-        #     upload_with_service_account(
-        #         dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
-        #     )
-        # except Exception as e:
-        #     print(f"\nErro\n{e}")
+            print("\n\nFlight:", flight.to_json())
+            for pilot in flight.flight_crew:
+                print("\n", pilot.to_json())
+        try:
+            upload_with_service_account(
+                dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
+            )
+            enviar_para_drive(
+                criar_pdf_memoria(dados=flight.to_json()), nome_arquivo=flight.get_file_name(), id_pasta=ID_PASTA_PDF
+            )
+        except Exception as e:
+            print(f"\nErro\n{e}")
         return jsonify({"msg": "Flight changed"}), 200
 
     if request.method == "DELETE":
@@ -272,10 +218,7 @@ def update_qualifications(
 
         # For each qualification type, find the last relevant flight before the one being deleted
         qualification_fields = ["qa1", "qa2", "bsp1", "bsp2", "ta", "vrp1", "vrp2", "cto", "sid", "mono", "nfp"]
-        # print(tripulante.pilot_id)
         for field in qualification_fields:
-            # print(field)
-
             last_qualification_date = session.execute(
                 select(func.max(Flight.date))
                 .join(FlightPilots)
@@ -283,7 +226,6 @@ def update_qualifications(
                 .where(Flight.fid != flight_id)
                 .where(getattr(FlightPilots, field) != 0),
             ).scalar_one_or_none()
-            # print(last_qualification_date)
 
             # Check if Date is None so to set a base Date
             last_qualification_date = (
@@ -371,15 +313,6 @@ def process_repetion_qual(
 def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> None:
     """Check type of crew and add it to respective Model Object."""
     # Garanties data integrety while introducing several flights
-    for k in ["ATR", "ATN", "precapp", "nprecapp"]:
-        try:
-            pilot[k] = 0 if pilot[k] == "" else pilot[k]
-        except KeyError:
-            pilot[k] = 0
-
-    # pilot["ATN"] = 0 if pilot["ATN"] == "" else pilot["ATN"]
-    # pilot["precapp"] = 0 if pilot["precapp"] == "" else pilot["precapp"]
-    # pilot["nprecapp"] = 0 if pilot["nprecapp"] == "" else pilot["nprecapp"]
 
     for i in range(1, 7):
         QUAL = "QUAL" + str(i)
@@ -387,6 +320,11 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
             pilot[pilot[QUAL]] = True
 
     if pilot["position"] in PILOT_USER:
+        for k in ["ATR", "ATN", "precapp", "nprecapp"]:
+            try:
+                pilot[k] = 0 if pilot[k] == "" else pilot[k]
+            except KeyError:
+                pilot[k] = 0
         for k in ["QA1", "QA2", "BSP1", "BSP2", "TA", "VRP1", "VRP2", "CTO", "SID", "MONO", "NFP"]:
             if k not in pilot.keys():
                 pilot[k] = False
@@ -449,8 +387,10 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         for k in ["BSOC"]:
             if k not in pilot.keys():
                 pilot[k] = False
+
         crew_obj: Crew = session.get(Crew, pilot["nip"])  # type: ignore  # noqa: PGH003
         if crew_obj is None:
+            print(f"Error: Crew {pilot['nip']} not found")
             return
         qual_c: QualificationCrew = session.get(QualificationCrew, pilot["nip"])  # type: ignore  # noqa: PGH003
 
@@ -462,6 +402,11 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
             if flight_crew is not None:
                 flight_crew.position = pilot["position"]
                 flight_crew.bsoc = pilot["BSOC"]
+            else:
+                flight_crew = FlightCrew(
+                    position=pilot["position"],
+                    bsoc=pilot["BSOC"],
+                )
         else:
             flight_crew = FlightCrew(
                 position=pilot["position"],

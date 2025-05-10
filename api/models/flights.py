@@ -1,4 +1,6 @@
 from __future__ import annotations  # noqa: D100, INP001
+# import locale
+
 
 from datetime import date  # noqa: TCH003
 from typing import TYPE_CHECKING, List, Optional
@@ -11,6 +13,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+# locale.setlocale(locale.LC_TIME, "pt_PT.UTF-8")  # Ou 'pt_BR.UTF-8' para português do Brasil
 if TYPE_CHECKING:
     from crew import Crew  # type: ignore
     from pilots import Pilot  # type: ignore
@@ -55,12 +58,15 @@ class Flight(Base):
         cascade="all, delete-orphan",
     )
 
-    def __repr__(self) -> str:
-        """Print Dictionary the instance attributes."""
-        return self.to_json().__repr__()
+    # def __repr__(self) -> str:
+    #     """Print Dictionary the instance attributes."""
+    #     return self.to_json().__repr__()
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
+        flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
+        flight_crewmembers.extend([flightcrew.to_json() for flightcrew in self.flight_crew])
+
         return {
             "id": self.fid,
             "airtask": self.airtask,
@@ -80,10 +86,11 @@ class Flight(Base):
             "numberOfCrew": self.number_of_crew,
             "orm": self.orm,
             "fuel": self.fuel,
+            "flight_pilots": flight_crewmembers,
         }
 
     def get_file_name(self) -> str:
-        return f"1M {self.airtask} {self.date.strftime('%d%b%Y')} {self.departure_time.strip(':')}.1m"
+        return f"1M {self.airtask} {self.date.strftime('%d%b%Y')} {self.departure_time.strip(':')} {self.tailnumber}.1m"
 
 
 class FlightPilots(Base):
@@ -120,18 +127,19 @@ class FlightPilots(Base):
     pilot: Mapped[Pilot] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
 
-    def __repr__(self) -> str:
-        """Print Dictionary the instance attributes and Flight Info."""
-        rep = f"Airtask {self.flight.airtask}\n Database ID: {self.flight_id} "
-        for k, v in self.to_json():
-            rep += f"\n{k}:{v}"
-        return rep
+    # def __repr__(self) -> str:
+    #     """Print Dictionary the instance attributes and Flight Info."""
+    #     rep = f"Airtask {self.flight.airtask}\n Database ID: {self.flight_id} "
+    #     for k, v in self.to_json():
+    #         rep += f"\n{k}:{v}"
+    #     return rep
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
         response = {
             "name": self.pilot.name,
             "nip": self.pilot.nip,
+            "rank": self.pilot.rank,
             "position": self.position,
             "ATR": self.day_landings,
             "ATN": self.night_landings,

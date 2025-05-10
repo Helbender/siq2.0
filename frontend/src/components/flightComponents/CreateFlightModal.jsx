@@ -460,7 +460,7 @@ function CreateFlightModal() {
                   alignItems={"center"}
                   // alignContent={"center"}
                   // alignSelf={"center"}
-                  templateColumns="repeat(15, 1fr)"
+                  templateColumns="repeat(18, 1fr)"
                   rowGap={2}
                   columnGap={4}
                 >
@@ -471,6 +471,9 @@ function CreateFlightModal() {
                     Nome
                   </GridItem>
                   <GridItem textAlign={"center"}>NIP</GridItem>
+                  <GridItem textAlign={"center"}>VIR</GridItem>
+                  <GridItem textAlign={"center"}>VN</GridItem>
+                  <GridItem textAlign={"center"}>CON</GridItem>
                   <GridItem textAlign={"center"}>ATR</GridItem>
                   <GridItem textAlign={"center"}>ATN</GridItem>
                   <GridItem textAlign={"center"}>Precisão</GridItem>

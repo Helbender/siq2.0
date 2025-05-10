@@ -62,7 +62,7 @@ export default function Flights() {
         <CreateFlightModal />
         <FormControl textAlign={"center"} ml={5} maxW="130px">
           <Input
-            placeholder="Search..."
+            placeholder="Procurar..."
             textAlign={"center"}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

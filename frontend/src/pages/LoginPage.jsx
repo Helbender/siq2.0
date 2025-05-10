@@ -43,6 +43,8 @@ function LoginPage() {
       };
       const response = await axios.post("/api/token", data);
       if (response.status === 201) {
+        toast.closeAll();
+
         toast({
           title: "Logado com sucesso.",
           status: "success",
@@ -58,7 +60,7 @@ function LoginPage() {
     } catch (error) {
       if (error.response) {
         const errorMessage = error.response.data?.message;
-
+        toast.closeAll();
         toast({
           title: "Login failed.",
           description: errorMessage,

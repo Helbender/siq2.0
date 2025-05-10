@@ -8,51 +8,13 @@ from google.oauth2.credentials import Credentials  # type:ignore
 from google.oauth2 import service_account  # type:ignore
 from google_auth_oauthlib.flow import InstalledAppFlow  # type:ignore
 from googleapiclient.discovery import build  # type:ignore
-from googleapiclient.errors import HttpError  # type:ignore
-from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload  # type:ignore
+from googleapiclient.http import MediaIoBaseUpload  # type:ignore
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
 
 # SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly"]
-def main():
-    """Shows basic usage of the Drive v3 API.
-    Prints the names and ids of the first 10 files the user has access to.
-    """
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
-
-    try:
-        service = build("drive", "v3", credentials=creds)
-
-        # Call the Drive v3 API
-        results = service.files().list(pageSize=10, fields="nextPageToken, files(id, name)").execute()
-        items = results.get("files", [])
-
-        if not items:
-            print("No files found.")
-            return
-        print("Files:")
-        for item in items:
-            print(f"{item['name']} ({item['id']})")
-    except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        print(f"An error occurred: {error}")
 
 
 # Autenticar e conectar ao Google Drive
@@ -76,15 +38,51 @@ def autenticar_drive():
     return build("drive", "v3", credentials=creds)
 
 
+def check_dublicates_and_sends(nome_ficheiro, service, pasta_dia_id, media):
+    query = f"name = '{nome_ficheiro}' and '{pasta_dia_id}' in parents and trashed = false"
+    response = service.files().list(q=query, spaces="drive", fields="files(id, name)").execute()
+    files = response.get("files", [])
+
+    if files:
+        # Ficheiro já existe — faz update
+        file_id = files[0]["id"]
+        file = service.files().update(fileId=file_id, media_body=media).execute()
+        print(f"Ficheiro existente atualizado! ID: {file.get('id')}")
+    else:
+        # Ficheiro não existe — cria novo
+        file_metadata = {"name": nome_ficheiro, "parents": [pasta_dia_id]}
+        file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        print(f"Ficheiro novo criado! ID: {file.get('id')}")
+
+
 # Função para enviar arquivo ao Google Drive
-def enviar_para_drive(service, arquivo_local, nome_arquivo_drive):
-    file_metadata = {"name": nome_arquivo_drive}
-    media = MediaFileUpload(arquivo_local, resumable=True)
+def enviar_para_drive(mem_pdf: io.BytesIO, nome_ficheiro: str, id_pasta: str):
+    # Carrega credenciais do arquivo JSON
+    credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
 
-    # Criar o arquivo no Google Drive
-    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    # Cria o cliente para a API do Drive
+    service = build("drive", "v3", credentials=credentials)
 
-    print(f"Arquivo enviado com sucesso. ID do arquivo: {arquivo.get('id')}")
+    data: str = nome_ficheiro.split()[2]
+    nome_pasta_dia: str = data[:2]
+    nome_pasta_mes: str = data[2:5]
+    nome_pasta_ano: str = data[-4:]
+    # Retira o mês do nome do ficheiro
+    # Retira o dia do nome do ficheiro
+
+    # 2) Garante que a pasta do ano exista dentro da pasta raiz
+    pasta_ano_id = get_or_create_folder(service, id_pasta, nome_pasta_ano)
+
+    # 3) Garante que a pasta do mês exista dentro da pasta raiz
+    pasta_mes_id = get_or_create_folder(service, pasta_ano_id, nome_pasta_mes)
+
+    # 4) Garante que a pasta do dia exista dentro da pasta do mês
+    pasta_dia_id = get_or_create_folder(service, pasta_mes_id, nome_pasta_dia)
+
+    media = MediaIoBaseUpload(mem_pdf, mimetype="application/pdf", resumable=True)
+
+    # Verifica se já existe um ficheiro com o mesmo nome na pasta
+    check_dublicates_and_sends(nome_ficheiro, service, pasta_dia_id, media)
 
 
 # Função para enviar dados diretamente para o Google Drive
@@ -139,17 +137,19 @@ def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: 
     dados_binarios = base64.b64encode(json.dumps(dados).encode("utf-8"))
     # dados_binarios = json.dumps(dados).encode("utf-8")
     buffer = io.BytesIO(dados_binarios)
-
-    # Metadados do arquivo
-    file_metadata = {
-        "name": nome_arquivo_drive,
-        "parents": [pasta_dia_id],  # Especifica a pasta de destino
-    }
-    # Faz o upload
     media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
-    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
-    print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
+    check_dublicates_and_sends(nome_arquivo_drive, service, pasta_dia_id, media)
+
+    # # Metadados do arquivo
+    # file_metadata = {
+    #     "name": nome_arquivo_drive,
+    #     "parents": [pasta_dia_id],  # Especifica a pasta de destino
+    # }
+    # # Faz o upload
+    # arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+
+    # print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
 
 
 def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:

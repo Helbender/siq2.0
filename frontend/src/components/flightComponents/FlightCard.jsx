@@ -27,14 +27,6 @@ const FlightCard = ({ flight }) => {
   // eslint-disable-next-line no-unused-vars
   const { colorMode } = useColorMode();
 
-  // const l = new Date(Date.parse(flight.date));
-  //Add a function that give todays date in dd-mmm-yyyy format
-  const today = new Date();
-  const todayString = today.toLocaleDateString("pt-pt", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
   return (
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
       <CardHeader>
@@ -55,9 +47,12 @@ const FlightCard = ({ flight }) => {
           <Spacer />
           <Heading>
             {
-              // `${l.toLocaleDateString("pt-pt")}`
+              // `${l.toLocaleDateString("pt-pt", {
+              //   day: "2-digit",
+              //   month: "short",
+              //   year: "numeric",
+              // })}`
               flight.date
-              // todayString
             }
           </Heading>
         </Flex>
@@ -121,9 +116,9 @@ const FlightCard = ({ flight }) => {
                 <Th>Nome</Th>
                 <Th textAlign={"center"}>ATR</Th>
                 <Th textAlign={"center"}>ATN</Th>
-                <Th textAlign={"center"}>PrecApp</Th>
-                <Th textAlign={"center"}>NPrecApp</Th>
-                <Th textAlign={"center"}>Qualifications</Th>
+                <Th textAlign={"center"}>Precisão</Th>
+                <Th textAlign={"center"}>Não Precisão</Th>
+                <Th textAlign={"center"}>Qualificações</Th>
               </Tr>
             </Thead>
             <Tbody>

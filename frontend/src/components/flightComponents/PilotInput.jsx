@@ -191,9 +191,49 @@ const PilotInput = ({
       <GridItem>
         <FormControl mx={1}>
           <Input
+            name="VIR"
+            type="time"
+            value={member.VIR}
+            textAlign={"center"}
+            onChange={(e) => {
+              handleCrewChange(index, "VIR", e.target.value);
+            }}
+          />
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <FormControl mx={1}>
+          <Input
+            name="VN"
+            type="time"
+            value={member.VN}
+            textAlign={"center"}
+            onChange={(e) => {
+              handleCrewChange(index, "VN", e.target.value);
+            }}
+          />
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <FormControl mx={1}>
+          <Input
+            name="CON"
+            type="time"
+            value={member.CON}
+            textAlign={"center"}
+            onChange={(e) => {
+              handleCrewChange(index, "CON", e.target.value);
+            }}
+          />
+        </FormControl>
+      </GridItem>
+      <GridItem>
+        <FormControl mx={1}>
+          <Input
             name="ATR"
             type="number"
             value={member.ATR}
+            textAlign={"center"}
             onChange={(e) => {
               handleCrewChange(index, "ATR", e.target.value);
             }}
@@ -205,6 +245,7 @@ const PilotInput = ({
           <Input
             name="ATN"
             type="number"
+            textAlign={"center"}
             value={member.ATN}
             onChange={(e) => {
               handleCrewChange(index, "ATN", e.target.value);
@@ -217,6 +258,7 @@ const PilotInput = ({
           <Input
             name="PrecApp"
             type="number"
+            textAlign={"center"}
             value={member.precapp}
             onChange={(e) => {
               handleCrewChange(index, "precapp", e.target.value);
@@ -229,6 +271,7 @@ const PilotInput = ({
           <Input
             name="NPrecApp"
             type="number"
+            textAlign={"center"}
             value={member.nprecapp}
             onChange={(e) => {
               handleCrewChange(index, "nprecapp", e.target.value);
