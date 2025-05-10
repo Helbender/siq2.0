@@ -101,7 +101,7 @@ def retrieve_flights() -> tuple[Response, int]:
                 # )
                 enviar_para_drive(
                     combinar_template_e_conteudo(
-                        template_pdf_path="functions/Mod1M.pdf",
+                        template_pdf_path="functions/img/Mod1M.pdf",
                         conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
                     ),
                     nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
@@ -158,7 +158,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             )
             enviar_para_drive(
                 combinar_template_e_conteudo(
-                    template_pdf_path="functions/Mod1M.pdf",
+                    template_pdf_path="functions/img/Mod1M.pdf",
                     conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
                 ),
                 nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
