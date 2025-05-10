@@ -15,7 +15,7 @@ from models.pilots import Pilot, Qualification  # type: ignore
 from models.users import year_init  # type: ignore
 from sqlalchemy import func, select, exc
 from sqlalchemy.orm import Session
-from functions.pdfcreator import criar_pdf_memoria, combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
+from functions.pdfcreator import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
 from functions.gdrive import enviar_para_drive  # type: ignore
 
 flights = Blueprint("flights", __name__)
@@ -157,7 +157,12 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
                 dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
             )
             enviar_para_drive(
-                criar_pdf_memoria(dados=flight.to_json()), nome_arquivo=flight.get_file_name(), id_pasta=ID_PASTA_PDF
+                combinar_template_e_conteudo(
+                    template_pdf_path="functions/Mod1M.pdf",
+                    conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
+                ),
+                nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
+                id_pasta=ID_PASTA_PDF,
             )
         except Exception as e:
             print(f"\nErro\n{e}")
