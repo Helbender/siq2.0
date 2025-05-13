@@ -1,4 +1,3 @@
- 
 import { createContext, useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../Contexts/AuthContext";
@@ -10,6 +9,7 @@ export const FlightContext = createContext();
 export const FlightProvider = ({ children }) => {
   const [flights, setFlights] = useState([]);
   const { token, removeToken } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
   const getSavedFlights = async () => {
     try {
@@ -17,6 +17,8 @@ export const FlightProvider = ({ children }) => {
         headers: { Authorization: "Bearer " + token },
       });
       setFlights(response.data || []);
+      setLoading(false);
+      console.log("Flights Loaded");
     } catch (error) {
       console.log(error);
       console.log(error.response.status);
@@ -29,12 +31,11 @@ export const FlightProvider = ({ children }) => {
 
   useEffect(() => {
     getSavedFlights();
-    console.log("Flights Loaded");
     // console.log(flights);
   }, []);
 
   return (
-    <FlightContext.Provider value={{ flights, setFlights }}>
+    <FlightContext.Provider value={{ flights, setFlights, loading }}>
       {children}
     </FlightContext.Provider>
   );

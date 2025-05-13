@@ -25,7 +25,7 @@ const FlightCard = ({ flight }) => {
   const { colorMode } = useColorMode();
 
   return (
-    <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.100" : "gray.700"}>
+    <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
       <CardHeader>
         <Flex align={"center"}>
           <Heading>{flight.airtask}</Heading>

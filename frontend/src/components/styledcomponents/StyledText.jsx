@@ -1,4 +1,3 @@
- 
 import { Text, Highlight, useColorMode } from "@chakra-ui/react";
 
 function StyledText({ query, text }) {
@@ -7,7 +6,10 @@ function StyledText({ query, text }) {
 
   return (
     <Text>
-      <Highlight query={query} styles={{ color: color, fontWeight: "bold" }}>
+      <Highlight
+        query={query}
+        styles={{ color: color, fontWeight: "bold", fontSize: "lg" }}
+      >
         {text}
       </Highlight>
     </Text>
