@@ -1,5 +1,5 @@
 server {
-    listen       80;
+    listen       8080;
     server_name  localhost;
 
     root   /usr/share/nginx/html;
@@ -16,7 +16,7 @@ server {
         add_header Cache-Control "public";
     }
 
-    location /api {
-        proxy_pass http://api:5051;
-    }
+#    location /api {
+#        proxy_pass http://api:5051;
+#    }
 }

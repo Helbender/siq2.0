@@ -12,6 +12,7 @@ from models.pilots import Pilot  # type:ignore
 from models.users import User  # type:ignore
 from routes.flight_blueprint import flights  # type:ignore
 from routes.users_blueprint import users  # type:ignore
+from routes.dashboard_blueprint import dashboard  # type:ignore
 from sqlalchemy import select, union_all
 from sqlalchemy.orm import Session
 
@@ -23,6 +24,9 @@ api.register_blueprint(users, url_prefix="/users")
 
 # register flight blueprints with api blueprint
 api.register_blueprint(flights, url_prefix="/flights")
+
+# register dashboard blueprints with api blueprint
+api.register_blueprint(dashboard, url_prefix="/dashboard")
 
 
 @api.route("/token", methods=["POST"])

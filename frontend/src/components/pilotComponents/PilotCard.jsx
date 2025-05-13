@@ -10,8 +10,6 @@ import {
   Grid,
   Stack,
   Spacer,
-  HStack,
-  VStack,
   GridItem,
 } from "@chakra-ui/react";
 import DaysLeftColumn from "./DaysLeftColumn";

@@ -1,22 +1,43 @@
 services:
   api:
-    image: docker.io/helbender/siq-api:0.5
+    # image: docker.io/helbender/siq-api:0.5
     restart: always
     build: ./api
-    # ports:
-    #   - '5051:5051'
-    volumes:
-      - ./api/database:/app/database
-    # environment:
-    #   - APPLY_CORS=1
-  frontend:
-    image: docker.io/helbender/siq-frontend:0.5
-    restart: always
-    build: ./frontend
     ports:
-      - "5173:80" #host:Container
-    # volumes:
-    #   - /app/node_modules
-    #   - ./frontend:/app
+      - '5051:5051'
+    volumes:
+      - ./api:/app
+    environment:
+      - APPLY_CORS=0
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=siq
+      - DB_PASS=siq
+      - DB_NAME=siq
+    depends_on:
+      - db
+  frontend:
+    # image: docker.io/helbender/siq-frontend:0.5
+    restart: always
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173" #host:Container
+      # - "5173:80" #Produção
+    volumes:
+      - ./frontend:/app
     depends_on:
       - api
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: siq
+        MYSQL_USER: siq
+        MYSQL_PASSWORD: siq
+    volumes:
+        - ./db:/var/lib/mysql
+    ports:
+        - "3306:3306"

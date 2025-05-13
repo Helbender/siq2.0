@@ -39,6 +39,10 @@ class Pilot(People, Base):
             result["qualification"] = self.qualification.to_json()
         return result
 
+    def is_qualified(self) -> bool:
+        """Check if the pilot is qualified."""
+        return self.qualification.is_qualified()
+
 
 class Qualification(Base):
     __tablename__ = "qualifications"
@@ -50,18 +54,6 @@ class Qualification(Base):
     last_night_landings: Mapped[str] = mapped_column(String(55), default=date_init)
     last_prec_app: Mapped[str] = mapped_column(String(55), default=date_init)
     last_nprec_app: Mapped[str] = mapped_column(String(55), default=date_init)
-    # last_day_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
-    # last_night_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
-    # last_prec_app_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
-    # last_nprec_app_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
 
     last_qa1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_qa2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
@@ -88,6 +80,34 @@ class Qualification(Base):
     last_bskit_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
+
+    def is_qualified(self) -> bool:
+        """Checks all qualifications and returns True if all are valid.
+
+        Returns:
+            bool: True if all qualifications are valid, False otherwise.
+        """
+        attr_list = [column.name for column in self.__table__.columns]
+        attr_list = attr_list[5:]
+        for item in attr_list:
+            print(f"Item: {item}")
+            print(getattr(self, item))
+            print((getattr(self, item) - date.today()).days + 180)
+            # if item in ["last_cto_date", "last_sid_date", "last_mono_date", "last_nfp_date"]:
+            if (getattr(self, item) - date.today()).days + 180 < 0:
+                return False
+            # elif item in [
+            #     "last_qa1_date",
+            #     "last_qa2_date",
+            #     "last_bsp1_date",
+            #     "last_bsp2_date",
+            #     "last_ta_date",
+            #     "last_vrp1_date",
+            #     "last_vrp2_date",
+            # ]:
+            #     if (date.today() - getattr(self, item)).days > 180:
+            #         return False
+        return True
 
     def update(self, data: FlightPilots, date: date) -> Qualification:
         """Update with Last qualification date."""

@@ -33,6 +33,10 @@ class Crew(People, Base):
             result["qualification"] = self.qualification.to_json()
         return result
 
+    def is_qualified(self) -> bool:
+        """Check if the crew is qualified."""
+        return self.qualification.is_qualified()
+
 
 class QualificationCrew(Base):
     __tablename__ = "qualifications_crew"
@@ -55,6 +59,10 @@ class QualificationCrew(Base):
             self.last_bsoc_date = date
 
         return self
+
+    def is_qualified(self) -> bool:
+        """Check if the crew is qualified."""
+        return self.last_bsoc_date < 0
 
     @staticmethod
     def _get_days(data: date) -> list[int | str]:

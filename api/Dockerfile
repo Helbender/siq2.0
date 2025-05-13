@@ -1,4 +1,4 @@
-FROM python:3.12.4-alpine3.20
+FROM python:3.12.7-alpine3.20
 
 WORKDIR /app
 
@@ -11,5 +11,6 @@ RUN pip install -r requirements.txt
 
 COPY . ./ 
 
-# EXPOSE 5051
-CMD ["gunicorn", "-b", ":5051", "app:app"]
+EXPOSE 5051
+# CMD ["gunicorn", "-b", ":5051", "app:app"]
+CMD ["python", "app.py"]

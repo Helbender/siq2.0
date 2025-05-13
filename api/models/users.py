@@ -22,7 +22,7 @@ class People:
     nip: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(20))
     rank: Mapped[str] = mapped_column(String(5))
-    position: Mapped[str] = mapped_column(String(3))
+    position: Mapped[str] = mapped_column(String(7))
     email: Mapped[str] = mapped_column(String(50))
     admin: Mapped[bool] = mapped_column(default=False)
     recover: Mapped[str] = mapped_column(String(500), default="")

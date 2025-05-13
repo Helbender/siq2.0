@@ -17,6 +17,7 @@ import UserManagementPage from "./pages/UserManagementPage";
 import Header from "./layout/Header";
 import { FlightProvider } from "./Contexts/FlightsContext";
 import { UserProvider } from "./Contexts/UserContext";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const { token, removeToken, setToken } = useContext(AuthContext);
@@ -47,6 +48,7 @@ function App() {
           <Routes>
             <Route index element={<Navigate replace to="flights" />} />
             <Route path="/flights" index element={<Flights />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagementPage />} />
 
             <Route path="/" element={<Master />}>

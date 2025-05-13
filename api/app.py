@@ -17,7 +17,8 @@ from routes.api_blueprint import api
 
 load_dotenv(dotenv_path="./.env")
 JWT_KEY: str = os.environ.get("JWT_KEY", "")
-APPLY_CORS: bool = bool(os.environ.get("APPLY_CORS", False))
+# APPLY_CORS: bool = bool(os.environ.get("APPLY_CORS", True))
+APPLY_CORS: bool = os.environ.get("APPLY_CORS", "true").lower() in ("1", "true", "yes")
 
 
 app = Flask(__name__)
@@ -31,7 +32,7 @@ application = app  # to work with CPANEL PYTHON APPS
 if APPLY_CORS:
     CORS(
         app,
-        origins="http://0.0.0.0:5173",
+        origins="http://localhost:5173",
         allow_headers=[
             "Content-Type",
             "Authorization",
@@ -65,5 +66,6 @@ if APPLY_CORS:
 
 # Main api resgistration
 app.register_blueprint(api, url_prefix="/api")
+
 if __name__ == "__main__":
-    app.run(port=5051, debug=True)  # noqa: S201
+    app.run(host="0.0.0.0", port=5051, debug=True)  # noqa: S201

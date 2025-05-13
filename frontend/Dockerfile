@@ -7,7 +7,7 @@ RUN npm install --silent
 COPY . ./
 RUN npm run build
 
-# EXPOSE 5173
+EXPOSE 8080
 
 # Build step #2: build an nginx container
 FROM nginx:stable-alpine

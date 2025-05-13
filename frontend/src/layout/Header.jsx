@@ -19,6 +19,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { MdSpaceDashboard } from "react-icons/md";
 import {
   FaInfoCircle,
   FaInstagram,
@@ -169,6 +170,22 @@ function Header() {
                         <Flex align="center">
                           <FaTable />
                           <Box ml={2}>Qualificações</Box>
+                        </Flex>
+                      </ChakraLink>
+
+                      <ChakraLink
+                        p={2}
+                        color="teal.500"
+                        fontSize="lg"
+                        onClick={() => {
+                          navigate("/dashboard");
+                          onClose();
+                        }}
+                        aria-label="Dashboard"
+                      >
+                        <Flex align="center">
+                          <MdSpaceDashboard />
+                          <Box ml={2}>Dashboard</Box>
                         </Flex>
                       </ChakraLink>
                       <Spacer />
