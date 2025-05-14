@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/api";
 
 function RecoverPass() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ function RecoverPass() {
 
   const sendEmail = async () => {
     try {
-      const response = await axios.post(`/api/recover/${email}`);
+      const response = await api.post(`/api/recover/${email}`);
       console.log("Email sent response:", response); // Log response for debugging
       toast({
         title: "Email sent.",

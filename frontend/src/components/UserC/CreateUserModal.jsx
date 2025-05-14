@@ -1,4 +1,3 @@
- 
 import {
   Modal,
   ModalOverlay,
@@ -24,10 +23,10 @@ import {
 } from "@chakra-ui/react";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { useState, useContext } from "react";
-import axios from "axios";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { BiTrash } from "react-icons/bi";
+import api from "../../utils/api";
 
 function CreateUserModal({ edit, add, isDelete, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -59,7 +58,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
     try {
       console.log(inputs);
-      const res = await axios.post("/api/users", inputs, {
+      const res = await api.post("/api/users", inputs, {
         headers: { Authorization: "Bearer " + token },
       });
       toast({ title: "User created successfully", status: "success" });
@@ -78,7 +77,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
 
     try {
-      const res = await axios.patch(
+      const res = await api.patch(
         `/api/users/${user.nip}/${user.position}`,
         inputs,
         {
@@ -109,12 +108,9 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   //Deletes the user
   const handleDeletePilot = async () => {
     try {
-      const res = await axios.delete(
-        `/api/users/${user.nip}/${user.position}`,
-        {
-          headers: { Authorization: "Bearer " + token },
-        },
-      );
+      const res = await api.delete(`/api/users/${user.nip}/${user.position}`, {
+        headers: { Authorization: "Bearer " + token },
+      });
       console.log(res);
       if (res.data?.deleted_id) {
         setPilotos(pilotos.filter((piloto) => piloto.nip != user.nip));

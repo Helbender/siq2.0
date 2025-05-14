@@ -1,5 +1,3 @@
- 
-
 import {
   Box,
   FormControl,
@@ -11,11 +9,11 @@ import {
   Link,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../Contexts/AuthContext";
+import api from "../utils/api";
 
 function LoginPage() {
   const { setToken } = useContext(AuthContext);
@@ -43,7 +41,7 @@ function LoginPage() {
         nip: loginForm.nip,
         password: loginForm.password,
       };
-      const response = await axios.post("/api/token", data);
+      const response = await api.post("/api/token", data);
       if (response.status === 201) {
         toast.closeAll();
         const decodedToken = jwtDecode(response.data.access_token);

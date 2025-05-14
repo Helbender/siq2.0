@@ -1,4 +1,3 @@
- 
 import {
   Box,
   FormControl,
@@ -9,10 +8,10 @@ import {
   Button,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
+import api from "../../utils/api";
 
 function RecoverProcess() {
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ function RecoverProcess() {
 
   const checkToken = async () => {
     try {
-      const response = await axios.post("/api/recovery", {
+      const response = await api.post("/api/recovery", {
         token: params.token,
         email: params.email,
       });
@@ -89,7 +88,7 @@ function RecoverProcess() {
 
     try {
       // Update the API endpoint and payload
-      const response = await axios.patch(`/api/storenewpass/${nip}`, {
+      const response = await api.patch(`/api/storenewpass/${nip}`, {
         password: newPassword,
       });
       console.log(response);

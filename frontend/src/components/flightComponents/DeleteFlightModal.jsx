@@ -1,5 +1,4 @@
 import React from "react";
-import axios from "axios";
 import { useContext } from "react";
 import { AuthContext } from "../../Contexts/AuthContext";
 import {
@@ -17,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
 import { FlightContext } from "../../Contexts/FlightsContext";
+import api from "../../utils/api";
 
 function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -34,7 +34,7 @@ function DeleteFlightModal({ flight }) {
         isClosable: true,
         position: "bottom",
       });
-      const res = await axios.delete(`/api/flights/${flight.id}`, {
+      const res = await api.delete(`/api/flights/${flight.id}`, {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.data?.deleted_id) {

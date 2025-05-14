@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import { BiEdit } from "react-icons/bi";
+import api from "../../utils/api";
 
 function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -110,7 +111,7 @@ function EditFlightModal({ flight }) {
       position: "bottom",
     });
     try {
-      const res = await axios.patch(`/api/flights/${id}`, flightdata, {
+      const res = await api.patch(`/api/flights/${id}`, flightdata, {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.status === 200) {

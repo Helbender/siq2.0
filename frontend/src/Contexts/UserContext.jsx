@@ -1,7 +1,6 @@
- 
 import { createContext, useEffect, useState, useContext } from "react";
-import axios from "axios";
 import { AuthContext } from "./AuthContext";
+import api from "../utils/api";
 
 // Create the context
 export const UserContext = createContext();
@@ -14,7 +13,7 @@ export const UserProvider = ({ children }) => {
 
   const getSavedPilots = async () => {
     try {
-      const res = await axios.get("/api/users", {
+      const res = await api.get("/api/users", {
         headers: { Authorization: "Bearer " + token },
       });
       // console.log(res.data);

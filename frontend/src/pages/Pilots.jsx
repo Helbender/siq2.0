@@ -3,8 +3,8 @@ import { Grid, useToast } from "@chakra-ui/react";
 import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
-import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "../utils/api";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);
@@ -23,7 +23,7 @@ const Pilots = ({ position }) => {
       position: "bottom",
     });
     try {
-      const res = await axios.get(`/api/pilots/${position}`, {
+      const res = await api.get(`/api/pilots/${position}`, {
         headers: { Authorization: "Bearer " + token },
       });
       toast.closeAll();
