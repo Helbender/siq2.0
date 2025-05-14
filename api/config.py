@@ -23,8 +23,7 @@ PILOT_USER: list = ["PI", "PC", "CP", "P", "PA"]
 CREW_USER: list = ["OC", "OCI", "OCA", "CT", "CTA", "CTI", "OPV", "OPVI", "OPVA"]
 
 # Define connection string
-# connection_string = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-connection_string = "postgresql://siq_db_user:F8HMIrhdufygXX8rYULptMwXKQLMhVQq@dpg-d0if9jvdiees738hndng-a.frankfurt-postgres.render.com/siq_db"
+connection_string = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"  # connection_string = "postgresql://siq_db_user:F8HMIrhdufygXX8rYULptMwXKQLMhVQq@dpg-d0if9jvdiees738hndng-a.frankfurt-postgres.render.com/siq_db"
 
 try:
     # Create the SQLAlchemy engine with improved configuration
