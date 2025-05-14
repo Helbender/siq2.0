@@ -14,6 +14,7 @@ from models.users import year_init  # type: ignore
 from sqlalchemy import func, select, exc
 from sqlalchemy.orm import Session
 from threading import Thread
+import time
 
 flights = Blueprint("flights", __name__)
 
@@ -32,17 +33,22 @@ def retrieve_flights() -> tuple[Response, int]:
 
     # Retrieve all flights from db
     if request.method == "GET":
+        start_time = time.perf_counter()
+        print("Getting FLIGHTS from DB")
         flights: list = []
 
         with Session(engine) as session:
             stmt = select(Flight).order_by(Flight.date.desc())
             flights_obj = session.execute(stmt).scalars()
-
+            print("Flights READY")
             # Iterates through flights and creates JSON response
+            # flights = [row.to_json() for row in flights_obj]  # Flight main data to JSON
             for row in flights_obj:
                 # print(row.to_json())
                 flights.append(row.to_json())  # Flight main data to JSON
 
+        end_time = time.perf_counter()
+        print(f"Tempo total: {end_time - start_time:.4f} segundos")
         return jsonify(flights), 200
 
     # Retrieves flight from Frontend and saves is to DB
