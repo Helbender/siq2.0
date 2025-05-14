@@ -4,20 +4,20 @@ import react from "@vitejs/plugin-react";
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "/",
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("react")) return "react";
-            if (id.includes("@chakra-ui")) return "chakra";
-            if (id.includes("lodash")) return "lodash";
-            return "vendor";
-          }
-        },
-      },
-    },
-  },
+  // build: {
+  //   rollupOptions: {
+  //     output: {
+  //       manualChunks(id) {
+  //         if (id.includes("node_modules")) {
+  //           if (id.includes("react")) return "react";
+  //           if (id.includes("@chakra-ui")) return "chakra";
+  //           if (id.includes("lodash")) return "lodash";
+  //           return "vendor";
+  //         }
+  //       },
+  //     },
+  //   },
+  // },
   plugins: [react()],
   preview: {
     port: 5173,
