@@ -2,6 +2,9 @@ import base64
 import io
 import json
 import os.path
+from dotenv import load_dotenv
+import logging
+from functions.pdfcreator import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials  # type:ignore
@@ -13,6 +16,12 @@ from googleapiclient.http import MediaIoBaseUpload  # type:ignore
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
+# Load enviroment variables
+load_dotenv(dotenv_path="./.env")
+ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
+ID_PASTA_PDF = os.environ.get("ID_PASTA_PDF", "")
+
+logger = logging.getLogger(__name__)
 
 # SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly"]
 
@@ -180,6 +189,26 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
         }
         folder = service.files().create(body=folder_metadata, fields="id").execute()
         return folder.get("id")
+
+
+def tarefa_enviar_para_drive(dados, nome_arquivo_drive, nome_pdf) -> None:
+    try:
+        upload_with_service_account(dados=dados, nome_arquivo_drive=nome_arquivo_drive, id_pasta=ID_PASTA_VOO)
+
+        enviar_para_drive(
+            combinar_template_e_conteudo(
+                template_pdf_path="functions/img/Mod1M.pdf",
+                conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=dados),
+            ),
+            nome_ficheiro=nome_pdf,
+            id_pasta=ID_PASTA_PDF,
+        )
+        logger.info(f"Upload para Google Drive concluído: {nome_arquivo_drive}")
+    except Exception as e:
+        logger.exception(f"Erro ao enviar voo {nome_arquivo_drive} para o Google Drive: {e}")
+
+        # Podes logar o erro aqui ou enviar para uma ferramenta de logging
+        print(f"Erro ao enviar para Google Drive: {e}")
 
 
 # Usar as funções

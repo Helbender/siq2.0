@@ -97,8 +97,7 @@ function CreateFlightModal() {
     console.log(time);
     return time;
   };
-  const handleCreateFlight = async (e) => {
-    e.preventDefault();
+  const handleCreateFlight = async () => {
     let data = flightdata;
 
     toast({

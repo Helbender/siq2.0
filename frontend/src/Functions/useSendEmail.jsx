@@ -9,7 +9,7 @@ import { useToast } from "@chakra-ui/react";
  */
 export const useSendEmail = () => {
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
+  const [setLoading] = useState(true);
 
   /**
    * Function to send an email.

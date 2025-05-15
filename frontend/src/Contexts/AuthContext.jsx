@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import { createContext } from "react";
 import useToken from "../components/loginComponents/useToken";
 import { jwtDecode } from "jwt-decode";

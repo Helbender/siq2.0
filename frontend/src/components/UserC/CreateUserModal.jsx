@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import {
   Modal,
   ModalOverlay,
@@ -21,10 +21,9 @@ import {
   useToast,
   Select,
   Tooltip,
-  position,
 } from "@chakra-ui/react";
 import { FaEdit, FaPlus } from "react-icons/fa";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
@@ -47,14 +46,6 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   const { token, getUser } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
   const User = getUser();
-  // Update inputs when user changes
-  // useEffect(() => {
-  //   if (user) {
-  //     setInputs(user);
-  //   } else {
-  //     setInputs({ position: "Default" });
-  //   }
-  // }, [user]); // Runs every time user changes
 
   //Updates inputs when filling the form
   const handleInputsChange = async (event) => {
@@ -74,15 +65,6 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       toast({ title: "User created successfully", status: "success" });
 
       setPilotos([...pilotos, res.data]);
-      // setInputs({
-      //   rank: "",
-      //   nip: "",
-      //   name: "",
-      //   email: "",
-      //   position: "Default",
-      //   admin: false,
-      //   squadron: "502 - Elefantes",
-      // });
       setInputs([]);
       onClose();
     } catch (error) {

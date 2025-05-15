@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import axios from "axios";
 import { useContext } from "react";
 import { AuthContext } from "../../Contexts/AuthContext";
@@ -17,6 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
 import { FlightContext } from "../../Contexts/FlightsContext";
+
 function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -25,11 +26,20 @@ function DeleteFlightModal({ flight }) {
   const toast = useToast();
   const handleDeleteFlight = async (flight) => {
     try {
+      toast({
+        title: "A apagar o voo",
+        description: "Em processo.",
+        status: "loading",
+        duration: 10000,
+        isClosable: true,
+        position: "bottom",
+      });
       const res = await axios.delete(`/api/flights/${flight.id}`, {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.data?.deleted_id) {
         console.log(`Flight is Deleted ${flight.id}`);
+        toast.closeAll();
         toast({
           title: "Voo Apagado com Sucesso",
           description: `Airstask ${flight.airtask} às ${flight.ATD} de ${flight.date}.`,
@@ -40,10 +50,12 @@ function DeleteFlightModal({ flight }) {
         // window.location.reload(f);
         setFlights(flights.filter((f) => f.id != flight.id));
         onClose();
-        // setFilteredFlights(flights.filter((flight) => flight.id != id));
       }
     } catch (error) {
+      console.log(error.response);
       if (error.response.status === 404) {
+        toast.closeAll();
+
         toast({
           title: "Erro a apagar",
           description: `ID é ${flight.id}. Voo não encontrado.\nExperimente fazer refresh à página`,
@@ -52,7 +64,6 @@ function DeleteFlightModal({ flight }) {
           position: "bottom",
         });
       }
-      console.log(error.response);
     }
   };
 

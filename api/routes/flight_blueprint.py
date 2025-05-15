@@ -1,30 +1,24 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-import os
 from datetime import UTC, date, datetime
 
 from flask_jwt_extended import verify_jwt_in_request
 
 from config import CREW_USER, PILOT_USER, engine  # type: ignore
-from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
-from functions.gdrive import upload_with_service_account  # type: ignore
+from functions.gdrive import tarefa_enviar_para_drive  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.flights import Flight, FlightCrew, FlightPilots  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
 from models.users import year_init  # type: ignore
 from sqlalchemy import func, select, exc
 from sqlalchemy.orm import Session
-from functions.pdfcreator import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
-from functions.gdrive import enviar_para_drive  # type: ignore
+from threading import Thread
 
 flights = Blueprint("flights", __name__)
 
 # Load enviroment variables
-load_dotenv(dotenv_path="./.env")
-
-ID_PASTA_VOO = os.environ.get("ID_PASTA_VOO", "")
-ID_PASTA_PDF = os.environ.get("ID_PASTA_PDF", "")
+# load_dotenv(dotenv_path="./.env")
 
 
 # FLight ROUTES
@@ -92,21 +86,11 @@ def retrieve_flights() -> tuple[Response, int]:
                 return jsonify({"message": e.orig.__repr__()}), 400
             else:
                 session.commit()
+                nome_arquivo_voo = flight.get_file_name()
+                nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
+        # Lançar a tarefa de envio em background
+        Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
 
-                upload_with_service_account(dados=f, nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO)
-                # enviar_para_drive(
-                #     criar_pdf_memoria(dados_voo=f),
-                #     nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
-                #     id_pasta=ID_PASTA_PDF,
-                # )
-                enviar_para_drive(
-                    combinar_template_e_conteudo(
-                        template_pdf_path="functions/img/Mod1M.pdf",
-                        conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
-                    ),
-                    nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
-                    id_pasta=ID_PASTA_PDF,
-                )
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
@@ -149,23 +133,13 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             session.commit()
             session.refresh(flight)
-            print("\n\nFlight:", flight.to_json())
-            for pilot in flight.flight_crew:
-                print("\n", pilot.to_json())
-        try:
-            upload_with_service_account(
-                dados=flight.to_json(), nome_arquivo_drive=flight.get_file_name(), id_pasta=ID_PASTA_VOO
-            )
-            enviar_para_drive(
-                combinar_template_e_conteudo(
-                    template_pdf_path="functions/img/Mod1M.pdf",
-                    conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=f),
-                ),
-                nome_ficheiro=flight.get_file_name().replace(".1m", ".pdf"),
-                id_pasta=ID_PASTA_PDF,
-            )
-        except Exception as e:
-            print(f"\nErro\n{e}")
+            # # print("\n\nFlight:", flight.to_json())
+            # for pilot in flight.flight_crew:
+            #     print("\n", pilot.to_json())
+            nome_arquivo_voo = flight.get_file_name()
+            nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
+        # Lançar a tarefa de envio em background
+        Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
         return jsonify({"msg": "Flight changed"}), 200
 
     if request.method == "DELETE":

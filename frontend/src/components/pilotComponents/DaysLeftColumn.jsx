@@ -1,5 +1,5 @@
-/* eslint-disable react/react-in-jsx-scope */
-/* eslint-disable react/prop-types */
+ 
+ 
 import { Box, Divider, Text } from "@chakra-ui/react";
 
 const DaysLeftColumn = ({ qualification, dates }) => {

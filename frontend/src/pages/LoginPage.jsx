@@ -1,4 +1,4 @@
-/* eslint-disable react/react-in-jsx-scope */
+ 
 
 import {
   Box,
@@ -18,7 +18,7 @@ import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../Contexts/AuthContext";
 
 function LoginPage() {
-  const { setToken, getUser } = useContext(AuthContext);
+  const { setToken } = useContext(AuthContext);
 
   const [loginForm, setloginForm] = useState({
     nip: "",

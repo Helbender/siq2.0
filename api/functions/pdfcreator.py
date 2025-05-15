@@ -243,7 +243,6 @@ def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
         "BSOC",
     ]
     for i in dados_voo.get("flight_pilots", []):
-        print(i)
         c.setFont("Helvetica", 8)
         c.drawString(130, 356 - (dados_voo["flight_pilots"].index(i) * 14), f"{i.get('nip', '')}")
         c.drawString(180, 356 - (dados_voo["flight_pilots"].index(i) * 14), f"{i.get('rank', '')}")
@@ -263,7 +262,6 @@ def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
         index = 0
         for f in qualificacoes:
             if i.get(f, False):
-                print(f)
                 c.drawString(725 + index * 16, 356 - (dados_voo["flight_pilots"].index(i) * 14), f"{f}")
                 index += 1
 

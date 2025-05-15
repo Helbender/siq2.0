@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import Pilots from "./pages/Pilots";
 import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
@@ -25,8 +25,6 @@ function App() {
 
   return (
     <HashRouter>
-      {/* <UserProvider>
-        <FlightProvider> */}
       <Header />
       {!token && token !== "" && token !== undefined ? (
         <Routes>
@@ -48,9 +46,6 @@ function App() {
         <Fragment>
           <Routes>
             <Route index element={<Navigate replace to="flights" />} />
-            {/* <Suspense fallback={<div>Loading...</div>}>
-              <Route path="/flights" element={<Flights />} />
-            </Suspense> */}
             <Route path="/flights" index element={<Flights />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagementPage />} />
@@ -65,8 +60,6 @@ function App() {
         </Fragment>
       )}
       <Footer />
-      {/* </FlightProvider>
-      </UserProvider> */}
     </HashRouter>
   );
 }

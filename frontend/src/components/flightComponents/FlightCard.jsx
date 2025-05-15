@@ -1,5 +1,4 @@
 import {
-  Box,
   Stack,
   Card,
   Flex,
@@ -23,8 +22,6 @@ import DeleteFlightModal from "./DeleteFlightModal";
 import EditFlightModal from "./EditFlightModal";
 
 const FlightCard = ({ flight }) => {
-  // console.log(flight);
-  // eslint-disable-next-line no-unused-vars
   const { colorMode } = useColorMode();
 
   return (

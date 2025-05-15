@@ -34,7 +34,7 @@ import { BiEdit } from "react-icons/bi";
 function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [flightdata, setFlightdata] = useState(flight);
-  const { flights, setFlights } = useContext(FlightContext);
+  const { setFlights } = useContext(FlightContext);
   const { removeToken } = useContext(AuthContext);
   const { pilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
