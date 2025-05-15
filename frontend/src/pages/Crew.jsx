@@ -13,7 +13,7 @@ const Crew = () => {
 
   async function getSavedCrew() {
     try {
-      const response = await axios.get(`/api/crew`, {
+      const response = await axios.get("/api/crew", {
         headers: { Authorization: "Bearer " + token },
       });
       setCrew(response.data || []);

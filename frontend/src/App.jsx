@@ -1,7 +1,8 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Pilots from "./pages/Pilots";
 import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
+// const Flights = React.lazy(() => import("./pages/Flights"));
 import Master from "./layout/Master";
 import LoginPage from "./pages//LoginPage";
 import RecoverPass from "./components/loginComponents/RecoverPass";
@@ -47,6 +48,9 @@ function App() {
         <Fragment>
           <Routes>
             <Route index element={<Navigate replace to="flights" />} />
+            {/* <Suspense fallback={<div>Loading...</div>}>
+              <Route path="/flights" element={<Flights />} />
+            </Suspense> */}
             <Route path="/flights" index element={<Flights />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<UserManagementPage />} />

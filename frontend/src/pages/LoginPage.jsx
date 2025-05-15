@@ -14,10 +14,11 @@ import {
 import axios from "axios";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../Contexts/AuthContext";
 
 function LoginPage() {
-  const { setToken } = useContext(AuthContext);
+  const { setToken, getUser } = useContext(AuthContext);
 
   const [loginForm, setloginForm] = useState({
     nip: "",
@@ -27,7 +28,8 @@ function LoginPage() {
   const toast = useToast();
   const navigateRecover = () => navigate("/recover");
 
-  const logMeIn = async () => {
+  const logMeIn = async (e) => {
+    e.preventDefault();
     toast({
       title: "A efetuar login.",
       description: "Agarde um momento.",
@@ -44,16 +46,19 @@ function LoginPage() {
       const response = await axios.post("/api/token", data);
       if (response.status === 201) {
         toast.closeAll();
+        const decodedToken = jwtDecode(response.data.access_token);
 
         toast({
           title: "Logado com sucesso.",
+          description: `Login efetuado como ${decodedToken.name}`,
+
           status: "success",
           duration: 5000,
           isClosable: true,
           position: "bottom",
         });
-        console.log(response);
-        console.log(response.data.access_token);
+        // console.log(response);
+        // console.log(response.data.access_token);
         setToken(response.data.access_token);
         navigate("/flights");
       }

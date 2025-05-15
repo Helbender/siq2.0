@@ -1,3 +1,5 @@
+import React, { Suspense } from "react";
+
 import {
   Stack,
   FormControl,
@@ -9,6 +11,9 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import FlightCard from "../components/flightComponents/FlightCard";
+// const FlightCard = React.lazy(
+//   () => import("../components/flightComponents/FlightCard"),
+// );
 import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
 import { useContext, useEffect, useState } from "react";
 import { FlightContext } from "../Contexts/FlightsContext";

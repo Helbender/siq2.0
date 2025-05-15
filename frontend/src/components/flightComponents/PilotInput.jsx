@@ -6,6 +6,7 @@ import {
   Select,
   Button,
   IconButton,
+  Spacer,
 } from "@chakra-ui/react";
 import { Fragment, useState } from "react";
 import { FaMinus } from "react-icons/fa";
@@ -48,7 +49,6 @@ const CREW_QUALIFICATIONS = ["BSOC"];
 // };
 const PilotInput = ({
   index,
-  flightdata,
   setFlightdata,
   pilotos,
   member,
@@ -108,10 +108,11 @@ const PilotInput = ({
   };
   return (
     <Fragment>
-      <GridItem maxW={"100px"}>
-        <FormControl m="auto">
+      <GridItem>
+        <FormControl>
           <Select
-            m="auto"
+            // m="auto"
+            minW={"100px"}
             name="posição"
             placeholder=" "
             type="text"
@@ -119,14 +120,8 @@ const PilotInput = ({
             onChange={(e) => {
               handleCrewChange(index, "position", e.target.value);
             }}
-            maxW={"100%"}
             textAlign={"center"}
           >
-            {/* {Object.keys(crewByRole).map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))} */}
             <option value="PI">PI</option>
             <option value="PC">PC</option>
             <option value="P">P</option>
@@ -143,8 +138,8 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem colSpan={2}>
-        <FormControl mx={1}>
+      <GridItem mx={1} w={"200px"}>
+        <FormControl>
           <Select
             name="name"
             textAlign={"center"}
@@ -183,14 +178,22 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1} isReadOnly alignSelf={"center"}>
-          <Input textAlign={"center"} value={nip} isReadOnly></Input>
+      <GridItem w={"80px"} bg={"whiteAlpha.100"}>
+        <FormControl isReadOnly alignSelf={"center"}>
+          <Input
+            p={0}
+            display="inline-block"
+            textAlign={"center"}
+            value={nip}
+            isReadOnly
+          ></Input>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem ml={3} w={"50px"}>
+        <FormControl>
           <Input
+            p={0}
+            display="inline-block"
             name="VIR"
             type="time"
             value={member.VIR}
@@ -201,9 +204,11 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem w={"50px"}>
+        <FormControl>
           <Input
+            p={0}
+            display="inline-block"
             name="VN"
             type="time"
             value={member.VN}
@@ -214,9 +219,11 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem mr={3} w={"50px"}>
+        <FormControl>
           <Input
+            p={0}
+            display="inline-block"
             name="CON"
             type="time"
             value={member.CON}
@@ -227,9 +234,10 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem w={"50px"}>
+        <FormControl>
           <Input
+            display="inline-block"
             name="ATR"
             type="number"
             value={member.ATR}
@@ -240,9 +248,10 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem w={"50px"}>
+        <FormControl>
           <Input
+            display="inline-block"
             name="ATN"
             type="number"
             textAlign={"center"}
@@ -253,9 +262,10 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem w={"80px"}>
+        <FormControl>
           <Input
+            display="inline-block"
             name="PrecApp"
             type="number"
             textAlign={"center"}
@@ -266,9 +276,10 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem w={"80px"}>
+        <FormControl>
           <Input
+            display="inline-block"
             name="NPrecApp"
             type="number"
             textAlign={"center"}
@@ -279,9 +290,11 @@ const PilotInput = ({
           />
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      {/* <Spacer /> */}
+      <GridItem ml={2} minW={"80px"}>
+        <FormControl>
           <Select
+            display="inline-block"
             name="Qual1"
             placeholder=" "
             type="text"
@@ -300,9 +313,10 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem minW={"80px"}>
+        <FormControl>
           <Select
+            display="inline-block"
             name="Qual2"
             placeholder=" "
             type="text"
@@ -321,9 +335,11 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem minW={"70px"}>
+        <FormControl>
           <Select
+            p={0}
+            display="inline-block"
             name="Qual3"
             placeholder=" "
             type="text"
@@ -342,9 +358,10 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem minW={"80px"}>
+        <FormControl>
           <Select
+            display="inline-block"
             name="Qual4"
             placeholder=" "
             type="text"
@@ -363,9 +380,10 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem minW={"80px"}>
+        <FormControl>
           <Select
+            display="inline-block"
             name="Qual5"
             placeholder=" "
             type="text"
@@ -384,9 +402,10 @@ const PilotInput = ({
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem>
-        <FormControl mx={1}>
+      <GridItem minW={"80px"}>
+        <FormControl>
           <Select
+            display="inline-block"
             name="Qual6"
             placeholder=" "
             type="text"

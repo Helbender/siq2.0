@@ -19,8 +19,9 @@ import {
   Select,
   useToast,
   FormErrorMessage,
+  Box,
 } from "@chakra-ui/react";
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import PilotInput from "./PilotInput";
@@ -37,7 +38,14 @@ function CreateFlightModal() {
   const { token, removeToken } = useContext(AuthContext);
   const toast = useToast();
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
 
+  const handleWheel = (e) => {
+    if (e.deltaY !== 0 && scrollRef.current) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
   const {
     register,
     handleSubmit,
@@ -90,15 +98,9 @@ function CreateFlightModal() {
     return time;
   };
   const handleCreateFlight = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     let data = flightdata;
-    // !data.flight_pilots ? (data.flight_pilots = []) : null;
-    // for (let i = 0; i < 6; i++) {
-    //   if (Object.hasOwn(flightdata, `pilot${i}`)) {
-    //     data.flight_pilots[i] = flightdata[`pilot${i}`];
-    //     delete data[`pilot${i}`];
-    //   }
-    // }
+
     toast({
       title: "A adicionar voo",
       description: "Em processo.",
@@ -312,6 +314,19 @@ function CreateFlightModal() {
                       textAlign="center"
                       name="origin"
                       type="text"
+                      maxLength={4}
+                      placeholder="XXXX"
+                      // {...register("origin", {
+                      //   required: "Campo obrigatório",
+                      //   minLength: {
+                      //     value: 4,
+                      //     message: "Mínimo 4 caracteres",
+                      //   },
+                      //   maxLength: {
+                      //     value: 4,
+                      //     message: "Máximo 4 caracteres",
+                      //   },
+                      // })}
                       value={flightdata.origin}
                       onChange={(e) =>
                         setFlightdata({
@@ -327,6 +342,8 @@ function CreateFlightModal() {
                       textAlign="center"
                       name="destination"
                       type="text"
+                      maxLength={4}
+                      placeholder="XXXX"
                       value={flightdata.destination}
                       onChange={(e) =>
                         setFlightdata({
@@ -456,45 +473,60 @@ function CreateFlightModal() {
                   </FormControl>
                 </Flex>
                 <Divider my={8} />
-                <Grid
-                  alignItems={"center"}
-                  // alignContent={"center"}
-                  // alignSelf={"center"}
-                  templateColumns="repeat(18, 1fr)"
-                  rowGap={2}
-                  columnGap={4}
+                <Box
+                  overflowX="auto"
+                  paddingBottom={5}
+                  ref={scrollRef}
+                  onWheel={handleWheel}
                 >
-                  <GridItem maxW={"100px"} textAlign={"center"}>
-                    Posição
-                  </GridItem>
-                  <GridItem textAlign={"center"} colSpan={2}>
-                    Nome
-                  </GridItem>
-                  <GridItem textAlign={"center"}>NIP</GridItem>
-                  <GridItem textAlign={"center"}>VIR</GridItem>
-                  <GridItem textAlign={"center"}>VN</GridItem>
-                  <GridItem textAlign={"center"}>CON</GridItem>
-                  <GridItem textAlign={"center"}>ATR</GridItem>
-                  <GridItem textAlign={"center"}>ATN</GridItem>
-                  <GridItem textAlign={"center"}>Precisão</GridItem>
-                  <GridItem textAlign={"center"}>Não Precisão</GridItem>
-                  <GridItem textAlign={"center"} colSpan={6}>
-                    Qualificações
-                  </GridItem>
-                  <GridItem m="auto" />
-                  {crewMembers.map((member, index) => (
-                    <PilotInput
-                      key={index}
-                      index={index}
-                      flightdata={flightdata}
-                      setFlightdata={setFlightdata}
-                      pilotos={pilotos}
-                      member={member}
-                      setCrewMembers={setCrewMembers}
-                      crewMembers={crewMembers}
-                    />
-                  ))}
-                </Grid>
+                  <Grid
+                    minW="max-content"
+                    // maxWidth={"1000px"}
+                    templateColumns="repeat(17, auto)"
+                    rowGap={2}
+                    columnGap={1}
+                  >
+                    <GridItem textAlign={"center"}>Posição</GridItem>
+                    <GridItem textAlign={"center"}>Nome</GridItem>
+                    <GridItem textAlign={"center"}>NIP</GridItem>
+                    <GridItem w={"50px"} textAlign={"center"} ml={2}>
+                      VIR
+                    </GridItem>
+                    <GridItem w={"50px"} textAlign={"center"}>
+                      VN
+                    </GridItem>
+                    <GridItem w={"50px"} textAlign={"center"}>
+                      CON
+                    </GridItem>
+                    <GridItem w={"50px"} textAlign={"center"}>
+                      ATR
+                    </GridItem>
+                    <GridItem w={"50px"} textAlign={"center"}>
+                      ATN
+                    </GridItem>
+                    <GridItem w={"80px"} textAlign={"center"}>
+                      Precisão
+                    </GridItem>
+                    <GridItem w={"80px"} textAlign={"center"}>
+                      Não Precisão
+                    </GridItem>
+                    <GridItem textAlign={"center"} colSpan={6}>
+                      Qualificações
+                    </GridItem>
+                    <GridItem m="auto" />
+                    {crewMembers.map((member, index) => (
+                      <PilotInput
+                        key={index}
+                        index={index}
+                        setFlightdata={setFlightdata}
+                        pilotos={pilotos}
+                        member={member}
+                        setCrewMembers={setCrewMembers}
+                        crewMembers={crewMembers}
+                      />
+                    ))}
+                  </Grid>
+                </Box>
                 <Button
                   leftIcon={<FaPlus />}
                   mt={5}

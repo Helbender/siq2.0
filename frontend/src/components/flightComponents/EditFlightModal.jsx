@@ -19,13 +19,15 @@ import {
   Select,
   useToast,
   IconButton,
+  Box,
 } from "@chakra-ui/react";
-import { useState, useEffect, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import PilotInput from "./PilotInput";
 import axios from "axios";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 import { BiEdit } from "react-icons/bi";
 
@@ -33,9 +35,18 @@ function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [flightdata, setFlightdata] = useState(flight);
   const { flights, setFlights } = useContext(FlightContext);
+  const { removeToken } = useContext(AuthContext);
   const { pilotos } = useContext(UserContext);
   const { token } = useContext(AuthContext);
+  const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
+  const handleWheel = (e) => {
+    if (e.deltaY !== 0 && scrollRef.current) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
   const toast = useToast();
   // console.log(inputs);
 
@@ -89,6 +100,14 @@ function EditFlightModal({ flight }) {
     setCrewMembers([...crewMembers, { position: "", name: "" }]);
   };
   const handleEditFlight = async (id) => {
+    toast({
+      title: "A modificar o voo",
+      description: "Em processo.",
+      status: "loading",
+      duration: 10000,
+      isClosable: true,
+      position: "bottom",
+    });
     try {
       const res = await axios.patch(`/api/flights/${id}`, flightdata, {
         headers: { Authorization: "Bearer " + token },
@@ -97,6 +116,7 @@ function EditFlightModal({ flight }) {
         setFlights((prevFlights) =>
           prevFlights.map((f) => (f.id === id ? flightdata : f)),
         );
+        toast.closeAll();
         toast({
           title: "Voo modificado com sucesso",
           // description: "Por favor faça login outra vez",
@@ -107,6 +127,7 @@ function EditFlightModal({ flight }) {
       }
     } catch (error) {
       if (error.response.status === 401) {
+        toast.closeAll();
         toast({
           title: "Erro de autenticação",
           description: "Por favor faça login outra vez",
@@ -114,6 +135,8 @@ function EditFlightModal({ flight }) {
           duration: 5000,
           position: "bottom",
         });
+        removeToken();
+        navigate("/");
       }
 
       if (error.response.status === 404) {
@@ -155,7 +178,12 @@ function EditFlightModal({ flight }) {
         icon={<BiEdit />}
       />
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        scrollBehavior="inside"
+        size="full"
+      >
         <ModalOverlay />
         <ModalContent minWidth={"1200px"}>
           <ModalHeader textAlign={"center"}>Editar Modelo</ModalHeader>
@@ -446,41 +474,62 @@ function EditFlightModal({ flight }) {
                 </FormControl>
               </Flex>
               <Divider my={8} />
-              <Grid
-                alignItems={"center"}
-                // alignContent={"center"}
-                // alignSelf={"center"}
-                templateColumns="repeat(15, 1fr)"
+              <Box
+                overflowX="auto"
+                paddingBottom={5}
+                ref={scrollRef}
+                onWheel={handleWheel}
               >
-                <GridItem maxW={"100px"} textAlign={"center"}>
-                  Posição
-                </GridItem>
-                <GridItem textAlign={"center"} colSpan={2}>
-                  Nome
-                </GridItem>
-                <GridItem textAlign={"center"}>NIP</GridItem>
-                <GridItem textAlign={"center"}>ATR</GridItem>
-                <GridItem textAlign={"center"}>ATN</GridItem>
-                <GridItem textAlign={"center"}>PrecApp</GridItem>
-                <GridItem textAlign={"center"}>NPrecApp</GridItem>
-                <GridItem textAlign={"center"} colSpan={6}>
-                  Qualificações
-                </GridItem>
-                <GridItem m="auto" />
-
-                {crewMembers.map((member, index) => (
-                  <PilotInput
-                    key={index}
-                    index={index}
-                    flightdata={flightdata}
-                    setFlightdata={setFlightdata}
-                    pilotos={pilotos}
-                    member={member}
-                    setCrewMembers={setCrewMembers}
-                    crewMembers={crewMembers}
-                  />
-                ))}
-              </Grid>
+                <Grid
+                  minW="max-content"
+                  // maxWidth={"1000px"}
+                  templateColumns="repeat(17, auto)"
+                  rowGap={2}
+                  columnGap={1}
+                >
+                  <GridItem maxW={"100px"} textAlign={"center"}>
+                    Posição
+                  </GridItem>
+                  <GridItem textAlign={"center"}>Nome</GridItem>
+                  <GridItem textAlign={"center"}>NIP</GridItem>
+                  <GridItem w={"50px"} textAlign={"center"} ml={2}>
+                    VIR
+                  </GridItem>
+                  <GridItem w={"50px"} textAlign={"center"}>
+                    VN
+                  </GridItem>
+                  <GridItem w={"50px"} textAlign={"center"}>
+                    CON
+                  </GridItem>
+                  <GridItem w={"50px"} textAlign={"center"}>
+                    ATR
+                  </GridItem>
+                  <GridItem w={"50px"} textAlign={"center"}>
+                    ATN
+                  </GridItem>
+                  <GridItem w={"80px"} textAlign={"center"}>
+                    Precisão
+                  </GridItem>
+                  <GridItem w={"80px"} textAlign={"center"}>
+                    Não Precisão
+                  </GridItem>
+                  <GridItem textAlign={"center"} colSpan={6}>
+                    Qualificações
+                  </GridItem>
+                  <GridItem m="auto" />
+                  {crewMembers.map((member, index) => (
+                    <PilotInput
+                      key={index}
+                      index={index}
+                      setFlightdata={setFlightdata}
+                      pilotos={pilotos}
+                      member={member}
+                      setCrewMembers={setCrewMembers}
+                      crewMembers={crewMembers}
+                    />
+                  ))}
+                </Grid>
+              </Box>
               <Button mt={5} onClick={addCrewMember} mx="auto">
                 + Adicionar Tripulante
               </Button>
