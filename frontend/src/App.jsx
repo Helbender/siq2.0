@@ -16,8 +16,6 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage";
 
 import Header from "./layout/Header";
-import { FlightProvider } from "./Contexts/FlightsContext";
-import { UserProvider } from "./Contexts/UserContext";
 import Dashboard from "./pages/Dashboard";
 
 function App() {
