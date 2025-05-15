@@ -5,6 +5,7 @@ import {
   Input,
   Select,
   IconButton,
+  Spacer,
 } from "@chakra-ui/react";
 import { Fragment, useState } from "react";
 import { FaMinus } from "react-icons/fa";

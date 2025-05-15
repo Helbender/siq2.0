@@ -28,6 +28,7 @@ import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { BiEdit } from "react-icons/bi";
 

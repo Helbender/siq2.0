@@ -21,7 +21,7 @@ import {
   FormErrorMessage,
   Box,
 } from "@chakra-ui/react";
-import { useState, useContext, useRef, useEffect } from "react";
+import { useState, useContext, useRef, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import PilotInput from "./PilotInput";
@@ -38,6 +38,14 @@ function CreateFlightModal() {
   const { token, removeToken } = useContext(AuthContext);
   const toast = useToast();
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
+
+  const handleWheel = (e) => {
+    if (e.deltaY !== 0 && scrollRef.current) {
+      e.preventDefault();
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
   const scrollRef = useRef(null);
 
   const handleWheel = (e) => {

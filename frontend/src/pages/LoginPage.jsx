@@ -18,7 +18,7 @@ import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../Contexts/AuthContext";
 
 function LoginPage() {
-  const { setToken } = useContext(AuthContext);
+  const { setToken, getUser } = useContext(AuthContext);
 
   const [loginForm, setloginForm] = useState({
     nip: "",
