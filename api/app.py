@@ -32,7 +32,7 @@ application = app  # to work with CPANEL PYTHON APPS
 if APPLY_CORS:
     CORS(
         app,
-        origins="http://localhost:5173",
+        origins="https://siq-react-vite.onrender.com/",
         allow_headers=[
             "Content-Type",
             "Authorization",

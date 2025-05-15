@@ -30,6 +30,7 @@ import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/api";
 
 function CreateFlightModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -120,7 +121,7 @@ function CreateFlightModal() {
     });
     console.log(data);
     try {
-      const res = await axios.post("/api/flights", data, {
+      const res = await api.post("/api/flights", data, {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.status === 201) {

@@ -4,6 +4,7 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CrewCard from "../components/crewComponents/CrewCard";
+import api from "../utils/api";
 
 const Crew = () => {
   const [crew, setCrew] = useState([]);
@@ -13,7 +14,7 @@ const Crew = () => {
 
   async function getSavedCrew() {
     try {
-      const response = await axios.get("/api/crew", {
+      const response = await api.get("/api/crew", {
         headers: { Authorization: "Bearer " + token },
       });
       setCrew(response.data || []);

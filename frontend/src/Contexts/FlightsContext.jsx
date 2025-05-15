@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
-import axios from "axios";
 import { AuthContext } from "../Contexts/AuthContext";
+import api from "../utils/api";
 
 // Create the context
 export const FlightContext = createContext();
@@ -13,7 +13,7 @@ export const FlightProvider = ({ children }) => {
 
   const getSavedFlights = async () => {
     try {
-      const response = await axios.get("/api/flights", {
+      const response = await api.get("/api/flights", {
         headers: { Authorization: "Bearer " + token },
       });
       setFlights(response.data || []);
