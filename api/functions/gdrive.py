@@ -95,30 +95,52 @@ def enviar_para_drive(mem_pdf: io.BytesIO, nome_ficheiro: str, id_pasta: str):
 
 
 # Função para enviar dados diretamente para o Google Drive
-def enviar_dados_para_pasta(service, dados, nome_arquivo_drive, id_pasta):
-    # Criar os dados como um objeto em memória
-    dados_binarios = base64.b64encode(json.dumps(dados).encode("utf-8"))
-    buffer = io.BytesIO(dados_binarios)
+def enviar_json_para_pasta(dados, nome_arquivo, id_pasta):
+    # Carrega credenciais do arquivo JSON
+    credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
 
-    # Metadata do arquivo, incluindo o ID da pasta
-    file_metadata = {
-        "name": nome_arquivo_drive,
-        "parents": [id_pasta],  # Especifica a pasta de destino
-    }
+    # Cria o cliente para a API do Drive
+    service = build("drive", "v3", credentials=credentials)
 
-    # Fazer upload do arquivo
-    media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
-    arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    # Converte os dados JSON para um stream de bytes
+    json_bytes = io.BytesIO(json.dumps(dados, indent=4).encode("utf-8"))
 
-    print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
+    # Upload como JSON
+    media = MediaIoBaseUpload(json_bytes, mimetype="application/json", resumable=False)
+
+    query = f"name = '{nome_arquivo}' and '{id_pasta}' in parents and trashed = false"
+    response = service.files().list(q=query, spaces="drive", fields="files(id, name)").execute()
+    files = response.get("files", [])
+
+    if files:
+        # Ficheiro já existe — faz update
+        file_id = files[0]["id"]
+        file = service.files().update(fileId=file_id, media_body=media).execute()
+        print(f"Ficheiro existente atualizado! ID: {file.get('id')}")
+    else:
+        # Define os metadados do ficheiro
+        file_metadata = {
+            "name": nome_arquivo,  # Ex: "meus_dados.json"
+            "parents": [id_pasta],  # ID da pasta de destino
+            "mimeType": "application/json",  # Tipo de ficheiro correto
+        }
+
+        # Ficheiro não existe — cria novo
+        file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        print(f"Ficheiro novo criado! ID: {file.get('id')}")
+
+    # # Cria o ficheiro no Google Drive
+    # arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    # print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
 
 
 def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: str):
-    """
-    Faz o upload de um arquivo ao Google Drive usando Service Account.
-    :param service_account_json_path: Caminho para o arquivo JSON da conta de serviço
-    :param file_name: Nome do arquivo no Drive
-    :param file_path: Caminho local do arquivo
+    """Uploads Flight JSON encoded data to Google Drive.
+
+    Args:
+        dados (dict): Dados do voo a serem enviados.
+        nome_arquivo_drive (str): Nome do arquivo a ser criado no Google Drive.
+        id_pasta (str): Id da pasta do Google Drive base onde o arquivo será enviado.
     """
     # Carrega credenciais do arquivo JSON
     credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
@@ -131,8 +153,6 @@ def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: 
     nome_pasta_dia: str = data[:2]
     nome_pasta_mes: str = data[2:5]
     nome_pasta_ano: str = data[-4:]
-    # Retira o mês do nome do ficheiro
-    # Retira o dia do nome do ficheiro
 
     # 2) Garante que a pasta do ano exista dentro da pasta raiz
     pasta_ano_id = get_or_create_folder(service, id_pasta, nome_pasta_ano)
@@ -149,16 +169,6 @@ def upload_with_service_account(dados: dict, nome_arquivo_drive: str, id_pasta: 
     media = MediaIoBaseUpload(buffer, mimetype="application/octet-stream", resumable=True)
 
     check_dublicates_and_sends(nome_arquivo_drive, service, pasta_dia_id, media)
-
-    # # Metadados do arquivo
-    # file_metadata = {
-    #     "name": nome_arquivo_drive,
-    #     "parents": [pasta_dia_id],  # Especifica a pasta de destino
-    # }
-    # # Faz o upload
-    # arquivo = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-
-    # print(f"Arquivo enviado com sucesso para a pasta. ID do arquivo: {arquivo.get('id')}")
 
 
 def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:

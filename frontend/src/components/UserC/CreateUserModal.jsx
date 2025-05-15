@@ -64,7 +64,15 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       toast({ title: "User created successfully", status: "success" });
 
       setPilotos([...pilotos, res.data]);
-      setInputs([]);
+      setInputs({
+        rank: "",
+        nip: "",
+        name: "",
+        email: "",
+        position: "Default",
+        admin: false,
+        squadron: "502 - Elefantes",
+      });
       onClose();
     } catch (error) {
       toast({ title: "Error saving user", status: "error" });
@@ -235,14 +243,13 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                       <FormLabel textAlign={"center"}>Admin</FormLabel>
                       <Switch
                         name="admin"
-                        isChecked={inputs?.admin ? inputs.admin : false}
-                        onChange={(e) => {
+                        isChecked={inputs.admin}
+                        onChange={(e) =>
                           setInputs((prev) => ({
                             ...prev,
                             admin: e.target.checked,
-                          }));
-                          console.log(inputs);
-                        }}
+                          }))
+                        }
                       />
                     </FormControl>
                   ) : null}

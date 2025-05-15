@@ -17,6 +17,7 @@ import UserManagementPage from "./pages/UserManagementPage";
 
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
+import FileUpload from "./components/FileUpload";
 
 function App() {
   const { token, removeToken, setToken } = useContext(AuthContext);
@@ -46,6 +47,7 @@ function App() {
             <Route index element={<Navigate replace to="flights" />} />
             <Route path="/flights" index element={<Flights />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/fileupload" index element={<FileUpload />} />
             <Route path="/users" element={<UserManagementPage />} />
 
             <Route path="/" element={<Master />}>

@@ -24,6 +24,7 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import FileUpload from "../components/FileUpload";
 
 function UserManagementPage() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ function UserManagementPage() {
   const displayAsTable = useBreakpointValue({ base: false, xl: true });
   const sendEmail = useSendEmail();
   const toast = useToast();
+  console.log(pilotos);
 
   const User = getUser();
   const checkToken = () => {
@@ -148,7 +150,8 @@ function UserManagementPage() {
             <UserDataCard m={5} key={user.nip} user={user} />
           ))}
         </Grid>
-      )}{" "}
+      )}
+      <FileUpload />
     </Container>
   );
 }
