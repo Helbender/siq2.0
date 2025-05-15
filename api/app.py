@@ -30,22 +30,22 @@ application = app  # to work with CPANEL PYTHON APPS
 
 
 if APPLY_CORS:
+    # CORS(
+    #     app,
+    #     origins="http://0.0.0.0:5173",
+    #     allow_headers=[
+    #         "Content-Type",
+    #         "Authorization",
+    #         "Access-Control-Allow-Credentials",
+    #         "Access-Control-Allow-Origin",
+    #     ],
+    #     supports_credentials=True,
+    # )
     CORS(
         app,
-        origins="http://0.0.0.0:5173",
-        allow_headers=[
-            "Content-Type",
-            "Authorization",
-            "Access-Control-Allow-Credentials",
-            "Access-Control-Allow-Origin",
-        ],
+        origins="https://siq-react-vite.onrender.com",
         supports_credentials=True,
     )
-#     CORS(
-#     app,
-#     origins="https://siq-react-vite.onrender.com",
-#     supports_credentials=True,
-# )
 
 # apli login routes
 # @app.after_request
