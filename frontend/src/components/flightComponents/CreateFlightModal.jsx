@@ -20,12 +20,12 @@ import {
   useToast,
   FormErrorMessage,
   Box,
+  Center,
 } from "@chakra-ui/react";
-import { useState, useContext, useRef, useEffect, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import PilotInput from "./PilotInput";
-import axios from "axios";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
@@ -35,11 +35,11 @@ import api from "../../utils/api";
 function CreateFlightModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { flights, setFlights } = useContext(FlightContext);
-  const { pilotos } = useContext(UserContext);
   const { token, removeToken } = useContext(AuthContext);
-  const toast = useToast();
+  const { pilotos } = useContext(UserContext);
+  const scrollRef = useRef(null);
   const navigate = useNavigate();
-  const scrollRef = useRef(null);
+  const toast = useToast();
 
   const handleWheel = (e) => {
     if (e.deltaY !== 0 && scrollRef.current) {
@@ -47,14 +47,7 @@ function CreateFlightModal() {
       scrollRef.current.scrollLeft += e.deltaY;
     }
   };
-  const scrollRef = useRef(null);
 
-  const handleWheel = (e) => {
-    if (e.deltaY !== 0 && scrollRef.current) {
-      e.preventDefault();
-      scrollRef.current.scrollLeft += e.deltaY;
-    }
-  };
   const {
     register,
     handleSubmit,
@@ -77,14 +70,18 @@ function CreateFlightModal() {
     ATD: "",
     ATA: "",
     ATE: "",
-    tailNumber: "",
-    totalLandings: "",
-    passengers: "",
-    doe: "",
-    cargo: "",
+    tailNumber: 0,
+    totalLandings: 0,
+    passengers: 0,
+    doe: 0,
+    cargo: 0,
     numberOfCrew: crewMembers.length,
-    orm: "",
-    fuel: "",
+    orm: 0,
+    fuel: 0,
+    activationFirst: "",
+    activationLast: "",
+    readyAC: "",
+    medArrival: "",
   });
 
   const addCrewMember = () => {
@@ -297,11 +294,7 @@ function CreateFlightModal() {
                         }
                       />
                     </FormControl>
-                    <FormControl
-                      // ml={"5"}
-                      // maxWidth={"90px"}
-                      maxW={"fit-content"}
-                    >
+                    <FormControl maxW={"fit-content"}>
                       <FormLabel textAlign={"center"}>ATD</FormLabel>
                       <Input
                         // as="text"
@@ -434,12 +427,6 @@ function CreateFlightModal() {
                         textAlign={"center"}
                         type="number"
                         value={flightdata.numberOfCrew}
-                        // onChange={(e) =>
-                        //   setFlightdata({
-                        //     ...flightdata,
-                        //     numberOfCrew: e.target.value,
-                        //   })
-                        // }
                         isReadOnly
                       />
                     </FormControl>
@@ -512,6 +499,74 @@ function CreateFlightModal() {
                     </FormControl>
                   </Flex>
                 </Flex>
+                <Center
+                  mt="5"
+                  gap={"5"}
+                  direction={{ base: "column", lg: "row" }}
+                  alignItems={"center"}
+                  alignContent={"center"}
+                >
+                  <FormControl maxW={"fit-content"}>
+                    <FormLabel textAlign={"center"}>ACT 1º</FormLabel>
+                    <Input
+                      // as="text"
+                      name="activationFirst"
+                      type="time"
+                      value={flightdata.activationFirst}
+                      onChange={(e) =>
+                        setFlightdata({
+                          ...flightdata,
+                          activationFirst: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl maxW={"fit-content"}>
+                    <FormLabel textAlign={"center"}>ACT Ult.</FormLabel>
+                    <Input
+                      // as="text"
+                      name="activationLast"
+                      type="time"
+                      value={flightdata.activationLast}
+                      onChange={(e) =>
+                        setFlightdata({
+                          ...flightdata,
+                          activationLast: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl maxW={"fit-content"}>
+                    <FormLabel textAlign={"center"}>AC Pronta</FormLabel>
+                    <Input
+                      // as="text"
+                      name="readyAC"
+                      type="time"
+                      value={flightdata.readyAC}
+                      onChange={(e) =>
+                        setFlightdata({
+                          ...flightdata,
+                          readyAC: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl maxW={"fit-content"}>
+                    <FormLabel textAlign={"center"}>Equipa Med</FormLabel>
+                    <Input
+                      textAlign={"center"}
+                      name="medArrival"
+                      type="time"
+                      value={flightdata.medArrival}
+                      onChange={(e) =>
+                        setFlightdata({
+                          ...flightdata,
+                          medArrival: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                </Center>
                 <Divider my={8} />
                 <Box
                   overflowX="auto"

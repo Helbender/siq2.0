@@ -1,7 +1,4 @@
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 import os
 import io
@@ -31,156 +28,156 @@ tradutor2 = {
 }
 
 
-def criar_pdf_memoria(dados_voo: dict, nome_arquivo: str = None) -> io.BytesIO:
-    """Cria PDF com os dados do voo e tripulantes.
+# def criar_pdf_memoria(dados_voo: dict, nome_arquivo: str = None) -> io.BytesIO:
+#     """Cria PDF com os dados do voo e tripulantes.
 
-    Args:
-        dados_voo (dict): JSON vindo do frontend com os dados do voo.
-        nome_arquivo (str, optional): Nome do arquivo local para teste da função. Defaults to None.
+#     Args:
+#         dados_voo (dict): JSON vindo do frontend com os dados do voo.
+#         nome_arquivo (str, optional): Nome do arquivo local para teste da função. Defaults to None.
 
-    Returns:
-        io.BytesIO: Buffer com o PDF gerado para enviar para o GDrive
-    """
+#     Returns:
+#         io.BytesIO: Buffer com o PDF gerado para enviar para o GDrive
+#     """
 
-    pagina = landscape(A4)
-    largura_total, altura_total = pagina
+#     pagina = landscape(A4)
+#     largura_total, altura_total = pagina
 
-    # *Verifica se o nome do arquivo foi fornecido:
-    # * Existe para testar a função fora da aplicação e ver o resultado
-    if nome_arquivo:
-        doc = SimpleDocTemplate(nome_arquivo, pagesize=pagina)
-    else:
-        buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=pagina)
-    elementos = []
-    estilos = getSampleStyleSheet()
+#     # *Verifica se o nome do arquivo foi fornecido:
+#     # * Existe para testar a função fora da aplicação e ver o resultado
+#     if nome_arquivo:
+#         doc = SimpleDocTemplate(nome_arquivo, pagesize=pagina)
+#     else:
+#         buffer = io.BytesIO()
+#         doc = SimpleDocTemplate(buffer, pagesize=pagina)
+#     elementos = []
+#     estilos = getSampleStyleSheet()
 
-    # ----- Cabeçalho com logotipo -----
-    def desenhar_cabecalho(canvas_obj, doc):
-        caminho_logotipo = os.path.join(os.path.dirname(__file__), "Esquadra_502.png")
-        canvas_obj.saveState()
-        if caminho_logotipo and os.path.isfile(caminho_logotipo):
-            canvas_obj.drawImage(
-                caminho_logotipo,
-                x=2 * cm,
-                y=altura_total - 2.5 * cm,
-                width=3 * cm,
-                height=2 * cm,
-                preserveAspectRatio=True,
-            )
-        canvas_obj.setFont("Helvetica", 30)
-        canvas_obj.drawString(largura_total / 2 - 4 * cm, altura_total - 1.5 * cm, "Relatório de Voo")
-        canvas_obj.restoreState()
+#     # ----- Cabeçalho com logotipo -----
+#     def desenhar_cabecalho(canvas_obj, doc):
+#         caminho_logotipo = os.path.join(os.path.dirname(__file__), "Esquadra_502.png")
+#         canvas_obj.saveState()
+#         if caminho_logotipo and os.path.isfile(caminho_logotipo):
+#             canvas_obj.drawImage(
+#                 caminho_logotipo,
+#                 x=2 * cm,
+#                 y=altura_total - 2.5 * cm,
+#                 width=3 * cm,
+#                 height=2 * cm,
+#                 preserveAspectRatio=True,
+#             )
+#         canvas_obj.setFont("Helvetica", 30)
+#         canvas_obj.drawString(largura_total / 2 - 4 * cm, altura_total - 1.5 * cm, "Relatório de Voo")
+#         canvas_obj.restoreState()
 
-    # Título da primeira tabela
-    elementos.append(Spacer(1, 24))
-    elementos.append(Paragraph("Dados do Voo", estilos["Heading2"]))
-    elementos.append(Spacer(1, 12))
+#     # Título da primeira tabela
+#     elementos.append(Spacer(1, 24))
+#     elementos.append(Paragraph("Dados do Voo", estilos["Heading2"]))
+#     elementos.append(Spacer(1, 12))
 
-    # Converter dados do voo para tabela
-    tabela_voo = []
-    cabecalhos_voo = [item for item in tradutor.values()]
-    tabela_voo.append(cabecalhos_voo)
-    tabela_voo.append([dados_voo[item] for item in tradutor.keys()])
+#     # Converter dados do voo para tabela
+#     tabela_voo = []
+#     cabecalhos_voo = [item for item in tradutor.values()]
+#     tabela_voo.append(cabecalhos_voo)
+#     tabela_voo.append([dados_voo[item] for item in tradutor.keys()])
 
-    largura_coluna_voo = largura_total * 0.9
-    tabela1 = Table(tabela_voo, colWidths=[80, 90, 50, 110, 80, 50, 50, 50, 70, 70])
-    tabela1.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-                ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 0), (-1, -1), 11),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-            ]
-        )
-    )
-    elementos.append(tabela1)
-    elementos.append(Spacer(1, 24))
+#     largura_coluna_voo = largura_total * 0.9
+#     tabela1 = Table(tabela_voo, colWidths=[80, 90, 50, 110, 80, 50, 50, 50, 70, 70])
+#     tabela1.setStyle(
+#         TableStyle(
+#             [
+#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
+#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
+#             ]
+#         )
+#     )
+#     elementos.append(tabela1)
+#     elementos.append(Spacer(1, 24))
 
-    tabela_voo = []
-    cabecalhos_voo = [item for item in tradutor2.values()]
-    tabela_voo.append(cabecalhos_voo)
-    tabela_voo.append([dados_voo[item] for item in tradutor2.keys()])
+#     tabela_voo = []
+#     cabecalhos_voo = [item for item in tradutor2.values()]
+#     tabela_voo.append(cabecalhos_voo)
+#     tabela_voo.append([dados_voo[item] for item in tradutor2.keys()])
 
-    largura_coluna_voo = largura_total * 0.9
-    proporção = [0.15, 0.15, 0.05, 0.1, 0.2, 0.05, 0.1]
-    tabela2 = Table(tabela_voo, colWidths=[largura_coluna_voo * p for p in proporção])
-    tabela2.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-                ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 0), (-1, -1), 11),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-            ]
-        )
-    )
-    elementos.append(tabela2)
-    elementos.append(Spacer(1, 24))
-    # Título da segunda tabela
-    elementos.append(Paragraph("Tripulação", estilos["Heading2"]))
-    elementos.append(Spacer(1, 12))
+#     largura_coluna_voo = largura_total * 0.9
+#     proporção = [0.15, 0.15, 0.05, 0.1, 0.2, 0.05, 0.1]
+#     tabela2 = Table(tabela_voo, colWidths=[largura_coluna_voo * p for p in proporção])
+#     tabela2.setStyle(
+#         TableStyle(
+#             [
+#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
+#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
+#             ]
+#         )
+#     )
+#     elementos.append(tabela2)
+#     elementos.append(Spacer(1, 24))
+#     # Título da segunda tabela
+#     elementos.append(Paragraph("Tripulação", estilos["Heading2"]))
+#     elementos.append(Spacer(1, 12))
 
-    # Cabeçalhos da tripulação
-    cabecalhos = [
-        "NIP",
-        "NOME",
-        "FUNÇÃO",
-        "VIR",
-        "VN",
-        "CON",
-        "ATR",
-        "ATN",
-        # "QUAL1",
-        # "QUAL2",
-        # "QUAL3",
-        # "QUAL4",
-        # "QUAL5",
-        # "QUAL6",
-    ]
-    tabela_tripulacao = [cabecalhos]
+#     # Cabeçalhos da tripulação
+#     cabecalhos = [
+#         "NIP",
+#         "NOME",
+#         "FUNÇÃO",
+#         "VIR",
+#         "VN",
+#         "CON",
+#         "ATR",
+#         "ATN",
+#         # "QUAL1",
+#         # "QUAL2",
+#         # "QUAL3",
+#         # "QUAL4",
+#         # "QUAL5",
+#         # "QUAL6",
+#     ]
+#     tabela_tripulacao = [cabecalhos]
 
-    for membro in dados_voo["flight_pilots"]:
-        tabela_tripulacao.append(
-            [
-                membro.get("nip", ""),
-                membro.get("name", ""),
-                membro.get("position", ""),
-                membro.get("VIR", ""),
-                membro.get("VN", ""),
-                membro.get("CON", ""),
-                membro.get("ATR", ""),
-                membro.get("ATN", ""),
-                membro.get("QUAL1", ""),
-                membro.get("QUAL2", ""),
-                membro.get("QUAL3", ""),
-                membro.get("QUAL4", ""),
-                membro.get("QUAL5", ""),
-                membro.get("QUAL6", ""),
-            ]
-        )
+#     for membro in dados_voo["flight_pilots"]:
+#         tabela_tripulacao.append(
+#             [
+#                 membro.get("nip", ""),
+#                 membro.get("name", ""),
+#                 membro.get("position", ""),
+#                 membro.get("VIR", ""),
+#                 membro.get("VN", ""),
+#                 membro.get("CON", ""),
+#                 membro.get("ATR", ""),
+#                 membro.get("ATN", ""),
+#                 membro.get("QUAL1", ""),
+#                 membro.get("QUAL2", ""),
+#                 membro.get("QUAL3", ""),
+#                 membro.get("QUAL4", ""),
+#                 membro.get("QUAL5", ""),
+#                 membro.get("QUAL6", ""),
+#             ]
+#         )
 
-    tabela2 = Table(tabela_tripulacao, colWidths=[50, 110, 60, 50, 50, 50, 50, 50, 40, 40, 40, 40, 40, 40])
-    tabela2.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
-                ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 0), (-1, -1), 11),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-            ]
-        )
-    )
-    elementos.append(tabela2)
+#     tabela2 = Table(tabela_tripulacao, colWidths=[50, 110, 60, 50, 50, 50, 50, 50, 40, 40, 40, 40, 40, 40])
+#     tabela2.setStyle(
+#         TableStyle(
+#             [
+#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
+#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
+#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
+#             ]
+#         )
+#     )
+#     elementos.append(tabela2)
 
-    doc.build(elementos, onFirstPage=desenhar_cabecalho)
-    if not nome_arquivo:
-        buffer.seek(0)
-        return buffer
+#     doc.build(elementos, onFirstPage=desenhar_cabecalho)
+#     if not nome_arquivo:
+#         buffer.seek(0)
+#         return buffer
 
 
 def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
@@ -217,12 +214,23 @@ def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
 
     c.setFont("Helvetica", 8)
     c.drawString(348, 450, f"{dados_voo.get('date', '')}")
-    c.setFont("Helvetica", 6)
 
+    c.setFont("Helvetica", 6)
     c.drawString(122, 450, f"{dados_voo.get('flightType', '')}")
     c.drawString(148, 450, f"{dados_voo.get('flightAction', '')}")
 
-    c.setFont("Helvetica", 10)
+    if dados_voo.get("Ativação 1º", "__:__") != "__:__":
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(700, 575, "Ativação 1º:")
+        c.drawString(700, 550, "Ativação Ult:")
+        c.drawString(700, 525, "AC Pronta:")
+        c.drawString(700, 500, "Equipa Médica:")
+        c.setFont("Helvetica", 10)
+        c.drawString(775, 575, f"{dados_voo.get('Ativação 1º', '__:__')}")
+        c.drawString(775, 550, f"{dados_voo.get('Ativação Ult', '__:__')}")
+        c.drawString(775, 525, f"{dados_voo.get('AC Pronta', '__:__')}")
+        c.drawString(775, 500, f"{dados_voo.get('Equipa Médica', '__:__')}")
+
     c.drawString(78, 450, f"{dados_voo.get('airtask', '')}")
 
     c.setFont("Helvetica", 12)
@@ -319,6 +327,10 @@ if __name__ == "__main__":
         "numberOfCrew": 7,
         "orm": 28,
         "fuel": 4000,
+        "Ativação 1º": "10:00",
+        "Ativação Ult": "10:00",
+        "AC Pronta": "10:00",
+        "Equipa Médica": "10:00",
         "flight_pilots": [
             {
                 "name": "Tiago Branco",

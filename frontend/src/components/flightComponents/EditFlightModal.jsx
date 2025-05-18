@@ -20,14 +20,13 @@ import {
   useToast,
   IconButton,
   Box,
+  Center,
 } from "@chakra-ui/react";
 import { useState, useRef, useContext } from "react";
 import PilotInput from "./PilotInput";
-import axios from "axios";
 import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
-import { useNavigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 import { BiEdit } from "react-icons/bi";
@@ -42,6 +41,7 @@ function EditFlightModal({ flight }) {
   const { token } = useContext(AuthContext);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleWheel = (e) => {
     if (e.deltaY !== 0 && scrollRef.current) {
@@ -49,7 +49,6 @@ function EditFlightModal({ flight }) {
       scrollRef.current.scrollLeft += e.deltaY;
     }
   };
-  const toast = useToast();
   // console.log(inputs);
 
   const [crewMembers, setCrewMembers] = useState(
@@ -154,21 +153,6 @@ function EditFlightModal({ flight }) {
       console.log(error.response);
     }
   };
-  // const getSavedPilots = async () => {
-  //   try {
-  //     const res = await axios.get("/api/users", {
-  //       headers: { Authorization: "Bearer " + token },
-  //     });
-  //     // console.log(res);
-  //     setPilotos(res.data || []);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getSavedPilots();
-  //   // console.log(flight);
-  // }, []);
 
   return (
     <>
@@ -404,15 +388,11 @@ function EditFlightModal({ flight }) {
                 <FormControl>
                   <FormLabel textAlign={"center"}>Nº Tripulantes</FormLabel>
                   <Input
+                    bg={"whiteAlpha.100"}
                     textAlign={"center"}
                     type="number"
                     value={flightdata.numberOfCrew}
-                    onChange={(e) =>
-                      setFlightdata({
-                        ...flightdata,
-                        numberOfCrew: e.target.value,
-                      })
-                    }
+                    isReadOnly
                   />
                 </FormControl>
                 <FormControl>
@@ -475,6 +455,74 @@ function EditFlightModal({ flight }) {
                   />
                 </FormControl>
               </Flex>
+              <Center
+                mt="5"
+                gap={"5"}
+                direction={{ base: "column", lg: "row" }}
+                alignItems={"center"}
+                alignContent={"center"}
+              >
+                <FormControl maxW={"fit-content"}>
+                  <FormLabel textAlign={"center"}>ACT 1º</FormLabel>
+                  <Input
+                    // as="text"
+                    name="activationFirst"
+                    type="time"
+                    value={flightdata.activationFirst}
+                    onChange={(e) =>
+                      setFlightdata({
+                        ...flightdata,
+                        activationFirst: e.target.value,
+                      })
+                    }
+                  />
+                </FormControl>
+                <FormControl maxW={"fit-content"}>
+                  <FormLabel textAlign={"center"}>ACT Ult.</FormLabel>
+                  <Input
+                    // as="text"
+                    name="activationLast"
+                    type="time"
+                    value={flightdata.activationLast}
+                    onChange={(e) =>
+                      setFlightdata({
+                        ...flightdata,
+                        activationLast: e.target.value,
+                      })
+                    }
+                  />
+                </FormControl>
+                <FormControl maxW={"fit-content"}>
+                  <FormLabel textAlign={"center"}>AC Pronta</FormLabel>
+                  <Input
+                    // as="text"
+                    name="readyAC"
+                    type="time"
+                    value={flightdata.readyAC}
+                    onChange={(e) =>
+                      setFlightdata({
+                        ...flightdata,
+                        readyAC: e.target.value,
+                      })
+                    }
+                  />
+                </FormControl>
+                <FormControl maxW={"fit-content"}>
+                  <FormLabel textAlign={"center"}>Equipa Med</FormLabel>
+                  <Input
+                    textAlign={"center"}
+                    name="medArrival"
+                    type="time"
+                    value={flightdata.medArrival}
+                    onChange={(e) =>
+                      setFlightdata({
+                        ...flightdata,
+                        medArrival: e.target.value,
+                      })
+                    }
+                  />
+                </FormControl>
+              </Center>
               <Divider my={8} />
               <Box
                 overflowX="auto"

@@ -34,17 +34,15 @@ def retrieve_flights() -> tuple[Response, int]:
     # Retrieve all flights from db
     if request.method == "GET":
         start_time = time.perf_counter()
-        print("Getting FLIGHTS from DB")
         flights: list = []
 
         with Session(engine) as session:
             stmt = select(Flight).order_by(Flight.date.desc())
             flights_obj = session.execute(stmt).scalars()
-            print("Flights READY")
             # Iterates through flights and creates JSON response
             # flights = [row.to_json() for row in flights_obj]  # Flight main data to JSON
             for row in flights_obj:
-                # print(row.to_json())
+                print(row.to_json())
                 flights.append(row.to_json())  # Flight main data to JSON
 
         end_time = time.perf_counter()
@@ -56,7 +54,8 @@ def retrieve_flights() -> tuple[Response, int]:
         verify_jwt_in_request()
 
         f: dict = request.get_json()
-        # print(f)
+        for k, v in f.items():
+            print(f"{k}: {v}")
         flight = Flight(
             airtask=f["airtask"],
             date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
@@ -75,6 +74,10 @@ def retrieve_flights() -> tuple[Response, int]:
             number_of_crew=f["numberOfCrew"],
             orm=f["orm"],
             fuel=f["fuel"],
+            activation_first=f["activationFirst"],
+            activation_last=f["activationLast"],
+            ready_ac=f["readyAC"],
+            med_arrival=f["medArrival"],
         )
 
         with Session(engine, autoflush=False) as session:
@@ -94,6 +97,7 @@ def retrieve_flights() -> tuple[Response, int]:
                 session.commit()
                 nome_arquivo_voo = flight.get_file_name()
                 nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
+
         # Lançar a tarefa de envio em background
         Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
 
@@ -129,6 +133,10 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             flight.number_of_crew = (f["numberOfCrew"],)
             flight.orm = (f["orm"],)
             flight.fuel = (f["fuel"],)
+            flight.activation_first = (f["activationFirst"],)
+            flight.activation_last = (f["activationLast"],)
+            flight.ready_ac = (f["readyAC"],)
+            flight.med_arrival = (f["medArrival"],)
 
             pilot: dict
 
@@ -209,7 +217,7 @@ def update_qualifications(
                 .join(FlightPilots)
                 .where(FlightPilots.pilot_id == tripulante.pilot_id)
                 .where(Flight.fid != flight_id)
-                .where(getattr(FlightPilots, field) != 0),
+                .where(getattr(FlightPilots, field) != False),
             ).scalar_one_or_none()
 
             # Check if Date is None so to set a base Date
@@ -235,7 +243,7 @@ def update_qualifications(
                 # .where(Flight.flight_crew.any(pilot_id=tripulante.crew_id))
                 .where(FlightCrew.crew_id == tripulante.crew_id)
                 .where(Flight.fid != flight_id)
-                .where(getattr(FlightCrew, field) != 0),
+                .where(getattr(FlightCrew, field) != False),
             ).scalar_one_or_none()
             # last_qualification_date = (
             #     session.query(func.max(Flight.date))

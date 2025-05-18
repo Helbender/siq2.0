@@ -23,7 +23,7 @@ import EditFlightModal from "./EditFlightModal";
 
 const FlightCard = ({ flight }) => {
   const { colorMode } = useColorMode();
-
+  console.log(flight);
   return (
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
       <CardHeader>
@@ -101,8 +101,30 @@ const FlightCard = ({ flight }) => {
               text={`De ${flight.origin} para ${flight.destination}`}
             />
           </Stack>
+          {flight.activationFirst === "__:__" ? null : (
+            <>
+              <Spacer />
+              <Stack>
+                <StyledText
+                  query={"Ativação 1º:"}
+                  text={`Ativação 1º: ${flight.activationFirst}`}
+                />
+                <StyledText
+                  query={"Ativação Ult:"}
+                  text={`Ativação Ult: ${flight.activationLast}`}
+                />
+                <StyledText
+                  query={"AC Pronta:"}
+                  text={`AC Pronta: ${flight.readyAC}`}
+                />
+                <StyledText
+                  query={"Equipa Med.:"}
+                  text={`Equipa Med.: ${flight.medArrival}`}
+                />
+              </Stack>
+            </>
+          )}
         </Flex>
-        {/* </Stack> */}
         <Divider my="5" />
         <TableContainer>
           <Table size={"sm"}>

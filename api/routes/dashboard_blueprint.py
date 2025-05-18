@@ -31,7 +31,7 @@ def send_data() -> tuple[Response | dict[str, str], int]:
         # Get the last year in the database
         last_year = session.execute(select(func.max(year_init)).select_from(Pilot)).scalar()
 
-        # Get the number of pilots
+        # Get the number of pilots0
         pilots = session.execute(select(func.count()).select_from(Pilot)).scalar()
 
         # Get the number of crew members
@@ -46,7 +46,9 @@ def send_data() -> tuple[Response | dict[str, str], int]:
         ).scalar()
         print(f"Number of flights in 2025: {flights}")
 
-    mydict: dict = is_pilot_qualified()
+    alerta: dict = is_pilot_qualified("Alerta")
+    vrp: dict = is_pilot_qualified("VRP")
+    cur: dict = is_pilot_qualified("Currencies")
 
     data: dict = {
         "numberUser": [
@@ -54,9 +56,17 @@ def send_data() -> tuple[Response | dict[str, str], int]:
             {"name": "OCs", "value": crew},
             {"name": "Usuários", "value": users},
         ],
-        "qualified": [
-            {"name": "Qualificados", "value": mydict["qualificados"]},
-            {"name": "Não qualificados", "value": mydict["nao_qualificados"]},
+        "alerta": [
+            {"name": "Qualificados", "value": alerta["qualificados"]},
+            {"name": "Não qualificados", "value": alerta["nao_qualificados"]},
+        ],
+        "vrp": [
+            {"name": "Qualificados", "value": vrp["qualificados"]},
+            {"name": "Não qualificados", "value": vrp["nao_qualificados"]},
+        ],
+        "currencies": [
+            {"name": "Qualificados", "value": cur["qualificados"]},
+            {"name": "Não qualificados", "value": cur["nao_qualificados"]},
         ],
         "flights": flights,
     }
@@ -64,7 +74,7 @@ def send_data() -> tuple[Response | dict[str, str], int]:
     return jsonify(data), 200
 
 
-def is_pilot_qualified():
+def is_pilot_qualified(type_qual):
     with Session(engine) as session:
         result: list = []
         stmt = select(Pilot).order_by(Pilot.nip)
@@ -75,8 +85,9 @@ def is_pilot_qualified():
         não_qualificados: int = 0
 
         for i in result:
-            print(i.qualification.is_qualified())
-            if i.qualification.is_qualified():
+            # print(f"\nNome: {i.name}")
+            # print(i.qualification.is_qualified())
+            if i.qualification.is_qualified(type_qual):
                 qualificados += 1
             else:
                 não_qualificados += 1

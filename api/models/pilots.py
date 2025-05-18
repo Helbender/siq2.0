@@ -55,11 +55,21 @@ class Qualification(Base):
     last_prec_app: Mapped[str] = mapped_column(String(55), default=date_init)
     last_nprec_app: Mapped[str] = mapped_column(String(55), default=date_init)
 
-    last_qa1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_qa2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_bsp1_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_bsp2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
-    last_ta_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
+    last_qa1_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_qa2_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_bsp1_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_bsp2_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_ta_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
     last_vrp1_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
@@ -81,32 +91,32 @@ class Qualification(Base):
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
 
-    def is_qualified(self) -> bool:
+    def is_qualified(self, type_qual) -> bool:
         """Checks all qualifications and returns True if all are valid.
 
         Returns:
             bool: True if all qualifications are valid, False otherwise.
         """
-        attr_list = [column.name for column in self.__table__.columns]
-        attr_list = attr_list[5:]
-        for item in attr_list:
-            print(f"Item: {item}")
-            print(getattr(self, item))
-            print((getattr(self, item) - date.today()).days + 180)
-            # if item in ["last_cto_date", "last_sid_date", "last_mono_date", "last_nfp_date"]:
-            if (getattr(self, item) - date.today()).days + 180 < 0:
-                return False
-            # elif item in [
-            #     "last_qa1_date",
-            #     "last_qa2_date",
-            #     "last_bsp1_date",
-            #     "last_bsp2_date",
-            #     "last_ta_date",
-            #     "last_vrp1_date",
-            #     "last_vrp2_date",
-            # ]:
-            #     if (date.today() - getattr(self, item)).days > 180:
-            #         return False
+        # attr_list = [column.name for column in self.__table__.columns]
+        # attr_list = attr_list[5:]
+        # print(attr_list)
+        match type_qual:
+            case "Alerta":
+                for item in ["last_qa1_date", "last_qa2_date", "last_bsp1_date", "last_bsp2_date", "last_ta_date"]:
+                    (getattr(self, item) - date.today()).days + 180
+                    if (getattr(self, item) - date.today()).days + 180 < 0:
+                        return False
+            case "VRP":
+                for item in ["last_vrp1_date", "last_vrp2_date"]:
+                    (getattr(self, item) - date.today()).days + 180
+                    if (getattr(self, item) - date.today()).days + 180 < 0:
+                        return False
+            case "Currencies":
+                for item in ["last_cto_date", "last_sid_date", "last_mono_date", "last_nfp_date"]:
+                    (getattr(self, item) - date.today()).days + 180
+                    if (getattr(self, item) - date.today()).days + 180 < 0:
+                        return False
+
         return True
 
     def update(self, data: FlightPilots, date: date) -> Qualification:

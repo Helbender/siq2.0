@@ -32,7 +32,7 @@ export default defineConfig({
       "/api": {
         //target for local deployment and NGINX and reverse proxy to /api
         target: "http://localhost:5051",
-        // target:"https://siq-api.onrender.com"
+        // target: "https://siq-api.onrender.com",
 
         // target for docker deployment with standard deployment
         // target: "http://api:5051",

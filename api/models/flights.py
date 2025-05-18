@@ -49,6 +49,11 @@ class Flight(Base):
     number_of_crew: Mapped[int]
     orm: Mapped[int]
     fuel: Mapped[int]
+    activation_first: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
+    activation_last: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
+    ready_ac: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
+    med_arrival: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
+
     flight_pilots: Mapped[List[FlightPilots]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
@@ -92,6 +97,10 @@ class Flight(Base):
             "numberOfCrew": self.number_of_crew,
             "orm": self.orm,
             "fuel": self.fuel,
+            "activationFirst": self.activation_first,
+            "activationLast": self.activation_last,
+            "readyAC": self.ready_ac,
+            "medArrival": self.med_arrival,
             "flight_pilots": flight_crewmembers,
         }
 

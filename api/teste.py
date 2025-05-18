@@ -286,10 +286,9 @@ with Session(engine, autoflush=False) as session:
                 with open(file_path, "rb") as f:
                     conteudo_base64 = f.read()
 
-                    # Decodificar base64 → JSON string → dicionário Python
+                # Decodificar base64 → JSON string → dicionário Python
                 json_str = base64.b64decode(conteudo_base64).decode("utf-8")
                 f = json.loads(json_str)
-                print(f["date"])
                 flight = Flight(
                     airtask=f["airtask"],
                     date=datetime.strptime(f["date"], "%d-%b-%Y").replace(tzinfo=UTC).date(),
