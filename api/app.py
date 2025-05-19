@@ -43,7 +43,7 @@ if APPLY_CORS:
     # )
     CORS(
         app,
-        origins="https://siq-react-vite.onrender.com",
+        origins=["https://esq502.onrender.com/", "http://localhost:5173"],
         supports_credentials=True,
     )
 
