@@ -39,9 +39,9 @@ class Pilot(People, Base):
             result["qualification"] = self.qualification.to_json()
         return result
 
-    def is_qualified(self) -> bool:
-        """Check if the pilot is qualified."""
-        return self.qualification.is_qualified()
+    # def is_qualified(self) -> bool:
+    #     """Check if the pilot is qualified."""
+    #     return self.qualification.is_qualified()
 
 
 class Qualification(Base):
@@ -103,17 +103,14 @@ class Qualification(Base):
         match type_qual:
             case "Alerta":
                 for item in ["last_qa1_date", "last_qa2_date", "last_bsp1_date", "last_bsp2_date", "last_ta_date"]:
-                    (getattr(self, item) - date.today()).days + 180
                     if (getattr(self, item) - date.today()).days + 180 < 0:
                         return False
             case "VRP":
                 for item in ["last_vrp1_date", "last_vrp2_date"]:
-                    (getattr(self, item) - date.today()).days + 180
                     if (getattr(self, item) - date.today()).days + 180 < 0:
                         return False
             case "Currencies":
                 for item in ["last_cto_date", "last_sid_date", "last_mono_date", "last_nfp_date"]:
-                    (getattr(self, item) - date.today()).days + 180
                     if (getattr(self, item) - date.today()).days + 180 < 0:
                         return False
 
@@ -167,7 +164,7 @@ class Qualification(Base):
             # print(f"Value: {value}")a =
             unsorted_dict[f"last{item[5:-5].upper()}"] = value
 
-        oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)
+        oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)  # type: ignore
 
         final_dict: dict = {
             "lastDayLandings": list(self.last_day_landings.split()),

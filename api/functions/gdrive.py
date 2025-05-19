@@ -47,7 +47,7 @@ def autenticar_drive():
     return build("drive", "v3", credentials=creds)
 
 
-def check_dublicates_and_sends(nome_ficheiro, service, pasta_dia_id, media):
+def check_dublicates_and_sends(nome_ficheiro: str, service, pasta_dia_id, media):
     query = f"name = '{nome_ficheiro}' and '{pasta_dia_id}' in parents and trashed = false"
     response = service.files().list(q=query, spaces="drive", fields="files(id, name)").execute()
     files = response.get("files", [])
@@ -56,16 +56,31 @@ def check_dublicates_and_sends(nome_ficheiro, service, pasta_dia_id, media):
         # Ficheiro já existe — faz update
         file_id = files[0]["id"]
         file = service.files().update(fileId=file_id, media_body=media).execute()
-        print(f"Ficheiro existente atualizado! ID: {file.get('id')}")
+        if nome_ficheiro.endswith(".pdf"):
+            print(f"PDF existente atualizado! ID: {file.get('id')}")
+        else:
+            print(f"Ficheiro existente atualizado! ID: {file.get('id')}")
+
     else:
         # Ficheiro não existe — cria novo
         file_metadata = {"name": nome_ficheiro, "parents": [pasta_dia_id]}
         file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
-        print(f"Ficheiro novo criado! ID: {file.get('id')}")
+        if nome_ficheiro.endswith(".pdf"):
+            print(f"PDF novo criado! ID: {file.get('id')}")
+        else:
+            print(f"Ficheiro novo criado! ID: {file.get('id')}")
 
 
 # Função para enviar arquivo ao Google Drive
 def enviar_para_drive(mem_pdf: io.BytesIO, nome_ficheiro: str, id_pasta: str):
+    """Envia o ficheiro pdf para o google drive
+
+    Args:
+        mem_pdf (io.BytesIO): Dados a enviar
+        nome_ficheiro (str): Nome do ficheiro a guardar
+        id_pasta (str): ID da pasta no Google Drive
+    """
+
     # Carrega credenciais do arquivo JSON
     credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
 
@@ -201,7 +216,16 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
         return folder.get("id")
 
 
-def tarefa_enviar_para_drive(dados, nome_arquivo_drive, nome_pdf) -> None:
+def tarefa_enviar_para_drive(dados: dict, nome_arquivo_drive: str, nome_pdf: str) -> None:
+    """Função geral de enviar os dados para os ficheiros no Google Drive.
+
+    Criada para usar multithread e enviar os ficheiros sem as respostas para o Frontend atrasarem
+
+    Args:
+        dados (dict): _description_
+        nome_arquivo_drive (str): _description_
+        nome_pdf (str): _description_
+    """
     try:
         upload_with_service_account(dados=dados, nome_arquivo_drive=nome_arquivo_drive, id_pasta=ID_PASTA_VOO)
 

@@ -28,158 +28,6 @@ tradutor2 = {
 }
 
 
-# def criar_pdf_memoria(dados_voo: dict, nome_arquivo: str = None) -> io.BytesIO:
-#     """Cria PDF com os dados do voo e tripulantes.
-
-#     Args:
-#         dados_voo (dict): JSON vindo do frontend com os dados do voo.
-#         nome_arquivo (str, optional): Nome do arquivo local para teste da função. Defaults to None.
-
-#     Returns:
-#         io.BytesIO: Buffer com o PDF gerado para enviar para o GDrive
-#     """
-
-#     pagina = landscape(A4)
-#     largura_total, altura_total = pagina
-
-#     # *Verifica se o nome do arquivo foi fornecido:
-#     # * Existe para testar a função fora da aplicação e ver o resultado
-#     if nome_arquivo:
-#         doc = SimpleDocTemplate(nome_arquivo, pagesize=pagina)
-#     else:
-#         buffer = io.BytesIO()
-#         doc = SimpleDocTemplate(buffer, pagesize=pagina)
-#     elementos = []
-#     estilos = getSampleStyleSheet()
-
-#     # ----- Cabeçalho com logotipo -----
-#     def desenhar_cabecalho(canvas_obj, doc):
-#         caminho_logotipo = os.path.join(os.path.dirname(__file__), "Esquadra_502.png")
-#         canvas_obj.saveState()
-#         if caminho_logotipo and os.path.isfile(caminho_logotipo):
-#             canvas_obj.drawImage(
-#                 caminho_logotipo,
-#                 x=2 * cm,
-#                 y=altura_total - 2.5 * cm,
-#                 width=3 * cm,
-#                 height=2 * cm,
-#                 preserveAspectRatio=True,
-#             )
-#         canvas_obj.setFont("Helvetica", 30)
-#         canvas_obj.drawString(largura_total / 2 - 4 * cm, altura_total - 1.5 * cm, "Relatório de Voo")
-#         canvas_obj.restoreState()
-
-#     # Título da primeira tabela
-#     elementos.append(Spacer(1, 24))
-#     elementos.append(Paragraph("Dados do Voo", estilos["Heading2"]))
-#     elementos.append(Spacer(1, 12))
-
-#     # Converter dados do voo para tabela
-#     tabela_voo = []
-#     cabecalhos_voo = [item for item in tradutor.values()]
-#     tabela_voo.append(cabecalhos_voo)
-#     tabela_voo.append([dados_voo[item] for item in tradutor.keys()])
-
-#     largura_coluna_voo = largura_total * 0.9
-#     tabela1 = Table(tabela_voo, colWidths=[80, 90, 50, 110, 80, 50, 50, 50, 70, 70])
-#     tabela1.setStyle(
-#         TableStyle(
-#             [
-#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
-#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-#             ]
-#         )
-#     )
-#     elementos.append(tabela1)
-#     elementos.append(Spacer(1, 24))
-
-#     tabela_voo = []
-#     cabecalhos_voo = [item for item in tradutor2.values()]
-#     tabela_voo.append(cabecalhos_voo)
-#     tabela_voo.append([dados_voo[item] for item in tradutor2.keys()])
-
-#     largura_coluna_voo = largura_total * 0.9
-#     proporção = [0.15, 0.15, 0.05, 0.1, 0.2, 0.05, 0.1]
-#     tabela2 = Table(tabela_voo, colWidths=[largura_coluna_voo * p for p in proporção])
-#     tabela2.setStyle(
-#         TableStyle(
-#             [
-#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
-#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-#             ]
-#         )
-#     )
-#     elementos.append(tabela2)
-#     elementos.append(Spacer(1, 24))
-#     # Título da segunda tabela
-#     elementos.append(Paragraph("Tripulação", estilos["Heading2"]))
-#     elementos.append(Spacer(1, 12))
-
-#     # Cabeçalhos da tripulação
-#     cabecalhos = [
-#         "NIP",
-#         "NOME",
-#         "FUNÇÃO",
-#         "VIR",
-#         "VN",
-#         "CON",
-#         "ATR",
-#         "ATN",
-#         # "QUAL1",
-#         # "QUAL2",
-#         # "QUAL3",
-#         # "QUAL4",
-#         # "QUAL5",
-#         # "QUAL6",
-#     ]
-#     tabela_tripulacao = [cabecalhos]
-
-#     for membro in dados_voo["flight_pilots"]:
-#         tabela_tripulacao.append(
-#             [
-#                 membro.get("nip", ""),
-#                 membro.get("name", ""),
-#                 membro.get("position", ""),
-#                 membro.get("VIR", ""),
-#                 membro.get("VN", ""),
-#                 membro.get("CON", ""),
-#                 membro.get("ATR", ""),
-#                 membro.get("ATN", ""),
-#                 membro.get("QUAL1", ""),
-#                 membro.get("QUAL2", ""),
-#                 membro.get("QUAL3", ""),
-#                 membro.get("QUAL4", ""),
-#                 membro.get("QUAL5", ""),
-#                 membro.get("QUAL6", ""),
-#             ]
-#         )
-
-#     tabela2 = Table(tabela_tripulacao, colWidths=[50, 110, 60, 50, 50, 50, 50, 50, 40, 40, 40, 40, 40, 40])
-#     tabela2.setStyle(
-#         TableStyle(
-#             [
-#                 ("BACKGROUND", (0, 0), (-1, 0), colors.lightblue),
-#                 ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-#                 ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-#                 ("FONTSIZE", (0, 0), (-1, -1), 11),
-#                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.whitesmoke]),
-#             ]
-#         )
-#     )
-#     elementos.append(tabela2)
-
-#     doc.build(elementos, onFirstPage=desenhar_cabecalho)
-#     if not nome_arquivo:
-#         buffer.seek(0)
-#         return buffer
-
-
 def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=landscape(A4))
@@ -280,7 +128,7 @@ def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
     return buffer
 
 
-def combinar_template_e_conteudo(template_pdf_path, conteudo_pdf_io, nome_arquivo_saida=None):
+def combinar_template_e_conteudo(template_pdf_path, conteudo_pdf_io, nome_arquivo_saida=None) -> io.BytesIO:
     # Leitura do template
     template_reader = PdfReader(template_pdf_path)
     template_page = template_reader.pages[0]
@@ -295,15 +143,17 @@ def combinar_template_e_conteudo(template_pdf_path, conteudo_pdf_io, nome_arquiv
     # Criar novo PDF com a página combinada
     writer = PdfWriter()
     writer.add_page(template_page)
+
+    # Serve para fazer testes e criar ficheiros localmente
     if nome_arquivo_saida:
         with open(nome_arquivo_saida, "wb") as f:
             writer.write(f)
-    else:
-        # Se não for fornecer um nome de arquivo, retornar o PDF em memória
-        buffer = io.BytesIO()
-        writer.write(buffer)
-        buffer.seek(0)
-        return buffer
+
+    # Retornar o PDF em memória
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    buffer.seek(0)
+    return buffer
 
 
 if __name__ == "__main__":

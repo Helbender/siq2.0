@@ -3,11 +3,9 @@ import {
   Stack,
   FormControl,
   Input,
-  Text,
   VStack,
   Flex,
   Spacer,
-  useColorModeValue,
   Center,
   Spinner,
   useBreakpointValue,
@@ -21,20 +19,15 @@ import { useNavigate } from "react-router-dom";
 import StyledText from "../components/styledcomponents/StyledText";
 
 export default function Flights() {
-  const { flights, loading } = useContext(FlightContext);
-  const [filteredFlights, setFilteredFlights] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   const isColumn = useBreakpointValue({ base: true, lg: false });
-  useColorModeValue();
+  const [filteredFlights, setFilteredFlights] = useState([]);
+  const { flights, loading } = useContext(FlightContext);
+  const [searchTerm, setSearchTerm] = useState("");
   const { token, removeToken } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const showed = 20;
 
   useEffect(() => {
-    if (!token && token !== "" && token !== undefined) {
-      console.log("Removing Token");
-      removeToken();
-      navigate("/");
-    }
     const results = flights.filter((flight) =>
       [
         flight.airtask,
@@ -51,6 +44,7 @@ export default function Flights() {
     );
     setFilteredFlights(results);
   }, [searchTerm, flights]);
+
   useEffect(() => {
     if (!token && token !== "" && token !== undefined) {
       console.log("Removing Token");
@@ -74,7 +68,6 @@ export default function Flights() {
             text={`Número de Voos: ${flights.length}`}
           />
         )}
-        {/* <Text ml={10}>{`Numero de Voos: ${flights.length}`}</Text> */}
         <Spacer />
         <CreateFlightModal />
         <FormControl textAlign={"center"} ml={5} maxW="130px">
@@ -85,12 +78,12 @@ export default function Flights() {
           />
         </FormControl>
         <Spacer />
-
-        {/* <Text mr={10}>{`Voos filtrados: ${filteredFlights.length}`}</Text> */}
-        <StyledText
-          query={"Voos filtrados:"}
-          text={`Voos filtrados: ${filteredFlights.length}`}
-        />
+        {isColumn ? null : (
+          <StyledText
+            query={["Mostrados:", "Encontrados"]}
+            text={`Mostrados: ${filteredFlights.length >= showed ? showed : filteredFlights.length} / ${filteredFlights.length} Encontrados`}
+          />
+        )}
       </Flex>
       <Stack
         gap={5}
@@ -102,9 +95,9 @@ export default function Flights() {
         p={2}
       >
         {filteredFlights.length
-          ? !!filteredFlights.length &&
+          ? // !!filteredFlights.length &&
             filteredFlights
-              .slice(0, 10)
+              .slice(0, showed)
               .map((flight) => (
                 <FlightCard
                   key={flight.id}

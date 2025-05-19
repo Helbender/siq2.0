@@ -8,7 +8,7 @@ from flask import Blueprint, Response, jsonify
 from models.crew import Crew  # type: ignore
 from models.flights import Flight  # type: ignore
 from models.pilots import Pilot  # type: ignore
-from models.users import year_init, User  # type: ignore
+from models.users import User  # type: ignore
 from sqlalchemy import func, select, extract
 from sqlalchemy.orm import Session
 
@@ -24,12 +24,6 @@ def send_data() -> tuple[Response | dict[str, str], int]:
     with Session(engine) as session:
         # Get the current year
         current_year = datetime.now(UTC).year
-
-        # Get the first year in the database
-        first_year = session.execute(select(func.min(year_init)).select_from(Pilot)).scalar()
-
-        # Get the last year in the database
-        last_year = session.execute(select(func.max(year_init)).select_from(Pilot)).scalar()
 
         # Get the number of pilots0
         pilots = session.execute(select(func.count()).select_from(Pilot)).scalar()
@@ -92,6 +86,6 @@ def is_pilot_qualified(type_qual):
             else:
                 não_qualificados += 1
 
-    print(f"Qualificados: {qualificados}")
-    print(f"Não qualificados: {não_qualificados}")
+    # print(f"Qualificados: {qualificados}")
+    # print(f"Não qualificados: {não_qualificados}")
     return {"qualificados": qualificados, "nao_qualificados": não_qualificados}

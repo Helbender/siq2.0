@@ -20,47 +20,26 @@ import { useColorMode } from "@chakra-ui/react";
 import StyledText from "../styledcomponents/StyledText";
 import DeleteFlightModal from "./DeleteFlightModal";
 import EditFlightModal from "./EditFlightModal";
+import CreateFlightModal from "./CreateFlightModal";
 
 const FlightCard = ({ flight }) => {
   const { colorMode } = useColorMode();
-  console.log(flight);
   return (
     <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
       <CardHeader>
         <Flex align={"center"}>
-          <Heading>{flight.airtask}</Heading>
+          <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
           <Spacer />
           <EditFlightModal flight={flight} />
 
           <Heading as="h3">{flight.ATD}</Heading>
-          {/* <IconButton
-            variant="ghost"
-            colorScheme="red"
-            size={"lg"}
-            onClick={() => handleDeleteFlight(flight.id)}
-            icon={<BiTrash />}
-          /> */}
           <DeleteFlightModal flight={flight} />
           <Spacer />
-          <Heading>
-            {
-              // `${l.toLocaleDateString("pt-pt", {
-              //   day: "2-digit",
-              //   month: "short",
-              //   year: "numeric",
-              // })}`
-              flight.date
-            }
-          </Heading>
+          <Heading>{flight.date}</Heading>
         </Flex>
         <Divider />
       </CardHeader>
       <CardBody>
-        {/* <Stack>
-          <Text alignContent={"center"} textAlign={"center"}>
-            {"ID: "}
-            {flight.id}
-          </Text> */}
         <Flex alignItems={"top"}>
           <Stack>
             <Text>{`${flight.flightType} / ${flight.flightAction}`}</Text>
@@ -101,7 +80,8 @@ const FlightCard = ({ flight }) => {
               text={`De ${flight.origin} para ${flight.destination}`}
             />
           </Stack>
-          {flight.activationFirst === "__:__" ? null : (
+          {flight.activationFirst === "__:__" ||
+          flight.activationFirst === "" ? null : (
             <>
               <Spacer />
               <Stack>
@@ -130,14 +110,28 @@ const FlightCard = ({ flight }) => {
           <Table size={"sm"}>
             <Thead>
               <Tr>
-                <Th textAlign={"center"}>NIP</Th>
-                <Th textAlign={"center"}>Func</Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  NIP
+                </Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  Func
+                </Th>
                 <Th>Nome</Th>
-                <Th textAlign={"center"}>ATR</Th>
-                <Th textAlign={"center"}>ATN</Th>
-                <Th textAlign={"center"}>Precisão</Th>
-                <Th textAlign={"center"}>Não Precisão</Th>
-                <Th textAlign={"center"}>Qualificações</Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  ATR
+                </Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  ATN
+                </Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  Precisão
+                </Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  Não Precisão
+                </Th>
+                <Th textAlign={"center"} fontSize={"md"}>
+                  Qualificações
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -184,11 +178,8 @@ const FlightCard = ({ flight }) => {
                 }
                 let texto = "";
                 for (let i = 0; i < qualification.length; i++) {
-                  // console.log(qualification[i]);
                   texto = texto + " " + qualification[i];
                 }
-                // console.log(texto);
-                // console.log("first");
                 return (
                   <Tr key={pilot.nip}>
                     <Td textAlign={"center"}>{pilot.nip}</Td>
@@ -198,12 +189,7 @@ const FlightCard = ({ flight }) => {
                     <Td textAlign={"center"}>{pilot.ATN}</Td>
                     <Td textAlign={"center"}>{pilot.precapp}</Td>
                     <Td textAlign={"center"}>{pilot.nprecapp}</Td>
-                    <Td textAlign={"center"}>
-                      {texto}
-                      {/* {qualification.length === 2
-                        ? `${qualification[0]} and ${qualification[1]}`
-                        : qualification[0]} */}
-                    </Td>
+                    <Td textAlign={"center"}>{texto}</Td>
                   </Tr>
                 );
               })}

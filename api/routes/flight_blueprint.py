@@ -42,7 +42,6 @@ def retrieve_flights() -> tuple[Response, int]:
             # Iterates through flights and creates JSON response
             # flights = [row.to_json() for row in flights_obj]  # Flight main data to JSON
             for row in flights_obj:
-                print(row.to_json())
                 flights.append(row.to_json())  # Flight main data to JSON
 
         end_time = time.perf_counter()

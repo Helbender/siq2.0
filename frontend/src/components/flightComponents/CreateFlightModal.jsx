@@ -78,10 +78,10 @@ function CreateFlightModal() {
     numberOfCrew: crewMembers.length,
     orm: 0,
     fuel: 0,
-    activationFirst: "",
-    activationLast: "",
-    readyAC: "",
-    medArrival: "",
+    activationFirst: "__:__",
+    activationLast: "__:__",
+    readyAC: "__:__",
+    medArrival: "__:__",
   });
 
   const addCrewMember = () => {

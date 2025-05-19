@@ -30,6 +30,7 @@ function Dashboard() {
   const [numberUser, setNumberUser] = useState([]);
   const [numberQualified, setNumberQualified] = useState([]);
   const [numberVRP, setNumberVRP] = useState([]);
+  const [numberCurrencies, setNumberCurrencies] = useState([]);
   const navigate = useNavigate();
   //Get Data from API Function
   const getDataFromAPI = async () => {
@@ -41,6 +42,7 @@ function Dashboard() {
       setNumberUser(response.data.numberUser);
       setNumberQualified(response.data.alerta);
       setNumberVRP(response.data.vrp);
+      setNumberCurrencies(response.data.currencies);
     } catch (error) {
       console.log(error);
       if (error.response.status === 401) {
@@ -94,35 +96,6 @@ function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </Box>
-          {/* Gráfico de Barras */}
-          <Box
-            w={["100%", "50%"]}
-            h="350px"
-            bg={useColorModeValue("gray.400", "gray.700")}
-            shadow={"lg"}
-            pb={10}
-          >
-            <Heading size="md" mb={2} pt={1} pl={2}>
-              Utilizadores por Mês
-            </Heading>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="utilizadores" fill="#3182ce" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-        </Flex>
-        <Flex
-          direction={["column", "row"]}
-          gap={10}
-          mt={10}
-          // _hover={{ bg: "whiteAlpha.400" }}
-          // p={5}
-        >
-          {/* Gráfico Circular */}
           <Box
             w={["100%", "50%"]}
             h="350px"
@@ -155,6 +128,35 @@ function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </Box>
+          {/* Gráfico de Barras */}
+          {/* <Box
+            w={["100%", "50%"]}
+            h="350px"
+            bg={useColorModeValue("gray.400", "gray.700")}
+            shadow={"lg"}
+            pb={10}
+          >
+            <Heading size="md" mb={2} pt={1} pl={2}>
+              Utilizadores por Mês
+            </Heading>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="utilizadores" fill="#3182ce" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box> */}
+        </Flex>
+        <Flex
+          direction={["column", "row"]}
+          gap={10}
+          mt={10}
+          // _hover={{ bg: "whiteAlpha.400" }}
+          // p={5}
+        >
+          {/* Gráfico Circular */}
           <Box
             w={["100%", "50%"]}
             h="350px"
@@ -176,6 +178,38 @@ function Dashboard() {
                   dataKey="value"
                 >
                   {numberVRP.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS2[index % COLORS2.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Box>
+          <Box
+            w={["100%", "50%"]}
+            h="350px"
+            shadow={"lg"}
+            bg={useColorModeValue("gray.400", "gray.700")}
+            pb={10}
+          >
+            <Heading size="md" mb={2} pt={1} pl={2}>
+              Currencies
+            </Heading>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={numberCurrencies}
+                  cx="50%"
+                  cy="50%"
+                  label
+                  outerRadius={80}
+                  dataKey="value"
+                >
+                  {numberCurrencies.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS2[index % COLORS2.length]}
