@@ -43,7 +43,7 @@ if APPLY_CORS:
     # )
     CORS(
         app,
-        origins=["https://esq502.onrender.com/", "http://localhost:5173"],
+        origins="https://esq502.onrender.com",
         supports_credentials=True,
     )
 
