@@ -1,4 +1,3 @@
- 
 import {
   Card,
   Text,
@@ -13,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import QualificationsPanel from "../pilotComponents/QualificationsPanel";
 import StandardText from "../styledcomponents/StandardText";
+
 const CrewCard = ({ user }) => {
   return (
     <Card bg={useColorModeValue("gray.200", "gray.700")} boxShadow={"xl"}>

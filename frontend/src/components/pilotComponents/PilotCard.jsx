@@ -17,7 +17,6 @@ import QualificationsPanel from "./QualificationsPanel";
 import StandardText from "../styledcomponents/StandardText";
 
 const PilotCard = ({ user }) => {
-  console.log(user);
   return (
     <Card
       bg={useColorModeValue("gray.400", "gray.700")}
@@ -218,6 +217,47 @@ const PilotCard = ({ user }) => {
               </GridItem>
             </Grid>
           </Flex>
+          <Flex
+            m={"auto"}
+            flexDirection={"column"}
+            backgroundColor={"#1a202c"}
+            borderRadius={10}
+            gap={2}
+            p={3}
+          >
+            <Text fontWeight={"bold"}>Diversos</Text>
+            <Grid
+              my={1}
+              rowGap={1}
+              columnGap={1}
+              templateColumns={"repeat(6,1fr)"}
+            >
+              <StandardText text="BSKIT" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastBSKIT}
+                  type={2}
+                />
+              </GridItem>
+
+              <StandardText text="PARAS" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastPARAS}
+                  type={2}
+                />
+              </GridItem>
+
+              <StandardText text="NVG" />
+              <GridItem colSpan={2}>
+                <QualificationsPanel
+                  qualification={user.qualification?.lastNVG}
+                  type={2}
+                />
+              </GridItem>
+            </Grid>
+          </Flex>
+
           {/* <HStack mt={5} gap={0}>
             <Grid
               my={1}

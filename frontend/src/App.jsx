@@ -2,7 +2,6 @@ import React from "react";
 import Pilots from "./pages/Pilots";
 import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
-// const Flights = React.lazy(() => import("./pages/Flights"));
 import Master from "./layout/Master";
 import LoginPage from "./pages//LoginPage";
 import RecoverPass from "./components/loginComponents/RecoverPass";

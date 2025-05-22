@@ -13,7 +13,7 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "../Contexts/AuthContext";
-import api from "../utils/api";
+import { api } from "../utils/api";
 
 function LoginPage() {
   const { setToken } = useContext(AuthContext);

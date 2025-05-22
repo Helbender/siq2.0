@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
 import { FlightContext } from "../../Contexts/FlightsContext";
-import api from "../../utils/api";
+import { api } from "../../utils/api";
 
 function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

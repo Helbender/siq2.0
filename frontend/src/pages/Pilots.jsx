@@ -4,7 +4,7 @@ import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "../utils/api";
+import { api } from "../utils/api";
 
 const Pilots = ({ position }) => {
   const [pilotos, setPilotos] = useState([]);

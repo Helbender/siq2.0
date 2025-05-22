@@ -30,7 +30,7 @@ import { UserContext } from "../../Contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 import { BiEdit } from "react-icons/bi";
-import api from "../../utils/api";
+import { api } from "../../utils/api";
 
 function EditFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -71,31 +71,6 @@ function EditFlightModal({ flight }) {
     console.log(time);
     return time;
   };
-  function formatDateToISO(dateStr) {
-    const months = {
-      Jan: "01",
-      Feb: "02",
-      Mar: "03",
-      Apr: "04",
-      May: "05",
-      Jun: "06",
-      Jul: "07",
-      Aug: "08",
-      Sep: "09",
-      Oct: "10",
-      Nov: "11",
-      Dec: "12",
-    };
-
-    const [day, monAbbr, year] = dateStr.split("-");
-    const month = months[monAbbr];
-
-    if (!month) {
-      return dateStr;
-    }
-
-    return `${year}-${month}-${day.padStart(2, "0")}`;
-  }
 
   const addCrewMember = () => {
     setCrewMembers([...crewMembers, { position: "", name: "" }]);

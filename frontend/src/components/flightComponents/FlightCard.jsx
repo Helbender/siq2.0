@@ -19,8 +19,8 @@ import {
 import { useColorMode } from "@chakra-ui/react";
 import StyledText from "../styledcomponents/StyledText";
 import DeleteFlightModal from "./DeleteFlightModal";
-import EditFlightModal from "./EditFlightModal";
 import CreateFlightModal from "./CreateFlightModal";
+import { formatDate } from "../../Functions/timeCalc";
 
 const FlightCard = ({ flight }) => {
   const { colorMode } = useColorMode();
@@ -30,12 +30,13 @@ const FlightCard = ({ flight }) => {
         <Flex align={"center"}>
           <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
           <Spacer />
-          <EditFlightModal flight={flight} />
+          {/* <EditFlightModal flight={flight} /> */}
+          <CreateFlightModal flight={flight} />
 
           <Heading as="h3">{flight.ATD}</Heading>
           <DeleteFlightModal flight={flight} />
           <Spacer />
-          <Heading>{flight.date}</Heading>
+          <Heading>{formatDate(flight.date)}</Heading>
         </Flex>
         <Divider />
       </CardHeader>

@@ -111,7 +111,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
     if request.method == "PATCH":
         verify_jwt_in_request()
         f: dict = request.get_json()
-
+        print(f)
         with Session(engine, autoflush=False) as session:
             flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
 
@@ -146,11 +146,9 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             session.commit()
             session.refresh(flight)
-            # # print("\n\nFlight:", flight.to_json())
-            # for pilot in flight.flight_crew:
-            #     print("\n", pilot.to_json())
             nome_arquivo_voo = flight.get_file_name()
             nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
+
         # Lançar a tarefa de envio em background
         Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
         return jsonify({"msg": "Flight changed"}), 200
@@ -209,7 +207,22 @@ def update_qualifications(
             )
 
         # For each qualification type, find the last relevant flight before the one being deleted
-        qualification_fields = ["qa1", "qa2", "bsp1", "bsp2", "ta", "vrp1", "vrp2", "cto", "sid", "mono", "nfp"]
+        qualification_fields = [
+            "bskit",
+            "qa1",
+            "qa2",
+            "bsp1",
+            "bsp2",
+            "ta",
+            "vrp1",
+            "vrp2",
+            "cto",
+            "sid",
+            "mono",
+            "nfp",
+            "paras",
+            "nvg",
+        ]
         for field in qualification_fields:
             last_qualification_date = session.execute(
                 select(func.max(Flight.date))
@@ -233,6 +246,7 @@ def update_qualifications(
         # For each qualification type, find the last relevant flight before the one being deleted
         qualification_fields = [
             "bsoc",
+            "bskit",
         ]
 
         for field in qualification_fields:
@@ -317,7 +331,22 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
                 pilot[k] = 0 if pilot[k] == "" else pilot[k]
             except KeyError:
                 pilot[k] = 0
-        for k in ["QA1", "QA2", "BSP1", "BSP2", "TA", "VRP1", "VRP2", "CTO", "SID", "MONO", "NFP"]:
+        for k in [
+            "QA1",
+            "QA2",
+            "BSP1",
+            "BSP2",
+            "TA",
+            "VRP1",
+            "VRP2",
+            "CTO",
+            "SID",
+            "MONO",
+            "NFP",
+            "PARAS",
+            "BSKIT",
+            "NVG",
+        ]:
             if k not in pilot.keys():
                 pilot[k] = False
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003
@@ -339,17 +368,20 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
                 flight_pilot.night_landings = int(pilot["ATN"])
                 flight_pilot.prec_app = int(pilot["precapp"])
                 flight_pilot.nprec_app = int(pilot["nprecapp"])
-                flight_pilot.qa1 = pilot["QA1"]
-                flight_pilot.qa2 = pilot["QA2"]
-                flight_pilot.bsp1 = pilot["BSP1"]
-                flight_pilot.bsp2 = pilot["BSP2"]
-                flight_pilot.ta = pilot["TA"]
-                flight_pilot.vrp1 = pilot["VRP1"]
-                flight_pilot.vrp2 = pilot["VRP2"]
-                flight_pilot.cto = pilot["CTO"]
-                flight_pilot.sid = pilot["SID"]
-                flight_pilot.mono = pilot["MONO"]
-                flight_pilot.nfp = pilot["NFP"]
+                flight_pilot.qa1 = pilot.get("QA1", False)
+                flight_pilot.qa2 = pilot.get("QA2", False)
+                flight_pilot.bsp1 = pilot.get("BSP1", False)
+                flight_pilot.bsp2 = pilot.get("BSP2", False)
+                flight_pilot.ta = pilot.get("TA", False)
+                flight_pilot.vrp1 = pilot.get("VRP1", False)
+                flight_pilot.vrp2 = pilot.get("VRP2", False)
+                flight_pilot.cto = pilot.get("CTO", False)
+                flight_pilot.sid = pilot.get("SID", False)
+                flight_pilot.mono = pilot.get("MONO", False)
+                flight_pilot.nfp = pilot.get("NFP", False)
+                flight_pilot.paras = pilot.get("PARAS", False)
+                flight_pilot.nvg = pilot.get("NVG", False)
+                flight_pilot.bskit = pilot.get("BSKIT", False)
         else:
             flight_pilot = FlightPilots(
                 position=pilot["position"],
@@ -357,17 +389,20 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
                 night_landings=int(pilot["ATN"]),
                 prec_app=int(pilot["precapp"]),
                 nprec_app=int(pilot["nprecapp"]),
-                qa1=pilot["QA1"],
-                qa2=pilot["QA2"],
-                bsp1=pilot["BSP1"],
-                bsp2=pilot["BSP2"],
-                ta=pilot["TA"],
-                vrp1=pilot["VRP1"],
-                vrp2=pilot["VRP2"],
-                cto=pilot["CTO"],
-                sid=pilot["SID"],
-                mono=pilot["MONO"],
-                nfp=pilot["NFP"],
+                qa1=pilot.get("QA1", False),
+                qa2=pilot.get("QA2", False),
+                bsp1=pilot.get("BSP1", False),
+                bsp2=pilot.get("BSP2", False),
+                ta=pilot.get("TA", False),
+                vrp1=pilot.get("VRP1", False),
+                vrp2=pilot.get("VRP2", False),
+                cto=pilot.get("CTO", False),
+                sid=pilot.get("SID", False),
+                mono=pilot.get("MONO", False),
+                nfp=pilot.get("NFP", False),
+                paras=pilot.get("PARAS", False),
+                nvg=pilot.get("NVG", False),
+                bskit=pilot.get("BSKIT", False),
             )
 
         qual_p.update(flight_pilot, flight.date)
@@ -376,7 +411,7 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         flight.flight_pilots.append(flight_pilot)
 
     elif pilot["position"] in CREW_USER:
-        for k in ["BSOC"]:
+        for k in ["BSOC", "BSKIT"]:
             if k not in pilot.keys():
                 pilot[k] = False
 
@@ -398,11 +433,13 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
                 flight_crew = FlightCrew(
                     position=pilot["position"],
                     bsoc=pilot["BSOC"],
+                    bskit=pilot["BSKIT"],
                 )
         else:
             flight_crew = FlightCrew(
                 position=pilot["position"],
                 bsoc=pilot["BSOC"],
+                bskit=pilot["BSKIT"],
             )
         qual_c.update(flight_crew, flight.date)
 

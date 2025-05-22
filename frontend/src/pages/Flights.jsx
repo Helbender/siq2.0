@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Stack,
   FormControl,
@@ -9,6 +9,9 @@ import {
   Center,
   Spinner,
   useBreakpointValue,
+  Text,
+  Heading,
+  Box,
 } from "@chakra-ui/react";
 import FlightCard from "../components/flightComponents/FlightCard";
 import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
@@ -17,32 +20,34 @@ import { FlightContext } from "../Contexts/FlightsContext";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import StyledText from "../components/styledcomponents/StyledText";
+import { formatDate } from "../Functions/timeCalc";
+import { FixedSizeList as List } from "react-window";
 
 export default function Flights() {
   const isColumn = useBreakpointValue({ base: true, lg: false });
-  const [filteredFlights, setFilteredFlights] = useState([]);
+  // const [filteredFlights, setFilteredFlights] = useState([]);
   const { flights, loading } = useContext(FlightContext);
   const [searchTerm, setSearchTerm] = useState("");
   const { token, removeToken } = useContext(AuthContext);
   const navigate = useNavigate();
-  const showed = 20;
+  const showed = 100;
 
-  useEffect(() => {
-    const results = flights.filter((flight) =>
+  const filteredFlights = useMemo(() => {
+    return flights.filter((flight) =>
       [
         flight.airtask,
-        flight.flightType,
-        flight.flightAction,
-        flight.date,
-        flight.origin,
-        flight.destination,
+        // flight.flightType,
+        // flight.flightAction,
+        formatDate(flight.date),
+        // flight.date,
+        // flight.origin,
+        // flight.destination,
         flight.tailNumber,
         flight.id,
       ]
         .map((field) => (field ? field.toString().toLowerCase() : ""))
         .some((field) => field.includes(searchTerm.toLowerCase())),
     );
-    setFilteredFlights(results);
   }, [searchTerm, flights]);
 
   useEffect(() => {
@@ -52,13 +57,6 @@ export default function Flights() {
       navigate("/");
     }
   }, []);
-  if (loading) {
-    return (
-      <Center h="100vh">
-        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
-      </Center>
-    );
-  }
   return (
     <VStack mt={10}>
       <Flex w={"80%"} maxW={"1000px"} alignItems={"center"} flex={"row"}>
@@ -85,28 +83,55 @@ export default function Flights() {
           />
         )}
       </Flex>
-      <Stack
-        gap={5}
-        mt="8"
-        overflowY="scroll"
-        w={"95%"}
-        maxW={"1200px"}
-        h={"80vh"}
-        p={2}
-      >
-        {filteredFlights.length
-          ? // !!filteredFlights.length &&
-            filteredFlights
-              .slice(0, showed)
-              .map((flight) => (
+      {loading ? (
+        <Center h="100vh" flexDirection={"row"}>
+          <Heading fontSize={"lg"}>A carregar VOOS</Heading>
+          <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+        </Center>
+      ) : (
+        // <Box
+        //   mt="8"
+        //   overflowY="hidden"
+        //   w={"95%"}
+        //   maxW={"1200px"}
+        //   h={"80vh"}
+        //   p={2}
+        // >
+        //   <List
+        //     height={window.innerHeight}
+        //     itemCount={filteredFlights.length}
+        //     itemSize={showed}
+        //     width={"100%"}
+        //   >
+        //     {({ index }) => (
+        //       <FlightCard
+        //         key={filteredFlights[index].id}
+        //         flight={filteredFlights[index]}
+        //       />
+        //     )}
+        //   </List>
+        // </Box>
+        <Stack
+          gap={5}
+          mt="8"
+          overflowY="auto"
+          w={"95%"}
+          maxW={"1200px"}
+          h={"80vh"}
+          p={2}
+        >
+          {filteredFlights.length
+            ? // !!filteredFlights.length &&
+              filteredFlights.slice(0, showed).map((flight) => (
                 <FlightCard
                   key={flight.id}
                   flight={flight}
-                  setFilteredFlights={setFilteredFlights}
+                  // setFilteredFlights={setFilteredFlights}
                 />
               ))
-          : null}
-      </Stack>
+            : null}
+        </Stack>
+      )}
     </VStack>
   );
 }

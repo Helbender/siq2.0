@@ -90,6 +90,12 @@ class Qualification(Base):
     last_bskit_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
+    last_paras_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
+    last_nvg_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
 
     def is_qualified(self, type_qual) -> bool:
         """Checks all qualifications and returns True if all are valid.
@@ -110,7 +116,14 @@ class Qualification(Base):
                     if (getattr(self, item) - date.today()).days + 180 < 0:
                         return False
             case "Currencies":
-                for item in ["last_cto_date", "last_sid_date", "last_mono_date", "last_nfp_date"]:
+                for item in [
+                    "last_cto_date",
+                    "last_sid_date",
+                    "last_mono_date",
+                    "last_nfp_date",
+                    "last_nvg_date",
+                    "last_paras_date",
+                ]:
                     if (getattr(self, item) - date.today()).days + 180 < 0:
                         return False
 

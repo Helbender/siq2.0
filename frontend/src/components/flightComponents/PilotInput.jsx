@@ -1,4 +1,3 @@
- 
 import {
   FormControl,
   GridItem,
@@ -6,9 +5,9 @@ import {
   Select,
   IconButton,
 } from "@chakra-ui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { FaMinus } from "react-icons/fa";
-
+import { useFormContext } from "react-hook-form";
 const PILOT_QUALIFICATIONS = [
   "QA1",
   "QA2",
@@ -18,12 +17,14 @@ const PILOT_QUALIFICATIONS = [
   "VRP1",
   "VRP2",
   "BSKIT",
+  "PARAS",
+  "NVG",
   "CTO",
   "SID",
   "MONO",
   "NFP",
 ];
-const CREW_QUALIFICATIONS = ["BSOC"];
+const CREW_QUALIFICATIONS = ["BSOC", "BSKIT"];
 // const BASE_PILOT = {
 //   nip: "",
 //   name: "",
@@ -45,65 +46,47 @@ const CREW_QUALIFICATIONS = ["BSOC"];
 //   BSKIT: false,
 //   BSOC: false,
 // };
-const PilotInput = ({
-  index,
-  setFlightdata,
-  pilotos,
-  member,
-  setCrewMembers,
-  crewMembers,
-}) => {
-  const [nip, setNip] = useState(member.nip);
+const PilotInput = ({ index, pilotos, member, remove }) => {
+  const [initFlag, setInitFlag] = useState(true);
   const [qualP, setQualP] = useState([]);
+  const {
+    register,
+    formState: { errors },
+    setValue,
+  } = useFormContext();
 
-  const handleNipForm = (name) => {
-    if (name === "") {
-      setNip("");
-      return "";
+  useEffect(() => {
+    let temp = pilotos.filter((piloto) => piloto.name == member.name);
+    if (temp[0] === undefined || temp[0].name === undefined) {
+      setValue(`flight_pilots.${index}.nip`, "");
+    } else {
+      setValue(`flight_pilots.${index}.nip`, temp[0].nip);
     }
-    let temp = pilotos.filter((piloto) => piloto.name == name);
-    setNip(temp[0].nip);
-    return temp[0].nip;
-  };
+  }, [member.name, setValue]);
 
-  const handlePositionSelect = (position) => {
-    if (position === "PC" || position === "PI" || position === "P") {
+  useEffect(() => {
+    if (initFlag) {
+      setInitFlag(false);
+    } else {
+      setValue(`flight_pilots.${index}.nip`, "");
+    }
+    if (
+      member.position === "PC" ||
+      member.position === "PI" ||
+      member.position === "P"
+    ) {
       setQualP(PILOT_QUALIFICATIONS);
-    } else if (position === "CP") {
+    } else if (member.position === "CP") {
       setQualP(PILOT_QUALIFICATIONS);
-    } else if (position === "OC" || position === "OCI" || position === "OCA") {
+    } else if (
+      member.position === "OC" ||
+      member.position === "OCI" ||
+      member.position === "OCA"
+    ) {
       setQualP(CREW_QUALIFICATIONS);
     }
-  };
-  const handleCrewChange = (index, field, value) => {
-    console.log(field, value);
-    const updated = [...crewMembers];
-    if (field === "name") {
-      updated[index].nip = handleNipForm(value);
-    }
-    updated[index] = { ...updated[index], [field]: value };
-    if (field === "position") {
-      handlePositionSelect(value);
-      console.log(true);
-      updated[index].name = "";
-      updated[index].nip = "";
-      setNip("");
-    }
-    setCrewMembers(updated);
-    setFlightdata((prev) => ({
-      ...prev,
-      flight_pilots: updated,
-    }));
-    console.log(updated);
-  };
-  const removeCrewMember = (index) => {
-    const updated = crewMembers.filter((_, i) => i !== index);
-    setCrewMembers(updated);
-    setFlightdata((prev) => ({
-      ...prev,
-      flight_pilots: updated,
-    }));
-  };
+  }, [member.position]);
+
   return (
     <Fragment>
       <GridItem>
@@ -114,10 +97,11 @@ const PilotInput = ({
             name="posição"
             placeholder=" "
             type="text"
-            value={member.position}
-            onChange={(e) => {
-              handleCrewChange(index, "position", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.position`)}
+            // value={member.position}
+            // onChange={(e) => {
+            //   handleCrewChange(index, "position", e.target.value);
+            // }}
             textAlign={"center"}
           >
             <option value="PI">PI</option>
@@ -144,11 +128,7 @@ const PilotInput = ({
             type="text"
             placeholder="Selecione"
             isDisabled={!member.position}
-            value={member.name}
-            onChange={(e) => {
-              handleCrewChange(index, "name", e.target.value);
-              handleNipForm(e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.name`)}
           >
             {pilotos
               .filter((crew) => {
@@ -182,8 +162,8 @@ const PilotInput = ({
             p={0}
             display="inline-block"
             textAlign={"center"}
-            value={nip}
             isReadOnly
+            {...register(`flight_pilots.${index}.nip`)}
           ></Input>
         </FormControl>
       </GridItem>
@@ -194,11 +174,8 @@ const PilotInput = ({
             display="inline-block"
             name="VIR"
             type="time"
-            value={member.VIR}
             textAlign={"center"}
-            onChange={(e) => {
-              handleCrewChange(index, "VIR", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.VIR`)}
           />
         </FormControl>
       </GridItem>
@@ -209,11 +186,8 @@ const PilotInput = ({
             display="inline-block"
             name="VN"
             type="time"
-            value={member.VN}
             textAlign={"center"}
-            onChange={(e) => {
-              handleCrewChange(index, "VN", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.VN`)}
           />
         </FormControl>
       </GridItem>
@@ -224,11 +198,8 @@ const PilotInput = ({
             display="inline-block"
             name="CON"
             type="time"
-            value={member.CON}
             textAlign={"center"}
-            onChange={(e) => {
-              handleCrewChange(index, "CON", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.CON`)}
           />
         </FormControl>
       </GridItem>
@@ -238,11 +209,8 @@ const PilotInput = ({
             display="inline-block"
             name="ATR"
             type="number"
-            value={member.ATR}
             textAlign={"center"}
-            onChange={(e) => {
-              handleCrewChange(index, "ATR", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.ATR`)}
           />
         </FormControl>
       </GridItem>
@@ -253,10 +221,7 @@ const PilotInput = ({
             name="ATN"
             type="number"
             textAlign={"center"}
-            value={member.ATN}
-            onChange={(e) => {
-              handleCrewChange(index, "ATN", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.ATN`)}
           />
         </FormControl>
       </GridItem>
@@ -264,13 +229,10 @@ const PilotInput = ({
         <FormControl>
           <Input
             display="inline-block"
-            name="PrecApp"
+            name="precapp"
             type="number"
             textAlign={"center"}
-            value={member.precapp}
-            onChange={(e) => {
-              handleCrewChange(index, "precapp", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.precapp`)}
           />
         </FormControl>
       </GridItem>
@@ -278,17 +240,13 @@ const PilotInput = ({
         <FormControl>
           <Input
             display="inline-block"
-            name="NPrecApp"
+            name="nprecapp"
             type="number"
             textAlign={"center"}
-            value={member.nprecapp}
-            onChange={(e) => {
-              handleCrewChange(index, "nprecapp", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.nprecapp`)}
           />
         </FormControl>
       </GridItem>
-      {/* <Spacer /> */}
       <GridItem ml={2} minW={"80px"}>
         <FormControl>
           <Select
@@ -296,10 +254,7 @@ const PilotInput = ({
             name="Qual1"
             placeholder=" "
             type="text"
-            value={member.QUAL1}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL1", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL1`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -318,10 +273,7 @@ const PilotInput = ({
             name="Qual2"
             placeholder=" "
             type="text"
-            value={member.QUAL2}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL2", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL2`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -341,10 +293,7 @@ const PilotInput = ({
             name="Qual3"
             placeholder=" "
             type="text"
-            value={member.QUAL3}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL3", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL3`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -363,10 +312,7 @@ const PilotInput = ({
             name="Qual4"
             placeholder=" "
             type="text"
-            value={member.QUAL4}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL4", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL4`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -385,10 +331,7 @@ const PilotInput = ({
             name="Qual5"
             placeholder=" "
             type="text"
-            value={member.QUAL5}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL5", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL5`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -407,10 +350,7 @@ const PilotInput = ({
             name="Qual6"
             placeholder=" "
             type="text"
-            value={member.QUAL6}
-            onChange={(e) => {
-              handleCrewChange(index, "QUAL6", e.target.value);
-            }}
+            {...register(`flight_pilots.${index}.QUAL6`)}
           >
             {qualP.map((qual, i) => {
               return (
@@ -426,18 +366,11 @@ const PilotInput = ({
         <IconButton
           icon={<FaMinus />}
           colorScheme="red"
-          onClick={() => removeCrewMember(index)}
+          onClick={() => remove(index)}
           aria-label="Edit User"
           maxW={"50%"}
         />
       </GridItem>
-      {/* <Button
-        colorScheme="red"
-        size="sm"
-        onClick={() => removeCrewMember(index)}
-      >
-        Remover
-      </Button> */}
     </Fragment>
   );
 };

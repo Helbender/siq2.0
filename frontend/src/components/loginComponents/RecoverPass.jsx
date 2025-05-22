@@ -8,10 +8,9 @@ import {
   Button,
   useToast,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../utils/api";
+import { api } from "../../utils/api";
 
 function RecoverPass() {
   const [email, setEmail] = useState("");

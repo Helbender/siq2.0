@@ -44,12 +44,16 @@ class QualificationCrew(Base):
     crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True)
     crew: Mapped[Crew] = relationship(back_populates="qualification")
     last_bsoc_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
+    last_bskit_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    )
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
         oldest_key = "lastBSOC"
         return {
             "lastBSOC": self._get_days(self.last_bsoc_date),
+            "lastBSKIT": self._get_days(self.last_bskit_date),
             "oldest": [oldest_key[4:], self._get_days(self.last_bsoc_date)[1]],
         }
 
@@ -61,7 +65,10 @@ class QualificationCrew(Base):
         return self
 
     def is_qualified(self) -> bool:
-        """Check if the crew is qualified."""
+        """Check if the crew is qualified.
+
+        WIP
+        """
         return self.last_bsoc_date < 0
 
     @staticmethod

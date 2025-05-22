@@ -6,15 +6,11 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { apiAuth } from "../utils/api";
 
 const COLORS = ["#E53E3E", "#38A169", "#3182ce"]; // verde, vermelho
 const COLORS2 = ["#38A169", "#E53E3E"]; // verde, vermelho
@@ -35,7 +31,7 @@ function Dashboard() {
   //Get Data from API Function
   const getDataFromAPI = async () => {
     try {
-      const response = await axios.get("/api/dashboard", {
+      const response = await apiAuth.get("/api/dashboard", {
         headers: { Authorization: "Bearer " + token },
       });
       console.log(response.data);

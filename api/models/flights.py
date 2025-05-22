@@ -81,7 +81,7 @@ class Flight(Base):
         return {
             "id": self.fid,
             "airtask": self.airtask,
-            "date": self.date.strftime("%d-%b-%Y"),
+            "date": self.date.strftime("%Y-%m-%d"),
             "origin": self.origin,
             "destination": self.destination,
             "ATD": self.departure_time,
@@ -138,6 +138,8 @@ class FlightPilots(Base):
     vrp1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     vrp2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     bskit: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    paras: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    nvg: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
 
     pilot: Mapped[Pilot] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
@@ -173,6 +175,8 @@ class FlightPilots(Base):
         response["MONO"] = self.mono
         response["NFP"] = self.nfp
         response["BSKIT"] = self.bskit
+        response["PARAS"] = self.paras
+        response["NVG"] = self.nvg
 
         return response
 
@@ -191,6 +195,7 @@ class FlightCrew(Base):
     position: Mapped[str] = mapped_column(String(5))
 
     bsoc: Mapped[Optional[bool]]  # noqa: UP007
+    bskit: Mapped[Optional[bool]]  # noqa: UP007
 
     crew: Mapped[Crew] = relationship(back_populates="flight_crew")
     flight: Mapped[Flight] = relationship(back_populates="flight_crew")
@@ -203,4 +208,5 @@ class FlightCrew(Base):
             "nip": self.crew.nip,
         }
         response["BSOC"] = self.bsoc
+        response["BSKIT"] = self.bskit
         return response
