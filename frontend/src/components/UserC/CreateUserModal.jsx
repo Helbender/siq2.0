@@ -156,9 +156,9 @@ function CreateUserModal({ edit, add, isDelete, user }) {
           {add ? (
             <ModalHeader textAlign={"center"}>Novo Utilizador</ModalHeader>
           ) : edit ? (
-            <ModalHeader>Editar Utilizador</ModalHeader>
+            <ModalHeader>{`Editar ${user.rank} ${user.name}`}</ModalHeader>
           ) : (
-            <ModalHeader>Apagar Utilizador</ModalHeader>
+            <ModalHeader>{`Apagar ${user.rank} ${user.name}`}</ModalHeader>
           )}
           <ModalCloseButton />
           {isDelete ? (
@@ -183,6 +183,8 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                       name="nip"
                       placeholder="NIP"
                       onChange={handleInputsChange}
+                      isReadOnly={edit || isDelete}
+                      isDisabled={edit || isDelete}
                     ></Input>
                   </Tooltip>
                 </FormControl>

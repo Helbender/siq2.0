@@ -9,9 +9,7 @@ import {
   Center,
   Spinner,
   useBreakpointValue,
-  Text,
   Heading,
-  Box,
 } from "@chakra-ui/react";
 import FlightCard from "../components/flightComponents/FlightCard";
 import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
@@ -21,11 +19,9 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import StyledText from "../components/styledcomponents/StyledText";
 import { formatDate } from "../Functions/timeCalc";
-import { FixedSizeList as List } from "react-window";
 
 export default function Flights() {
   const isColumn = useBreakpointValue({ base: true, lg: false });
-  // const [filteredFlights, setFilteredFlights] = useState([]);
   const { flights, loading } = useContext(FlightContext);
   const [searchTerm, setSearchTerm] = useState("");
   const { token, removeToken } = useContext(AuthContext);
@@ -84,9 +80,11 @@ export default function Flights() {
         )}
       </Flex>
       {loading ? (
-        <Center h="100vh" flexDirection={"row"}>
-          <Heading fontSize={"lg"}>A carregar VOOS</Heading>
-          <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+        <Center h="80vh" flexDirection={"column"}>
+          <Heading mb={10} fontSize={"lg"}>
+            A carregar VOOS
+          </Heading>
+          <Spinner size="xl" thickness="4px" speed="1.65s" color="blue.500" />
         </Center>
       ) : (
         // <Box
@@ -122,13 +120,9 @@ export default function Flights() {
         >
           {filteredFlights.length
             ? // !!filteredFlights.length &&
-              filteredFlights.slice(0, showed).map((flight) => (
-                <FlightCard
-                  key={flight.id}
-                  flight={flight}
-                  // setFilteredFlights={setFilteredFlights}
-                />
-              ))
+              filteredFlights
+                .slice(0, showed)
+                .map((flight) => <FlightCard key={flight.id} flight={flight} />)
             : null}
         </Stack>
       )}

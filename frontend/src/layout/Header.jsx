@@ -188,7 +188,6 @@ function Header() {
                           <Box ml={2}>Dashboard</Box>
                         </Flex>
                       </ChakraLink>
-                      <Spacer />
 
                       {User.admin ? (
                         <ChakraLink
@@ -218,12 +217,12 @@ function Header() {
                         >
                           <Flex align="center">
                             <FaTools />
-
                             <Box ml={2}>Utilizador</Box>
                           </Flex>
                         </ChakraLink>
                       )}
 
+                      <Spacer />
                       <ChakraLink
                         p={2}
                         color="teal.500"

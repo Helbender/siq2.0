@@ -51,35 +51,43 @@ def retrieve_flights() -> tuple[Response, int]:
     # Retrieves flight from Frontend and saves is to DB
     if request.method == "POST":
         verify_jwt_in_request()
-
         f: dict = request.get_json()
-        for k, v in f.items():
-            print(f"{k}: {v}")
-        flight = Flight(
-            airtask=f["airtask"],
-            date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
-            origin=f["origin"],
-            destination=f["destination"],
-            departure_time=f["ATD"],
-            arrival_time=f["ATA"],
-            flight_type=f["flightType"],
-            flight_action=f["flightAction"],
-            tailnumber=f["tailNumber"],
-            total_time=f["ATE"],
-            atr=f["totalLandings"],
-            passengers=f["passengers"],
-            doe=f["doe"],
-            cargo=f["cargo"],
-            number_of_crew=f["numberOfCrew"],
-            orm=f["orm"],
-            fuel=f["fuel"],
-            activation_first=f["activationFirst"],
-            activation_last=f["activationLast"],
-            ready_ac=f["readyAC"],
-            med_arrival=f["medArrival"],
-        )
 
-        with Session(engine, autoflush=False) as session:
+        with Session(engine) as session:
+            flight: Flight = session.execute(
+                select(Flight)
+                .where(Flight.airtask == f["airtask"])
+                .where(Flight.date == datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date())
+                .where(Flight.tailnumber == f["tailNumber"])
+                .where(Flight.departure_time == f["ATD"])
+            ).scalar_one_or_none()
+
+            if flight is not None:
+                return jsonify({"message": f"O voo já existe com o ID {flight.fid}"}), 400
+
+            flight = Flight(
+                airtask=f["airtask"],
+                date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
+                origin=f.get("origin", ""),
+                destination=f.get("destination", ""),
+                departure_time=f.get("ATD", ""),
+                arrival_time=f.get("ATA", ""),
+                flight_type=f.get("flightType", ""),
+                flight_action=f.get("flightAction", ""),
+                tailnumber=f.get("tailNumber", ""),
+                total_time=f.get("ATE", ""),
+                atr=f.get("totalLandings", 0),
+                passengers=f.get("passengers", 0),
+                doe=f.get("doe", 0),
+                cargo=f.get("cargo", 0),
+                number_of_crew=f.get("numberOfCrew", 0),
+                orm=f.get("orm", 0),
+                fuel=f.get("fuel", 0),
+                activation_first=f.get("activationFirst", "__:__"),
+                activation_last=f.get("activationLast", "__:__"),
+                ready_ac=f.get("readyAC", "__:__"),
+                med_arrival=f.get("medArrival", "__:__"),
+            )
             session.add(flight)
             pilot: dict
 
@@ -115,27 +123,27 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
         with Session(engine, autoflush=False) as session:
             flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
 
-            flight.airtask = (f["airtask"],)
+            flight.airtask = f.get("airtask", "")
             flight.date = datetime.strptime(f["date"], "%d-%b-%Y").replace(tzinfo=UTC).date()
-            flight.origin = (f["origin"],)
-            flight.destination = (f["destination"],)
-            flight.departure_time = (f["ATD"],)
-            flight.arrival_time = (f["ATA"],)
-            flight.flight_type = (f["flightType"],)
-            flight.flight_action = (f["flightAction"],)
-            flight.tailnumber = (f["tailNumber"],)
-            flight.total_time = (f["ATE"],)
-            flight.atr = (f["totalLandings"],)
-            flight.passengers = (f["passengers"],)
-            flight.doe = (f["doe"],)
-            flight.cargo = (f["cargo"],)
-            flight.number_of_crew = (f["numberOfCrew"],)
-            flight.orm = (f["orm"],)
-            flight.fuel = (f["fuel"],)
-            flight.activation_first = (f["activationFirst"],)
-            flight.activation_last = (f["activationLast"],)
-            flight.ready_ac = (f["readyAC"],)
-            flight.med_arrival = (f["medArrival"],)
+            flight.origin = f.get("origin", "")
+            flight.destination = f.get("destination", "")
+            flight.departure_time = f.get("ATD", "")
+            flight.arrival_time = f.get("ATA", "")
+            flight.flight_type = f.get("flightType", "")
+            flight.flight_action = f.get("flightAction", "")
+            flight.tailnumber = f.get("tailNumber", "")
+            flight.total_time = f.get("ATE", "")
+            flight.atr = f.get("totalLandings", 0)
+            flight.passengers = f.get("passengers", 0)
+            flight.doe = f.get("doe", 0)
+            flight.cargo = f.get("cargo", 0)
+            flight.number_of_crew = f.get("numberOfCrew", 0)
+            flight.orm = f.get("orm", 0)
+            flight.fuel = f.get("fuel", 0)
+            flight.activation_first = f.get("activationFirst", "__:__")
+            flight.activation_last = f.get("activationLast", "__:__")
+            flight.ready_ac = f.get("readyAC", "__:__")
+            flight.med_arrival = f.get("medArrival", "__:__")
 
             pilot: dict
 

@@ -36,7 +36,7 @@ const CrewCard = ({ user }) => {
           gap={2}
           p={3}
         >
-          <Text fontWeight={"bold"}>Alerta</Text>
+          <Text fontWeight={"bold"}>Qualificações</Text>
           <Grid
             my={1}
             rowGap={1}
@@ -47,6 +47,12 @@ const CrewCard = ({ user }) => {
             <GridItem colSpan={2}>
               <QualificationsPanel
                 qualification={user.qualification?.lastBSOC}
+              />
+            </GridItem>
+            <StandardText text="BSKIT" />
+            <GridItem colSpan={2}>
+              <QualificationsPanel
+                qualification={user.qualification?.lastBSKIT}
               />
             </GridItem>
           </Grid>
