@@ -30,7 +30,7 @@ def send_email(subject: str, body: str, to: str) -> dict:
 
     # Create the email message
     msg = MIMEMultipart()
-    sender_address = formataddr(("Jarbas", smtp_user))
+    sender_address = formataddr(("SIQ - Recuperar Password", smtp_user))
 
     msg["From"] = sender_address
     msg["To"] = to
@@ -79,8 +79,8 @@ def main(recipient_email: str) -> str:
     subject = "SIQ - Restauro de password"
 
     # Create the recovery URL with email and code
-    recovery_url = f"https://esq502.pt/#/recovery/{code}/{recipient_email}"
-    recovery_url_docker = f"https://siq.brancohome.synology.me/#/recovery/{code}/{recipient_email}"
+    recovery_url = f"https://esq502.onrender.com/#/recovery/{code}/{recipient_email}"
+    # recovery_url_docker = f"https://siq.brancohome.synology.me/#/recovery/{code}/{recipient_email}"
     # recovery_url_local = f"http://localhost:5173/#/recovery/{code}/{recipient_email}"  # noqa: ERA001
 
     # Prepare the HTML email body with a clickable link
@@ -93,7 +93,6 @@ def main(recipient_email: str) -> str:
     <p>Bom dia,</p>
     <p>Foi iniciado um restauro de password da sua conta do SIQ. Clique no seguinte link para completar a operação:</p>
     <p><a href="{recovery_url}"><-- CLICK AQUI PARA NOVA PASSWORD --></a></p>
-    <p>Link Docker (Teste)<a href="{recovery_url_docker}"><-- CLICK AQUI PARA NOVA PASSWORD --></a></p>
     <p>Bons voos!</p>
 </body>
 </html>"""
