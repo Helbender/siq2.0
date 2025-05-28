@@ -65,29 +65,30 @@ def retrieve_flights() -> tuple[Response, int]:
             if flight is not None:
                 return jsonify({"message": f"O voo já existe com o ID {flight.fid}"}), 400
 
-            flight = Flight(
-                airtask=f["airtask"],
-                date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
-                origin=f.get("origin", ""),
-                destination=f.get("destination", ""),
-                departure_time=f.get("ATD", ""),
-                arrival_time=f.get("ATA", ""),
-                flight_type=f.get("flightType", ""),
-                flight_action=f.get("flightAction", ""),
-                tailnumber=f.get("tailNumber", ""),
-                total_time=f.get("ATE", ""),
-                atr=f.get("totalLandings", 0),
-                passengers=f.get("passengers", 0),
-                doe=f.get("doe", 0),
-                cargo=f.get("cargo", 0),
-                number_of_crew=f.get("numberOfCrew", 0),
-                orm=f.get("orm", 0),
-                fuel=f.get("fuel", 0),
-                activation_first=f.get("activationFirst", "__:__"),
-                activation_last=f.get("activationLast", "__:__"),
-                ready_ac=f.get("readyAC", "__:__"),
-                med_arrival=f.get("medArrival", "__:__"),
-            )
+        flight = Flight(
+            airtask=f["airtask"],
+            date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
+            origin=f.get("origin", ""),
+            destination=f.get("destination", ""),
+            departure_time=f.get("ATD", ""),
+            arrival_time=f.get("ATA", ""),
+            flight_type=f.get("flightType", ""),
+            flight_action=f.get("flightAction", ""),
+            tailnumber=f.get("tailNumber", ""),
+            total_time=f.get("ATE", ""),
+            atr=f.get("totalLandings", 0),
+            passengers=f.get("passengers", 0),
+            doe=f.get("doe", 0),
+            cargo=f.get("cargo", 0),
+            number_of_crew=f.get("numberOfCrew", 0),
+            orm=f.get("orm", 0),
+            fuel=f.get("fuel", 0),
+            activation_first=f.get("activationFirst", "__:__"),
+            activation_last=f.get("activationLast", "__:__"),
+            ready_ac=f.get("readyAC", "__:__"),
+            med_arrival=f.get("medArrival", "__:__"),
+        )
+        with Session(engine, autoflush=False) as session:
             session.add(flight)
             pilot: dict
 
