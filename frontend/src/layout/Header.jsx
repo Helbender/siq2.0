@@ -17,6 +17,7 @@ import {
   Spacer,
   DrawerFooter,
   useColorMode,
+  Image,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { MdSpaceDashboard } from "react-icons/md";
@@ -111,34 +112,47 @@ function Header() {
               {token ? (
                 //Drawer render if logged in
                 <>
-                  <DrawerHeader>
-                    <Heading
-                      size="sm"
-                      color="teal.500"
-                      mt="10"
-                      cursor="pointer"
-                      onClick={() => {
-                        navigate("/");
-                        onClose();
-                      }}
-                    >
-                      Bem-vindo,
-                    </Heading>
-                    <Heading
-                      size="md"
-                      mt="0"
-                      color={"teal.500"}
-                      cursor="pointer"
-                      onClick={() => {
-                        navigate("/");
-                        onClose();
-                      }}
-                    >
-                      {User.name}
-                    </Heading>
-                    <Heading size="sm" mt="0" color={"teal.700"}>
-                      {User.admin ? "Admin" : ""}
-                    </Heading>
+                  <DrawerHeader flexDirection={"row"}>
+                    <Flex flexDirection={"row"} pr={10}>
+                      <Box>
+                        <Heading
+                          size="sm"
+                          color="teal.500"
+                          mt="10"
+                          cursor="pointer"
+                          onClick={() => {
+                            navigate("/");
+                            onClose();
+                          }}
+                        >
+                          Bem-vindo,
+                        </Heading>
+                        <Heading
+                          size="md"
+                          mt="0"
+                          color={"teal.500"}
+                          cursor="pointer"
+                          onClick={() => {
+                            navigate("/");
+                            onClose();
+                          }}
+                        >
+                          {User.name}
+                        </Heading>
+                        <Heading size="sm" mt="0" color={"teal.700"}>
+                          {User.admin ? "Admin" : ""}
+                        </Heading>
+                      </Box>
+                      <Spacer />
+                      <Image
+                        src="/public/Esquadra_502.png"
+                        alt="Logo"
+                        boxSize="50px"
+                        alignSelf={"center"}
+                        objectFit="cover"
+                        // mb={2}
+                      />
+                    </Flex>
                   </DrawerHeader>
                   <DrawerBody>
                     <VStack align="flex-start" h="100%">

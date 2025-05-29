@@ -101,10 +101,10 @@ function CreateFlightModal({ flight }) {
   const ATD = watch("ATD");
   const ATA = watch("ATA");
   const flight_pilots = watch("flight_pilots") || [];
+  const AIRTASK = watch("airtask");
 
   // Create Flight Endpoint
   const handleCreateFlight = async (data) => {
-    console.log(data);
     toast({
       title: "A adicionar voo",
       description: "Em processo.",
@@ -114,9 +114,16 @@ function CreateFlightModal({ flight }) {
       position: "bottom",
     });
     try {
-      const res = await api.post("/api/flights", data, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      let res;
+      if (flight) {
+        res = await api.patch(`/api/flights/${flight.id}`, data, {
+          headers: { Authorization: "Bearer " + token },
+        });
+      } else {
+        res = await api.post("/api/flights", data, {
+          headers: { Authorization: "Bearer " + token },
+        });
+      }
       if (res.status === 201) {
         console.log(res);
         toast.closeAll();
@@ -152,7 +159,7 @@ function CreateFlightModal({ flight }) {
   // Atualiza o número de tripulantes automaticamente
   useEffect(() => {
     setValue("numberOfCrew", flight_pilots.length);
-  }, [flight_pilots.length, setValue]);
+  }, [flight_pilots.length]);
 
   // Atualiza ATE automaticamente
   useEffect(() => {
@@ -160,7 +167,10 @@ function CreateFlightModal({ flight }) {
       const ATE = getTimeDiff(ATD, ATA);
       setValue("ATE", ATE);
     }
-  }, [ATD, ATA, setValue]);
+  }, [ATD, ATA]);
+  useEffect(() => {
+    setValue("airtask", AIRTASK.toUpperCase());
+  }, [AIRTASK]);
   return (
     <>
       {flight ? (
@@ -188,7 +198,9 @@ function CreateFlightModal({ flight }) {
             <ModalContent
             // minWidth={"1200px"}
             >
-              <ModalHeader textAlign={"center"}>Novo Modelo 1M</ModalHeader>
+              <ModalHeader textAlign={"center"}>
+                {flight ? `Editar o Modelo ${flight.id}` : "Novo Modelo 1M"}
+              </ModalHeader>
               <ModalCloseButton />
               <ModalBody>
                 <Stack>
@@ -212,7 +224,7 @@ function CreateFlightModal({ flight }) {
                           {...register("airtask", {
                             required: "Campo obrigatório",
                             pattern: {
-                              value: /^\d{2}[A-Za-z]\d{4}$/,
+                              value: /^\d{2}[A-Z]\d{4}$/,
                               message: "Formato inválido. Ex: 00A0000",
                             },
                           })}
@@ -537,8 +549,8 @@ function CreateFlightModal({ flight }) {
                 </Stack>
               </ModalBody>
               <ModalFooter>
-                <Button colorScheme="blue" mr={3} type="submit">
-                  Registar Voo
+                <Button colorScheme="green" mr={3} type="submit">
+                  {flight ? "Editar Voo" : "Registar Voo"}
                 </Button>
                 <Button
                   colorScheme="blue"

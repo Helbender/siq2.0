@@ -1,8 +1,7 @@
 from __future__ import annotations  # noqa: D100, INP001
+
 # import locale
-
-
-from datetime import date  # noqa: TCH003
+from datetime import date  # noqa: TC003
 from typing import TYPE_CHECKING, List, Optional
 
 from models.users import Base  # type: ignore

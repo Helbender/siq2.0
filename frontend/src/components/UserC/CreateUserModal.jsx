@@ -27,6 +27,7 @@ import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { BiTrash } from "react-icons/bi";
 import api from "../../utils/api";
+import { useNavigate } from "react-router-dom";
 
 function CreateUserModal({ edit, add, isDelete, user }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -42,9 +43,10 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       squadron: "502 - Elefantes",
     },
   );
-  const { token, getUser } = useContext(AuthContext);
+  const { token, getUser, removeToken } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
   const User = getUser();
+  const navigate = useNavigate();
 
   //Updates inputs when filling the form
   const handleInputsChange = async (event) => {
@@ -104,6 +106,11 @@ function CreateUserModal({ edit, add, isDelete, user }) {
 
       onClose();
     } catch (error) {
+      if (error.response.status === 401) {
+        console.log("Removing Token");
+        removeToken();
+        navigate("/");
+      }
       toast({
         title: "Error adding user",
         description: error.response.data.message,
@@ -179,6 +186,8 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                   <FormLabel>NIP</FormLabel>
                   <Tooltip hasArrow label="Introduza o NIP sem modúlo">
                     <Input
+                      // type="number"
+                      // maxLength={6}
                       value={inputs?.nip}
                       name="nip"
                       placeholder="NIP"

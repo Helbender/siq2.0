@@ -1,18 +1,18 @@
 from __future__ import annotations
-import json  # noqa: D100, INP001
 
-from functions.gdrive import ID_PASTA_VOO, enviar_json_para_pasta
+import json
+
 from config import CREW_USER, PILOT_USER, engine  # type: ignore
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
+from functions.gdrive import ID_PASTA_VOO, enviar_json_para_pasta
 from functions.sendemail import hash_code  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
 from models.users import User  # type: ignore
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-
 
 users = Blueprint("users", __name__)
 
@@ -34,7 +34,7 @@ def retrieve_user() -> tuple[Response, int]:
 
     # Adds new user to db
     if request.method == "POST":
-        verify_jwt_in_request()
+        # verify_jwt_in_request()
         user = request.get_json()
         print(user)
         with Session(engine) as session:
@@ -108,8 +108,13 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
 
     if request.method == "PATCH":
         user: dict = request.get_json()
+        db = Pilot, Crew, User
         with Session(engine) as session:
-            modified_pilot = session.execute(select(db).where(db.nip == nip)).scalar_one()
+            for model in db:
+                try:
+                    modified_pilot = session.execute(select(model).where(model.nip == nip)).scalar_one()
+                except NoResultFound:
+                    continue
             for k, v in user.items():
                 if k == "qualification":
                     continue
@@ -141,7 +146,7 @@ def add_users() -> tuple[Response, int]:
         content = file.read().decode("utf-8")
         data = json.loads(content)
     except Exception as e:
-        return jsonify({"error": f"Erro ao ler ficheiro JSON: {str(e)}"}), 400
+        return jsonify({"error": f"Erro ao ler ficheiro JSON: {e!s}"}), 400
 
     with Session(engine) as session:
 
@@ -193,7 +198,7 @@ def backup_users() -> tuple[Response, int]:
         lista2 = session.execute(select(Crew)).scalars()
         lista3 = session.execute(select(User)).scalars()
 
-        user_base = {"pilots": [], "crew": [], "users": []}
+        user_base: dict = {"pilots": [], "crew": [], "users": []}
         for a in lista:
             user_base["pilots"].append(a.to_json())
 
