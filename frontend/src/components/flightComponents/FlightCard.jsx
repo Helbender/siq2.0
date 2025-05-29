@@ -171,6 +171,18 @@ const FlightCard = ({ flight }) => {
                 if (pilot.NFP) {
                   qualification = [...qualification, "NFP"];
                 }
+                if (pilot.BSKIT) {
+                  qualification = [...qualification, "BSKIT"];
+                }
+                if (pilot.BSOC) {
+                  qualification = [...qualification, "BSOC"];
+                }
+                if (pilot.PARAS) {
+                  qualification = [...qualification, "PARAS"];
+                }
+                if (pilot.NVG) {
+                  qualification = [...qualification, "NVG"];
+                }
                 if (pilot.QUAL1) {
                   qualification = [...qualification, pilot.QUAL1];
                 }
