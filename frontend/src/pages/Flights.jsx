@@ -10,6 +10,7 @@ import {
   Spinner,
   useBreakpointValue,
   Heading,
+  Box,
 } from "@chakra-ui/react";
 import FlightCard from "../components/flightComponents/FlightCard";
 import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
@@ -19,21 +20,22 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import StyledText from "../components/styledcomponents/StyledText";
 import { formatDate } from "../Functions/timeCalc";
+import { FixedSizeList as List } from "react-window";
 
 export default function Flights() {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   const { flights, loading } = useContext(FlightContext);
   const [searchTerm, setSearchTerm] = useState("");
-  const { token, removeToken } = useContext(AuthContext);
+  const { token, removeToken, getUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const showed = 100;
-
+  const User = getUser();
   const filteredFlights = useMemo(() => {
     return flights.filter((flight) =>
       [
         flight.airtask,
-        // flight.flightType,
-        // flight.flightAction,
+        flight.flightType,
+        flight.flightAction,
         formatDate(flight.date),
         // flight.date,
         // flight.origin,
@@ -63,7 +65,7 @@ export default function Flights() {
           />
         )}
         <Spacer />
-        <CreateFlightModal />
+        {User.admin ? <CreateFlightModal /> : null}
         <FormControl textAlign={"center"} ml={5} maxW="130px">
           <Input
             placeholder="Procurar..."
@@ -75,7 +77,8 @@ export default function Flights() {
         {isColumn ? null : (
           <StyledText
             query={["Mostrados:", "Encontrados"]}
-            text={`Mostrados: ${filteredFlights.length >= showed ? showed : filteredFlights.length} / ${filteredFlights.length} Encontrados`}
+            // text={`Mostrados: ${filteredFlights.length >= showed ? showed : filteredFlights.length} / ${filteredFlights.length} Encontrados`}
+            text={`${filteredFlights.length} Encontrados`}
           />
         )}
       </Flex>
@@ -87,44 +90,48 @@ export default function Flights() {
           <Spinner size="xl" thickness="4px" speed="1.65s" color="blue.500" />
         </Center>
       ) : (
-        // <Box
+        <Box
+          mt="8"
+          overflowY="hidden"
+          w={"95%"}
+          maxW={"1200px"}
+          h={"80vh"}
+          // p={10}
+        >
+          <List
+            height={window.innerHeight}
+            itemCount={filteredFlights.length}
+            itemSize={650}
+            width={"100%"}
+          >
+            {({ index, style }) => (
+              <Box style={style}>
+                {filteredFlights.length ? (
+                  <FlightCard
+                    key={filteredFlights[index].id}
+                    flight={filteredFlights[index]}
+                  />
+                ) : null}
+              </Box>
+            )}
+          </List>
+        </Box>
+        // <Stack
+        //   gap={5}
         //   mt="8"
-        //   overflowY="hidden"
+        //   overflowY="auto"
         //   w={"95%"}
         //   maxW={"1200px"}
         //   h={"80vh"}
         //   p={2}
         // >
-        //   <List
-        //     height={window.innerHeight}
-        //     itemCount={filteredFlights.length}
-        //     itemSize={showed}
-        //     width={"100%"}
-        //   >
-        //     {({ index }) => (
-        //       <FlightCard
-        //         key={filteredFlights[index].id}
-        //         flight={filteredFlights[index]}
-        //       />
-        //     )}
-        //   </List>
-        // </Box>
-        <Stack
-          gap={5}
-          mt="8"
-          overflowY="auto"
-          w={"95%"}
-          maxW={"1200px"}
-          h={"80vh"}
-          p={2}
-        >
-          {filteredFlights.length
-            ? // !!filteredFlights.length &&
-              filteredFlights
-                .slice(0, showed)
-                .map((flight) => <FlightCard key={flight.id} flight={flight} />)
-            : null}
-        </Stack>
+        //   {filteredFlights.length
+        //     ? // !!filteredFlights.length &&
+        //       filteredFlights
+        //         .slice(0, showed)
+        //         .map((flight) => <FlightCard key={flight.id} flight={flight} />)
+        //     : null}
+        // </Stack>
       )}
     </VStack>
   );

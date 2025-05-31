@@ -145,7 +145,7 @@ function Header() {
                       </Box>
                       <Spacer />
                       <Image
-                        src="/public/Esquadra_502.png"
+                        src="/Esquadra_502.png"
                         alt="Logo"
                         boxSize="50px"
                         alignSelf={"center"}

@@ -85,26 +85,16 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
     """Placehold."""
     verify_jwt_in_request()
 
-    if position in PILOT_USER:
-        db = Pilot
-    elif position in CREW_USER:
-        db = Crew
-    else:
-        db = User
-
     if request.method == "DELETE":
         with Session(engine) as session:
-            # result = session.execute(
-            #     delete(Qualification).where(Qualification.pilot_id == nip),
-            # )
-            result = session.execute(delete(db).where(db.nip == nip))
+            for db in [Pilot, Crew, User]:
+                result = session.execute(delete(db).where(db.nip == nip))
 
-            if result.rowcount == 1:
-                session.commit()
+                if result.rowcount == 1:
+                    session.commit()
 
-                return jsonify({"deleted_id": f"{nip}"}), 200
-            else:  # noqa: RET505
-                return jsonify({"message": "Failed to delete"}), 304
+                    return jsonify({"deleted_id": f"{nip}"}), 200
+            return jsonify({"message": "Failed to delete"}), 304
 
     if request.method == "PATCH":
         user: dict = request.get_json()

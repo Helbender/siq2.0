@@ -47,6 +47,7 @@ def retrieve_flights() -> tuple[Response, int]:
                 flights.append(row.to_json())  # Flight main data to JSON
 
         end_time = time.perf_counter()
+        print(f"Tempo medio: {(end_time - start_time) / len(flights):.4f} segundos")
         print(f"Tempo total: {end_time - start_time:.4f} segundos")
         return jsonify(flights), 200
 
@@ -160,7 +161,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
         if not DEV:
             Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
-        return jsonify({"msg": "Flight changed"}), 200
+        return jsonify({"message": "Flight changed"}), 204
 
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:

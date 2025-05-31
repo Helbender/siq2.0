@@ -25,7 +25,11 @@ import { formatDate } from "../../Functions/timeCalc";
 const FlightCard = ({ flight }) => {
   const { colorMode } = useColorMode();
   return (
-    <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
+    <Card
+      boxShadow={"lg"}
+      bg={colorMode === "light" ? "gray.300" : "gray.700"}
+      // height={"600px"}
+    >
       <CardHeader>
         <Flex align={"center"}>
           <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
@@ -107,7 +111,7 @@ const FlightCard = ({ flight }) => {
           )}
         </Flex>
         <Divider my="5" />
-        <TableContainer>
+        <TableContainer overflowY={"auto"} maxHeight={"300px"}>
           <Table size={"sm"}>
             <Thead>
               <Tr>

@@ -129,10 +129,20 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       console.log(res);
       if (res.data?.deleted_id) {
         setPilotos(pilotos.filter((piloto) => piloto.nip != user.nip));
+        toast({
+          title: "Utilizador apagado com sucesso",
+          description: `Utilizdor com o nip ${res.data.deleted_id} apagado`,
+          status: "error",
+        });
         // setFilteredUsers(pilotos.filter((piloto) => piloto.nip != user.nip));
       }
     } catch (error) {
       console.log(error);
+      toast({
+        title: "Error deleting user",
+        description: error.response.data.message,
+        status: "error",
+      });
     }
   };
   return (

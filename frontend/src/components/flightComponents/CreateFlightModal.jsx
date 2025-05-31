@@ -124,8 +124,8 @@ function CreateFlightModal({ flight }) {
           headers: { Authorization: "Bearer " + token },
         });
       }
+      console.log(res);
       if (res.status === 201) {
-        console.log(res);
         toast.closeAll();
         toast({
           title: "Sucesso",
@@ -136,6 +136,21 @@ function CreateFlightModal({ flight }) {
         });
         data.id = res.data?.message;
         setFlights([...flights, data]);
+      }
+      if (res.status === 204) {
+        toast.closeAll();
+        toast({
+          title: "Sucesso",
+          description: "Voo atualizado com sucesso.",
+          status: "success",
+          duration: 5000,
+          position: "bottom",
+        });
+        setFlights((prevFlights) =>
+          prevFlights.map((flight) =>
+            flight.id === data.id ? { ...flight, ...data } : flight,
+          ),
+        );
       }
     } catch (error) {
       if (error.response.status === 401) {
