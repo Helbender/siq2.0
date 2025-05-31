@@ -1,7 +1,6 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 import os
-import time
 from datetime import UTC, date, datetime
 from threading import Thread
 
@@ -15,7 +14,7 @@ from models.flights import Flight, FlightCrew, FlightPilots  # type:ignore  # no
 from models.pilots import Pilot, Qualification  # type:ignore  # noqa: PGH003
 from models.users import year_init  # type:ignore  # noqa: PGH003
 from sqlalchemy import exc, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 flights = Blueprint("flights", __name__)
 
@@ -35,20 +34,28 @@ def retrieve_flights() -> tuple[Response, int]:
     """
     # Retrieve all flights from db
     if request.method == "GET":
-        start_time = time.perf_counter()
+        # start_time = time.perf_counter()
         flights: list = []
 
         with Session(engine) as session:
-            stmt = select(Flight).order_by(Flight.date.desc())
-            flights_obj = session.execute(stmt).scalars()
-            # Iterates through flights and creates JSON response
-            # flights = [row.to_json() for row in flights_obj]  # Flight main data to JSON
-            for row in flights_obj:
-                flights.append(row.to_json())  # Flight main data to JSON
+            stmt = (
+                select(Flight)
+                .order_by(Flight.date.desc())
+                .options(
+                    joinedload(Flight.flight_pilots).joinedload(FlightPilots.pilot),
+                    joinedload(Flight.flight_crew).joinedload(FlightCrew.crew),
+                )
+            )
+            flights_obj = session.execute(stmt).unique().scalars()
+            # end_time = time.perf_counter()
+            # print(f"Tempo DB: {end_time - start_time:.4f} segundos")
 
-        end_time = time.perf_counter()
-        print(f"Tempo medio: {(end_time - start_time) / len(flights):.4f} segundos")
-        print(f"Tempo total: {end_time - start_time:.4f} segundos")
+            # Iterates through flights and creates JSON response
+            flights = [row.to_json() for row in flights_obj]  # Flight main data to JSON
+
+        # end_time = time.perf_counter()
+        # print(f"Tempo medio: {(end_time - start_time) / len(flights):.4f} segundos")
+        # print(f"Tempo total: {end_time - start_time:.4f} segundos")
         return jsonify(flights), 200
 
     # Retrieves flight from Frontend and saves is to DB

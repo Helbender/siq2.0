@@ -5,7 +5,8 @@ import {
   Select,
   IconButton,
 } from "@chakra-ui/react";
-import { Fragment, useEffect, useState } from "react";
+import React from "react";
+import { Fragment, useEffect, useState, useMemo } from "react";
 import { FaMinus } from "react-icons/fa";
 import { useFormContext } from "react-hook-form";
 const PILOT_QUALIFICATIONS = [
@@ -47,53 +48,80 @@ const CREW_QUALIFICATIONS = ["BSOC", "BSKIT"];
 //   BSOC: false,
 // };
 const PilotInput = ({ index, pilotos, member, remove }) => {
-  const [initFlag, setInitFlag] = useState(true);
-  const [qualP, setQualP] = useState([]);
+  // const [initFlag, setInitFlag] = useState(true);
   const {
     register,
     formState: { errors },
     setValue,
   } = useFormContext();
 
-  useEffect(() => {
-    let temp = pilotos.filter((piloto) => piloto.name == member.name);
-    if (temp[0] === undefined || temp[0].name === undefined) {
-      setValue(`flight_pilots.${index}.nip`, "");
-    } else {
-      setValue(`flight_pilots.${index}.nip`, temp[0].nip);
-    }
-  }, [member.name, setValue]);
-
-  useEffect(() => {
-    if (initFlag) {
-      setInitFlag(false);
-    } else {
-      setValue(`flight_pilots.${index}.nip`, "");
-    }
-    if (
-      member.position === "PC" ||
-      member.position === "PI" ||
-      member.position === "P"
-    ) {
-      setQualP(PILOT_QUALIFICATIONS);
-    } else if (member.position === "CP") {
-      setQualP(PILOT_QUALIFICATIONS);
-    } else if (
-      member.position === "OC" ||
-      member.position === "OCI" ||
-      member.position === "OCA"
-    ) {
-      setQualP(CREW_QUALIFICATIONS);
-    }
+  // Define qualificações de forma memoizada
+  const qualP = useMemo(() => {
+    const pos = member.position;
+    if (["PC", "PI", "P", "CP"].includes(pos)) return PILOT_QUALIFICATIONS;
+    if (["OC", "OCI", "OCA"].includes(pos)) return CREW_QUALIFICATIONS;
+    return [];
   }, [member.position]);
+
+  // Lista de pilotos filtrada consoante a posição selecionada
+  const pilotosFiltrados = useMemo(() => {
+    const pos = member.position;
+    return pilotos.filter((crew) => {
+      if (pos === "PC") return ["PI", "PC"].includes(crew.position);
+      if (pos === "P") return ["PI", "PC", "P"].includes(crew.position);
+      if (pos === "OC") return ["OCI", "OC"].includes(crew.position);
+      if (pos === "CT") return ["CTI", "CT"].includes(crew.position);
+      if (pos === "OPV") return ["OPVI", "OPV"].includes(crew.position);
+      return crew.position === pos;
+    });
+  }, [pilotos, member.position]);
+
+  // useEffect(() => {
+  //   let temp = pilotos.filter((piloto) => piloto.name == member.name);
+  //   if (temp[0] === undefined || temp[0].name === undefined) {
+  //     setValue(`flight_pilots.${index}.nip`, "");
+  //   } else {
+  //     setValue(`flight_pilots.${index}.nip`, temp[0].nip);
+  //   }
+  // }, [member.name, setValue]);
+  // Atualiza automaticamente o NIP quando muda o nome
+  useEffect(() => {
+    const piloto = pilotos.find((p) => p.name === member.name);
+    setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
+  }, [member.name, pilotos, setValue, index]);
+
+  // useEffect(() => {
+  //   if (initFlag) {
+  //     setInitFlag(false);
+  //   } else {
+  //     setValue(`flight_pilots.${index}.nip`, "");
+  //   }
+  //   if (
+  //     member.position === "PC" ||
+  //     member.position === "PI" ||
+  //     member.position === "P"
+  //   ) {
+  //     setQualP(PILOT_QUALIFICATIONS);
+  //   } else if (member.position === "CP") {
+  //     setQualP(PILOT_QUALIFICATIONS);
+  //   } else if (
+  //     member.position === "OC" ||
+  //     member.position === "OCI" ||
+  //     member.position === "OCA"
+  //   ) {
+  //     setQualP(CREW_QUALIFICATIONS);
+  //   }
+  // }, [member.position]);
 
   return (
     <Fragment>
-      <GridItem>
-        <FormControl>
+      <GridItem alignContent={"center"} alignItems={"center"}>
+        <FormControl alignContent={"center"} alignItems={"center"}>
           <Select
             // m="auto"
             minW={"100px"}
+            // maxW={"200px"}
+            // width={"100px"}
             name="posição"
             placeholder=" "
             type="text"
@@ -103,6 +131,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             //   handleCrewChange(index, "position", e.target.value);
             // }}
             textAlign={"center"}
+            alignSelf={"center"}
           >
             <option value="PI">PI</option>
             <option value="PC">PC</option>
@@ -130,7 +159,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             isDisabled={!member.position}
             {...register(`flight_pilots.${index}.name`)}
           >
-            {pilotos
+            {/* {pilotos
               .filter((crew) => {
                 if (member.position === "PC") {
                   return crew.position === "PI" || crew.position === "PC";
@@ -152,11 +181,16 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
                 <option key={crew.name} value={crew.name}>
                   {crew.name}
                 </option>
-              ))}
+              ))} */}
+            {pilotosFiltrados.map((crew) => (
+              <option key={crew.name} value={crew.name}>
+                {crew.name}
+              </option>
+            ))}
           </Select>
         </FormControl>
       </GridItem>
-      <GridItem w={"80px"} bg={"whiteAlpha.100"}>
+      <GridItem bg={"whiteAlpha.100"} w={"80px"}>
         <FormControl isReadOnly alignSelf={"center"}>
           <Input
             p={0}
@@ -167,7 +201,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
           ></Input>
         </FormControl>
       </GridItem>
-      <GridItem ml={3} w={"50px"}>
+      {/* <GridItem ml={3} w={"50px"}>
         <FormControl>
           <Input
             p={0}
@@ -246,8 +280,30 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             {...register(`flight_pilots.${index}.nprecapp`)}
           />
         </FormControl>
-      </GridItem>
-      <GridItem ml={2} minW={"80px"}>
+      </GridItem> */}
+      {["VIR", "VN", "CON", "ATR", "ATN", "precapp", "nprecapp"].map(
+        (campo) => (
+          <GridItem
+            key={campo}
+            w={
+              ["VIR", "VN", "CON", "ATR", "ATN"].includes(campo)
+                ? "50px"
+                : "100px"
+            }
+          >
+            <FormControl>
+              <Input
+                p={0}
+                name={campo}
+                type={["VIR", "VN", "CON"].includes(campo) ? "time" : "number"}
+                textAlign={"center"}
+                {...register(`flight_pilots.${index}.${campo}`)}
+              />
+            </FormControl>
+          </GridItem>
+        ),
+      )}
+      {/* <GridItem ml={2} minW={"80px"}>
         <FormControl>
           <Select
             display="inline-block"
@@ -361,7 +417,24 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             })}
           </Select>
         </FormControl>
-      </GridItem>
+      </GridItem> */}
+      {[1, 2, 3, 4, 5, 6].map((n) => (
+        <GridItem key={n} minW={"70px"}>
+          <FormControl>
+            <Select
+              name={`Qual${n}`}
+              placeholder=" "
+              {...register(`flight_pilots.${index}.QUAL${n}`)}
+            >
+              {qualP.map((qual, i) => (
+                <option key={i} value={qual}>
+                  {qual}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+        </GridItem>
+      ))}
       <GridItem justifyContent={"flex-end"} display={"flex"}>
         <IconButton
           icon={<FaMinus />}
@@ -375,4 +448,4 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
   );
 };
 
-export default PilotInput;
+export default React.memo(PilotInput);

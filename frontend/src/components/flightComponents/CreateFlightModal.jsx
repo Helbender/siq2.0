@@ -129,13 +129,13 @@ function CreateFlightModal({ flight }) {
         toast.closeAll();
         toast({
           title: "Sucesso",
-          description: `Voo colocado com sucesso. ID: ${res.data?.message}`,
+          description: `Voo adicionado com sucesso. ID: ${res.data?.message}`,
           status: "success",
           duration: 5000,
           position: "bottom",
         });
         data.id = res.data?.message;
-        setFlights([...flights, data]);
+        setFlights((prev) => [...prev, data]);
       }
       if (res.status === 204) {
         toast.closeAll();
@@ -513,11 +513,13 @@ function CreateFlightModal({ flight }) {
                       columnGap={1}
                     >
                       <GridItem textAlign={"center"}>Posição</GridItem>
-                      <GridItem textAlign={"center"}>Nome</GridItem>
+                      <GridItem width={"200px"} textAlign={"center"}>
+                        Nome
+                      </GridItem>
                       <GridItem w={"80px"} textAlign={"center"}>
                         NIP
                       </GridItem>
-                      <GridItem w={"50px"} textAlign={"center"} ml={2}>
+                      <GridItem w={"50px"} textAlign={"center"}>
                         VIR
                       </GridItem>
                       <GridItem w={"50px"} textAlign={"center"}>
@@ -532,10 +534,10 @@ function CreateFlightModal({ flight }) {
                       <GridItem w={"50px"} textAlign={"center"}>
                         ATN
                       </GridItem>
-                      <GridItem w={"80px"} textAlign={"center"}>
+                      <GridItem w={"100px"} textAlign={"center"}>
                         Precisão
                       </GridItem>
-                      <GridItem w={"80px"} textAlign={"center"}>
+                      <GridItem w={"100px"} textAlign={"center"}>
                         Não Precisão
                       </GridItem>
                       <GridItem textAlign={"center"} colSpan={6}>

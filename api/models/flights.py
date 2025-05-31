@@ -68,13 +68,8 @@ class Flight(Base):
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
-        # flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
-        # flight_crewmembers.extend([flightcrew.to_json() for flightcrew in self.flight_crew])
-        flight_crewmembers = []
-        for flightpilot in self.flight_pilots:
-            flight_crewmembers.append(flightpilot.to_json())
-        for flightcrew in self.flight_crew:
-            flight_crewmembers.append(flightcrew.to_json())
+        flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
+        flight_crewmembers.extend([flightcrew.to_json() for flightcrew in self.flight_crew])
 
         # Return the JSON response
         return {
@@ -104,6 +99,12 @@ class Flight(Base):
         }
 
     def get_file_name(self) -> str:
+        """Construct file name base on Row parameters.
+
+        Returns:
+            str: String with AIRTASK DATE ATD and Aircraft info
+
+        """
         return f"1M {self.airtask} {self.date.strftime('%d%b%Y')} {self.departure_time.strip(':')} {self.tailnumber}.1m"
 
 

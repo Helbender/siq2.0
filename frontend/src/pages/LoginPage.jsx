@@ -30,9 +30,9 @@ function LoginPage() {
     e.preventDefault();
     toast({
       title: "A efetuar login.",
-      description: "Agarde um momento.",
+      description: "Aguarde um momento.",
       status: "loading",
-      duration: 5000,
+      duration: 50000,
       isClosable: true,
       position: "bottom",
     });

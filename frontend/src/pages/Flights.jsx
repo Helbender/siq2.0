@@ -90,14 +90,7 @@ export default function Flights() {
           <Spinner size="xl" thickness="4px" speed="1.65s" color="blue.500" />
         </Center>
       ) : (
-        <Box
-          mt="8"
-          overflowY="hidden"
-          w={"95%"}
-          maxW={"1200px"}
-          h={"80vh"}
-          // p={10}
-        >
+        <Box mt="8" overflowY="hidden" w={"95%"} maxW={"1210px"} h={"80vh"}>
           <List
             height={window.innerHeight}
             itemCount={filteredFlights.length}
@@ -105,7 +98,7 @@ export default function Flights() {
             width={"100%"}
           >
             {({ index, style }) => (
-              <Box style={style}>
+              <Box style={style} p={2}>
                 {filteredFlights.length ? (
                   <FlightCard
                     key={filteredFlights[index].id}
