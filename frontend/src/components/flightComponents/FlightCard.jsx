@@ -15,14 +15,19 @@ import {
   Th,
   Td,
   TableContainer,
+  useBreakpointValue,
+  Box,
 } from "@chakra-ui/react";
 import { useColorMode } from "@chakra-ui/react";
 import StyledText from "../styledcomponents/StyledText";
 import DeleteFlightModal from "./DeleteFlightModal";
 import CreateFlightModal from "./CreateFlightModal";
 import { formatDate } from "../../Functions/timeCalc";
+import InfoMed from "./InfoMed";
 
 const FlightCard = ({ flight }) => {
+  const isColumn = useBreakpointValue({ base: true, lg: false });
+
   const { colorMode } = useColorMode();
   return (
     <Card
@@ -32,7 +37,14 @@ const FlightCard = ({ flight }) => {
     >
       <CardHeader>
         <Flex align={"center"}>
-          <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
+          {isColumn ? (
+            <Box>
+              <Heading>{`${flight.airtask}`}</Heading>
+              <Text>{`${formatDate(flight.date)}`}</Text>
+            </Box>
+          ) : (
+            <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
+          )}
           <Spacer />
           {/* <EditFlightModal flight={flight} /> */}
           <CreateFlightModal flight={flight} />
@@ -40,12 +52,12 @@ const FlightCard = ({ flight }) => {
           <Heading as="h3">{flight.ATD}</Heading>
           <DeleteFlightModal flight={flight} />
           <Spacer />
-          <Heading>{formatDate(flight.date)}</Heading>
+          {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>
         <Divider />
       </CardHeader>
       <CardBody>
-        <Flex alignItems={"top"}>
+        <Flex alignItems={"top"} gap={2} overflowX={"auto"}>
           <Stack>
             <Text>{`${flight.flightType} / ${flight.flightAction}`}</Text>
             <StyledText
@@ -65,7 +77,7 @@ const FlightCard = ({ flight }) => {
           <Stack>
             <StyledText query={"ORM:"} text={`ORM: ${flight.orm}`} />
             <StyledText
-              query={["PAX:", "DOE:", "/"]}
+              query={["PAX", "DOE", "/", ":"]}
               text={
                 flight.doe
                   ? `PAX/DOE: ${flight.passengers} / ${flight.doe}`
@@ -85,31 +97,9 @@ const FlightCard = ({ flight }) => {
               text={`De ${flight.origin} para ${flight.destination}`}
             />
           </Stack>
-          {flight.activationFirst === "__:__" ||
-          flight.activationFirst === "" ? null : (
-            <>
-              <Spacer />
-              <Stack>
-                <StyledText
-                  query={"Ativação 1º:"}
-                  text={`Ativação 1º: ${flight.activationFirst}`}
-                />
-                <StyledText
-                  query={"Ativação Ult:"}
-                  text={`Ativação Ult: ${flight.activationLast}`}
-                />
-                <StyledText
-                  query={"AC Pronta:"}
-                  text={`AC Pronta: ${flight.readyAC}`}
-                />
-                <StyledText
-                  query={"Equipa Med.:"}
-                  text={`Equipa Med.: ${flight.medArrival}`}
-                />
-              </Stack>
-            </>
-          )}
+          <InfoMed flight={flight} />
         </Flex>
+
         <Divider my="5" />
         <TableContainer overflowY={"auto"} maxHeight={"300px"}>
           <Table size={"sm"}>
@@ -192,6 +182,18 @@ const FlightCard = ({ flight }) => {
                 }
                 if (pilot.QUAL2) {
                   qualification = [...qualification, pilot.QUAL2];
+                }
+                if (pilot.QUAL3) {
+                  qualification = [...qualification, pilot.QUAL3];
+                }
+                if (pilot.QUAL4) {
+                  qualification = [...qualification, pilot.QUAL4];
+                }
+                if (pilot.QUAL5) {
+                  qualification = [...qualification, pilot.QUAL5];
+                }
+                if (pilot.QUAL6) {
+                  qualification = [...qualification, pilot.QUAL6];
                 }
                 let texto = "";
                 for (let i = 0; i < qualification.length; i++) {

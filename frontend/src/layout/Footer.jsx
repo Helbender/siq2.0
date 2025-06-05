@@ -1,8 +1,10 @@
 /* eslint-disable no-undef */
 // Footer.jsx
-import { HStack, Spacer, Text } from "@chakra-ui/react";
+import { HStack, Spacer, Text, useBreakpointValue } from "@chakra-ui/react";
 
 function Footer() {
+  const isSmall = useBreakpointValue({ base: true, sm: false });
+  console.log(isSmall);
   return (
     <HStack
       w="100%"
@@ -23,9 +25,11 @@ function Footer() {
         Esquadra 502
       </Text>
       <Spacer />
-      <Text textAlign="right" mb={1} fontSize="sm" fontWeight="italic">
-        {"Build: " + BUILD_DATE}
-      </Text>
+      {isSmall ? null : (
+        <Text textAlign="right" mb={1} fontSize="sm" fontWeight="italic">
+          {"Build: " + BUILD_DATE}
+        </Text>
+      )}
     </HStack>
   );
 }

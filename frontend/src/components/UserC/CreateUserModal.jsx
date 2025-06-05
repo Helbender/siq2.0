@@ -112,11 +112,11 @@ function CreateUserModal({ edit, add, isDelete, user }) {
         navigate("/");
       }
       toast({
-        title: "Error adding user",
+        title: "Error editing user",
         description: error.response.data.message,
         status: "error",
       });
-      console.error("Error adding user:", error);
+      console.error("Error editing user:", error);
     }
   };
 
@@ -131,8 +131,8 @@ function CreateUserModal({ edit, add, isDelete, user }) {
         setPilotos(pilotos.filter((piloto) => piloto.nip != user.nip));
         toast({
           title: "Utilizador apagado com sucesso",
-          description: `Utilizdor com o nip ${res.data.deleted_id} apagado`,
-          status: "error",
+          description: `Utilizador com o nip ${res.data.deleted_id} apagado`,
+          status: "info",
         });
         // setFilteredUsers(pilotos.filter((piloto) => piloto.nip != user.nip));
       }

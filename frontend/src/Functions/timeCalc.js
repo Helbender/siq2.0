@@ -40,3 +40,15 @@ export const formatDate = (dateStr) => {
 
   return `${year}-${month}-${day.padStart(2, "0")}`;
 };
+// Converte "hh:mm" para minutos
+export const parseTimeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+// Converte minutos para "hh:mm"
+export const formatMinutesToTime = (totalMinutes) => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes.toString().padStart(2, "0")}min`;
+};

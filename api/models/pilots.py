@@ -213,7 +213,8 @@ class Qualification(Base):
         today = date.today()
         dias = (data - today + timedelta(days=validade)).days
         expire = (data + timedelta(days=validade)).strftime("%d/%b/%y")
-        return [dias, data.strftime("%d%b%y")]
+        # return [dias, data.strftime("%d%b%y")]
+        return [dias, expire]
 
     @staticmethod
     def _get_last_five(last: list, number: int, date: str) -> str:

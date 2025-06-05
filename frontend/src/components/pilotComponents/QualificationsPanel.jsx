@@ -1,5 +1,3 @@
- 
- 
 import { HStack, Text } from "@chakra-ui/react";
 
 const QualificationsPanel = (props) => {
@@ -20,7 +18,7 @@ const QualificationsPanel = (props) => {
         color="black"
         py={1}
         h="100%"
-        // w={"50%"}
+        w={"45px"}
         px={2}
         bg={colorFormatter(props.qualification[0])}
         borderTopLeftRadius={props.borderTopLeftRadius}
@@ -32,11 +30,12 @@ const QualificationsPanel = (props) => {
       </Text>
       {/* <Spacer /> */}
       <Text
+        // w={"55%"}
         py={1}
-        px={2}
+        pl={2}
         textAlign={"right"}
         alignContent={"center"}
-        isTruncated
+        // isTruncated
       >
         {props.qualification[1]}
       </Text>
