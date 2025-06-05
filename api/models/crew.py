@@ -24,7 +24,11 @@ class Crew(People, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_crew: Mapped[List[FlightCrew]] = relationship(back_populates="crew")
+    flight_crew: Mapped[List[FlightCrew]] = relationship(
+        back_populates="crew",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def to_json(self, qualification_data: bool = False) -> dict:
         """Return all model data in JSON format."""
@@ -45,7 +49,8 @@ class QualificationCrew(Base):
     crew: Mapped[Crew] = relationship(back_populates="qualification")
     last_bsoc_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_bskit_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
 
     def to_json(self) -> dict:

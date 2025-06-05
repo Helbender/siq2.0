@@ -56,10 +56,12 @@ class Flight(Base):
     flight_pilots: Mapped[List[FlightPilots]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     flight_crew: Mapped[List[FlightCrew]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     # def __repr__(self) -> str:
@@ -114,10 +116,10 @@ class FlightPilots(Base):
     __tablename__ = "flight_pilots"
 
     flight_id: Mapped[int] = mapped_column(
-        ForeignKey("flights_table.fid"),
+        ForeignKey("flights_table.fid", ondelete="CASCADE"),
         primary_key=True,
     )
-    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip"), primary_key=True)
+    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True)
     position: Mapped[str] = mapped_column(String(5))
 
     day_landings: Mapped[int]
@@ -187,11 +189,11 @@ class FlightCrew(Base):
     __tablename__ = "flight_crew"
 
     flight_id: Mapped[int] = mapped_column(
-        ForeignKey("flights_table.fid"),
+        ForeignKey("flights_table.fid", ondelete="CASCADE"),
         primary_key=True,
     )
 
-    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip"), primary_key=True)
+    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True)
     position: Mapped[str] = mapped_column(String(5))
 
     bsoc: Mapped[Optional[bool]]  # noqa: UP007

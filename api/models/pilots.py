@@ -3,14 +3,13 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date, timedelta
 from typing import TYPE_CHECKING, List
 
-from models.users import Base, People, year_init, date_init  # type: ignore
+from models.users import Base, People, date_init, year_init  # type: ignore
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
 )
-
 
 if TYPE_CHECKING:
     from flights import FlightPilots  # type: ignore
@@ -25,7 +24,7 @@ class Pilot(People, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_pilots: Mapped[List[FlightPilots]] = relationship(back_populates="pilot")
+    flight_pilots: Mapped[List[FlightPilots]] = relationship(back_populates="pilot", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
         repr = super().__repr__()
@@ -56,45 +55,58 @@ class Qualification(Base):
     last_nprec_app: Mapped[str] = mapped_column(String(55), default=date_init)
 
     last_qa1_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_qa2_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_bsp1_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_bsp2_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_ta_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_vrp1_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_vrp2_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
 
     last_cto_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_sid_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_mono_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_nfp_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_bskit_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_paras_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
     last_nvg_date: Mapped[date] = mapped_column(
-        insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
     )
 
     def is_qualified(self, type_qual) -> bool:
@@ -102,6 +114,7 @@ class Qualification(Base):
 
         Returns:
             bool: True if all qualifications are valid, False otherwise.
+
         """
         # attr_list = [column.name for column in self.__table__.columns]
         # attr_list = attr_list[5:]
@@ -199,8 +212,8 @@ class Qualification(Base):
     def _get_days(data: date, validade: int = 180) -> list[int | str]:
         today = date.today()
         dias = (data - today + timedelta(days=validade)).days
-        expire = (data + timedelta(days=validade)).strftime("%d-%b-%Y")
-        return [dias, expire]
+        expire = (data + timedelta(days=validade)).strftime("%d/%b/%y")
+        return [dias, data.strftime("%d%b%y")]
 
     @staticmethod
     def _get_last_five(last: list, number: int, date: str) -> str:
