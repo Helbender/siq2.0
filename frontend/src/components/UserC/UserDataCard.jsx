@@ -16,6 +16,7 @@ import CreateUserModal from "../UserC/CreateUserModal";
 import StyledText from "../styledcomponents/StyledText";
 import { FaMailBulk } from "react-icons/fa";
 import { useSendEmail } from "../../Functions/useSendEmail";
+import InsertInitQual from "./InsertInitQual";
 
 const colors = {
   PI: "red.500",
@@ -62,6 +63,8 @@ function UserDataCard({ user }) {
         <Flex gap={5}>
           <Spacer />
           <CreateUserModal edit={true} user={user} />
+          <InsertInitQual user={user} />
+
           <IconButton
             icon={<FaMailBulk />}
             colorScheme="blue"

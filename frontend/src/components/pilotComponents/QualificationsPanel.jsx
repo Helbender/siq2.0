@@ -32,6 +32,7 @@ const QualificationsPanel = (props) => {
       </Text>
       {/* <Spacer /> */}
       <Text
+      color={"white"}
         py={1}
         px={2}
         textAlign={"right"}

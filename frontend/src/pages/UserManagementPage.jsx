@@ -14,6 +14,7 @@ import {
   useBreakpointValue,
   Grid,
   useToast,
+  Image,
 } from "@chakra-ui/react";
 import { UserContext } from "../Contexts/UserContext";
 import CreateUserModal from "../components/UserC/CreateUserModal";
@@ -25,6 +26,8 @@ import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { IoCloseCircleSharp } from "react-icons/io5";
 import FileUpload from "../components/FileUpload";
+import { GiPlanePilot } from "react-icons/gi";
+import InsertInitQual from "../components/UserC/InsertInitQual";
 
 function UserManagementPage() {
   const navigate = useNavigate();
@@ -35,7 +38,6 @@ function UserManagementPage() {
   const displayAsTable = useBreakpointValue({ base: false, xl: true });
   const sendEmail = useSendEmail();
   const toast = useToast();
-  console.log(pilotos);
 
   const User = getUser();
   const checkToken = () => {
@@ -113,6 +115,7 @@ function UserManagementPage() {
                 <Td>
                   <HStack spacing={2} align="center">
                     <CreateUserModal edit={true} user={user} />
+                    <InsertInitQual user={user} />
                     <IconButton
                       icon={<FaMailBulk />}
                       colorScheme="blue"

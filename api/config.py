@@ -17,14 +17,12 @@ load_dotenv(dotenv_path="./.env")
 # DB_PORT = os.environ.get("DB_PORT")
 # DB_NAME = os.environ.get("DB_NAME", "")
 
-# connection_string = "sqlite:///database/mydb.db"
 
 PILOT_USER: list = ["PI", "PC", "CP", "P", "PA"]
 CREW_USER: list = ["OC", "OCI", "OCA", "CT", "CTA", "CTI", "OPV", "OPVI", "OPVA"]
 
 # Define connection string
 # connection_string = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-# connection_string = "postgresql://siq_db_user:F8HMIrhdufygXX8rYULptMwXKQLMhVQq@dpg-d0if9jvdiees738hndng-a.frankfurt-postgres.render.com/siq_db"
 connection_string = os.environ.get("DB_URL", "")
 
 try:

@@ -347,28 +347,13 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
                 pilot[k] = 0 if pilot[k] == "" else pilot[k]
             except KeyError:
                 pilot[k] = 0
-        for k in [
-            "QA1",
-            "QA2",
-            "BSP1",
-            "BSP2",
-            "TA",
-            "VRP1",
-            "VRP2",
-            "CTO",
-            "SID",
-            "MONO",
-            "NFP",
-            "PARAS",
-            "BSKIT",
-            "NVG",
-        ]:
-            if k not in pilot:
-                pilot[k] = False
         pilot_obj: Pilot = session.get(Pilot, pilot["nip"])  # type: ignore  # noqa: PGH003
         if pilot_obj is None:
             return
         qual_p: Qualification = session.get(Qualification, pilot["nip"])  # type: ignore  # noqa: PGH003
+        for k in qual_p.get_qualification_list():
+            if k not in pilot:
+                pilot[k] = False
 
         # Check if the pilot already exists in the database and edit it if true
         if edit:

@@ -14,6 +14,14 @@ from sqlalchemy.orm import (
 if TYPE_CHECKING:
     from flights import FlightCrew  # type: ignore
 
+QUALIFICATIONS = {
+    "bsoc": (180, "alerta"),
+    "bskit": (180, "alerta"),
+    "paras": (180, "diversos"),
+    "nvg": (180, "diversos"),
+    "carga": (90, "diversos"),
+}
+
 
 class Crew(People, Base):
     __tablename__ = "crew"
@@ -47,15 +55,22 @@ class QualificationCrew(Base):
     last_bskit_date: Mapped[date] = mapped_column(
         insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
     )
+    # last_paras_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
+    # bsoc_init: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01")
+    # bskit_init: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01")
 
-    def to_json(self) -> dict:
+    def to_json(self) -> list:
         """Return all model data in JSON format."""
-        oldest_key = "lastBSOC"
-        return {
-            "lastBSOC": self._get_days(self.last_bsoc_date),
-            "lastBSKIT": self._get_days(self.last_bskit_date),
-            "oldest": [oldest_key[4:], self._get_days(self.last_bsoc_date)[1]],
-        }
+        qualist: list = self.get_qualification_list()
+
+        mylist = [
+            {"name": item, "dados": self._get_days(getattr(self, f"last_{item.lower()}_date"))} for item in qualist
+        ]
+        oldest = min(mylist, key=lambda x: x["dados"][0])
+        mylist.append({"name": "oldest", "dados": [oldest["name"], oldest["dados"][1]]})
+        return mylist
 
     def update(self, data: FlightCrew, date: date) -> QualificationCrew:
         """Update with Last qualification date."""
@@ -69,7 +84,13 @@ class QualificationCrew(Base):
 
         WIP
         """
-        return self.last_bsoc_date < 0
+        return False
+
+    def get_qualification_list(self, init=False) -> list:
+        if init:
+            return [column.name[:-5] for column in self.__table__.columns if "_init" in column.name]
+        else:
+            return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
 
     @staticmethod
     def _get_days(data: date) -> list[int | str]:
