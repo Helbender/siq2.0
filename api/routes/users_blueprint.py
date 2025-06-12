@@ -9,10 +9,11 @@ from functions.gdrive import ID_PASTA_VOO, enviar_json_para_pasta
 from functions.sendemail import hash_code  # type: ignore
 from models.crew import Crew, QualificationCrew  # type: ignore
 from models.pilots import Pilot, Qualification  # type: ignore
-from models.users import User  # type: ignore
+from models.users import User, year_init  # type: ignore
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
+from datetime import datetime, UTC
 
 users = Blueprint("users", __name__)
 
@@ -199,3 +200,50 @@ def backup_users() -> tuple[Response, int]:
     enviar_json_para_pasta(dados=user_base, nome_arquivo="user_base.json", id_pasta=ID_PASTA_VOO)
 
     return jsonify({"message": "Backup feito com sucesso!"}), 200
+
+
+@users.route("/qualificationlist/<nip>", methods=["GET", "POST"], strict_slashes=False)
+def get_qualifications(nip: int) -> tuple[Response, int]:
+    with Session(engine) as session:
+        for db in [Pilot, Crew]:
+            tripulante: Pilot | Crew = session.execute(select(db).where(db.nip == nip)).scalar_one_or_none()
+            if tripulante is not None:
+                break
+        match request.method:
+            case "GET":
+                print(type(tripulante))
+                print(tripulante)
+                try:
+                    quallist: list = tripulante.qualification.get_qualification_list()
+                except Exception as e:
+                    print(e)
+                    return jsonify({"message": str(e)}), 400
+                # if isinstance(tripulante, Pilot):
+                #     quallist = quallist[4:]
+                print(quallist)
+                return jsonify(quallist), 200
+
+            case "POST":
+                data: dict = request.get_json()
+                nome_qualificação = data["qualification"]
+                date = datetime.strptime(data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+                qualification = tripulante.qualification
+                attr = "last_" + nome_qualificação.lower() + "_date"
+                print(attr)
+                print(getattr(qualification, attr))
+                if getattr(qualification, attr).year == year_init:
+                    setattr(qualification, attr, date)
+                    session.commit()
+                    return jsonify(
+                        {
+                            "message": f"O {tripulante.name} tem agora a qualificação {nome_qualificação} iniciada com a data {date}"
+                        }
+                    ), 200
+                else:
+                    return jsonify(
+                        {
+                            "message": f"A qualificação {nome_qualificação} já existe com a data {getattr(qualification, attr)}"
+                        }
+                    ), 400
+
+    return jsonify({"message": "Tripulante não encontrado"}), 404

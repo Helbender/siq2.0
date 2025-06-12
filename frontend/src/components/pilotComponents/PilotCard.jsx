@@ -15,6 +15,7 @@ import {
 import DaysLeftColumn from "./DaysLeftColumn";
 import QualificationsPanel from "./QualificationsPanel";
 import StandardText from "../styledcomponents/StandardText";
+import { Fragment } from "react";
 
 const PilotCard = ({ user }) => {
   return (
@@ -58,7 +59,18 @@ const PilotCard = ({ user }) => {
             p={3}
             minHeight={"180px"}
           >
-            <DaysLeftColumn
+            {user.qualification
+              .filter((qual) => qual.grupo === "aterragens")
+              .map((qual, index) =>
+                qual.name === "oldest" ? null : (
+                  <DaysLeftColumn
+                    key={index}
+                    qualification={qual.name}
+                    dates={qual.dados}
+                  />
+                ),
+              )}
+            {/* <DaysLeftColumn
               qualification={"ATD"}
               dates={user.qualification?.lastDayLandings}
             />
@@ -66,7 +78,6 @@ const PilotCard = ({ user }) => {
               qualification={"ATN"}
               dates={user.qualification.lastNightLandings}
             />
-            {/* ) : null} */}
             {user.qualification?.lastPrecApp ? (
               <DaysLeftColumn
                 qualification={"P"}
@@ -78,7 +89,7 @@ const PilotCard = ({ user }) => {
                 qualification={"NP"}
                 dates={user.qualification.lastNprecApp}
               />
-            ) : null}
+            ) : null} */}
           </Flex>
 
           <Spacer />
@@ -90,49 +101,23 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"}>Pronto para Alerta</Text>
+            <Text fontWeight={"bold"} color={"white"} >Pronto para Alerta</Text>
             <Grid
               my={1}
               rowGap={1}
               columnGap={1}
               templateColumns={"repeat(6,1fr)"}
             >
-              <GridItem alignContent={"center"}>
-                <StandardText text="QA1" />
-              </GridItem>
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastQA1}
-                />
-              </GridItem>
-              <StandardText text="QA2" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastQA2}
-                />
-              </GridItem>
-              <StandardText text="BSP1" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastBSP1}
-                />
-              </GridItem>
-              <StandardText text="BSP2" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="BSP2"
-                  qualification={user.qualification?.lastBSP2}
-                />
-              </GridItem>
-              <StandardText text="TA" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="TA"
-                  qualification={user.qualification?.lastTA}
-                />
-              </GridItem>
+              {user.qualification
+                .filter((qual) => qual.grupo === "alerta")
+                .map((qual, index) => (
+                  <Fragment key={index}>
+                    <StandardText text={`${qual.name}`} />
+                    <GridItem colSpan={2}>
+                      <QualificationsPanel qualification={qual.dados} />
+                    </GridItem>
+                  </Fragment>
+                ))}
             </Grid>
           </Flex>
           <Flex
@@ -145,7 +130,7 @@ const PilotCard = ({ user }) => {
             p={3}
             // minHeight={"180px"}
           >
-            <Text fontWeight={"bold"}>ISR</Text>
+            <Text fontWeight={"bold"}color={"white"}>ISR</Text>
             <Grid
               my={1}
               rowGap={1}
@@ -153,20 +138,18 @@ const PilotCard = ({ user }) => {
               templateColumns={"repeat(6,1fr)"}
               // bg={"teal.100"}
             >
-              <StandardText text="VRP1" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="VRP1"
-                  qualification={user.qualification?.lastVRP1}
-                />
-              </GridItem>
-              <StandardText text="VRP2" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastVRP2}
-                />
-              </GridItem>
+              {user.qualification
+                .filter((qual) => qual.grupo === "vrp")
+                .map((qual, index) =>
+                  qual.name === "oldest" ? null : (
+                    <>
+                      <StandardText key={index} text={`${qual.name}`} />
+                      <GridItem colSpan={2}>
+                        <QualificationsPanel qualification={qual.dados} />
+                      </GridItem>
+                    </>
+                  ),
+                )}
             </Grid>
           </Flex>
           <Flex
@@ -177,44 +160,25 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"}>Currencies</Text>
+            <Text fontWeight={"bold"}color={"white"}>Currencies</Text>
             <Grid
               my={1}
               rowGap={1}
               columnGap={1}
               templateColumns={"repeat(6,1fr)"}
             >
-              <StandardText text="CTO" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastCTO}
-                  type={2}
-                />
-              </GridItem>
-
-              <StandardText text="SID" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastSID}
-                  type={2}
-                />
-              </GridItem>
-
-              <StandardText text="MONO" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastMONO}
-                  type={2}
-                />
-              </GridItem>
-
-              <StandardText text="NFP" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastNFP}
-                  type={2}
-                />
-              </GridItem>
+              {user.qualification
+                .filter((qual) => qual.grupo === "currencies")
+                .map((qual, index) =>
+                  qual.name === "oldest" ? null : (
+                    <>
+                      <StandardText key={index} text={`${qual.name}`} />
+                      <GridItem colSpan={2}>
+                        <QualificationsPanel qualification={qual.dados} />
+                      </GridItem>
+                    </>
+                  ),
+                )}
             </Grid>
           </Flex>
           <Flex
@@ -225,133 +189,28 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"}>Diversos</Text>
+            <Text fontWeight={"bold"}color={"white"}>Diversos</Text>
             <Grid
               my={1}
               rowGap={1}
               columnGap={1}
               templateColumns={"repeat(6,1fr)"}
             >
-              <StandardText text="BSKIT" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastBSKIT}
-                  type={2}
-                />
-              </GridItem>
-
-              <StandardText text="PARAS" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastPARAS}
-                  type={2}
-                />
-              </GridItem>
-
-              <StandardText text="NVG" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastNVG}
-                  type={2}
-                />
-              </GridItem>
+              {user.qualification
+                .filter((qual) => qual.grupo === "diversos")
+                .map((qual, index) =>
+                  qual.name === "oldest" ? null : (
+                    <>
+                      <StandardText key={index} text={`${qual.name}`} />
+                      <GridItem colSpan={2}>
+                        <QualificationsPanel qualification={qual.dados} />
+                      </GridItem>
+                    </>
+                  ),
+                )}
             </Grid>
           </Flex>
 
-          {/* <HStack mt={5} gap={0}>
-            <Grid
-              my={1}
-              rowGap={1}
-              columnGap={1}
-              templateColumns={"repeat(3,1fr)"}
-            >
-              <StandardText text="QA1" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastQA1}
-                />
-              </GridItem>
-              <StandardText text="QA2" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastQA2}
-                />
-              </GridItem>
-
-              <StandardText text="BSP1" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastBSP1}
-                />
-              </GridItem>
-              <StandardText text="BSP2" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="BSP2"
-                  qualification={user.qualification?.lastBSP2}
-                />
-              </GridItem>
-              <StandardText text="TA" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="TA"
-                  qualification={user.qualification?.lastTA}
-                />
-              </GridItem>
-              <StandardText text="VRP1" />
-
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualificationName="VRP1"
-                  qualification={user.qualification?.lastVRP1}
-                />
-              </GridItem>
-            </Grid>
-            <Grid
-              my={1}
-              rowGap={1}
-              columnGap={1}
-              templateColumns={"repeat(3,1fr)"}
-            >
-              <StandardText text="VRP2" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastVRP2}
-                />
-              </GridItem>
-
-              <StandardText text="CTO" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastCTO}
-                />
-              </GridItem>
-
-              <StandardText text="SID" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastSID}
-                />
-              </GridItem>
-
-              <StandardText text="MONO" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastMONO}
-                />
-              </GridItem>
-
-              <StandardText text="NFP" />
-              <GridItem colSpan={2}>
-                <QualificationsPanel
-                  qualification={user.qualification?.lastNFP}
-                />
-              </GridItem>
-            </Grid>
-          </HStack> */}
           <Text
             borderRadius={5}
             bg="rgba(229,62,62,0.7)"
@@ -362,7 +221,7 @@ const PilotCard = ({ user }) => {
             minW={250}
             fontSize={17}
           >
-            {`${user.qualification?.oldest[0]} expira a ${user.qualification?.oldest[1]}`}
+            {`${user.qualification.at(-1).dados[0]} expira a ${user.qualification.at(-1).dados[1]}`}
           </Text>
         </Stack>
       </CardBody>

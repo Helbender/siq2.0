@@ -14,6 +14,26 @@ from sqlalchemy.orm import (
 if TYPE_CHECKING:
     from flights import FlightPilots  # type: ignore
 
+QUALIFICATIONS = {
+    "qa1": (180, "alerta"),
+    "qa2": (180, "alerta"),
+    "bsp1": (180, "alerta"),
+    "bsp2": (180, "alerta"),
+    "ta": (180, "alerta"),
+    "vrp1": (180, "vrp"),
+    "vrp2": (180, "vrp"),
+    "cto": (45, "currencies"),
+    "sid": (180, "currencies"),
+    "mono": (45, "currencies"),
+    "nfp": (45, "currencies"),
+    "paras": (180, "diversos"),
+    "nvg": (180, "diversos"),
+    "nvg2": (180, "diversos"),
+    "bskit": (360, "diversos"),
+    "carga1": (90, "diversos"),
+    "carga2": (90, "diversos"),
+}
+
 
 class Pilot(People, Base):
     __tablename__ = "pilots"
@@ -37,10 +57,6 @@ class Pilot(People, Base):
         if qualification_data:
             result["qualification"] = self.qualification.to_json()
         return result
-
-    # def is_qualified(self) -> bool:
-    #     """Check if the pilot is qualified."""
-    #     return self.qualification.is_qualified()
 
 
 class Qualification(Base):
@@ -108,6 +124,9 @@ class Qualification(Base):
         insert_default=date(year_init, 1, 1),
         server_default=f"{year_init}-01-01",
     )
+    # last_nvg2_date: Mapped[date] = mapped_column(
+    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
+    # )
 
     def is_qualified(self, type_qual) -> bool:
         """Checks all qualifications and returns True if all are valid.
@@ -116,9 +135,6 @@ class Qualification(Base):
             bool: True if all qualifications are valid, False otherwise.
 
         """
-        # attr_list = [column.name for column in self.__table__.columns]
-        # attr_list = attr_list[5:]
-        # print(attr_list)
         match type_qual:
             case "Alerta":
                 for item in ["last_qa1_date", "last_qa2_date", "last_bsp1_date", "last_bsp2_date", "last_ta_date"]:
@@ -141,6 +157,9 @@ class Qualification(Base):
                         return False
 
         return True
+
+    def get_qualification_list(self) -> list:
+        return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
 
     def update(self, data: FlightPilots, date: date) -> Qualification:
         """Update with Last qualification date."""
@@ -177,36 +196,47 @@ class Qualification(Base):
     def __repr__(self) -> str:
         return self.to_json().__repr__()
 
-    def to_json(self) -> dict:
+    def to_json(self) -> list:
         # Gets the columns names for standard qualifications
-        attr_list = [column.name for column in self.__table__.columns]
-        attr_list = attr_list[5:]
 
-        unsorted_dict: dict = {}
+        qualist: list = self.get_qualification_list()
 
-        for item in attr_list:
-            # print(f"Item: {item}")
-            value = getattr(self, item)
-            # print(f"Value: {value}")a =
-            unsorted_dict[f"last{item[5:-5].upper()}"] = value
+        mylist = [
+            {
+                "name": item,
+                "dados": self._get_days(
+                    getattr(self, f"last_{item.lower()}_date"), validade=QUALIFICATIONS[item.lower()][0]
+                ),
+                "grupo": QUALIFICATIONS[item.lower()][1],
+            }
+            for item in qualist
+            if QUALIFICATIONS.get(item.lower()) is not None
+        ]
+        oldest = min(mylist, key=lambda x: x["dados"][0])
+        mylist.append({"name": "ATR", "dados": list(self.last_day_landings.split()), "grupo": "aterragens"})
+        mylist.append({"name": "ATN", "dados": list(self.last_night_landings.split()), "grupo": "aterragens"})
 
-        oldest_key: str = min(unsorted_dict, key=unsorted_dict.get)  # type: ignore
+        mylist.append({"name": "P", "dados": list(self.last_prec_app.split()), "grupo": "aterragens"})
+        mylist.append({"name": "NP", "dados": list(self.last_nprec_app.split()), "grupo": "aterragens"})
+        mylist.append({"name": "oldest", "dados": [oldest["name"], oldest["dados"][1]]})
 
-        final_dict: dict = {
-            "lastDayLandings": list(self.last_day_landings.split()),
-            "lastNightLandings": list(self.last_night_landings.split()),
-            "lastPrecApp": list(self.last_prec_app.split()),
-            "lastNprecApp": list(self.last_nprec_app.split()),
-        }
+        # print(mylist)
+        return mylist
+        #
+        #     "lastDayLandings": list(self.last_day_landings.split()),
+        #     "lastNightLandings": list(self.last_night_landings.split()),
+        #     "lastPrecApp": list(self.last_prec_app.split()),
+        #     "lastNprecApp": list(self.last_nprec_app.split()),
+        # }
 
-        for k, v in unsorted_dict.items():
-            # print(type(v))
-            if k[4:] in ["CTO", "SID", "MONO", "NFP"]:
-                final_dict[k] = self._get_days(v, 45)
-            else:
-                final_dict[k] = self._get_days(v)
-        final_dict["oldest"] = [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]]
-        return final_dict
+        # for k, v in unsorted_dict.items():
+        #     # print(type(v))
+        #     if k[4:] in ["CTO", "SID", "MONO", "NFP"]:
+        #         final_dict[k] = self._get_days(v, 45)
+        #     else:
+        #         final_dict[k] = self._get_days(v)
+        # final_dict["oldest"] = [oldest_key[4:], self._get_days(unsorted_dict[oldest_key])[1]]
+        # return final_dict
 
     @staticmethod
     def _get_days(data: date, validade: int = 180) -> list[int | str]:

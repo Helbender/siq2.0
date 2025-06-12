@@ -197,7 +197,7 @@ def retrieve_crew() -> tuple[Response, int]:
     if request.method == "GET":
         # Retrieve all crew from db
         with Session(engine) as session:
-            stmt = select(Crew).order_by(Crew.nip)
+            stmt = select(Crew).where(Crew.position.in_(["OCI", "OC", "OCA"])).order_by(Crew.nip)
             result = session.execute(stmt).scalars().all()
             return jsonify([row.to_json(qualification_data=True) for row in result]), 200
 

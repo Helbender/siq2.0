@@ -102,6 +102,8 @@ function CreateFlightModal({ flight }) {
   const ATA = watch("ATA");
   const flight_pilots = watch("flight_pilots") || [];
   const AIRTASK = watch("airtask");
+  const ORIGIN = watch("origin");
+  const DESTINATION = watch("destination");
 
   // Create Flight Endpoint
   const handleCreateFlight = async (data) => {
@@ -186,6 +188,12 @@ function CreateFlightModal({ flight }) {
   useEffect(() => {
     setValue("airtask", AIRTASK.toUpperCase());
   }, [AIRTASK]);
+  useEffect(() => {
+    setValue("origin", ORIGIN.toUpperCase());
+  }, [ORIGIN]);
+  useEffect(() => {
+    setValue("destination", DESTINATION.toUpperCase());
+  }, [DESTINATION]);
   return (
     <>
       {flight ? (
