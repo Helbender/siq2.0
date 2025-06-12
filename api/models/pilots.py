@@ -124,9 +124,10 @@ class Qualification(Base):
         insert_default=date(year_init, 1, 1),
         server_default=f"{year_init}-01-01",
     )
-    # last_nvg2_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
+    last_nvg2_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
+    )
 
     def is_qualified(self, type_qual) -> bool:
         """Checks all qualifications and returns True if all are valid.
@@ -205,7 +206,8 @@ class Qualification(Base):
             {
                 "name": item,
                 "dados": self._get_days(
-                    getattr(self, f"last_{item.lower()}_date"), validade=QUALIFICATIONS[item.lower()][0]
+                    getattr(self, f"last_{item.lower()}_date"),
+                    validade=QUALIFICATIONS[item.lower()][0],
                 ),
                 "grupo": QUALIFICATIONS[item.lower()][1],
             }

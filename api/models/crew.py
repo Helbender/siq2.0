@@ -60,9 +60,10 @@ class QualificationCrew(Base):
         insert_default=date(year_init, 1, 1),
         server_default=f"{year_init}-01-01",
     )
-    # last_paras_date: Mapped[date] = mapped_column(
-    #     insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01"
-    # )
+    last_paras_date: Mapped[date] = mapped_column(
+        insert_default=date(year_init, 1, 1),
+        server_default=f"{year_init}-01-01",
+    )
     # bsoc_init: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01")
     # bskit_init: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1), server_default=f"{year_init}-01-01")
 
@@ -70,9 +71,7 @@ class QualificationCrew(Base):
         """Return all model data in JSON format."""
         qualist: list = self.get_qualification_list()
 
-        mylist = [
-            {"name": item, "dados": self._get_days(getattr(self, f"last_{item.lower()}_date"))} for item in qualist
-        ]
+        mylist = [{"name": item, "dados": self._get_days(getattr(self, f"last_{item.lower()}_date"))} for item in qualist]
         oldest = min(mylist, key=lambda x: x["dados"][0])
         mylist.append({"name": "oldest", "dados": [oldest["name"], oldest["dados"][1]]})
         return mylist
@@ -94,8 +93,7 @@ class QualificationCrew(Base):
     def get_qualification_list(self, init=False) -> list:
         if init:
             return [column.name[:-5] for column in self.__table__.columns if "_init" in column.name]
-        else:
-            return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
+        return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
 
     @staticmethod
     def _get_days(data: date) -> list[int | str]:

@@ -1,10 +1,12 @@
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
+load_dotenv(dotenv_path="./.env")
+DB_URL = os.environ.get("DB_URL", "")
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -39,7 +41,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    # url = config.get_main_option(DB_URL)
+    url = DB_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -58,8 +61,14 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Aqui podes também injetar o URL diretamente em config
+    configuration = config.get_section(config.config_ini_section)
+    if configuration is None:
+        configuration = {}
+    configuration["sqlalchemy.url"] = DB_URL
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
