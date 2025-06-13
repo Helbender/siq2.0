@@ -14,7 +14,7 @@ from sqlalchemy.orm import (
 if TYPE_CHECKING:
     from flights import FlightPilots  # type: ignore
 
-QUALIFICATIONS = {
+QUALIFICATIONS: dict[str, tuple[int, str]] = {
     "qa1": (180, "alerta"),
     "qa2": (180, "alerta"),
     "bsp1": (180, "alerta"),
@@ -130,31 +130,28 @@ class Qualification(Base):
     )
 
     def is_qualified(self, type_qual) -> bool:
-        """Checks all qualifications and returns True if all are valid.
+        """Check all qualifications and returns True if all are valid.
 
         Returns:
             bool: True if all qualifications are valid, False otherwise.
 
         """
-        match type_qual:
-            case "Alerta":
-                for item in ["last_qa1_date", "last_qa2_date", "last_bsp1_date", "last_bsp2_date", "last_ta_date"]:
-                    if (getattr(self, item) - date.today()).days + 180 < 0:
+        dia = date.today()
+        quallist: list[str] = self.get_qualification_list()
+        for item in quallist:
+            match type_qual:
+                case "Alerta":
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "alerta") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
-            case "VRP":
-                for item in ["last_vrp1_date", "last_vrp2_date"]:
-                    if (getattr(self, item) - date.today()).days + 180 < 0:
+                case "VRP":
+                    # for item.lower() in quallist:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "vrp") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
-            case "Currencies":
-                for item in [
-                    "last_cto_date",
-                    "last_sid_date",
-                    "last_mono_date",
-                    "last_nfp_date",
-                    "last_nvg_date",
-                    "last_paras_date",
-                ]:
-                    if (getattr(self, item) - date.today()).days + 180 < 0:
+                case "Currencies":
+                    # for item.lower() in quallist:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "currencies") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][
+                        0
+                    ] < 0:
                         return False
 
         return True

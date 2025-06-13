@@ -141,17 +141,11 @@ class FlightPilots(Base):
     vrp2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     bskit: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
     paras: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    nvg: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
+    nvg: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False) # noqa: UP007
+    nvg2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False) # noqa: UP007
 
     pilot: Mapped[Pilot] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
-
-    # def __repr__(self) -> str:
-    #     """Print Dictionary the instance attributes and Flight Info."""
-    #     rep = f"Airtask {self.flight.airtask}\n Database ID: {self.flight_id} "
-    #     for k, v in self.to_json():
-    #         rep += f"\n{k}:{v}"
-    #     return rep
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
@@ -165,20 +159,24 @@ class FlightPilots(Base):
             "precapp": self.prec_app,
             "nprecapp": self.nprec_app,
         }
-        response["QA1"] = self.qa1
-        response["QA2"] = self.qa2
-        response["BSP1"] = self.bsp1
-        response["BSP2"] = self.bsp2
-        response["TA"] = self.ta
-        response["VRP1"] = self.vrp1
-        response["VRP2"] = self.vrp2
-        response["CTO"] = self.cto
-        response["SID"] = self.sid
-        response["MONO"] = self.mono
-        response["NFP"] = self.nfp
-        response["BSKIT"] = self.bskit
-        response["PARAS"] = self.paras
-        response["NVG"] = self.nvg
+        # response["QA1"] = self.qa1
+        # response["QA2"] = self.qa2
+        # response["BSP1"] = self.bsp1
+        # response["BSP2"] = self.bsp2
+        # response["TA"] = self.ta
+        # response["VRP1"] = self.vrp1
+        # response["VRP2"] = self.vrp2
+        # response["CTO"] = self.cto
+        # response["SID"] = self.sid
+        # response["MONO"] = self.mono
+        # response["NFP"] = self.nfp
+        # response["BSKIT"] = self.bskit
+        # response["PARAS"] = self.paras
+        # response["NVG"] = self.nvg
+        # response["NVG2"] = self.nvg2
+        for i in self.pilot.qualification.get_qualification_list():
+            # print(f"{i.lower()}: {getattr(self, i.lower())}")
+            response[i] = getattr(self, i.lower(), False)
 
         return response
 
@@ -198,6 +196,7 @@ class FlightCrew(Base):
 
     bsoc: Mapped[Optional[bool]]  # noqa: UP007
     bskit: Mapped[Optional[bool]]  # noqa: UP007
+    paras: Mapped[Optional[bool]]  # noqa: UP007
 
     crew: Mapped[Crew] = relationship(back_populates="flight_crew")
     flight: Mapped[Flight] = relationship(back_populates="flight_crew")
@@ -209,6 +208,7 @@ class FlightCrew(Base):
             "position": self.position,
             "nip": self.crew.nip,
         }
-        response["BSOC"] = self.bsoc
-        response["BSKIT"] = self.bskit
+        for i in self.crew.qualification.get_qualification_list():
+            # print(f"{i.lower()}: {getattr(self, i.lower())}")
+            response[i] = getattr(self, i.lower(), False)
         return response
