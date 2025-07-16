@@ -161,6 +161,21 @@ function Header() {
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
+                          navigate("/dashboard");
+                          onClose();
+                        }}
+                        aria-label="Dashboard"
+                      >
+                        <Flex align="center">
+                          <MdSpaceDashboard />
+                          <Box ml={2}>Dashboard</Box>
+                        </Flex>
+                      </ChakraLink>
+                      <ChakraLink
+                        p={2}
+                        color="teal.500"
+                        fontSize="lg"
+                        onClick={() => {
                           navigate("/flights");
                           onClose();
                         }}
@@ -184,22 +199,6 @@ function Header() {
                         <Flex align="center">
                           <FaTable />
                           <Box ml={2}>Qualificações</Box>
-                        </Flex>
-                      </ChakraLink>
-
-                      <ChakraLink
-                        p={2}
-                        color="teal.500"
-                        fontSize="lg"
-                        onClick={() => {
-                          navigate("/dashboard");
-                          onClose();
-                        }}
-                        aria-label="Dashboard"
-                      >
-                        <Flex align="center">
-                          <MdSpaceDashboard />
-                          <Box ml={2}>Dashboard</Box>
                         </Flex>
                       </ChakraLink>
 

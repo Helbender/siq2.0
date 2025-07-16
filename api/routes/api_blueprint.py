@@ -10,9 +10,9 @@ from functions.sendemail import hash_code, main  # type:ignore
 from models.crew import Crew  # type:ignore
 from models.pilots import Pilot  # type:ignore
 from models.users import User  # type:ignore
+from routes.dashboard_blueprint import dashboard  # type:ignore
 from routes.flight_blueprint import flights  # type:ignore
 from routes.users_blueprint import users  # type:ignore
-from routes.dashboard_blueprint import dashboard  # type:ignore
 from sqlalchemy import select, union_all
 from sqlalchemy.orm import Session
 

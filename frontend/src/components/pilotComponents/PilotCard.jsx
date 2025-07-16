@@ -101,7 +101,9 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"} color={"white"} >Pronto para Alerta</Text>
+            <Text fontWeight={"bold"} color={"white"}>
+              Pronto para Alerta
+            </Text>
             <Grid
               my={1}
               rowGap={1}
@@ -130,7 +132,9 @@ const PilotCard = ({ user }) => {
             p={3}
             // minHeight={"180px"}
           >
-            <Text fontWeight={"bold"}color={"white"}>ISR</Text>
+            <Text fontWeight={"bold"} color={"white"}>
+              ISR
+            </Text>
             <Grid
               my={1}
               rowGap={1}
@@ -160,7 +164,9 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"}color={"white"}>Currencies</Text>
+            <Text fontWeight={"bold"} color={"white"}>
+              Currencies
+            </Text>
             <Grid
               my={1}
               rowGap={1}
@@ -174,7 +180,10 @@ const PilotCard = ({ user }) => {
                     <>
                       <StandardText key={index} text={`${qual.name}`} />
                       <GridItem colSpan={2}>
-                        <QualificationsPanel qualification={qual.dados} />
+                        <QualificationsPanel
+                          qualification={qual.dados}
+                          type={qual.name === "SID" ? 1 : 2}
+                        />
                       </GridItem>
                     </>
                   ),
@@ -189,7 +198,9 @@ const PilotCard = ({ user }) => {
             gap={2}
             p={3}
           >
-            <Text fontWeight={"bold"}color={"white"}>Diversos</Text>
+            <Text fontWeight={"bold"} color={"white"}>
+              Diversos
+            </Text>
             <Grid
               my={1}
               rowGap={1}

@@ -40,9 +40,10 @@ export const formatDate = (dateStr) => {
 
   return `${year}-${month}-${day.padStart(2, "0")}`;
 };
-// Converte "hh:mm" para minutos
+// Converte "hh:mm:ss" para minutos
 export const parseTimeToMinutes = (timeStr) => {
   const [hours, minutes] = timeStr.split(":").map(Number);
+  // console.log(hours * 60 + minutes);
   return hours * 60 + minutes;
 };
 
@@ -52,3 +53,6 @@ export const formatMinutesToTime = (totalMinutes) => {
   const minutes = totalMinutes % 60;
   return `${hours}h ${minutes.toString().padStart(2, "0")}min`;
 };
+export function formatDateISO(date) {
+  return date.toISOString().split("T")[0];
+}

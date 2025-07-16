@@ -26,8 +26,10 @@ function App() {
       <Header />
       {!token && token !== "" && token !== undefined ? (
         <Routes>
+          <Route index element={<Navigate replace to="login" />} />
+
           <Route
-            path="/"
+            path="/login"
             element={
               <LoginPage setToken={setToken} removeToken={removeToken} />
             }
@@ -43,10 +45,10 @@ function App() {
       ) : (
         <Fragment>
           <Routes>
-            <Route index element={<Navigate replace to="flights" />} />
-            <Route path="/flights" index element={<Flights />} />
+            <Route index element={<Navigate replace to="dashboard" />} />
+            <Route path="/flights" element={<Flights />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/fileupload" index element={<FileUpload />} />
+            <Route path="/fileupload" element={<FileUpload />} />
             <Route path="/users" element={<UserManagementPage />} />
 
             <Route path="/" element={<Master />}>
