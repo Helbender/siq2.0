@@ -1,7 +1,7 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 import os
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from threading import Thread
 
 from dotenv import load_dotenv

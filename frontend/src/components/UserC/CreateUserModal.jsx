@@ -32,7 +32,7 @@ import { useNavigate } from "react-router-dom";
 function CreateUserModal({ edit, add, isDelete, user }) {
   const navigate = useNavigate();
 
-  const { removeToken } = useContext(AuthContext);
+  const { token, removeToken, getUser } = useContext(AuthContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [inputs, setInputs] = useState(
@@ -47,10 +47,8 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       tipo: "PILOTO",
     },
   );
-  const { token, getUser, removeToken } = useContext(AuthContext);
   const { pilotos, setPilotos } = useContext(UserContext);
   const User = getUser();
-  const navigate = useNavigate();
 
   //Updates inputs when filling the form
   const handleInputsChange = async (event) => {

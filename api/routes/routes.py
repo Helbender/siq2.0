@@ -16,52 +16,52 @@ from models.basemodels import (  # type:ignore
 v2 = Blueprint("v2", __name__)
 
 
-# # 1. Listar todos os tripulantes
-# @v2.route("/tripulantes", methods=["GET"])
-# def listar_tripulantes() -> Response:
-#     with Session(engine) as session:
-#         tripulantes = session.execute(select(Tripulante)).scalars().all()
-#         return jsonify(
-#             [
-#                 {
-#                     "nip": t.nip,
-#                     "nome": t.nome,
-#                     "tipo": t.tipo.value,
-#                     "rank": t.rank,
-#                     "position": t.position,
-#                     "email": t.email,
-#                     "admin": t.admin,
-#                 }
-#                 for t in tripulantes
-#             ]
-#         )
+# 1. Listar todos os tripulantes
+@v2.route("/tripulantes", methods=["GET"])
+def listar_tripulantes() -> Response:
+    with Session(engine) as session:
+        tripulantes = session.execute(select(Tripulante)).scalars().all()
+        return jsonify(
+            [
+                {
+                    "nip": t.nip,
+                    "nome": t.nome,
+                    "tipo": t.tipo.value,
+                    "rank": t.rank,
+                    "position": t.position,
+                    "email": t.email,
+                    "admin": t.admin,
+                }
+                for t in tripulantes
+            ]
+        )
 
 
-# # 2. Criar tripulante
-# @v2.route("/tripulantes", methods=["POST"])
-# def criar_tripulante() -> Response:
-#     data = request.get_json()
-#     print(data)
-#     t = Tripulante(
-#         nome=data["nome"],
-#         nip=data["nip"],
-#         rank=data["rank"],
-#         position=data["position"],
-#         email=data["email"],
-#         admin=bool(data["admin"]),
-#         password=data["password"],
-#         tipo=data["tipo"],
-#     )
+# 2. Criar tripulante
+@v2.route("/tripulantes", methods=["POST"])
+def criar_tripulante() -> Response:
+    data = request.get_json()
+    print(data)
+    t = Tripulante(
+        nome=data["nome"],
+        nip=data["nip"],
+        rank=data["rank"],
+        position=data["position"],
+        email=data["email"],
+        admin=bool(data["admin"]),
+        password=data["password"],
+        tipo=data["tipo"],
+    )
 
-#     with Session(engine) as session:
-#         try:
-#             session.flush()
-#         except exc.IntegrityError as e:
-#             session.rollback()
-#             print("\n", e.orig.__repr__())
-#         session.add(t)
-#         session.commit()
-#         return jsonify({"id": t.nip})
+    with Session(engine) as session:
+        try:
+            session.flush()
+        except exc.IntegrityError as e:
+            session.rollback()
+            print("\n", e.orig.__repr__())
+        session.add(t)
+        session.commit()
+        return jsonify({"id": t.nip})
 
 
 # 3. Criar qualificação com tipos permitidos
@@ -142,6 +142,20 @@ def listar_qualificacoes() -> Response:
         return jsonify(result)
 
 
+# 4.3 Listar qualificações válidas para um tipo de tripulante
+@v2.route("/qualificacoes/<id>", methods=["DELETE"])
+def apagar_qualificacao(id: int) -> Response:
+    with Session(engine) as session:
+        stmt = select(Qualificacao).where(Qualificacao.id == id)
+        qualificacao = session.execute(stmt).scalar_one_or_none()
+        if not qualificacao:
+            abort(404, "Qualificação não encontrada")
+
+        session.delete(qualificacao)
+        session.commit()
+        return jsonify({"mensagem": "Qualificação apagada com sucesso."})
+
+
 # 5. Associar qualificação a um tripulante (com validação)
 @v2.route("/tripulante/<int:tripulante_id>/qualificacoes", methods=["POST"])
 def adicionar_qualificacao_tripulante(tripulante_id: int) -> tuple[Response, int]:
@@ -189,7 +203,7 @@ def listar_qualificacoes_tripulante(tripulante_id: int) -> Response:
         resultados = session.execute(stmt).scalars().all()
 
         # Montar o JSON agrupado por grupo
-        qualificacoes_por_grupo = {}
+        qualificacoes_por_grupo: dict[str, list[dict]] = {}
         for pq in resultados:
             grupo = pq.qualificacao.grupo.value
             if grupo not in qualificacoes_por_grupo:
@@ -286,7 +300,7 @@ def listar_qualificacoes_expiradas():
 
 @v2.route("/tripulante/<int:tripulante_id>/qualificacoes/expiradas", methods=["GET"])
 def listar_qualificacoes_expiradas_por_tripulante(tripulante_id):
-    hoje = datetime.utcnow().date()
+    hoje = datetime.now(datetime.UTC).date()
     with Session(engine) as session:
         tripulante = session.scalars(
             select(Tripulante)

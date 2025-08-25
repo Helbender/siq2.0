@@ -22,6 +22,7 @@ import { parseTimeToMinutes, formatMinutesToTime } from "../Functions/timeCalc";
 import { useSunTimes } from "../utils/useSunTimes";
 import TableQ from "../components/TableQ";
 import { formatDateISO } from "../Functions/timeCalc"; // Assuming this is a utility function to format date to ISO string
+import { time } from "framer-motion";
 const COLORS = ["#E53E3E", "#38A169", "#3182ce", "#633974"]; // verde, vermelho
 const COLORS2 = ["#38A169", "#E53E3E"]; // verde, vermelho
 
@@ -45,7 +46,15 @@ function Dashboard() {
   const tomorrowStr = formatDateISO(getTomorrow());
 
   const { sunrise, sunset, loading, error } = useSunTimes(todayStr);
-  const { sunriseT, sunsetT, loadingT, errorT } = useSunTimes(tomorrowStr);
+  console.log(sunrise);
+
+  const {
+    sunrise: sunriseT,
+    sunset: sunsetT,
+    loading: loadingT,
+    error: errorT,
+  } = useSunTimes(tomorrowStr);
+  console.log(sunriseT);
 
   //Get Data from API Function
   const getDataFromAPI = async () => {
@@ -104,7 +113,7 @@ function Dashboard() {
           Dashboard (WIP)
         </Heading>
         {loading && <Text size={"lg"}>A carregar horário...</Text>}
-        {/* {error && <Text>Error: {error}</Text>} */}
+        {error && <Text>Error: {error}</Text>}
         {sunrise && sunset && (
           <Flex mb={4} alignItems={"center"}>
             <Heading fontSize={"md"} mr={5}>
@@ -116,9 +125,12 @@ function Dashboard() {
               {"SS: "}
             </Heading>
             <Heading>{sunset.toLocaleTimeString()}</Heading>
-            <Text mb={4}>https://sunrise-sunset.org/</Text>
           </Flex>
         )}
+
+        {loadingT && <Text size={"lg"}>A carregar horário...</Text>}
+        {errorT && <Text>Error: {errorT}</Text>}
+
         {sunriseT && sunsetT && (
           <Fragment>
             <Text>Amanhã</Text>
@@ -126,6 +138,7 @@ function Dashboard() {
             <Text>{sunsetT.toLocaleTimeString()}</Text>
           </Fragment>
         )}
+        <Text mb={4}>https://sunrise-sunset.org/</Text>
         {/* <Accordion defaultIndex={[0]} allowMultiple={true}>
           <AccordionItem>
             <h2>
@@ -136,7 +149,7 @@ function Dashboard() {
                 <AccordionIcon />
               </AccordionButton>
             </h2>
-            <AccordionPanel> */}
+            <AccordionPanel>
         <Flex
           mt={10}
           direction={"column"}

@@ -15,33 +15,42 @@ import {
   Grid,
   useToast,
   Text,
+  Checkbox,
+  CheckboxGroup,
+  Flex,
 } from "@chakra-ui/react";
-import { UserContext } from "../Contexts/UserContext";
-import CreateUserModal from "../components/UserC/CreateUserModal";
-import { FaMailBulk } from "react-icons/fa";
-import UserDataCard from "../components/UserC/UserDataCard";
-import { useSendEmail } from "../Functions/useSendEmail";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { IoCheckmarkCircleSharp } from "react-icons/io5";
-import { IoCloseCircleSharp } from "react-icons/io5";
-import FileUpload from "../components/FileUpload";
 import axios from "axios";
 import CreateQualModal from "../components/qualificationComponents/CreateQualModal";
+import DeleteQualModal from "../components/qualificationComponents/DeleteQualModal";
+import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
 
 function QualificationManagement() {
-  const navigate = useNavigate();
-  const { token, getUser } = useContext(AuthContext);
   const [filteredQualifications, setFilteredQualifications] = useState([]);
   const [qualifications, setQualifications] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const toast = useToast();
-  // console.log(pilotos);
+  const [selectedGroups, setSelectedGroups] = useState([]);
+  const [availableGroups, setAvailableGroups] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [availableTypes, setAvailableTypes] = useState([]);
 
   const getData = async () => {
     try {
       const res = await axios.get("/api/v2/qualificacoes");
       setQualifications(res.data);
+
+      // Extract unique groups from qualifications
+      const groups = [
+        ...new Set(res.data.map((qual) => qual.grupo).filter(Boolean)),
+      ];
+      const types = [
+        ...new Set(res.data.map((qual) => qual.tipo_aplicavel).filter(Boolean)),
+      ];
+      setAvailableGroups(groups);
+      setSelectedGroups(groups); // Select all groups by default
+      setAvailableTypes(types);
+      setSelectedTypes(types); // Select all types by default
     } catch (error) {
       console.log(error);
       console.log(error.response.status);
@@ -50,19 +59,36 @@ function QualificationManagement() {
   useEffect(() => {
     getData();
   }, []);
-  // Filter users based on search term
+  // Filter qualifications based on search term and selected groups
   useEffect(() => {
-    const results = qualifications.filter((qual) =>
-      [qual.nome, qual.validade, qual.tipos_permitidos]
-        .map((field) => (field ? field.toString().toLowerCase() : ""))
-        .some((field) => field.includes(searchTerm.toLowerCase())),
-    );
+    let results = qualifications;
+
+    // Filter by selected groups
+    if (selectedGroups.length > 0) {
+      results = results.filter((qual) => selectedGroups.includes(qual.grupo));
+    }
+    // Filter by selected types
+    if (selectedTypes.length > 0) {
+      results = results.filter((qual) =>
+        selectedTypes.includes(qual.tipo_aplicavel),
+      );
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      results = results.filter((qual) =>
+        [qual.nome, qual.validade, qual.tipo_aplicavel, qual.grupo]
+          .map((field) => (field ? field.toString().toLowerCase() : ""))
+          .some((field) => field.includes(searchTerm.toLowerCase())),
+      );
+    }
+
     setFilteredQualifications(results);
-  }, [searchTerm, qualifications]);
+  }, [searchTerm, qualifications, selectedGroups, selectedTypes]);
   return (
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10} align={"center"}>
-        <CreateQualModal />
+        <CreateQualModal setQualifications={setQualifications} />
         <Spacer />
         <Input
           m="auto"
@@ -74,6 +100,21 @@ function QualificationManagement() {
         />
       </HStack>
 
+      <Flex mb={6} gap={4} direction={{ base: "column", md: "row" }}>
+        <QualificationGroupFilter
+          availableGroups={availableGroups}
+          selectedGroups={selectedGroups}
+          onGroupChange={setSelectedGroups}
+        />
+        <Spacer />
+        <QualificationGroupFilter
+          availableGroups={availableTypes}
+          selectedGroups={selectedTypes}
+          onGroupChange={setSelectedTypes}
+          filter={true}
+        />
+      </Flex>
+
       <Table variant="simple" mt={4} overflowX="auto">
         <Thead>
           <Tr>
@@ -82,6 +123,7 @@ function QualificationManagement() {
             <Th>Validade (Dias)</Th>
             <Th>Tipo Tripulante</Th>
             <Th>Grupo</Th>
+            <Th>test</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -92,6 +134,12 @@ function QualificationManagement() {
               <Td>{qual.validade}</Td>
               <Td>{qual.tipo_aplicavel}</Td>
               <Td>{qual.grupo}</Td>
+              <Td>
+                <DeleteQualModal
+                  qual={qual}
+                  setQualifications={setQualifications}
+                />
+              </Td>
             </Tr>
           ))}
         </Tbody>

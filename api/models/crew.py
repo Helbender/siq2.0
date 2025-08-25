@@ -34,7 +34,7 @@ class Crew(People, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_crew: Mapped[List[FlightCrew]] = relationship(
+    flight_crew: Mapped[list[FlightCrew]] = relationship(
         back_populates="crew",
         cascade="all, delete-orphan",
         passive_deletes=True,

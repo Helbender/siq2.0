@@ -23,12 +23,12 @@ export function useSunTimes(datestr) {
         const data = await response.json();
 
         if (data.status === "OK") {
-          console.log("OK");
-          const sunrise = new Date(data.results.sunrise);
-          const sunset = new Date(data.results.sunset);
-          console.log(sunrise, sunset);
-          setSunTimes({ sunrise, sunset });
-          console.log("Dates ready");
+          // console.log("OK");
+          const sunriseUTC = new Date(data.results.sunrise);
+          const sunsetUTC = new Date(data.results.sunset);
+          // console.log(sunriseUTC, sunsetUTC);
+          setSunTimes({ sunrise: sunriseUTC, sunset: sunsetUTC });
+          // console.log("Dates ready");
         } else {
           throw new Error(data.status);
         }

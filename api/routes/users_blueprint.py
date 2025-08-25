@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
 
 from flask import Blueprint, Response, jsonify, request
@@ -11,9 +10,10 @@ from sqlalchemy.orm import Session
 
 from config import engine  # type: ignore
 from functions.sendemail import hash_code  # type: ignore
+from models.basemodels import Tripulante, year_init  # type: ignore
 from models.crew import Crew  # type: ignore
 from models.pilots import Pilot  # type: ignore
-from models.users import User, year_init  # type: ignore
+from models.users import User  # type: ignore
 
 users = Blueprint("users", __name__)
 
@@ -123,13 +123,13 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
 
     #     file = request.files["file"]
 
-    if file.filename == "":
-        return jsonify({"error": "Nome de ficheiro vazio"}), 400
-    try:
-        content = file.read().decode("utf-8")
-        data = json.loads(content)
-    except Exception as e:
-        return jsonify({"error": f"Erro ao ler ficheiro JSON: {e!s}"}), 400
+    # if file.filename == "":
+    #     return jsonify({"error": "Nome de ficheiro vazio"}), 400
+    # try:
+    #     content = file.read().decode("utf-8")
+    #     data = json.loads(content)
+    # except Exception as e:
+    #     return jsonify({"error": f"Erro ao ler ficheiro JSON: {e!s}"}), 400
 
     #     with Session(engine) as session:
 
