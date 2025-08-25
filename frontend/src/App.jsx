@@ -17,6 +17,8 @@ import UserManagementPage from "./pages/UserManagementPage";
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
 import FileUpload from "./components/FileUpload";
+import QualificationsPanel from "./components/pilotComponents/QualificationsPanel";
+import QualificationManagement from "./pages/QualificationManagement";
 
 function App() {
   const { token, removeToken, setToken } = useContext(AuthContext);
@@ -50,6 +52,10 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/fileupload" element={<FileUpload />} />
             <Route path="/users" element={<UserManagementPage />} />
+            <Route
+              path="/qualificacoes"
+              element={<QualificationManagement />}
+            />
 
             <Route path="/" element={<Master />}>
               <Route path="/pilots" element={<Pilots position="PC" />} />

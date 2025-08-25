@@ -41,7 +41,7 @@ function UserDataCard({ user }) {
             >
               {user.position}
             </Circle>
-            <Heading size="md">{`${user.rank} ${user.name}`}</Heading>
+            <Heading size="md">{`${user.rank} ${user.nome}`}</Heading>
           </Flex>
         </Flex>
       </CardHeader>

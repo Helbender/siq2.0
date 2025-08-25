@@ -26,10 +26,13 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { BiTrash } from "react-icons/bi";
-import api from "../../utils/api";
+import api, { apiAuth } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 
 function CreateUserModal({ edit, add, isDelete, user }) {
+  const navigate = useNavigate();
+
+  const { removeToken } = useContext(AuthContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const [inputs, setInputs] = useState(
@@ -41,6 +44,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       position: "Default",
       admin: false,
       squadron: "502 - Elefantes",
+      tipo: "PILOTO",
     },
   );
   const { token, getUser, removeToken } = useContext(AuthContext);
@@ -60,21 +64,19 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
     try {
       console.log(inputs);
-      const res = await api.post("/api/users", inputs, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const res = await apiAuth.post("/users", inputs, {});
       toast({ title: "User created successfully", status: "success" });
 
       setPilotos([...pilotos, res.data]);
-      setInputs({
-        rank: "",
-        nip: "",
-        name: "",
-        email: "",
-        position: "Default",
-        admin: false,
-        squadron: "502 - Elefantes",
-      });
+      // setInputs({
+      //   rank: "",
+      //   nip: "",
+      //   name: "",
+      //   email: "",
+      //   position: "Default",
+      //   admin: false,
+      //   squadron: "502 - Elefantes",
+      // });
       onClose();
     } catch (error) {
       toast({ title: "Error saving user", status: "error" });
@@ -87,12 +89,9 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
 
     try {
-      const res = await api.patch(
-        `/api/users/${user.nip}/${user.position}`,
+      const res = await apiAuth.patch(
+        `/users/${user.nip}/${user.position}`,
         inputs,
-        {
-          headers: { Authorization: "Bearer " + token },
-        },
       );
       toast({ title: "User updated successfully", status: "success" });
 
@@ -123,7 +122,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   //Deletes the user
   const handleDeletePilot = async () => {
     try {
-      const res = await api.delete(`/api/users/${user.nip}/${user.position}`, {
+      const res = await api.delete(`/users/${user.nip}/${user.position}`, {
         headers: { Authorization: "Bearer " + token },
       });
       console.log(res);
@@ -274,7 +273,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                       />
                     </FormControl>
                   ) : null}
-                  <FormControl>
+                  <FormControl hidden={true}>
                     <FormLabel>Esquadra</FormLabel>
                     <Input
                       value={inputs.squadron}
@@ -283,6 +282,33 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                       placeholder="Esquadra"
                       onChange={handleInputsChange}
                     />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Grupo</FormLabel>
+                    {/* <Input
+                      value={inputs.tipo}
+                      name="tipo"
+                      type="text"
+                      // placeholder="Esquadra"
+                      onChange={handleInputsChange}
+                    /> */}
+                    <Select
+                      value={inputs?.tipo}
+                      name="tipo"
+                      onChange={handleInputsChange}
+                    >
+                      <option>PILOTO</option>
+                      <option value={"OPERADOR_CABINE"}>
+                        OPERADOR de CABINE
+                      </option>
+                      <option value="CONTROLADOR_TATICO">
+                        CONTROLADOR TÁTICO
+                      </option>
+                      <option value="OPERADOR_VIGILANCIA">
+                        OPERADOR de VIGILÂNCIA
+                      </option>
+                      <option value={"OPERACOES"}>OPERAÇÔES</option>
+                    </Select>
                   </FormControl>
                 </HStack>
               </VStack>

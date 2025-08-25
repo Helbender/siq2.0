@@ -41,7 +41,7 @@ function LoginPage() {
         nip: loginForm.nip,
         password: loginForm.password,
       };
-      const response = await api.post("/api/token", data);
+      const response = await api.post("/token", data);
       if (response.status === 201) {
         toast.closeAll();
         const decodedToken = jwtDecode(response.data.access_token);

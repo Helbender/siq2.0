@@ -58,13 +58,14 @@ function UserManagementPage() {
           user.email,
           user.admin ? "Yes" : "No",
           user.squadron,
+          user.tipo,
         ]
           .map((field) => (field ? field.toString().toLowerCase() : ""))
           .some((field) => field.includes(searchTerm.toLowerCase())),
       );
       setFilteredUsers(results);
     } else {
-      const results = pilotos.filter((u) => u.name === User.name);
+      const results = pilotos.filter((u) => u.nome === User.nome);
       setFilteredUsers(results);
     }
   }, [searchTerm, pilotos]);
@@ -90,7 +91,7 @@ function UserManagementPage() {
               <Th>Name</Th>
               <Th>Rank</Th>
               <Th>Position</Th>
-              {/* <Th>Email</Th> */}
+              <Th>Tipo</Th>
               <Th>Admin</Th>
               {/* <Th>Squadron</Th> */}
               <Th></Th>
@@ -103,7 +104,7 @@ function UserManagementPage() {
                 <Td>{user.name}</Td>
                 <Td>{user.rank}</Td>
                 <Td>{user.position}</Td>
-                {/* <Td>{user.email}</Td> */}
+                <Td>{user.tipo}</Td>
                 <Td>
                   {user.admin ? (
                     <IoCheckmarkCircleSharp size={"30px"} color="green" />

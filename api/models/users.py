@@ -3,16 +3,12 @@ from __future__ import annotations
 import json
 
 from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
-year_init: int = 2020
-date_init: str = f"{year_init}-01-01"
-
-
-class Base(DeclarativeBase):
-    """subclasses will be converted to dataclasses."""
+from models.basemodels import Base
 
 
+# OLD MODELS
 class People:
     """Basic People Model.
 
@@ -43,7 +39,6 @@ class People:
             "admin": self.admin,
             "recover": self.recover,
             "squadron": self.squadron,
-            # "password": self.password,
         }
 
     # def get_qualification(self) -> list:

@@ -2,15 +2,16 @@ from __future__ import annotations  # noqa: D100, INP001
 
 # import locale
 from datetime import date  # noqa: TC003
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
-from models.users import Base  # type: ignore
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
 )
+
+from models.basemodels import Base  # type: ignore
 
 # locale.setlocale(locale.LC_TIME, "pt_PT.UTF-8")  # Ou 'pt_BR.UTF-8' para português do Brasil
 if TYPE_CHECKING:
@@ -48,10 +49,18 @@ class Flight(Base):
     number_of_crew: Mapped[int]
     orm: Mapped[int]
     fuel: Mapped[int]
-    activation_first: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
-    activation_last: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
-    ready_ac: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
-    med_arrival: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
+    activation_first: Mapped[str] = mapped_column(
+        String(5), insert_default="__:__", server_default="__:__"
+    )
+    activation_last: Mapped[str] = mapped_column(
+        String(5), insert_default="__:__", server_default="__:__"
+    )
+    ready_ac: Mapped[str] = mapped_column(
+        String(5), insert_default="__:__", server_default="__:__"
+    )
+    med_arrival: Mapped[str] = mapped_column(
+        String(5), insert_default="__:__", server_default="__:__"
+    )
 
     flight_pilots: Mapped[List[FlightPilots]] = relationship(  # noqa: UP006
         back_populates="flight",
@@ -70,8 +79,12 @@ class Flight(Base):
 
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
-        flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
-        flight_crewmembers.extend([flightcrew.to_json() for flightcrew in self.flight_crew])
+        flight_crewmembers = [
+            flightpilot.to_json() for flightpilot in self.flight_pilots
+        ]
+        flight_crewmembers.extend(
+            [flightcrew.to_json() for flightcrew in self.flight_crew]
+        )
 
         # Return the JSON response
         return {
@@ -119,7 +132,9 @@ class FlightPilots(Base):
         ForeignKey("flights_table.fid", ondelete="CASCADE"),
         primary_key=True,
     )
-    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True)
+    pilot_id: Mapped[int] = mapped_column(
+        ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True
+    )
     position: Mapped[str] = mapped_column(String(5))
 
     day_landings: Mapped[int]
@@ -127,22 +142,12 @@ class FlightPilots(Base):
     prec_app: Mapped[int]
     nprec_app: Mapped[int]
 
-    cto: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    sid: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    mono: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    nfp: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-
-    qa1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    qa2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)  # noqa: UP007
-    bsp1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    bsp2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    ta: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    vrp1: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    vrp2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    bskit: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    paras: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False)# noqa: UP007
-    nvg: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False) # noqa: UP007
-    nvg2: Mapped[Optional[bool]]  # = mapped_column(nullable=True, default=False) # noqa: UP007
+    qual1: Mapped[str | None]  # noqa: UP007
+    qual2: Mapped[str | None]  # noqa: UP007
+    qual3: Mapped[str | None]  # noqa: UP007
+    qual4: Mapped[str | None]  # noqa: UP007
+    qual5: Mapped[str | None]  # noqa: UP007
+    qual6: Mapped[str | None]  # noqa: UP007
 
     pilot: Mapped[Pilot] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
@@ -191,12 +196,14 @@ class FlightCrew(Base):
         primary_key=True,
     )
 
-    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True)
+    crew_id: Mapped[int] = mapped_column(
+        ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True
+    )
     position: Mapped[str] = mapped_column(String(5))
 
-    bsoc: Mapped[Optional[bool]]  # noqa: UP007
-    bskit: Mapped[Optional[bool]]  # noqa: UP007
-    paras: Mapped[Optional[bool]]  # noqa: UP007
+    bsoc: Mapped[bool | None]  # noqa: UP007
+    bskit: Mapped[bool | None]  # noqa: UP007
+    paras: Mapped[bool | None]  # noqa: UP007
 
     crew: Mapped[Crew] = relationship(back_populates="flight_crew")
     flight: Mapped[Flight] = relationship(back_populates="flight_crew")

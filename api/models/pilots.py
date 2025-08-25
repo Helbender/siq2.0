@@ -1,15 +1,17 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 from datetime import date, timedelta
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from models.users import Base, People, date_init, year_init  # type: ignore
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
 )
+
+from models.basemodels import Base, date_init, year_init  # type: ignore
+from models.users import People  # type: ignore
 
 if TYPE_CHECKING:
     from flights import FlightPilots  # type: ignore
@@ -44,7 +46,7 @@ class Pilot(People, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_pilots: Mapped[List[FlightPilots]] = relationship(back_populates="pilot", cascade="all, delete-orphan", passive_deletes=True)
+    flight_pilots: Mapped[list[FlightPilots]] = relationship(back_populates="pilot")
 
     def __repr__(self):
         repr = super().__repr__()
@@ -62,7 +64,9 @@ class Pilot(People, Base):
 class Qualification(Base):
     __tablename__ = "qualifications"
 
-    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True)
+    pilot_id: Mapped[int] = mapped_column(
+        ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True
+    )
     pilot: Mapped[Pilot] = relationship(back_populates="qualification")
 
     last_day_landings: Mapped[str] = mapped_column(String(55), default=date_init)
@@ -141,23 +145,33 @@ class Qualification(Base):
         for item in quallist:
             match type_qual:
                 case "Alerta":
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "alerta") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "alerta") and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
                 case "VRP":
                     # for item.lower() in quallist:
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "vrp") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "vrp") and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
                 case "Currencies":
                     # for item.lower() in quallist:
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "currencies") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][
-                        0
-                    ] < 0:
+                    if (
+                        QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "currencies"
+                    ) and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
 
         return True
 
     def get_qualification_list(self) -> list:
-        return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
+        return [
+            column.name[5:-5].upper()
+            for column in self.__table__.columns
+            if "_date" in column.name
+        ]
 
     def update(self, data: FlightPilots, date: date) -> Qualification:
         """Update with Last qualification date."""
@@ -212,11 +226,35 @@ class Qualification(Base):
             if QUALIFICATIONS.get(item.lower()) is not None
         ]
         oldest = min(mylist, key=lambda x: x["dados"][0])
-        mylist.append({"name": "ATR", "dados": list(self.last_day_landings.split()), "grupo": "aterragens"})
-        mylist.append({"name": "ATN", "dados": list(self.last_night_landings.split()), "grupo": "aterragens"})
+        mylist.append(
+            {
+                "name": "ATR",
+                "dados": list(self.last_day_landings.split()),
+                "grupo": "aterragens",
+            }
+        )
+        mylist.append(
+            {
+                "name": "ATN",
+                "dados": list(self.last_night_landings.split()),
+                "grupo": "aterragens",
+            }
+        )
 
-        mylist.append({"name": "P", "dados": list(self.last_prec_app.split()), "grupo": "aterragens"})
-        mylist.append({"name": "NP", "dados": list(self.last_nprec_app.split()), "grupo": "aterragens"})
+        mylist.append(
+            {
+                "name": "P",
+                "dados": list(self.last_prec_app.split()),
+                "grupo": "aterragens",
+            }
+        )
+        mylist.append(
+            {
+                "name": "NP",
+                "dados": list(self.last_nprec_app.split()),
+                "grupo": "aterragens",
+            }
+        )
         mylist.append({"name": "oldest", "dados": [oldest["name"], oldest["dados"][1]]})
 
         # print(mylist)

@@ -1,15 +1,17 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 from datetime import date, timedelta
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from models.users import Base, People, year_init  # type: ignore
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey  # type: ignore
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
 )
+
+from models.basemodels import Base, year_init  # type: ignore
+from models.users import People  # type: ignore
 
 if TYPE_CHECKING:
     from flights import FlightCrew  # type: ignore
@@ -53,7 +55,9 @@ class Crew(People, Base):
 class QualificationCrew(Base):
     __tablename__ = "qualifications_crew"
 
-    crew_id: Mapped[int] = mapped_column(ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True)
+    crew_id: Mapped[int] = mapped_column(
+        ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True
+    )
     crew: Mapped[Crew] = relationship(back_populates="qualification")
     last_bsoc_date: Mapped[date] = mapped_column(insert_default=date(year_init, 1, 1))
     last_bskit_date: Mapped[date] = mapped_column(
@@ -71,7 +75,13 @@ class QualificationCrew(Base):
         """Return all model data in JSON format."""
         qualist: list = self.get_qualification_list()
 
-        mylist = [{"name": item, "dados": self._get_days(getattr(self, f"last_{item.lower()}_date"))} for item in qualist]
+        mylist = [
+            {
+                "name": item,
+                "dados": self._get_days(getattr(self, f"last_{item.lower()}_date")),
+            }
+            for item in qualist
+        ]
         oldest = min(mylist, key=lambda x: x["dados"][0])
         mylist.append({"name": "oldest", "dados": [oldest["name"], oldest["dados"][1]]})
         return mylist
@@ -92,8 +102,16 @@ class QualificationCrew(Base):
 
     def get_qualification_list(self, init=False) -> list:
         if init:
-            return [column.name[:-5] for column in self.__table__.columns if "_init" in column.name]
-        return [column.name[5:-5].upper() for column in self.__table__.columns if "_date" in column.name]
+            return [
+                column.name[:-5]
+                for column in self.__table__.columns
+                if "_init" in column.name
+            ]
+        return [
+            column.name[5:-5].upper()
+            for column in self.__table__.columns
+            if "_date" in column.name
+        ]
 
     @staticmethod
     def _get_days(data: date) -> list[int | str]:

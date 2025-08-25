@@ -4,7 +4,7 @@
       "editor.defaultFormatter": "charliermarsh.ruff",
       "editor.codeActionsOnSave": {
           "source.fixAll": "explicit",
-          "source.organizeImports": "never"
+          "source.organizeImports": "explicit",
     }
     },
 
@@ -15,7 +15,6 @@
     "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit",
         },
-    "ruff.lineLength": 120,
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
     "editor.formatOnType": false, // required
     "editor.formatOnPaste": true, // optional
@@ -23,5 +22,15 @@
     "editor.formatOnSaveMode": "file", // required to format on save
     // "files.autoSave": "onFocusChange", // optional but recommended
     "vs-code-prettier-eslint.prettierLast": true,
-    // ] // set as "true" to run 'prettier' last not first
+    "python.languageServer": "Pylance",
+    "python.defaultInterpreterPath": "api/.venv/bin/python",
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "SQLITE",
+            "database": "api/database.db"
+        }
+    ],
 }

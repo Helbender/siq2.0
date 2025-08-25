@@ -1,20 +1,25 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 import os
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from threading import Thread
 
-from config import CREW_USER, PILOT_USER, engine  # type:ignore  # noqa: PGH003
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
-from functions.gdrive import tarefa_enviar_para_drive  # type:ignore  # noqa: PGH003
-from models.crew import Crew, QualificationCrew  # type:ignore  # noqa: PGH003
-from models.flights import Flight, FlightCrew, FlightPilots  # type:ignore  # noqa: PGH003
-from models.pilots import Pilot, Qualification  # type:ignore  # noqa: PGH003
-from models.users import year_init  # type:ignore  # noqa: PGH003
 from sqlalchemy import exc, func, select
 from sqlalchemy.orm import Session, joinedload
+
+from config import CREW_USER, PILOT_USER, engine  # type:ignore  # noqa: PGH003
+from functions.gdrive import tarefa_enviar_para_drive  # type:ignore  # noqa: PGH003
+from models.crew import Crew, QualificationCrew  # type:ignore  # noqa: PGH003
+from models.flights import (  # type:ignore  # noqa: PGH003
+    Flight,
+    FlightCrew,
+    FlightPilots,
+)
+from models.pilots import Pilot, Qualification  # type:ignore  # noqa: PGH003
+from models.users import year_init  # type:ignore  # noqa: PGH003
 
 flights = Blueprint("flights", __name__)
 
@@ -23,7 +28,7 @@ load_dotenv(dotenv_path="./.env")
 DEV = bool(os.environ.get("DEV", "0"))
 
 
-# FLight ROUTES
+# Flight ROUTES
 @flights.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_flights() -> tuple[Response, int]:
     """Retrieve all flights from the db and sends to frontend.
@@ -67,13 +72,20 @@ def retrieve_flights() -> tuple[Response, int]:
             flight: Flight = session.execute(
                 select(Flight)
                 .where(Flight.airtask == f["airtask"])
-                .where(Flight.date == datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date())
+                .where(
+                    Flight.date
+                    == datetime.strptime(f["date"], "%Y-%m-%d")
+                    .replace(tzinfo=UTC)
+                    .date()
+                )
                 .where(Flight.tailnumber == f["tailNumber"])
                 .where(Flight.departure_time == f["ATD"]),
             ).scalar_one_or_none()
 
             if flight is not None:
-                return jsonify({"message": f"O voo já existe com o ID {flight.fid}"}), 400
+                return jsonify(
+                    {"message": f"O voo já existe com o ID {flight.fid}"}
+                ), 400
 
         flight = Flight(
             airtask=f["airtask"],
@@ -118,7 +130,9 @@ def retrieve_flights() -> tuple[Response, int]:
 
         # Lançar a tarefa de envio em background
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
+            Thread(
+                target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)
+            ).start()
 
         return jsonify({"message": flight.fid}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
@@ -131,10 +145,14 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
         verify_jwt_in_request()
         f: dict = request.get_json()
         with Session(engine, autoflush=False) as session:
-            flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
+            flight: Flight = session.execute(
+                select(Flight).where(Flight.fid == flight_id)
+            ).scalar_one_or_none()
 
             flight.airtask = f.get("airtask", "")
-            flight.date = datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+            flight.date = (
+                datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+            )
             flight.origin = f.get("origin", "")
             flight.destination = f.get("destination", "")
             flight.departure_time = f.get("ATD", "")
@@ -167,12 +185,16 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)).start()
+            Thread(
+                target=tarefa_enviar_para_drive, args=(f, nome_arquivo_voo, nome_pdf)
+            ).start()
         return jsonify({"message": "Flight changed"}), 204
 
     if request.method == "DELETE":
         with Session(engine, autoflush=False) as session:
-            flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
+            flight = session.execute(
+                select(Flight).where(Flight.fid == flight_id)
+            ).scalar_one_or_none()
             if not flight:
                 return jsonify({"msg": "Flight not found"}), 404
 
@@ -251,14 +273,20 @@ def update_qualifications(
 
             # Check if Date is None so to set a base Date
             last_qualification_date = (
-                date(year_init, 1, 1) if last_qualification_date is None else last_qualification_date
+                date(year_init, 1, 1)
+                if last_qualification_date is None
+                else last_qualification_date
             )
 
             # Update the tripulante's qualifications table
             setattr(pilot_qualification, f"last_{field}_date", last_qualification_date)
 
     elif isinstance(tripulante, FlightCrew):
-        crew_qualification = session.query(QualificationCrew).filter_by(crew_id=tripulante.crew_id).first()
+        crew_qualification = (
+            session.query(QualificationCrew)
+            .filter_by(crew_id=tripulante.crew_id)
+            .first()
+        )
 
         # For each qualification type, find the last relevant flight before the one being deleted
         qualification_fields = [
@@ -306,7 +334,9 @@ def process_repetion_qual(
     """
     # print(f"\nProcessing {qualification_field}")
     recent_qualications = session.execute(
-        select(Flight.date, getattr(FlightPilots, qualification_field))  # FlightPilots.day_landings)
+        select(
+            Flight.date, getattr(FlightPilots, qualification_field)
+        )  # FlightPilots.day_landings)
         .join(FlightPilots)
         .where(Flight.flight_pilots.any(pilot_id=tripulante.pilot_id))
         .where(Flight.fid != flight_id)
@@ -332,7 +362,9 @@ def process_repetion_qual(
     # print(f"After Qual {qualification_field}:\t{getattr(pilot_qualification, f'last_{qualification_field}')}\n")
 
 
-def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> None:  # noqa: FBT001, FBT002
+def add_crew_and_pilots(
+    session: Session, flight: Flight, pilot: dict, edit: bool = False
+) -> None:  # noqa: FBT001, FBT002
     """Check type of crew and add it to respective Model Object."""
     # Garanties data integrety while introducing several flights
 
@@ -425,7 +457,9 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         if edit:
             # Update the existing FlightCrew object
             flight_crew: FlightCrew = session.execute(
-                select(FlightCrew).where(FlightCrew.flight_id == flight.fid).where(FlightCrew.crew_id == pilot["nip"]),
+                select(FlightCrew)
+                .where(FlightCrew.flight_id == flight.fid)
+                .where(FlightCrew.crew_id == pilot["nip"]),
             ).scalar_one_or_none()
             if flight_crew is not None:
                 flight_crew.position = pilot["position"]

@@ -14,23 +14,24 @@ from sqlalchemy.orm import Session
 dashboard = Blueprint("dashboard", __name__)
 
 
-@dashboard.route("/", strict_slashes=False)
-def send_data() -> tuple[Response | dict[str, str], int]:
-    """Send data to dashboard."""
-    print("Dashboard route called")
-    # verify_jwt_in_request()
-    with Session(engine) as session:
-        # Get the current year
-        current_year = datetime.now(UTC).year
+# @dashboard.route("/", strict_slashes=False)
+# def send_data() -> tuple[Response | dict[str, str], int]:
+#     """Send data to dashboard."""
 
-        # Get the number of pilots
-        pilots = session.execute(select(func.count()).select_from(Pilot)).scalar()
+#     print("Dashboard route called")
+#     # verify_jwt_in_request()
+#     with Session(engine) as session:
+#         # Get the current year
+#         current_year = datetime.now(UTC).year
 
-        # Get the number of crew members
-        crew = session.execute(select(func.count()).select_from(Crew)).scalar()
+#         # Get the number of pilots0
+#         pilots = session.execute(select(func.count()).select_from(Pilot)).scalar()
 
-        # Get the number of general users members
-        users = session.execute(select(func.count()).select_from(User)).scalar()
+#         # Get the number of crew members
+#         crew = session.execute(select(func.count()).select_from(Crew)).scalar()
+
+#         # Get the number of general users members
+#         users = session.execute(select(func.count()).select_from(User)).scalar()
 
         # Get the number of flights
         flights = session.execute(
@@ -103,17 +104,17 @@ def is_pilot_qualified(type_qual: str) -> dict[str, int]:
         if session.execute(stmt).scalars().all() is not None:
             result.extend(session.execute(stmt).scalars().all())
 
-        qualificados: int = 0
-        não_qualificados: int = 0
+#         qualificados: int = 0
+#         não_qualificados: int = 0
 
-        for i in result:
-            # print(f"\nNome: {i.name}")
-            # print(i.qualification.is_qualified())
-            if i.qualification.is_qualified(type_qual):
-                qualificados += 1
-            else:
-                não_qualificados += 1
+#         for i in result:
+#             # print(f"\nNome: {i.name}")
+#             # print(i.qualification.is_qualified())
+#             if i.qualification.is_qualified(type_qual):
+#                 qualificados += 1
+#             else:
+#                 não_qualificados += 1
 
-    # print(f"Qualificados: {qualificados}")
-    # print(f"Não qualificados: {não_qualificados}")
-    return {"qualificados": qualificados, "nao_qualificados": não_qualificados}
+#     # print(f"Qualificados: {qualificados}")
+#     # print(f"Não qualificados: {não_qualificados}")
+#     return {"qualificados": qualificados, "nao_qualificados": não_qualificados}

@@ -202,6 +202,38 @@ function Header() {
                         </Flex>
                       </ChakraLink>
 
+                      <ChakraLink
+                        p={2}
+                        color="teal.500"
+                        fontSize="lg"
+                        onClick={() => {
+                          navigate("/dashboard");
+                          onClose();
+                        }}
+                        aria-label="Dashboard"
+                      >
+                        <Flex align="center">
+                          <MdSpaceDashboard />
+                          <Box ml={2}>Dashboard</Box>
+                        </Flex>
+                      </ChakraLink>
+                      <ChakraLink
+                        p={2}
+                        color="teal.500"
+                        fontSize="lg"
+                        onClick={() => {
+                          navigate("/qualificacoes");
+                          onClose();
+                        }}
+                      >
+                        <Flex align="center">
+                          <FaTools />
+
+                          <Box ml={2}>Gerir Qualificações</Box>
+                        </Flex>
+                      </ChakraLink>
+                      <Spacer />
+
                       {User.admin ? (
                         <ChakraLink
                           p={2}

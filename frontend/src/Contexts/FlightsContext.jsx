@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
-import { api } from "../utils/api";
+import { api, apiAuth } from "../utils/api";
 
 // Create the context
 export const FlightContext = createContext();
@@ -13,16 +13,14 @@ export const FlightProvider = ({ children }) => {
 
   const getSavedFlights = async () => {
     try {
-      const response = await api.get("/api/flights", {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const response = await apiAuth.get("/flights");
       setFlights(response.data || []);
       setLoading(false);
       console.log("Flights Loaded");
     } catch (error) {
       console.log(error);
-      console.log(error.response.status);
-      if (error.response.status === 401) {
+      console.log(error.response?.status);
+      if (error.response?.status === 401) {
         console.log("Removing Token");
         removeToken();
       }

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "./AuthContext";
-import { api } from "../utils/api";
+import { api, apiAuth } from "../utils/api";
 
 // Create the context
 export const UserContext = createContext();
@@ -13,15 +13,12 @@ export const UserProvider = ({ children }) => {
 
   const getSavedPilots = async () => {
     try {
-      const res = await api.get("/api/users", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      // console.log(res.data);
+      const res = await apiAuth.get("/users");
       setPilotos(res.data || []);
+      console.log("Users Loaded");
     } catch (error) {
       console.log(error);
-      console.log(error.response.status);
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         console.log("Removing Token");
         removeToken();
         // navigate("/");
@@ -29,7 +26,6 @@ export const UserProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-    console.log("Users Loaded");
     getSavedPilots();
   }, []);
 
