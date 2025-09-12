@@ -1,0 +1,15 @@
+from enum import Enum
+
+class GrupoQualificacoes(Enum):
+    ALERTA = "ALERTA"
+    VIGILANCIA = "VIGILANCIA"
+    NVG = "NVG"
+    TATICO = "TATICO"
+    OUTROS = "OUTROS"
+
+class TipoTripulante(Enum):
+    PILOTO = "PILOTO"
+    OPERADOR_CABINE = "OPERADOR_CABINE"
+    CONTROLADOR_TATICO = "CONTROLADOR_TATICO"
+    OPERADOR_VIGILANCIA = "OPERADOR_VIGILANCIA"
+    OPERACOES = "OPERAÇÕES"

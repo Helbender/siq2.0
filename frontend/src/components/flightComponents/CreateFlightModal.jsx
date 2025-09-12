@@ -23,7 +23,7 @@ import {
   Center,
   IconButton,
 } from "@chakra-ui/react";
-import { useState, useContext, useRef, useEffect } from "react";
+import { useContext, useRef, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import PilotInput from "./PilotInput";
@@ -31,7 +31,7 @@ import { FlightContext } from "../../Contexts/FlightsContext";
 import { AuthContext } from "../../Contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../utils/api";
+import { api, apiAuth } from "../../utils/api";
 import { getTimeDiff } from "../../Functions/timeCalc";
 import { BiEdit } from "react-icons/bi";
 
@@ -40,9 +40,9 @@ const today = new Date();
 // Componente
 function CreateFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { flights, setFlights } = useContext(FlightContext);
+  const { setFlights } = useContext(FlightContext);
   const { token, removeToken } = useContext(AuthContext);
-  const { pilotos } = useContext(UserContext);
+  const { users } = useContext(UserContext);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
   const toast = useToast();
@@ -50,7 +50,6 @@ function CreateFlightModal({ flight }) {
     airtask: "",
     flightType: "",
     flightAction: "",
-    // date: today,
     date: today.toISOString().substring(0, 10),
     origin: "",
     destination: "",
@@ -64,13 +63,12 @@ function CreateFlightModal({ flight }) {
     cargo: 0,
     orm: 0,
     fuel: 0,
-    flight_pilots: [{ name: "" }],
     numberOfCrew: 1,
-
     activationFirst: "__:__",
     activationLast: "__:__",
     readyAC: "__:__",
     medArrival: "__:__",
+    flight_pilots: [{ name: "" }],
   };
   
   const flightdata = flight ?? defaultFlightData;
@@ -146,14 +144,10 @@ function CreateFlightModal({ flight }) {
     });
     try {
       let res;
-      if (flight && !isNewFlight) {
-        res = await api.patch(`/api/flights/${flight.id}`, data, {
-          headers: { Authorization: "Bearer " + token },
-        });
+      if (flight) {
+        res = await apiAuth.patch(`/flights/${flight.id}`, data);
       } else {
-        res = await api.post("/api/flights", data, {
-          headers: { Authorization: "Bearer " + token },
-        });
+        res = await apiAuth.post("/flights", data);
       }
       console.log(res);
       if (res.status === 201) {
@@ -594,7 +588,7 @@ function CreateFlightModal({ flight }) {
                           index={index}
                           remove={remove}
                           member={flight_pilots[index]}
-                          pilotos={pilotos}
+                          pilotos={users}
                         />
                       ))}
                     </Grid>

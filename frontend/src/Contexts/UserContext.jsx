@@ -1,21 +1,21 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "./AuthContext";
-import { api, apiAuth } from "../utils/api";
+import { apiAuth } from "../utils/api";
 
 // Create the context
 export const UserContext = createContext();
 
 // Create a provider component
 export const UserProvider = ({ children }) => {
-  const { token, removeToken } = useContext(AuthContext);
+  const { removeToken } = useContext(AuthContext);
 
-  const [pilotos, setPilotos] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  const getSavedPilots = async () => {
+  const getSavedUsers = async () => {
     try {
       const res = await apiAuth.get("/users");
-      setPilotos(res.data || []);
-      console.log("Users Loaded");
+      setUsers(res.data || []);
+      console.log("Users Loaded from context");
     } catch (error) {
       console.log(error);
       if (error.response?.status === 401) {
@@ -26,11 +26,11 @@ export const UserProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-    getSavedPilots();
+    getSavedUsers();
   }, []);
 
   return (
-    <UserContext.Provider value={{ pilotos, setPilotos }}>
+    <UserContext.Provider value={{ users, setUsers }}>
       {children}
     </UserContext.Provider>
   );

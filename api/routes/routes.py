@@ -1,67 +1,15 @@
 from datetime import datetime
 
 from flask import Blueprint, Response, abort, jsonify, request
+from flask_jwt_extended import verify_jwt_in_request
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from config import engine  # type:ignore
-from models.basemodels import (  # type:ignore
-    GrupoQualificacoes,
-    Qualificacao,
-    TipoTripulante,
-    Tripulante,
-    TripulanteQualificacao,
-)
+from models.qualificacoes import GrupoQualificacoes, Qualificacao
+from models.tripulantes import TipoTripulante, Tripulante, TripulanteQualificacao
 
 v2 = Blueprint("v2", __name__)
-
-
-# 1. Listar todos os tripulantes
-@v2.route("/tripulantes", methods=["GET"])
-def listar_tripulantes() -> Response:
-    with Session(engine) as session:
-        tripulantes = session.execute(select(Tripulante)).scalars().all()
-        return jsonify(
-            [
-                {
-                    "nip": t.nip,
-                    "nome": t.nome,
-                    "tipo": t.tipo.value,
-                    "rank": t.rank,
-                    "position": t.position,
-                    "email": t.email,
-                    "admin": t.admin,
-                }
-                for t in tripulantes
-            ]
-        )
-
-
-# 2. Criar tripulante
-@v2.route("/tripulantes", methods=["POST"])
-def criar_tripulante() -> Response:
-    data = request.get_json()
-    print(data)
-    t = Tripulante(
-        nome=data["nome"],
-        nip=data["nip"],
-        rank=data["rank"],
-        position=data["position"],
-        email=data["email"],
-        admin=bool(data["admin"]),
-        password=data["password"],
-        tipo=data["tipo"],
-    )
-
-    with Session(engine) as session:
-        try:
-            session.flush()
-        except exc.IntegrityError as e:
-            session.rollback()
-            print("\n", e.orig.__repr__())
-        session.add(t)
-        session.commit()
-        return jsonify({"id": t.nip})
 
 
 # 3. Criar qualificação com tipos permitidos
@@ -96,6 +44,19 @@ def criar_qualificacao() -> Response:
         return jsonify({"id": q.id})
 
 
+@v2.route("/qualificacoes/<int:nip>", methods=["GET"])
+def listar_qualificacoes_nip(nip: int) -> Response:
+    with Session(engine) as session:
+        tripulante = session.get(Tripulante, nip)
+        if not tripulante:
+            abort(404, "Tripulante não encontrado")
+
+        stmt = select(Qualificacao).where(Qualificacao.tipo_aplicavel == tripulante.tipo)
+        result = session.execute(stmt).scalars().all()
+        resultados = [l.nome for l in result]
+        return jsonify(resultados)
+
+
 # 4. Listar qualificações válidas para um tipo de tripulante
 @v2.route("/qualificacoes/<tipo>", methods=["GET"])
 def listar_qualificacoes_por_tipo(tipo: str) -> Response:
@@ -124,6 +85,7 @@ def listar_qualificacoes_por_tipo(tipo: str) -> Response:
 # 4.1 Listar qualificações válidas para um tipo de tripulante
 @v2.route("/qualificacoes", methods=["GET"])
 def listar_qualificacoes() -> Response:
+    verify_jwt_in_request()
     with Session(engine) as session:
         stmt = select(Qualificacao)
         qualificacoes = session.execute(stmt).scalars().all()
@@ -171,16 +133,12 @@ def adicionar_qualificacao_tripulante(tripulante_id: int) -> tuple[Response, int
 
         # Validação simplificada
         if tripulante.tipo != qualificacao.tipo_aplicavel:
-            return jsonify(
-                {"erro": "Esta qualificação não é válida para o tipo de tripulante"}
-            ), 400
+            return jsonify({"erro": "Esta qualificação não é válida para o tipo de tripulante"}), 400
 
         pq = TripulanteQualificacao(
             tripulante_id=tripulante.nip,
             qualificacao_id=qualificacao.id,
-            data_ultima_validacao=datetime.strptime(
-                data["data_ultima_validacao"], "%Y-%m-%d"
-            ).date(),
+            data_ultima_validacao=datetime.strptime(data["data_ultima_validacao"], "%Y-%m-%d").date(),
         )
         session.add(pq)
         session.commit()
@@ -246,9 +204,7 @@ def atualizar_data_qualificacao(tripulante_id: int, qualificacao_id: int):
         if not pq:
             abort(404, "Qualificação não atribuída ao tripulante")
 
-        pq.data_ultima_validacao = datetime.strptime(
-            data["data_ultima_validacao"], "%Y-%m-%d"
-        ).date()
+        pq.data_ultima_validacao = datetime.strptime(data["data_ultima_validacao"], "%Y-%m-%d").date()
         session.commit()
         return jsonify({"mensagem": "Qualificação atualizada com sucesso"}), 200
 
@@ -304,11 +260,7 @@ def listar_qualificacoes_expiradas_por_tripulante(tripulante_id):
     with Session(engine) as session:
         tripulante = session.scalars(
             select(Tripulante)
-            .options(
-                selectinload(Tripulante.qualificacoes).selectinload(
-                    TripulanteQualificacao.qualificacao
-                )
-            )
+            .options(selectinload(Tripulante.qualificacoes).selectinload(TripulanteQualificacao.qualificacao))
             .where(Tripulante.nip == tripulante_id)
         ).first()
 

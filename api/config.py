@@ -3,21 +3,10 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, exc
 
-from models.basemodels import (  # noqa: F401
-    Base,
-    GrupoQualificacoes,
-    Qualificacao,
-    TipoTripulante,
-    Tripulante,
-    TripulanteQualificacao,
-)
-from models.crew import Crew, QualificationCrew  # noqa: F401
-
-# from models.crew import Crew, QualificationCrew  # noqa: F401
-from models.flights import Flight, FlightCrew, FlightPilots  # noqa: F401
-from models.pilots import Pilot, Qualification  # noqa: F401
-
-# from models.users import Base, User  # noqa: F401
+from models.basemodels import Base
+from models.flights import Flight, FlightPilots  # noqa: F401
+from models.qualificacoes import Qualificacao  # noqa: F401
+from models.tripulantes import Tripulante, TripulanteQualificacao  # noqa: F401
 
 # Load enviroment variables
 load_dotenv(dotenv_path="./.env")

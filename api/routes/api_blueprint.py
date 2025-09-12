@@ -7,17 +7,16 @@ from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import (
     create_access_token,
     unset_jwt_cookies,
-    verify_jwt_in_request,
 )
-from sqlalchemy import select, union_all
+
+# from models.crew import Crew  # type:ignore
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import engine  # type:ignore
 from functions.sendemail import hash_code, main  # type:ignore
-from models.basemodels import Tripulante  # type:ignore
-
-# from models.crew import Crew  # type:ignore
-from models.pilots import Pilot  # type:ignore
+from models.tripulantes import Tripulante  # type:ignore
+from routes.flight_blueprint import flights  # type:ignore
 from routes.routes import v2  # type:ignore
 from routes.users_blueprint import users  # type:ignore
 
@@ -28,7 +27,7 @@ api = Blueprint("api", __name__)
 api.register_blueprint(users, url_prefix="/users")
 
 # register flight blueprints with api blueprint
-# api.register_blueprint(flights, url_prefix="/flights")
+api.register_blueprint(flights, url_prefix="/flights")
 
 # register dashboard blueprints with api blueprint
 # api.register_blueprint(dashboard, url_prefix="/dashboard")
@@ -143,48 +142,26 @@ def store_new_passord(nip: int) -> tuple[Response, int]:
     return jsonify({"message": "Internal Error"}), 500
 
 
-@api.route("/pilots/<position>", methods=["GET"])
-def retrieve_pilots(position: str) -> tuple[Response, int]:
-    """Placehold."""
-    verify_jwt_in_request()
-    if position in ["PC", "PI"]:
-        stmt = union_all(
-            select(Pilot).where(Pilot.position == "PC"),
-            select(Pilot).where(Pilot.position == "PI"),
-        ).order_by(Pilot.nip.asc())
-    else:
-        stmt = union_all(
-            select(Pilot).where(Pilot.position == "CP"),
-            select(Pilot).where(Pilot.position == "P"),
-            select(Pilot).where(Pilot.position == "PA"),
-        ).order_by(Pilot.nip.asc())
-    if request.method == "GET":
-        # Retrieve all pilots from db
-        with Session(engine) as session:
-            stmt2 = select(Pilot).from_statement(stmt)
-            result = session.execute(stmt2).scalars().all()
-            return jsonify(
-                [row.to_json(qualification_data=True) for row in result]
-            ), 200
+# @api.route("/pilots/<position>", methods=["GET"])
+# def retrieve_pilots(position: str) -> tuple[Response, int]:
+#     """Placehold."""
+#     verify_jwt_in_request()
+#     if position in ["PC", "PI"]:
+#         stmt = union_all(
+#             select(Pilot).where(Pilot.position == "PC"),
+#             select(Pilot).where(Pilot.position == "PI"),
+#         ).order_by(Pilot.nip.asc())
+#     else:
+#         stmt = union_all(
+#             select(Pilot).where(Pilot.position == "CP"),
+#             select(Pilot).where(Pilot.position == "P"),
+#             select(Pilot).where(Pilot.position == "PA"),
+#         ).order_by(Pilot.nip.asc())
+#     if request.method == "GET":
+#         # Retrieve all pilots from db
+#         with Session(engine) as session:
+#             stmt2 = select(Pilot).from_statement(stmt)
+#             result = session.execute(stmt2).scalars().all()
+#             return jsonify([row.to_json(qualification_data=True) for row in result]), 200
 
-    return jsonify({"message": "Bad Manual Request"}), 403
-
-
-@api.route("/crew", methods=["GET"])
-def retrieve_crew() -> tuple[Response, int]:
-    """Placehold."""
-    verify_jwt_in_request()
-    if request.method == "GET":
-        # Retrieve all crew from db
-        with Session(engine) as session:
-            stmt = (
-                select(Crew)
-                .where(Crew.position.in_(["OCI", "OC", "OCA"]))
-                .order_by(Crew.nip)
-            )
-            result = session.execute(stmt).scalars().all()
-            return jsonify(
-                [row.to_json(qualification_data=True) for row in result]
-            ), 200
-
-    return jsonify({"message": "Bad Manual Request"}), 403
+#     return jsonify({"message": "Bad Manual Request"}), 403

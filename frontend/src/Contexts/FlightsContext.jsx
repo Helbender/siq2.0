@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
-import { api, apiAuth } from "../utils/api";
+import { apiAuth } from "../utils/api";
 
 // Create the context
 export const FlightContext = createContext();
@@ -8,7 +8,7 @@ export const FlightContext = createContext();
 // Create a provider component
 export const FlightProvider = ({ children }) => {
   const [flights, setFlights] = useState([]);
-  const { token, removeToken } = useContext(AuthContext);
+  const { removeToken } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
 
   const getSavedFlights = async () => {
@@ -16,7 +16,7 @@ export const FlightProvider = ({ children }) => {
       const response = await apiAuth.get("/flights");
       setFlights(response.data || []);
       setLoading(false);
-      console.log("Flights Loaded");
+      console.log("Flights Loaded from context");
     } catch (error) {
       console.log(error);
       console.log(error.response?.status);
@@ -29,7 +29,6 @@ export const FlightProvider = ({ children }) => {
 
   useEffect(() => {
     getSavedFlights();
-    // console.log(flights);
   }, []);
 
   return (

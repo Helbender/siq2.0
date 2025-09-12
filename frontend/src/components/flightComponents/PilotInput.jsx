@@ -28,11 +28,10 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
       
       try {
         console.log("Fetching Data");
-        const response = await apiAuth.get(
-          `/api/users/qualificationlist/${member.nip}`,
-        );
-        //console.log("Data Fetched");
+        const response = await apiAuth.get(`/v2/qualificacoes/${member.nip}`);
+        console.log("Data Fetched");
         setQualP(response.data);
+        // console.log(response.data);
       } catch (error) {
         console.error("Error fetching qualifications:", error);
         setQualP([]);
@@ -74,7 +73,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             minW={"100px"}
             // maxW={"200px"}
             // width={"100px"}
-            name="posição"
+            nome="posição"
             placeholder=" "
             type="text"
             {...register(`flight_pilots.${index}.position`)}
@@ -100,16 +99,16 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
       <GridItem mx={1} w={"200px"}>
         <FormControl>
           <Select
-            name="name"
+            nome="nome"
             textAlign={"center"}
             type="text"
             placeholder="Selecione"
             isDisabled={!member.position}
-            {...register(`flight_pilots.${index}.name`)}
+            {...register(`flight_pilots.${index}.nome`)}
           >
             {pilotosFiltrados.map((crew) => (
-              <option key={crew.name} value={crew.name}>
-                {crew.name}
+              <option key={crew.nome} value={crew.nome}>
+                {crew.nome}
               </option>
             ))}
           </Select>
@@ -139,7 +138,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             <FormControl>
               <Input
                 p={0}
-                name={campo}
+                nome={campo}
                 type={["VIR", "VN", "CON"].includes(campo) ? "time" : "number"}
                 textAlign={"center"}
                 {...register(`flight_pilots.${index}.${campo}`)}
@@ -152,7 +151,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
         <GridItem key={n} minW={"70px"}>
           <FormControl>
             <Select
-              name={`Qual${n}`}
+              nome={`Qual${n}`}
               placeholder=" "
               {...register(`flight_pilots.${index}.QUAL${n}`)}
             >
@@ -166,6 +165,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
           </FormControl>
         </GridItem>
       ))}
+      {}
       <GridItem justifyContent={"flex-end"} display={"flex"}>
         <IconButton
           icon={<FaMinus />}

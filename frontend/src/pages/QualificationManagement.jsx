@@ -25,6 +25,7 @@ import axios from "axios";
 import CreateQualModal from "../components/qualificationComponents/CreateQualModal";
 import DeleteQualModal from "../components/qualificationComponents/DeleteQualModal";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
+import { api, apiAuth } from "../utils/api";
 
 function QualificationManagement() {
   const [filteredQualifications, setFilteredQualifications] = useState([]);
@@ -37,7 +38,7 @@ function QualificationManagement() {
 
   const getData = async () => {
     try {
-      const res = await axios.get("/api/v2/qualificacoes");
+      const res = await apiAuth.get("/v2/qualificacoes");
       setQualifications(res.data);
 
       // Extract unique groups from qualifications

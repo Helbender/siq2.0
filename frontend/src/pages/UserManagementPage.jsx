@@ -32,7 +32,7 @@ import InsertInitQual from "../components/UserC/InsertInitQual";
 function UserManagementPage() {
   const navigate = useNavigate();
   const { token, getUser } = useContext(AuthContext);
-  const { pilotos } = useContext(UserContext);
+  const { users } = useContext(UserContext);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const displayAsTable = useBreakpointValue({ base: false, xl: true });
@@ -49,7 +49,7 @@ function UserManagementPage() {
   // Filter users based on search term
   useEffect(() => {
     if (User.admin) {
-      const results = pilotos.filter((user) =>
+      const results = users.filter((user) =>
         [
           user.nip,
           user.name,
@@ -65,10 +65,10 @@ function UserManagementPage() {
       );
       setFilteredUsers(results);
     } else {
-      const results = pilotos.filter((u) => u.nome === User.nome);
+      const results = users.filter((u) => u.nome === User.nome);
       setFilteredUsers(results);
     }
-  }, [searchTerm, pilotos]);
+  }, [searchTerm, users]);
   return (
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10} align={"center"}>
@@ -101,7 +101,7 @@ function UserManagementPage() {
             {filteredUsers.map((user) => (
               <Tr key={user.nip}>
                 <Td>{user.nip}</Td>
-                <Td>{user.name}</Td>
+                <Td>{user.nome}</Td>
                 <Td>{user.rank}</Td>
                 <Td>{user.position}</Td>
                 <Td>{user.tipo}</Td>

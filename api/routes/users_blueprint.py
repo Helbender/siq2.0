@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
-from sqlalchemy import delete, select
+from sqlalchemy import delete, exc, select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
@@ -22,46 +22,48 @@ users = Blueprint("users", __name__)
 @users.route("/", methods=["GET", "POST"], strict_slashes=False)
 def retrieve_user() -> tuple[Response, int]:
     if request.method == "GET":
-        print("Getting users")
-        result: list = []
-        db = Tripulante
-        # Retrieve all users from db
         with Session(engine) as session:
-            stmt = select(db).order_by(db.nip)
-            if session.execute(stmt).scalars().all() is not None:
-                result.extend(session.execute(stmt).scalars().all())
-            ordered_list: list = sorted(
-                [row.to_json() for row in result], key=lambda x: x["nip"]
-            )
-            print(ordered_list)
-            try:
-                jsonify(ordered_list)
-                return jsonify(ordered_list), 200
-            except TypeError as e:
-                print(e)
+            tripulantes_obj = session.execute(select(Tripulante)).scalars().all()
 
+            tripulantes: list[Tripulante] = [
+                {
+                    "nip": t.nip,
+                    "nome": t.name,
+                    "tipo": t.tipo.value,
+                    "rank": t.rank,
+                    "position": t.position,
+                    "email": t.email,
+                    "admin": t.admin,
+                }
+                for t in tripulantes_obj
+            ]
+
+        return jsonify(tripulantes), 201
     # Adds new user to db
     if request.method == "POST":
-        # verify_jwt_in_request()
-        user = request.get_json()
-        print(user)
-        with Session(engine) as session:
-            new_user = Tripulante(
-                nip=int(user["nip"]),
-                name=user["name"],
-                rank=user["rank"],
-                position=user["position"],
-                email=user["email"],
-                admin=bool(user["admin"]),
-                # squadron=user["squadron"],
-                password=hash_code(str(12345)),
-                tipo=user["tipo"],
-            )
+        verify_jwt_in_request()
+        data = request.get_json()
+        print(data)
+        t = Tripulante(
+            name=data["name"],
+            nip=data["nip"],
+            rank=data["rank"],
+            position=data["position"],
+            email=data["email"],
+            admin=bool(data["admin"]),
+            password=hash_code(str(12345)),
+            tipo=data["tipo"],
+        )
 
-            session.add(new_user)
+        with Session(engine) as session:
+            try:
+                session.flush()
+            except exc.IntegrityError as e:
+                session.rollback()
+                print("\n", e.orig.__repr__())
+            session.add(t)
             session.commit()
-            response = new_user.to_json()
-        return jsonify(response), 201
+            return jsonify({"id": t.nip}), 201
     return jsonify({"message": "Bad Manual Request"}), 403
 
 

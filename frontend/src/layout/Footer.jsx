@@ -4,7 +4,6 @@ import { HStack, Spacer, Text, useBreakpointValue } from "@chakra-ui/react";
 
 function Footer() {
   const isSmall = useBreakpointValue({ base: true, sm: false });
-  console.log(isSmall);
   return (
     <HStack
       w="100%"
