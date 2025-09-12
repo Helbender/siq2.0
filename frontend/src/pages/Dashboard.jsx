@@ -112,32 +112,26 @@ function Dashboard() {
         <Heading mb={6} textAlign={"center"}>
           Dashboard (WIP)
         </Heading>
-        {loading && <Text size={"lg"}>A carregar horário...</Text>}
-        {error && <Text>Error: {error}</Text>}
-        {sunrise && sunset && (
-          <Flex mb={4} alignItems={"center"}>
-            <Heading fontSize={"md"} mr={5}>
-              {"SR: "}
-            </Heading>
-            <Heading>{sunrise.toLocaleTimeString()}</Heading>
-            <Spacer />
-            <Heading fontSize={"md"} mr={5}>
-              {"SS: "}
-            </Heading>
-            <Heading>{sunset.toLocaleTimeString()}</Heading>
-          </Flex>
-        )}
-
-        {loadingT && <Text size={"lg"}>A carregar horário...</Text>}
-        {errorT && <Text>Error: {errorT}</Text>}
-
-        {sunriseT && sunsetT && (
-          <Fragment>
-            <Text>Amanhã</Text>
-            <Text>{sunriseT.toLocaleTimeString()}</Text>
-            <Text>{sunsetT.toLocaleTimeString()}</Text>
-          </Fragment>
-        )}
+        <Flex justifyContent={"space-between"}>
+          {loading && <Text size={"lg"}>A carregar horário...</Text>}
+          {error && <Text>Error: {error}</Text>}
+          {sunrise && sunset && (
+            <Flex mb={4} alignItems={"center"} flexDirection={"column"}>
+              <Heading>Hoje</Heading>
+              <Text>{`SR: ${sunrise.toLocaleTimeString()}L`}</Text>
+              <Text>{`SS: ${sunset.toLocaleTimeString()}L`}</Text>
+            </Flex>
+          )}
+          {loadingT && <Text size={"lg"}>A carregar horário...</Text>}
+          {errorT && <Text>Error: {errorT}</Text>}
+          {sunriseT && sunsetT && (
+            <Flex mb={4} alignItems={"center"} flexDirection={"column"}>
+              <Heading>Amanhã</Heading>
+              <Text>{`SR: ${sunriseT.toLocaleTimeString()}L`}</Text>
+              <Text>{`SS: ${sunsetT.toLocaleTimeString()}L`}</Text>
+            </Flex>
+          )}
+        </Flex>
         <Text mb={4}>https://sunrise-sunset.org/</Text>
         {/* <Accordion defaultIndex={[0]} allowMultiple={true}>
           <AccordionItem>
