@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Pilots from "./pages/Pilots";
 import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
@@ -19,9 +19,23 @@ import Dashboard from "./pages/Dashboard";
 import FileUpload from "./components/FileUpload";
 import QualificationsPanel from "./components/pilotComponents/QualificationsPanel";
 import QualificationManagement from "./pages/QualificationManagement";
+import api from "./utils/api";
 
 function App() {
   const { token, removeToken, setToken } = useContext(AuthContext);
+  const [tipos, setTipos] = useState([]);
+
+  useMemo(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get("/v2/listas");
+        setTipos(res.data.tipos);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <HashRouter>
@@ -48,8 +62,8 @@ function App() {
         <Fragment>
           <Routes>
             <Route index element={<Navigate replace to="dashboard" />} />
-            <Route path="/flights" element={<Flights />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/flights" element={<Flights />} />
             <Route path="/fileupload" element={<FileUpload />} />
             <Route path="/users" element={<UserManagementPage />} />
             <Route
@@ -58,9 +72,16 @@ function App() {
             />
 
             <Route path="/" element={<Master />}>
-              <Route path="/pilots" element={<Pilots position="PC" />} />
+              {tipos.map((tipo) => (
+                <Route
+                  key={tipo}
+                  path={`/${tipo.toLowerCase().replace(" ", "-")}`}
+                  element={<Pilots tipo={tipo} />}
+                />
+              ))}
+              {/* <Route path="/pilots" element={<Pilots position="PC" />} />
               <Route path="/co-pilots" element={<Pilots position="CP" />} />
-              <Route path="/crew" element={<Crew />} />
+              <Route path="/crew" element={<Crew />} /> */}
             </Route>
             <Route path="/about" element={<AboutPage />} />
           </Routes>

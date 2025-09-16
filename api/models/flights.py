@@ -64,7 +64,6 @@ class Flight(Base):
     def to_json(self) -> dict:
         """Return all model data in JSON format."""
         flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
-        flight_crewmembers.extend([flightcrew.to_json() for flightcrew in self.flight_crew])
 
         # Return the JSON response
         return {
@@ -112,7 +111,7 @@ class FlightPilots(Base):
         ForeignKey("flights_table.fid", ondelete="CASCADE"),
         primary_key=True,
     )
-    pilot_id: Mapped[int] = mapped_column(ForeignKey("pilots.nip", ondelete="CASCADE"), primary_key=True)
+    pilot_id: Mapped[int] = mapped_column(ForeignKey("tripulantes.nip", ondelete="CASCADE"), primary_key=True)
     position: Mapped[str] = mapped_column(String(5))
 
     day_landings: Mapped[int]

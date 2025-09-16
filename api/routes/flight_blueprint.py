@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from config import engine  # type:ignore  # noqa: PGH003
 from functions.gdrive import tarefa_enviar_para_drive  # type:ignore  # noqa: PGH003
-from models.basemodels import year_init  # type:ignore
+from models import year_init  # type:ignore  # noqa: PGH003
 from models.flights import (  # type:ignore  # noqa: PGH003
     Flight,
     FlightPilots,
@@ -25,6 +25,8 @@ flights = Blueprint("flights", __name__)
 # Load enviroment variables
 load_dotenv(dotenv_path="./.env")
 DEV = bool(os.environ.get("DEV", "0"))
+
+converter: dict = {"ATR": "day_landings", "ATN": "night_landings", "precapp": "prec_app", "nprecapp": "nprec_app"}
 
 
 # Flight ROUTES
@@ -68,6 +70,8 @@ def retrieve_flights() -> tuple[Response, int]:
         f: dict = request.get_json()
 
         print(f"\nAdding Flight {f['airtask']} on {f['date']} to the Database")
+
+        print(f"\nFlight Data: {f}\n")
         flight = Flight(
             airtask=f["airtask"],
             date=datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
@@ -100,7 +104,7 @@ def retrieve_flights() -> tuple[Response, int]:
             except KeyError:
                 return jsonify({"message": "At least one pilot is required"}), 400
 
-            for pilot in [f["flight_pilots"]]:
+            for pilot in f["flight_pilots"]:
                 add_crew_and_pilots(session, flight, pilot)
             try:
                 session.flush()
@@ -168,18 +172,17 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
         return jsonify({"message": "Flight changed"}), 204
 
     if request.method == "DELETE":
-        with Session(engine, autoflush=False) as session:
-            flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
-            if not flight:
-                return jsonify({"msg": "Flight not found"}), 404
+        verify_jwt_in_request()
 
+        with Session(engine, autoflush=False) as session:
+            flight: Flight | None = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
+            if flight is None:
+                return jsonify({"msg": "Flight not found"}), 404
+            for k, v in flight.to_json().items():
+                print(f"{k}: {v}")
             # Iterate over each pilot in the flight
             for pilot in flight.flight_pilots:
                 update_qualifications_on_delete(flight_id, session, pilot)
-
-            # Iterate over each crew in the flight
-            for crew in flight.flight_crew:
-                update_qualifications_on_delete(flight_id, session, crew)
 
             # Commit the updates
             session.commit()
@@ -194,61 +197,93 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 def update_qualifications_on_delete(
     flight_id: int,
     session: Session,
-    tripulante: FlightPilots | FlightCrew,
+    tripulante: FlightPilots,
 ) -> None:
-    """Update qualification of all crew before flight delete."""
-    pilot_qualification: Qualification = session.execute(
-        select(Qualification).filter_by(pilot_id=tripulante.pilot_id),
-    ).scalar_one()
-
-    # Process repetion Qualifications
-    qualification_fields = [
-        "day_landings",
-        "night_landings",
-        "prec_app",
-        "nprec_app",
-    ]
-    # Query the most recent dates for day landings from other flights
-    for i in range(len(qualification_fields)):
-        process_repetion_qual(
-            session,
-            flight_id,
-            tripulante,
-            pilot_qualification,
-            qualification_fields[i],
+    # Find all TripulanteQualificacao records for this pilot
+    tripulante_quals = (
+        session.execute(
+            select(TripulanteQualificacao).where(TripulanteQualificacao.tripulante_id == tripulante.pilot_id)
         )
+        .scalars()
+        .all()
+    )
 
-    # For each qualification type, find the last relevant flight before the one being deleted
-    qualification_fields = [
-        "bskit",
-        "qa1",
-        "qa2",
-        "bsp1",
-        "bsp2",
-        "ta",
-        "vrp1",
-        "vrp2",
-        "cto",
-        "sid",
-        "mono",
-        "nfp",
-        "paras",
-        "nvg",
-    ]
-    for field in qualification_fields:
-        last_qualification_date = session.execute(
+    for pq in tripulante_quals:
+        print(f"\nProcessing Qualification {pq.qualificacao.nome} for Pilot {tripulante.pilot_id}")
+        # for q in ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]:
+        # print(f"Checking FlightPilots.{q} == {pq.qualificacao.nome}")
+        # Find the most recent flight (excluding the one being deleted) where this qualification was validated
+        from sqlalchemy import or_
+
+        qual_fields = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
+        qual_conditions = [getattr(FlightPilots, field) == pq.qualificacao.nome for field in qual_fields]
+        last_date = session.execute(
             select(func.max(Flight.date))
-            .join(FlightPilots)
+            .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
             .where(FlightPilots.pilot_id == tripulante.pilot_id)
             .where(Flight.fid != flight_id)
-            .where(getattr(FlightPilots, field) != False),
+            .where(or_(*qual_conditions))
         ).scalar_one_or_none()
+        print(f"Last date for {pq.qualificacao.nome}: {last_date}")
 
-        # Check if Date is None so to set a base Date
-        last_qualification_date = date(year_init, 1, 1) if last_qualification_date is None else last_qualification_date
+        # If no other flights, set to None or a base date
+        pq.data_ultima_validacao = last_date if last_date else date(year_init, 1, 1)
+        print(f"Updated pq.data_ultima_validacao to {pq.data_ultima_validacao}")
+        # session.add(pq)
 
-        # Update the tripulante's qualifications table
-        setattr(pilot_qualification, f"last_{field}_date", last_qualification_date)
+    # """Update qualification of all crew before flight delete."""
+    # pilot_qualification: Qualification = session.execute(
+    #     select(Qualification).filter_by(pilot_id=tripulante.pilot_id),
+    # ).scalar_one()
+
+    # # Process repetion Qualifications
+    # qualification_fields = [
+    #     "day_landings",
+    #     "night_landings",
+    #     "prec_app",
+    #     "nprec_app",
+    # ]
+    # # Query the most recent dates for day landings from other flights
+    # for i in range(len(qualification_fields)):
+    #     process_repetion_qual(
+    #         session,
+    #         flight_id,
+    #         tripulante,
+    #         pilot_qualification,
+    #         qualification_fields[i],
+    #     )
+
+    # # For each qualification type, find the last relevant flight before the one being deleted
+    # qualification_fields = [
+    #     "bskit",
+    #     "qa1",
+    #     "qa2",
+    #     "bsp1",
+    #     "bsp2",
+    #     "ta",
+    #     "vrp1",
+    #     "vrp2",
+    #     "cto",
+    #     "sid",
+    #     "mono",
+    #     "nfp",
+    #     "paras",
+    #     "nvg",
+    # ]
+    # for field in qualification_fields:
+    #     last_qualification_date = session.execute(
+    #         select(func.max(Flight.date))
+    #         .join(FlightPilots)
+    #         .where(FlightPilots.pilot_id == tripulante.pilot_id)
+    #         .where(Flight.fid != flight_id)
+    #         .where(getattr(FlightPilots, field) != False),
+    #     ).scalar_one_or_none()
+
+    #     # Check if Date is None so to set a base Date
+    #     last_qualification_date = date(year_init, 1, 1) if last_qualification_date is None else last_qualification_date
+
+    #     # Update the tripulante's qualifications table
+    #     setattr(pilot_qualification, f"last_{field}_date", last_qualification_date)
 
 
 def process_repetion_qual(
@@ -296,16 +331,14 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
 
     print(f"\nProcessing Pilot/Crew NIP: {pilot['nip']}")
     pilot_obj: Tripulante = session.get(Tripulante, pilot["nip"])  # type: ignore  # noqa: PGH003
+
     if pilot_obj is None:
         print(f"Error: Pilot {pilot['nip']} not found")
         return
-
-    print(pilot_obj.to_json())
-
     # Check if the pilot already exists in the database and edit it if true
     if edit:
         # Update the existing FlightPilots object
-        flight_pilot: FlightPilots = session.execute(
+        flight_pilot: FlightPilots | None = session.execute(
             select(FlightPilots)
             .where(FlightPilots.flight_id == flight.fid)
             .where(FlightPilots.pilot_id == pilot["nip"]),
@@ -322,13 +355,15 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
             flight_pilot.qual4 = pilot.get("QUAL4", False)
             flight_pilot.qual5 = pilot.get("QUAL5", False)
             flight_pilot.qual6 = pilot.get("QUAL6", False)
+        else:
+            return
     else:
         flight_pilot = FlightPilots(
             position=pilot["position"],
-            day_landings=int(pilot["ATR"]),
-            night_landings=int(pilot["ATN"]),
-            prec_app=int(pilot["precapp"]),
-            nprec_app=int(pilot["nprecapp"]),
+            day_landings=pilot.get("ATR", 0),
+            night_landings=pilot.get("ATN", 0),
+            prec_app=pilot.get("precapp", 0),
+            nprec_app=pilot.get("nprecapp", 0),
             qual1=pilot.get("QUAL1", False),
             qual2=pilot.get("QUAL2", False),
             qual3=pilot.get("QUAL3", False),
@@ -338,11 +373,12 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         )
 
     for k in ["QUAL1", "QUAL2", "QUAL3", "QUAL4", "QUAL5", "QUAL6"]:
-        update_tripulante_qualificacao(session, pilot_obj, k, flight)
+        update_tripulante_qualificacao(session, pilot_obj, k.lower(), flight, flight_pilot)
 
-    if pilot_obj.tipo == "PILOTO":
+    if pilot_obj.tipo.value == "PILOTO":
+        print("\n\nA processar PILOTOS")
         for k in ["ATR", "ATN", "precapp", "nprecapp"]:
-            update_tripulante_qualificacao(session, pilot_obj, k, flight)
+            update_tripulante_qualificacao(session, pilot_obj, k, flight, flight_pilot, True)
 
     pilot_obj.flight_pilots.append(flight_pilot)
     flight.flight_pilots.append(flight_pilot)
@@ -394,13 +430,25 @@ def update_tripulante_qualificacao(
     pilot_obj: Tripulante,
     qual_name: str,
     flight: Flight,
+    flight_pilot: FlightPilots | None = None,
+    convert: bool = False,
 ) -> None:
-    smtmt = (
-        select(Qualificacao).where(Qualificacao.nome == qual_name).where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)
-    )  # type: ignore  # noqa: PGH003
+    if convert:
+        smtmt = (
+            select(Qualificacao)
+            .where(Qualificacao.nome == qual_name)
+            .where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)
+        )  # type: ignore  # noqa: PGH003
+    else:
+        smtmt = (
+            select(Qualificacao)
+            .where(Qualificacao.nome == getattr(flight_pilot, qual_name))
+            .where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)
+        )  # type: ignore  # noqa: PGH003
     qual: Qualificacao = session.execute(smtmt).scalar_one_or_none()  # type: ignore  # noqa: PGH003
+
     if qual is None:
-        print(f"Error: Qualification {qual_name} not found for type {pilot_obj.tipo}")
+        print(f"Error: Qualification {qual_name} not found for type {pilot_obj.tipo.value}")
         return
 
     pq = session.scalars(
@@ -413,12 +461,12 @@ def update_tripulante_qualificacao(
         pq = TripulanteQualificacao(
             tripulante_id=pilot_obj.nip,
             qualificacao_id=qual.id,
-            data_ultima_validacao=datetime.strptime(flight.date, "%Y-%m-%d").date(),
+            data_ultima_validacao=flight.date,
         )
         session.add(pq)
         session.flush()
     else:
-        nova_data = datetime.strptime(flight.date, "%Y-%m-%d").date()
+        nova_data = flight.date
 
         if pq.data_ultima_validacao is None or pq.data_ultima_validacao < nova_data:
             pq.data_ultima_validacao = nova_data

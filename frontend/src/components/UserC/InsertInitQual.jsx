@@ -52,7 +52,7 @@ function InsertInitQual(props) {
   const getQualificationList = async () => {
     try {
       const response = await api.get(
-        `/api/users/qualificationlist/${props.user.nip}`,
+        `/users/qualificationlist/${props.user.nip}`,
         {
           headers: { Authorization: "Bearer " + token },
         },

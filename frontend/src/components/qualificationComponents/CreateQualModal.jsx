@@ -23,40 +23,65 @@ import {
   Center,
   IconButton,
 } from "@chakra-ui/react";
-import { useState, useContext, useRef, useEffect } from "react";
+import { useState, useContext, useRef, useEffect, useMemo } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
-import { FaPlus } from "react-icons/fa";
-import { FlightContext } from "../../Contexts/FlightsContext";
-import { AuthContext } from "../../Contexts/AuthContext";
-import { UserContext } from "../../Contexts/UserContext";
-import { useNavigate } from "react-router-dom";
+import { FaEdit, FaPlus } from "react-icons/fa";
 import { api } from "../../utils/api";
-import { getTimeDiff } from "../../Functions/timeCalc";
-import { BiEdit } from "react-icons/bi";
-import axios from "axios";
 
-const CreateQualModal = ({ setQualifications }) => {
+const CreateQualModal = ({ setQualifications, edit, qualification }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tipos, setTipos] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const toast = useToast();
-  const qualificacao = useForm();
+  const qualificacao = useForm(
+    qualification || {
+      nome: "",
+      validade: "",
+      tipo_aplicavel: "",
+      grupo: "",
+    },
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let res;
     try {
       console.log(qualificacao.getValues());
-      const res = await api.post(
-        "/v2/qualificacoes",
-        qualificacao.getValues(),
-        {},
-      );
-      toast({ title: "Qualificação criada com sucesso", status: "success" });
-      console.log(qualificacao);
-      setQualifications((prev) => [
-        ...prev,
-        { ...qualificacao.getValues(), id: res.data.id },
-      ]);
+      {
+        edit
+          ? (res = await api.patch(
+              `/v2/qualificacoes/${qualification.id}`,
+              qualificacao.getValues(),
+              {},
+            ))
+          : (res = await api.post(
+              "/v2/qualificacoes",
+              qualificacao.getValues(),
+              {},
+            ));
+      }
+      if (edit) {
+        // Update the qualification in the list
+        setQualifications((prev) =>
+          prev.map((q) =>
+            q.id === qualification.id
+              ? { ...q, ...qualificacao.getValues(), id: qualification.id }
+              : q,
+          ),
+        );
+        toast({
+          title: "Qualificação atualizada com sucesso",
+          status: "success",
+        });
+      } else {
+        // Add the new qualification to the list
+        setQualifications((prev) => [
+          ...prev,
+          { ...qualificacao.getValues(), id: res.data.id },
+        ]);
+        toast({ title: "Qualificação criada com sucesso", status: "success" });
+      }
+
       onClose();
     } catch (error) {
       toast({ title: "Erro a salvar a Qualificação", status: "error" });
@@ -64,10 +89,9 @@ const CreateQualModal = ({ setQualifications }) => {
     }
   };
 
-  useEffect(() => {
+  useMemo(() => {
     const fetchData = async () => {
       try {
-        // const res = await axios.get("api/v2/listas");
         const res = await api.get("/v2/listas");
         setTipos(res.data.tipos);
         setGrupos(res.data.grupos);
@@ -77,11 +101,32 @@ const CreateQualModal = ({ setQualifications }) => {
     };
     fetchData();
   }, []);
+
+  // Populate form fields if in edit mode and qualification is provided
+  useEffect(() => {
+    if (edit && qualification) {
+      qualificacao.reset({
+        nome: qualification.nome || "",
+        validade: qualification.validade || "",
+        tipo_aplicavel: qualification.tipo_aplicavel || "",
+        grupo: qualification.grupo || "",
+      });
+    }
+  }, [edit, qualification]);
   return (
     <>
-      <Button onClick={onOpen} colorScheme="green">
-        Nova Qualificação
-      </Button>
+      {edit ? (
+        <IconButton
+          icon={<FaEdit />}
+          colorScheme="yellow"
+          onClick={onOpen}
+          aria-label="Edit User"
+        />
+      ) : (
+        <Button onClick={onOpen} colorScheme="green">
+          Nova Qualificação
+        </Button>
+      )}
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
@@ -131,7 +176,7 @@ const CreateQualModal = ({ setQualifications }) => {
 
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-              Salvar
+              {edit ? "Guardar Alterações" : "Salvar"}
             </Button>
             <Button variant="ghost" onClick={onClose}>
               Cancelar

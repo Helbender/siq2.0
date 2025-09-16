@@ -29,6 +29,7 @@ import {
   FaPlaneArrival,
   FaTable,
   FaTools,
+  FaUsers,
 } from "react-icons/fa";
 import axios from "axios";
 import { useContext } from "react";
@@ -191,7 +192,7 @@ function Header() {
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
-                          navigate("/pilots");
+                          navigate("/piloto");
                           onClose();
                         }}
                         aria-label="Qualificações"
@@ -207,21 +208,6 @@ function Header() {
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
-                          navigate("/dashboard");
-                          onClose();
-                        }}
-                        aria-label="Dashboard"
-                      >
-                        <Flex align="center">
-                          <MdSpaceDashboard />
-                          <Box ml={2}>Dashboard</Box>
-                        </Flex>
-                      </ChakraLink>
-                      <ChakraLink
-                        p={2}
-                        color="teal.500"
-                        fontSize="lg"
-                        onClick={() => {
                           navigate("/qualificacoes");
                           onClose();
                         }}
@@ -232,7 +218,6 @@ function Header() {
                           <Box ml={2}>Gerir Qualificações</Box>
                         </Flex>
                       </ChakraLink>
-                      <Spacer />
 
                       {User.admin ? (
                         <ChakraLink
@@ -245,7 +230,7 @@ function Header() {
                           }}
                         >
                           <Flex align="center">
-                            <FaTools />
+                            <FaUsers />
 
                             <Box ml={2}>Utilizadores</Box>
                           </Flex>
@@ -261,7 +246,8 @@ function Header() {
                           }}
                         >
                           <Flex align="center">
-                            <FaTools />
+                            <FaUsers />
+
                             <Box ml={2}>Utilizador</Box>
                           </Flex>
                         </ChakraLink>

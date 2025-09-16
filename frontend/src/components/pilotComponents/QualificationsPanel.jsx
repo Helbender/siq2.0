@@ -18,17 +18,16 @@ const QualificationsPanel = (props) => {
         color="black"
         py={1}
         h="100%"
-        w={"45px"}
+        // w={"52px"}
         px={2}
-        bg={colorFormatter(props.qualification[0])}
+        bg={colorFormatter(props.qualification.validade_info[0])}
         borderTopLeftRadius={props.borderTopLeftRadius}
         borderTopRightRadius={props.borderTopRightRadius}
         borderBottomLeftRadius={props.borderBottomLeftRadius}
         borderBottomRightRadius={props.borderBottomRightRadius}
       >
-        {props.qualification[0]}
+        {props.qualification.validade_info[0]}
       </Text>
-      {/* <Spacer /> */}
       <Text
         color={"white"}
         py={1}
@@ -37,7 +36,7 @@ const QualificationsPanel = (props) => {
         alignContent={"center"}
         // isTruncated
       >
-        {props.qualification[1]}
+        {props.qualification.validade_info[1]}
       </Text>
     </HStack>
   );

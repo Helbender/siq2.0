@@ -47,7 +47,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       tipo: "PILOTO",
     },
   );
-  const { pilotos, setPilotos } = useContext(UserContext);
+  const { users, setUsers } = useContext(UserContext);
   const User = getUser();
 
   //Updates inputs when filling the form
@@ -65,7 +65,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       const res = await apiAuth.post("/users", inputs, {});
       toast({ title: "User created successfully", status: "success" });
 
-      setPilotos([...pilotos, res.data]);
+      setUsers([...users, res.data]);
       // setInputs({
       //   rank: "",
       //   nip: "",
@@ -94,7 +94,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       toast({ title: "User updated successfully", status: "success" });
 
       console.log(res.data);
-      setPilotos((prevUsers) =>
+      setUsers((prevUsers) =>
         prevUsers.map((u) => (u.nip === user.nip ? res.data : u)),
       );
       // setFilteredUsers((prevUsers) =>
@@ -118,20 +118,21 @@ function CreateUserModal({ edit, add, isDelete, user }) {
   };
 
   //Deletes the user
-  const handleDeletePilot = async () => {
+  const handleDeleteUser = async () => {
     try {
-      const res = await api.delete(`/users/${user.nip}/${user.position}`, {
+      const res = await api.delete(`/users/${user.nip}`, {
         headers: { Authorization: "Bearer " + token },
       });
       console.log(res);
       if (res.data?.deleted_id) {
-        setPilotos(pilotos.filter((piloto) => piloto.nip != user.nip));
+        setUsers(users.filter((piloto) => piloto.nip != user.nip));
         toast({
           title: "Utilizador apagado com sucesso",
           description: `Utilizador com o nip ${res.data.deleted_id} apagado`,
           status: "info",
         });
         // setFilteredUsers(pilotos.filter((piloto) => piloto.nip != user.nip));
+        onClose();
       }
     } catch (error) {
       console.log(error);
@@ -318,7 +319,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                 colorScheme="red"
                 mr={3}
                 type="submit"
-                onClick={handleDeletePilot}
+                onClick={handleDeleteUser}
               >
                 Apagar
               </Button>

@@ -10,10 +10,8 @@ from sqlalchemy.orm import Session
 
 from config import engine  # type: ignore
 from functions.sendemail import hash_code  # type: ignore
-from models.basemodels import Tripulante, year_init  # type: ignore
-from models.crew import Crew  # type: ignore
-from models.pilots import Pilot  # type: ignore
-from models.users import User  # type: ignore
+from models.basemodels import year_init  # type: ignore
+from models.tripulantes import Tripulante  # type: ignore
 
 users = Blueprint("users", __name__)
 
@@ -25,7 +23,7 @@ def retrieve_user() -> tuple[Response, int]:
         with Session(engine) as session:
             tripulantes_obj = session.execute(select(Tripulante)).scalars().all()
 
-            tripulantes: list[Tripulante] = [
+            tripulantes: list[dict] = [
                 {
                     "nip": t.nip,
                     "nome": t.name,
@@ -41,7 +39,7 @@ def retrieve_user() -> tuple[Response, int]:
         return jsonify(tripulantes), 201
     # Adds new user to db
     if request.method == "POST":
-        verify_jwt_in_request()
+        # verify_jwt_in_request()
         data = request.get_json()
         print(data)
         t = Tripulante(
@@ -67,8 +65,8 @@ def retrieve_user() -> tuple[Response, int]:
     return jsonify({"message": "Bad Manual Request"}), 403
 
 
-@users.route("/<nip>/<position>", methods=["DELETE", "PATCH"], strict_slashes=False)
-def modify_user(nip: int, position: str) -> tuple[Response, int]:
+@users.route("/<nip>", methods=["DELETE", "PATCH"], strict_slashes=False)
+def modify_user(nip: int) -> tuple[Response, int]:
     """Placehold."""
     verify_jwt_in_request()
 
@@ -76,14 +74,13 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
 
     if request.method == "DELETE":
         with Session(engine) as session:
-            for db in [Pilot, Crew, User]:
-                result = session.execute(delete(db).where(db.nip == nip))
+            result = session.execute(delete(Tripulante).where(Tripulante.nip == nip))
 
-                if result.rowcount == 1:
-                    session.commit()
+            if result.rowcount == 1:
+                session.commit()
 
-                    return jsonify({"deleted_id": f"{nip}"}), 200
-            return jsonify({"message": "Failed to delete"}), 304
+                return jsonify({"deleted_id": f"{nip}"}), 200
+        return jsonify({"message": "Failed to delete"}), 304
 
     if request.method == "PATCH":
         user: dict = request.get_json()
@@ -91,9 +88,7 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
         with Session(engine) as session:
             for model in db:
                 try:
-                    modified_pilot = session.execute(
-                        select(model).where(model.nip == nip)
-                    ).scalar_one()
+                    modified_pilot = session.execute(select(model).where(model.nip == nip)).scalar_one()
                 except NoResultFound:
                     continue
             for k, v in user.items():
@@ -106,11 +101,7 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
                 session.commit()
 
             except Exception:
-                return jsonify(
-                    {
-                        "message": "You can not change the NIP. Create a new user instead."
-                    }
-                ), 403
+                return jsonify({"message": "You can not change the NIP. Create a new user instead."}), 403
             return jsonify(modified_pilot.to_json()), 200
 
     return jsonify({"message": "Bad Manual Request"}), 403
@@ -201,9 +192,7 @@ def modify_user(nip: int, position: str) -> tuple[Response, int]:
 def get_qualifications(nip: int) -> tuple[Response, int]:
     with Session(engine) as session:
         for db in [Pilot, Crew]:
-            tripulante: Pilot | Crew = session.execute(
-                select(db).where(db.nip == nip)
-            ).scalar_one_or_none()
+            tripulante: Pilot | Crew = session.execute(select(db).where(db.nip == nip)).scalar_one_or_none()
             if tripulante is not None:
                 break
         match request.method:
@@ -223,11 +212,7 @@ def get_qualifications(nip: int) -> tuple[Response, int]:
             case "POST":
                 data: dict = request.get_json()
                 nome_qualificação = data["qualification"]
-                date = (
-                    datetime.strptime(data["date"], "%Y-%m-%d")
-                    .replace(tzinfo=UTC)
-                    .date()
-                )
+                date = datetime.strptime(data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
                 qualification = tripulante.qualification
                 attr = "last_" + nome_qualificação.lower() + "_date"
                 print(attr)

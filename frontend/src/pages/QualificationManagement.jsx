@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   HStack,
@@ -10,6 +10,7 @@ import {
   Th,
   Tbody,
   Td,
+  Box,
   IconButton,
   useBreakpointValue,
   Grid,
@@ -35,7 +36,8 @@ function QualificationManagement() {
   const [availableGroups, setAvailableGroups] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
-
+  const navigate = useNavigate();
+  // const { removeToken } = AuthContext();
   const getData = async () => {
     try {
       const res = await apiAuth.get("/v2/qualificacoes");
@@ -55,6 +57,11 @@ function QualificationManagement() {
     } catch (error) {
       console.log(error);
       console.log(error.response.status);
+      if (error.response.status === 401) {
+        console.log("Unauthorized, redirecting to login...");
+        // removeToken();
+        navigate("/login");
+      }
     }
   };
   useEffect(() => {
@@ -124,7 +131,7 @@ function QualificationManagement() {
             <Th>Validade (Dias)</Th>
             <Th>Tipo Tripulante</Th>
             <Th>Grupo</Th>
-            <Th>test</Th>
+            <Th>Ações</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -136,10 +143,17 @@ function QualificationManagement() {
               <Td>{qual.tipo_aplicavel}</Td>
               <Td>{qual.grupo}</Td>
               <Td>
-                <DeleteQualModal
-                  qual={qual}
-                  setQualifications={setQualifications}
-                />
+                <Box gap={1} display={"flex"}>
+                  <CreateQualModal
+                    qualification={qual}
+                    setQualifications={setQualifications}
+                    edit={true}
+                  />
+                  <DeleteQualModal
+                    qual={qual}
+                    setQualifications={setQualifications}
+                  />
+                </Box>
               </Td>
             </Tr>
           ))}

@@ -1,12 +1,20 @@
 import React from "react";
-import { Grid, useToast } from "@chakra-ui/react";
+import { Grid, useToast, Stack, Box } from "@chakra-ui/react";
 import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../utils/api";
+import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
 
-const Pilots = ({ position }) => {
+const Pilots = ({ tipo }) => {
+  //For testing purposes only
+  // position = "PILOTO";
+  //
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [availableTypes, setAvailableTypes] = useState([]);
+  const [filteredCrew, setFilteredCrew] = useState([]);
+
   const [pilotos, setPilotos] = useState([]);
   const { token, removeToken } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -15,7 +23,7 @@ const Pilots = ({ position }) => {
 
   const getSavedPilots = async () => {
     toast({
-      title: "A carregar Pilotos",
+      title: "A carregar Tripulantes",
       description: "Em processo.",
       status: "loading",
       duration: 5000,
@@ -23,19 +31,28 @@ const Pilots = ({ position }) => {
       position: "bottom",
     });
     try {
-      const res = await api.get(`/api/pilots/${position}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const res = await api.get(
+        `/v2/tripulantes/qualificacoes/${tipo.replace(" ", "_")}`,
+        {
+          headers: { Authorization: "Bearer " + token },
+        },
+      );
       toast.closeAll();
       toast({
-        title: "Pilotos Carregados",
-        description: "Informação carregada com sucesso",
+        title: "Tripulantes Carregados",
+        description: `${res.data.length} Tripulantes carregados com sucesso.`,
         status: "success",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
       setPilotos(res.data || []);
+      console.log(res.data);
+      const types = [
+        ...new Set(res.data.map((qual) => qual.position).filter(Boolean)),
+      ];
+      setAvailableTypes(types);
+      setSelectedTypes(types); // Select all types by default
     } catch (error) {
       console.log(error);
       console.log(error.response.status);
@@ -49,21 +66,52 @@ const Pilots = ({ position }) => {
   useEffect(() => {
     getSavedPilots();
   }, [location]);
+
+  // Filter qualifications based on search term and selected groups
+  useEffect(() => {
+    let results = pilotos;
+
+    // Filter by selected types
+    if (selectedTypes.length > 0) {
+      results = results.filter((qual) => selectedTypes.includes(qual.position));
+    }
+
+    // Filter by search term
+    // if (searchTerm) {
+    //   results = results.filter((qual) =>
+    //     [qual.nome, qual.validade, qual.tipo_aplicavel, qual.grupo]
+    //       .map((field) => (field ? field.toString().toLowerCase() : ""))
+    //       .some((field) => field.includes(searchTerm.toLowerCase())),
+    //   );
+    // }
+
+    setFilteredCrew(results);
+  }, [pilotos, selectedTypes]);
   return (
-    <Grid
-      mx="5"
-      templateColumns={{
-        base: "1fr",
-        lg: "repeat(2,1fr)",
-        xl: "repeat(3,1fr)",
-      }}
-      gap={4}
-      mt="8"
-    >
-      {pilotos.map((pilot) => (
-        <PilotCard key={pilot.nip} user={pilot} />
-      ))}
-    </Grid>
+    <Stack m={4} bg={"black"}>
+      <Box ml={4} alignSelf={"flex-start"}>
+        <QualificationGroupFilter
+          availableGroups={availableTypes}
+          selectedGroups={selectedTypes}
+          onGroupChange={setSelectedTypes}
+        />
+      </Box>
+      <Grid
+        // mx="auto"
+        templateColumns={{
+          base: "1fr",
+          lg: "repeat(2,1fr)",
+          "2xl": "repeat(3,1fr)",
+        }}
+        gap={4}
+        mt="8"
+        // justifyContent={"center"}
+      >
+        {filteredCrew.map((pilot) => (
+          <PilotCard key={pilot.nip} user={pilot} />
+        ))}
+      </Grid>
+    </Stack>
   );
 };
 

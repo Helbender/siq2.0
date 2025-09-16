@@ -8,8 +8,11 @@ import {
   Flex,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { useState, useMemo } from "react";
+import api from "../utils/api";
 
 const Navbar = () => {
+  const [tipos, setTipos] = useState([]);
   const location = useLocation();
   const selected_style = {
     bg: "purple.600",
@@ -17,8 +20,19 @@ const Navbar = () => {
     color: "black",
     fontWeight: "bold",
   };
+  useMemo(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get("/v2/listas");
+        setTipos(res.data.tipos);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
   return (
-    <Container maxW={"60%"} my={10}>
+    <Container maxW={"80%"} my={10}>
       <Box
         px={5}
         // my={4}
@@ -34,43 +48,23 @@ const Navbar = () => {
         >
           {/* Left Side*/}
           <Breadcrumb separator={"-"}>
-            <BreadcrumbItem
-              isCurrentPage={location.pathname === "/pilots" ? true : false}
-            >
-              <BreadcrumbLink
-                p={2}
-                as={Link}
-                to="pilots"
-                sx={location.pathname === "/pilots" ? selected_style : null}
-              >
-                Pilotos
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbItem
-              isCurrentPage={location.pathname === "/co-pilots" ? true : false}
-            >
-              <BreadcrumbLink
-                p={2}
-                as={Link}
-                to="co-pilots"
-                sx={location.pathname === "/co-pilots" ? selected_style : null}
-              >
-                CPs
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem
-              isCurrentPage={location.pathname === "/crew" ? true : false}
-            >
-              <BreadcrumbLink
-                p={2}
-                as={Link}
-                sx={location.pathname === "/crew" ? selected_style : null}
-                to="crew"
-              >
-                OCs
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+            {tipos.map((tipo) => (
+              <BreadcrumbItem key={tipo}>
+                <BreadcrumbLink
+                  p={2}
+                  as={Link}
+                  to={tipo.toLowerCase().replace(" ", "-")}
+                  sx={
+                    location.pathname ===
+                    `/${tipo.toLowerCase().replace(" ", "-")}`
+                      ? selected_style
+                      : null
+                  }
+                >
+                  {tipo}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ))}
           </Breadcrumb>
         </Flex>
       </Box>
