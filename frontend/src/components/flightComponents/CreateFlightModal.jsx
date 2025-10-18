@@ -145,7 +145,9 @@ function CreateFlightModal({ flight }) {
     try {
       let res;
       if (flight) {
-        res = await apiAuth.patch(`/flights/${flight.id}`, data);
+        res = await api.patch(`/api/flights/${flight.id}`, data, {
+          headers: { Authorization: "Bearer " + token },
+        });
       } else {
         res = await apiAuth.post("/flights", data);
       }
