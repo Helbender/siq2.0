@@ -204,10 +204,10 @@ const FlightCard = ({ flight }) => {
                     <Td textAlign={"center"}>{pilot.nip}</Td>
                     <Td textAlign={"center"}>{pilot.position}</Td>
                     <Td>{pilot.name}</Td>
-                    <Td textAlign={"center"}>{pilot.ATR}</Td>
-                    <Td textAlign={"center"}>{pilot.ATN}</Td>
-                    <Td textAlign={"center"}>{pilot.precapp}</Td>
-                    <Td textAlign={"center"}>{pilot.nprecapp}</Td>
+                    <Td textAlign={"center"}>{pilot.ATR === 0 ? "" : pilot.ATR}</Td>
+                    <Td textAlign={"center"}>{pilot.ATN === 0 ? "" : pilot.ATN}</Td>
+                    <Td textAlign={"center"}>{pilot.precapp === 0 ? "" : pilot.precapp}</Td>
+                    <Td textAlign={"center"}>{pilot.nprecapp === 0 ? "" : pilot.nprecapp}</Td>
                     <Td textAlign={"center"}>{texto}</Td>
                   </Tr>
                 );

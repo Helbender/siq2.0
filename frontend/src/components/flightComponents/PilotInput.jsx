@@ -21,12 +21,17 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
 
   useEffect(() => {
     const fetchQualifications = async () => {
+      if (!member.nip) {
+        setQualP([]);
+        return;
+      }
+      
       try {
         console.log("Fetching Data");
         const response = await apiAuth.get(
           `/api/users/qualificationlist/${member.nip}`,
         );
-        console.log("Data Fetched");
+        //console.log("Data Fetched");
         setQualP(response.data);
       } catch (error) {
         console.error("Error fetching qualifications:", error);
@@ -52,8 +57,12 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
 
   // Atualiza automaticamente o NIP quando muda o nome
   useEffect(() => {
-    const piloto = pilotos.find((p) => p.name === member.name);
-    setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
+    if (member.name && pilotos.length > 0) {
+      const piloto = pilotos.find((p) => p.name === member.name);
+      if (piloto?.nip) {
+        setValue(`flight_pilots.${index}.nip`, piloto.nip);
+      }
+    }
   }, [member.name, pilotos, setValue, index]);
 
   return (
