@@ -1,12 +1,12 @@
-from models.users import *
+import os
+
+from dotenv import load_dotenv
+from models.crew import *
 from models.flights import *
 from models.pilots import *
-from models.crew import *
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-
+from models.users import *
 from sqlalchemy import create_engine, exc
-from dotenv import load_dotenv
+from testes.test import test_database_connection
 
 # q = Qualification()
 
@@ -26,11 +26,6 @@ from dotenv import load_dotenv
 # Load enviroment variables
 load_dotenv(dotenv_path=".env")
 
-DB_PASS = "siq"  # "G69ksWgAlMz~")  # Ensure to set this in your .env file
-DB_USER = "siq"  # "esqpt_siq2")  # Ensure to set this in your .env file
-DB_HOST = "db"  # "esq502.pt")
-DB_PORT = 3306  # 3306)
-DB_NAME = "siq"  # "esqpt_siq")
 
 # connection_string = "sqlite:///database/mydb.db"
 
@@ -38,7 +33,7 @@ PILOT_USER: list = ["PI", "PC", "CP", "P", "PA"]
 CREW_USER: list = ["OC", "OCI", "OCA", "CT", "CTA", "CTI", "OPV", "OPVI", "OPVA"]
 
 # Define connection string
-connection_string = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+connection_string = os.environ.get("DB_URL", "")
 
 try:
     # Create the SQLAlchemy engine with improved configuration
@@ -58,14 +53,4 @@ try:
 except exc.SQLAlchemyError as e:
     print(f"An error occurred while setting up the database:\n {e}")
 
-result: list = []
-
-with Session(engine) as session:
-    for db in [User, Pilot, Crew]:
-        stmt = select(db).order_by(db.nip)
-        if session.execute(stmt).scalars().all() is not None:
-            result.extend(session.execute(stmt).scalars().all())
-l = [row.to_json() for row in result]
-ordered_list = sorted(l, key=lambda x: x["nip"])
-for r in ordered_list:
-    print(r["nip"])
+test_database_connection(engine, Flight)

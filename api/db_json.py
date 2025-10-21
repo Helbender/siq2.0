@@ -4,15 +4,12 @@ import json
 
 from functions.sendemail import hash_code
 from models.crew import Crew, QualificationCrew
-from models.pilots import Pilot, Qualification
-from models.users import User, Base
 from models.flights import *
-
-from sqlalchemy import select
+from models.pilots import Pilot, Qualification
+from models.users import Base, User
+from sqlalchemy import create_engine, exc, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
-from sqlalchemy import create_engine, exc
 
 DB_PASS = "siq"  # "G69ksWgAlMz~")  # Ensure to set this in your .env file
 DB_USER = "siq"  # "esqpt_siq2")  # Ensure to set this in your .env file

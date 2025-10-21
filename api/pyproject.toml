@@ -1,0 +1,62 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "Flask API for SIQ React Vite application"
+requires-python = ">=3.12"
+dependencies = [
+    "flask",
+    "flask-cors",
+    "sqlalchemy",
+    "flask-jwt-extended",
+    "python-dotenv",
+    "gunicorn",
+    "google-api-python-client",
+    "google-auth",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "flask-migrate",
+    "alembic",
+    "reportlab",
+    "pypdf2",
+    "psycopg2-binary",
+    "pymysql",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "types-flask-cors",
+]
+
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+extend-select = [
+  "F",   # pyflakes
+  "E",   # pycodestyle (errors)
+  "W",   # pycodestyle (warnings)
+  "B",   # bugbear
+  "I",   # isort
+  "UP",  # pyupgrade
+  "C90", # mccabe
+  "N",   # pep8-naming
+  "D",   # pydocstyle
+]
+ignore = ["D100", "D104"]
+
+[tool.ruff.isort]
+force-single-line = true
+known-first-party = ["src", "app"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+strict_optional = true
+ignore_missing_imports = true
+pretty = true
