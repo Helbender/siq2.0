@@ -6,3 +6,4 @@ TODO
 .env
 .mypy_cache
 /db
+*.db

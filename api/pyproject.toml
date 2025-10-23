@@ -1,86 +1,45 @@
 [project]
 name = "api"
 version = "0.1.0"
-description = "Flask API for SIQ React Vite application"
-description = "Flask API for SIQ React Vite application"
+description = "Add your description here"
+readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "flask",
-    "flask-cors",
-    "sqlalchemy",
-    "flask-jwt-extended",
-    "python-dotenv",
-    "gunicorn",
-    "google-api-python-client",
-    "google-auth",
-    "google-auth-httplib2",
-    "google-auth-oauthlib",
-    "flask-migrate",
-    "alembic",
-    "reportlab",
-    "pypdf2",
-    "psycopg2-binary",
-    "pymysql",
-    "flask",
-    "flask-cors",
-    "sqlalchemy",
-    "flask-jwt-extended",
-    "python-dotenv",
-    "gunicorn",
-    "google-api-python-client",
-    "google-auth",
-    "google-auth-httplib2",
-    "google-auth-oauthlib",
-    "flask-migrate",
-    "alembic",
-    "reportlab",
-    "pypdf2",
-    "psycopg2-binary",
-    "pymysql",
+    "alembic>=1.16.1",
+    "flask>=3.1.1",
+    "flask-cors>=6.0.0",
+    "flask-jwt-extended>=4.7.1",
+    "flask-migrate>=4.1.0",
+    "google-api-python-client>=2.170.0",
+    "google-auth>=2.40.2",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.2",
+    "gunicorn>=23.0.0",
+    "psycopg2-binary>=2.9.10",
+    "pymysql>=1.1.1",
+    "pypdf2>=3.0.1",
+    "python-dotenv>=1.1.0",
+    "reportlab>=4.4.1",
+    "sqlalchemy>=2.0.41",
 ]
-
-
 [project.optional-dependencies]
-dev = [
-    "mypy",
-    "types-flask-cors",
-]
+dev = ["mypy", "ruff", "pytest"]
 
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-extend-select = [
-  "F",   # pyflakes
-  "E",   # pycodestyle (errors)
-  "W",   # pycodestyle (warnings)
-  "B",   # bugbear
-  "I",   # isort
-  "UP",  # pyupgrade
-  "C90", # mccabe
-  "N",   # pep8-naming
-  "D",   # pydocstyle
-]
-ignore = ["D100", "D104"]
+exclude = ["venv", ".venv", "build", "dist"]
+lint.select = ["E", "F", "I", "UP", "N", "B"]
+lint.ignore = ["E501"]  # Exemplo: ignora linhas longas (se usares Black)
 
-[tool.ruff.isort]
-force-single-line = true
-known-first-party = ["src", "app"]
-
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_calls = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-strict_optional = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-strict_optional = true
-ignore_missing_imports = true
-pretty = true
-pretty = true
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
