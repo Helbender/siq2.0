@@ -132,7 +132,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
         verify_jwt_in_request()
         f: dict = request.get_json()
         with Session(engine, autoflush=False) as session:
-            flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
+            flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one()
 
             flight.airtask = f.get("airtask", "")
             flight.date = datetime.strptime(f["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
@@ -178,8 +178,8 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             flight: Flight | None = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one_or_none()
             if flight is None:
                 return jsonify({"msg": "Flight not found"}), 404
-            for k, v in flight.to_json().items():
-                print(f"{k}: {v}")
+            # for k, v in flight.to_json().items():
+            #     print(f"{k}: {v}")
             # Iterate over each pilot in the flight
             for pilot in flight.flight_pilots:
                 update_qualifications_on_delete(flight_id, session, pilot)
