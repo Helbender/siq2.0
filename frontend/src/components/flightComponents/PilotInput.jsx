@@ -56,12 +56,8 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
 
   // Atualiza automaticamente o NIP quando muda o nome
   useEffect(() => {
-    if (member.name && pilotos.length > 0) {
-      const piloto = pilotos.find((p) => p.name === member.name);
-      if (piloto?.nip) {
-        setValue(`flight_pilots.${index}.nip`, piloto.nip);
-      }
-    }
+    const piloto = pilotos.find((p) => p.name === member.name);
+    setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
   }, [member.name, pilotos, setValue, index]);
 
   return (
@@ -104,11 +100,11 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             type="text"
             placeholder="Selecione"
             isDisabled={!member.position}
-            {...register(`flight_pilots.${index}.nome`)}
+            {...register(`flight_pilots.${index}.name`)}
           >
             {pilotosFiltrados.map((crew) => (
-              <option key={crew.nome} value={crew.nome}>
-                {crew.nome}
+              <option key={crew.name} value={crew.name}>
+                {crew.name}
               </option>
             ))}
           </Select>
@@ -151,7 +147,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
         <GridItem key={n} minW={"70px"}>
           <FormControl>
             <Select
-              nome={`Qual${n}`}
+              name={`QUAL${n}`}
               placeholder=" "
               {...register(`flight_pilots.${index}.QUAL${n}`)}
             >

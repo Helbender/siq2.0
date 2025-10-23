@@ -11,8 +11,8 @@ import {
   Icon,
   HStack,
 } from "@chakra-ui/react";
-import { api } from "../utils/api"; // Ajusta o caminho conforme necessário
-import { AuthContext } from "../Contexts/AuthContext"; // Ajuste o caminho conforme necessário
+import { api } from "../../utils/api"; // Ajusta o caminho conforme necessário
+import { AuthContext } from "../../Contexts/AuthContext"; // Ajuste o caminho conforme necessário
 import { FiUploadCloud } from "react-icons/fi";
 export default function FileUpload() {
   const [file, setFile] = useState(null);
@@ -39,7 +39,7 @@ export default function FileUpload() {
     formData.append("file", file);
     console.log(formData);
     try {
-      const response = await api.post("/api/users/add_users", formData, {
+      const response = await api.post("/users/add_users", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: "Bearer " + token,
@@ -64,7 +64,7 @@ export default function FileUpload() {
   };
   const handleBackup = async () => {
     try {
-      const response = await api.get("/api/users/backup", {
+      const response = await api.get("/users/backup", {
         headers: {
           Authorization: "Bearer " + token,
         },

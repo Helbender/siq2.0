@@ -24,6 +24,7 @@ const colors = {
   P: "blue.500",
   CP: "blue.300",
   OC: "green",
+  OCI: "red.500",
   Default: "violet.500",
 };
 function UserDataCard({ user }) {

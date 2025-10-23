@@ -87,10 +87,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
     e.preventDefault();
 
     try {
-      const res = await apiAuth.patch(
-        `/users/${user.nip}/${user.position}`,
-        inputs,
-      );
+      const res = await apiAuth.patch(`/users/${user.nip}`, inputs);
       toast({ title: "User updated successfully", status: "success" });
 
       console.log(res.data);
@@ -284,29 +281,20 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Grupo</FormLabel>
-                    {/* <Input
-                      value={inputs.tipo}
-                      name="tipo"
-                      type="text"
-                      // placeholder="Esquadra"
-                      onChange={handleInputsChange}
-                    /> */}
                     <Select
-                      value={inputs?.tipo}
+                      value={inputs?.tipo ? inputs.tipo : ""}
                       name="tipo"
                       onChange={handleInputsChange}
                     >
-                      <option>PILOTO</option>
-                      <option value={"OPERADOR_CABINE"}>
-                        OPERADOR de CABINE
-                      </option>
+                      <option value="PILOTO">PILOTO</option>
+                      <option value="OPERADOR_CABINE">OPERADOR CABINE</option>
                       <option value="CONTROLADOR_TATICO">
                         CONTROLADOR TÁTICO
                       </option>
                       <option value="OPERADOR_VIGILANCIA">
-                        OPERADOR de VIGILÂNCIA
+                        OPERADOR VIGILÂNCIA
                       </option>
-                      <option value={"OPERACOES"}>OPERAÇÔES</option>
+                      <option value="OPERACOES">OPERAÇÕES</option>
                     </Select>
                   </FormControl>
                 </HStack>

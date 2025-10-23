@@ -46,7 +46,8 @@ function CreateFlightModal({ flight }) {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
   const toast = useToast();
-  const defaultFlightData = {
+
+  const flightdata = flight ?? {
     airtask: "",
     flightType: "",
     flightAction: "",
@@ -70,8 +71,6 @@ function CreateFlightModal({ flight }) {
     medArrival: "__:__",
     flight_pilots: [{ name: "" }],
   };
-  
-  const flightdata = flight ?? defaultFlightData;
   const methods = useForm({
     defaultValues: flightdata,
   });
@@ -105,35 +104,8 @@ function CreateFlightModal({ flight }) {
   const ORIGIN = watch("origin");
   const DESTINATION = watch("destination");
 
-  // Handle creating new flight from existing form data
-  const handleCreateNewFlight = async () => {
-    const formData = methods.getValues();
-    
-    // Ensure flight_pilots data is properly formatted
-    if (formData.flight_pilots && formData.flight_pilots.length > 0) {
-      formData.flight_pilots = formData.flight_pilots.map(pilot => ({
-        ...pilot,
-        // Ensure required fields have default values
-        ATR: pilot.ATR || 0,
-        ATN: pilot.ATN || 0,
-        precapp: pilot.precapp || 0,
-        nprecapp: pilot.nprecapp || 0,
-        // Ensure qualification fields are properly set
-        QUAL1: pilot.QUAL1 || "",
-        QUAL2: pilot.QUAL2 || "",
-        QUAL3: pilot.QUAL3 || "",
-        QUAL4: pilot.QUAL4 || "",
-        QUAL5: pilot.QUAL5 || "",
-        QUAL6: pilot.QUAL6 || "",
-      }));
-    }
-    
-    console.log("Creating new flight with data:", formData);
-    await handleCreateFlight(formData, true);
-  };
-
   // Create Flight Endpoint
-  const handleCreateFlight = async (data, isNewFlight = false) => {
+  const handleCreateFlight = async (data) => {
     toast({
       title: "A adicionar voo",
       description: "Em processo.",
@@ -144,7 +116,7 @@ function CreateFlightModal({ flight }) {
     });
     try {
       let res;
-      if (flight) {
+      if (flight && !isNewFlight) {
         res = await api.patch(`/api/flights/${flight.id}`, data, {
           headers: { Authorization: "Bearer " + token },
         });
@@ -154,21 +126,15 @@ function CreateFlightModal({ flight }) {
       console.log(res);
       if (res.status === 201) {
         toast.closeAll();
-        const message = isNewFlight ? "Novo voo criado com sucesso" : "Voo adicionado com sucesso";
         toast({
           title: "Sucesso",
-          description: `${message}. ID: ${res.data?.message}`,
+          description: `Voo adicionado com sucesso. ID: ${res.data?.message}`,
           status: "success",
           duration: 5000,
           position: "bottom",
         });
         data.id = res.data?.message;
         setFlights((prev) => [...prev, data]);
-        
-        // If creating new flight from edit mode, reset form to create mode
-        if (isNewFlight && flight) {
-          reset(defaultFlightData);
-        }
       }
       if (res.status === 204) {
         toast.closeAll();
@@ -203,7 +169,6 @@ function CreateFlightModal({ flight }) {
       console.log(error.response.data.message);
     }
   };
-
 
   // Atualiza o número de tripulantes automaticamente
   useEffect(() => {
@@ -584,15 +549,17 @@ function CreateFlightModal({ flight }) {
                         Qualificações
                       </GridItem>
                       <GridItem m="auto" />
-                      {fields.map((member, index) => (
-                        <PilotInput
-                          key={member.id}
-                          index={index}
-                          remove={remove}
-                          member={flight_pilots[index]}
-                          pilotos={users}
-                        />
-                      ))}
+                      {fields.map((member, index) => {
+                        return (
+                          <PilotInput
+                            key={index}
+                            index={index}
+                            remove={remove}
+                            member={flight_pilots[index]}
+                            pilotos={users}
+                          />
+                        );
+                      })}
                     </Grid>
                   </Box>
                   <Button
@@ -606,15 +573,6 @@ function CreateFlightModal({ flight }) {
                 </Stack>
               </ModalBody>
               <ModalFooter>
-                {flight && (
-                  <Button
-                    colorScheme="purple"
-                    mr={3}
-                    onClick={handleCreateNewFlight}
-                  >
-                    Novo Voo
-                  </Button>
-                )}
                 <Button colorScheme="green" mr={3} type="submit">
                   {flight ? "Editar Voo" : "Registar Voo"}
                 </Button>

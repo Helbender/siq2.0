@@ -32,7 +32,7 @@ const Pilots = ({ tipo }) => {
     });
     try {
       const res = await api.get(
-        `/v2/tripulantes/qualificacoes/${tipo.replace(" ", "_")}`,
+        `/v2/tripulantes/qualificacoes/${tipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES")}`,
         {
           headers: { Authorization: "Bearer " + token },
         },
@@ -88,7 +88,7 @@ const Pilots = ({ tipo }) => {
     setFilteredCrew(results);
   }, [pilotos, selectedTypes]);
   return (
-    <Stack m={4} bg={"black"}>
+    <Stack m={4}>
       <Box ml={4} alignSelf={"flex-start"}>
         <QualificationGroupFilter
           availableGroups={availableTypes}

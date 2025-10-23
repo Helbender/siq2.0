@@ -25,8 +25,7 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { IoCloseCircleSharp } from "react-icons/io5";
-import FileUpload from "../components/FileUpload";
-import { GiPlanePilot } from "react-icons/gi";
+import FileUpload from "../components/UserC/FileUpload";
 import InsertInitQual from "../components/UserC/InsertInitQual";
 
 function UserManagementPage() {
@@ -53,11 +52,11 @@ function UserManagementPage() {
         [
           user.nip,
           user.name,
-          user.rank,
+          // user.rank,
           user.position,
-          user.email,
-          user.admin ? "Yes" : "No",
-          user.squadron,
+          // user.email,
+          // user.admin ? "Yes" : "No",
+          // user.squadron,
           user.tipo,
         ]
           .map((field) => (field ? field.toString().toLowerCase() : ""))
@@ -88,9 +87,9 @@ function UserManagementPage() {
           <Thead>
             <Tr>
               <Th>NIP</Th>
-              <Th>Name</Th>
-              <Th>Rank</Th>
-              <Th>Position</Th>
+              <Th>Nome</Th>
+              <Th>Posto</Th>
+              <Th>Função</Th>
               <Th>Tipo</Th>
               <Th>Admin</Th>
               {/* <Th>Squadron</Th> */}

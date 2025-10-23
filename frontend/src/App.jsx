@@ -16,8 +16,7 @@ import UserManagementPage from "./pages/UserManagementPage";
 
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
-import FileUpload from "./components/FileUpload";
-import QualificationsPanel from "./components/pilotComponents/QualificationsPanel";
+import FileUpload from "./components/UserC/FileUpload";
 import QualificationManagement from "./pages/QualificationManagement";
 import api from "./utils/api";
 
@@ -75,7 +74,11 @@ function App() {
               {tipos.map((tipo) => (
                 <Route
                   key={tipo}
-                  path={`/${tipo.toLowerCase().replace(" ", "-")}`}
+                  path={`/${tipo
+                    .toLowerCase()
+                    .replace(" ", "-")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")}`}
                   element={<Pilots tipo={tipo} />}
                 />
               ))}

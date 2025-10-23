@@ -52,7 +52,7 @@ function InsertInitQual(props) {
   const getQualificationList = async () => {
     try {
       const response = await api.get(
-        `/users/qualificationlist/${props.user.nip}`,
+        `/v2/qualificacoeslist/${props.user.nip}`,
         {
           headers: { Authorization: "Bearer " + token },
         },
@@ -68,7 +68,7 @@ function InsertInitQual(props) {
   const sendQualification = async (data) => {
     try {
       const response = await apiAuth.post(
-        `/api/users/qualificationlist/${props.user.nip}`,
+        `/v2/qualificacoeslist/${props.user.nip}`,
         data,
       );
       toast({

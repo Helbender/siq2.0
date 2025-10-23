@@ -20,6 +20,7 @@ const Navbar = () => {
     color: "black",
     fontWeight: "bold",
   };
+
   useMemo(() => {
     const fetchData = async () => {
       try {
@@ -53,10 +54,18 @@ const Navbar = () => {
                 <BreadcrumbLink
                   p={2}
                   as={Link}
-                  to={tipo.toLowerCase().replace(" ", "-")}
+                  to={tipo
+                    .toLowerCase()
+                    .replace(" ", "-")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")}
                   sx={
                     location.pathname ===
-                    `/${tipo.toLowerCase().replace(" ", "-")}`
+                    `/${tipo
+                      .toLowerCase()
+                      .replace(" ", "-")
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")}`
                       ? selected_style
                       : null
                   }
