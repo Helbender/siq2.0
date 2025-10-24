@@ -3,6 +3,7 @@ import json
 import os
 from datetime import UTC, datetime
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from config import engine  # adjust as needed
@@ -10,11 +11,23 @@ from models.flights import Flight  # Adjust import as needed
 from routes.flight_blueprint import add_crew_and_pilots
 
 
+def check_duplicate_flight(session: Session, airtask: str, date, departure_time: str, tailnumber: int) -> Flight | None:
+    """Check if a flight with the same airtask, date, ATD, and aircraft already exists."""
+    return session.execute(
+        select(Flight).where(
+            Flight.airtask == airtask,
+            Flight.date == date,
+            Flight.departure_time == departure_time,
+            Flight.tailnumber == tailnumber,
+        )
+    ).scalar_one_or_none()
+
+
 def import_flights_from_folder(root_folder: str, db: Session):
     for dirpath, _, filenames in os.walk(root_folder):
         print(f"Processing directory: {dirpath}")
         for filename in filenames:
-            print(f"Processing file: {filename}")
+            print(f"\nProcessing file: {filename}")
             file_path = os.path.join(dirpath, filename)
             with open(file_path) as content_dict:
                 content = content_dict.read().strip()
@@ -30,8 +43,8 @@ def import_flights_from_folder(root_folder: str, db: Session):
                 except Exception as e:
                     print(f"Error decoding base64: {e}")
                     content_raw = {}
-                print(f"Decoded content as dict: {content_raw}")
-                content_dict = content_raw
+                # print(f"Decoded content as dict: {content_raw}")
+                flight_data = content_raw
                 # You must adapt this to your actual file format and DB schema
                 # Example filename: "1M 50A0023 02Apr2025 03_20 16710.1m"
                 parts = filename.split()
@@ -39,74 +52,113 @@ def import_flights_from_folder(root_folder: str, db: Session):
                     continue  # skip malformed files
                 try:
                     flight = Flight(
-                        airtask=content_dict["airtask"],
-                        date=datetime.strptime(content_dict["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
-                        origin=content_dict.get("origin", ""),
-                        destination=content_dict.get("destination", ""),
-                        departure_time=content_dict.get("ATD", ""),
-                        arrival_time=content_dict.get("ATA", ""),
-                        flight_type=content_dict.get("flightType", ""),
-                        flight_action=content_dict.get("flightAction", ""),
-                        tailnumber=content_dict.get("tailNumber", ""),
-                        total_time=content_dict.get("ATE", ""),
-                        atr=content_dict.get("totalLandings", 0),
-                        passengers=content_dict.get("passengers", 0),
-                        doe=content_dict.get("doe", 0),
-                        cargo=content_dict.get("cargo", 0),
-                        number_of_crew=content_dict.get("numberOfCrew", 0),
-                        orm=content_dict.get("orm", 0),
-                        fuel=content_dict.get("fuel", 0),
-                        activation_first=content_dict.get("activationFirst", "__:__"),
-                        activation_last=content_dict.get("activationLast", "__:__"),
-                        ready_ac=content_dict.get("readyAC", "__:__"),
-                        med_arrival=content_dict.get("medArrival", "__:__"),
+                        airtask=flight_data["airtask"],
+                        date=datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
+                        origin=flight_data.get("origin", ""),
+                        destination=flight_data.get("destination", ""),
+                        departure_time=flight_data.get("ATD", ""),
+                        arrival_time=flight_data.get("ATA", ""),
+                        flight_type=flight_data.get("flightType", ""),
+                        flight_action=flight_data.get("flightAction", ""),
+                        tailnumber=int(flight_data.get("tailNumber", 0)),
+                        total_time=flight_data.get("ATE", ""),
+                        atr=flight_data.get("totalLandings", 0),
+                        passengers=flight_data.get("passengers", 0),
+                        doe=flight_data.get("doe", 0),
+                        cargo=flight_data.get("cargo", 0),
+                        number_of_crew=flight_data.get("numberOfCrew", 0),
+                        orm=flight_data.get("orm", 0),
+                        fuel=flight_data.get("fuel", 0),
+                        activation_first=flight_data.get("activationFirst", "__:__"),
+                        activation_last=flight_data.get("activationLast", "__:__"),
+                        ready_ac=flight_data.get("readyAC", "__:__"),
+                        med_arrival=flight_data.get("medArrival", "__:__"),
                     )
                 except ValueError:
                     flight = Flight(
-                        airtask=content_dict["airtask"],
-                        date=datetime.strptime(content_dict["date"], "%d-%b-%Y").replace(tzinfo=UTC).date(),
-                        origin=content_dict.get("origin", ""),
-                        destination=content_dict.get("destination", ""),
-                        departure_time=content_dict.get("ATD", ""),
-                        arrival_time=content_dict.get("ATA", ""),
-                        flight_type=content_dict.get("flightType", ""),
-                        flight_action=content_dict.get("flightAction", ""),
-                        tailnumber=content_dict.get("tailNumber", ""),
-                        total_time=content_dict.get("ATE", ""),
-                        atr=content_dict.get("totalLandings", 0),
-                        passengers=content_dict.get("passengers", 0),
-                        doe=content_dict.get("doe", 0),
-                        cargo=content_dict.get("cargo", 0),
-                        number_of_crew=content_dict.get("numberOfCrew", 0),
-                        orm=content_dict.get("orm", 0),
-                        fuel=content_dict.get("fuel", 0),
-                        activation_first=content_dict.get("activationFirst", "__:__"),
-                        activation_last=content_dict.get("activationLast", "__:__"),
-                        ready_ac=content_dict.get("readyAC", "__:__"),
-                        med_arrival=content_dict.get("medArrival", "__:__"),
+                        airtask=flight_data["airtask"],
+                        date=datetime.strptime(flight_data["date"], "%d-%b-%Y").replace(tzinfo=UTC).date(),
+                        origin=flight_data.get("origin", ""),
+                        destination=flight_data.get("destination", ""),
+                        departure_time=flight_data.get("ATD", ""),
+                        arrival_time=flight_data.get("ATA", ""),
+                        flight_type=flight_data.get("flightType", ""),
+                        flight_action=flight_data.get("flightAction", ""),
+                        tailnumber=int(flight_data.get("tailNumber", 0)),
+                        total_time=flight_data.get("ATE", ""),
+                        atr=flight_data.get("totalLandings", 0),
+                        passengers=flight_data.get("passengers", 0),
+                        doe=flight_data.get("doe", 0),
+                        cargo=flight_data.get("cargo", 0),
+                        number_of_crew=flight_data.get("numberOfCrew", 0),
+                        orm=flight_data.get("orm", 0),
+                        fuel=flight_data.get("fuel", 0),
+                        activation_first=flight_data.get("activationFirst", "__:__"),
+                        activation_last=flight_data.get("activationLast", "__:__"),
+                        ready_ac=flight_data.get("readyAC", "__:__"),
+                        med_arrival=flight_data.get("medArrival", "__:__"),
                     )
                 with Session(engine, autoflush=False) as session:
-                    session.add(flight)
-                    pilot: dict
+                    # Check for duplicate flight
+                    existing_flight = check_duplicate_flight(
+                        session, flight.airtask, flight.date, flight.departure_time, flight.tailnumber
+                    )
 
-                    try:
-                        content_dict["flight_pilots"]
-                    except KeyError:
-                        print("At least one pilot is required")
+                    if existing_flight:
+                        print(f"Duplicate found - updating existing flight: {flight.airtask} on {flight.date}")
                         continue
-                        # return jsonify({"message": "At least one pilot is required"}), 400
+                        # Update existing flight with new data
+                        existing_flight.airtask = flight.airtask
+                        existing_flight.date = flight.date
+                        existing_flight.origin = flight.origin
+                        existing_flight.destination = flight.destination
+                        existing_flight.departure_time = flight.departure_time
+                        existing_flight.arrival_time = flight.arrival_time
+                        existing_flight.flight_type = flight.flight_type
+                        existing_flight.flight_action = flight.flight_action
+                        existing_flight.tailnumber = flight.tailnumber
+                        existing_flight.total_time = flight.total_time
+                        existing_flight.atr = flight.atr
+                        existing_flight.passengers = flight.passengers
+                        existing_flight.doe = flight.doe
+                        existing_flight.cargo = flight.cargo
+                        existing_flight.number_of_crew = flight.number_of_crew
+                        existing_flight.orm = flight.orm
+                        existing_flight.fuel = flight.fuel
+                        existing_flight.activation_first = flight.activation_first
+                        existing_flight.activation_last = flight.activation_last
+                        existing_flight.ready_ac = flight.ready_ac
+                        existing_flight.med_arrival = flight.med_arrival
 
-                    for pilot in content_dict["flight_pilots"]:
-                        add_crew_and_pilots(session, flight, pilot)
-                    # try:
-                    #     session.flush()
-                    # except exc.IntegrityError as e:
-                    #     session.rollback()
-                    #     print("\n", e.orig.__repr__())
-                    #     # return jsonify({"message": e.orig.__repr__()}), 400
-                    # else:
-                    #     session.commit()
-                    #     nome_arquivo_voo = flight.get_file_name()
+                        # Clear existing pilots and add new ones
+                        existing_flight.flight_pilots.clear()
+
+                        try:
+                            flight_data["flight_pilots"]
+                        except KeyError:
+                            print("At least one pilot is required")
+                            continue
+
+                        for pilot in flight_data["flight_pilots"]:
+                            add_crew_and_pilots(session, existing_flight, pilot)
+
+                        session.commit()
+                        print(f"Updated flight: {existing_flight.airtask} on {existing_flight.date}")
+                    else:
+                        print(f"New flight - creating: {flight.airtask} on {flight.date}")
+                        session.add(flight)
+
+                        try:
+                            flight_data["flight_pilots"]
+                        except KeyError:
+                            print("At least one pilot is required")
+                            continue
+
+                        for pilot_data in flight_data["flight_pilots"]:
+                            add_crew_and_pilots(session, flight, pilot_data)
+
+                        session.commit()
+                        print(f"Created new flight: {flight.airtask} on {flight.date}")
 
 
 SessionLocal = sessionmaker(bind=engine)

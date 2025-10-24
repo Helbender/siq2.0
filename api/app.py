@@ -67,7 +67,8 @@ if APPLY_CORS:
 def refresh_expiring_jwts(response: Response) -> Response:
     """Handle Token Expiration - Refresh token if it expires within 30 minutes."""
     try:
-        # Get the current JWT payload
+        # Check if there's a valid JWT token in the request
+        # This will raise an exception if no JWT is present
         jwt_payload = get_jwt()
         exp_timestamp = jwt_payload["exp"]
         now = datetime.now(UTC)
@@ -91,9 +92,9 @@ def refresh_expiring_jwts(response: Response) -> Response:
                 response.data = json.dumps(data)
 
         return response
-    except (RuntimeError, KeyError) as e:
-        print(f"\nToken refresh error: {e}\n")
-        # Case where there is not a valid JWT. Just return the original response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT or no JWT at all.
+        # This is normal for public endpoints, so just return the original response
         return response
 
 

@@ -105,8 +105,7 @@ function Header() {
             {colorMode === "light" ? <IoMoon /> : <LuSun />}
           </Button>
         </Flex>
-        {/* Drawer for Menu Items */}
-        <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
           <DrawerOverlay>
             <DrawerContent>
               <DrawerCloseButton />
@@ -203,7 +202,7 @@ function Header() {
                         </Flex>
                       </ChakraLink>
 
-                      <ChakraLink
+                      {User.admin ? (<ChakraLink
                         p={2}
                         color="teal.500"
                         fontSize="lg"
@@ -217,7 +216,7 @@ function Header() {
 
                           <Box ml={2}>Gerir Qualificações</Box>
                         </Flex>
-                      </ChakraLink>
+                      </ChakraLink>):null}
 
                       {User.admin ? (
                         <ChakraLink

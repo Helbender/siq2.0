@@ -23,8 +23,8 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
     const fetchQualifications = async () => {
       if (!member.nip) {
         setQualP([]);
-        return;
-      
+        return;}
+      else{
         try {
           console.log("Fetching Data");
           const response = await apiAuth.get(
@@ -123,7 +123,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
           ></Input>
         </FormControl>
       </GridItem>
-      {["VIR", "VN", "CON", "ATR", "ATN", "precapp", "nprecapp"].map(
+      {["PI","PC","CP","P"].includes(member.position)? (["VIR", "VN", "CON", "ATR", "ATN", "precapp", "nprecapp"].map(
         (campo) => (
           <GridItem
             key={campo}
@@ -144,7 +144,8 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             </FormControl>
           </GridItem>
         ),
-      )}
+      )):([1,2,3,4,5,6,7].map(()=>(<GridItem></GridItem>)))}
+     
       {[1, 2, 3, 4, 5, 6].map((n) => (
         <GridItem key={n} minW={"70px"}>
           <FormControl>

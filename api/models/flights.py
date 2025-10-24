@@ -112,10 +112,10 @@ class FlightPilots(Base):
     pilot_id: Mapped[int] = mapped_column(ForeignKey("tripulantes.nip", ondelete="CASCADE"), primary_key=True)
     position: Mapped[str] = mapped_column(String(5))
 
-    day_landings: Mapped[int]
-    night_landings: Mapped[int]
-    prec_app: Mapped[int]
-    nprec_app: Mapped[int]
+    day_landings: Mapped[int | None]  # noqa: UP007
+    night_landings: Mapped[int | None]  # noqa: UP007
+    prec_app: Mapped[int | None]  # noqa: UP007
+    nprec_app: Mapped[int | None]  # noqa: UP007
 
     qual1: Mapped[str | None]  # noqa: UP007
     qual2: Mapped[str | None]  # noqa: UP007

@@ -1,19 +1,55 @@
 from enum import Enum
 
+"""
+Qualification Group Segregation System
+
+This module provides a system to segregate qualification groups by crew type,
+making it easier for the frontend to show only relevant qualifications when
+adding new qualifications for specific crew types.
+
+Usage Examples:
+- Get qualification groups for PILOTO: get_qualification_groups_for_crew_type(TipoTripulante.PILOTO)
+- Check if a group applies to a crew type: is_qualification_group_applicable_to_crew_type(group, crew_type)
+- Get all crew types for a group: get_crew_types_for_qualification_group(GrupoQualificacoes.MQP)
+
+API Endpoints:
+- GET /api/v2/qualification-groups - Get all qualification groups
+- GET /api/v2/crew-types - Get all crew types  
+- GET /api/v2/qualification-groups/<crew_type> - Get groups for specific crew type
+- GET /api/v2/crew-types-for-group/<group> - Get crew types for specific group
+- POST /api/v2/qualification-groups/check - Check if group applies to crew type
+"""
+
 
 class GrupoQualificacoes(Enum):
-    # ALERTA = "ALERTA"
-    # VIGILANCIA = "VIGILANCIA"
-    # NVG = "NVG"
-    # TATICO = "TATICO"
-    # OUTROS = "OUTROS"
-    # ATR_APPS = "ATR e APPS"
+    # Pilot-specific qualifications
+    CURRENCY = "CURRENCY"
     MQP = "MQP"
     MQOBP = "MQOBP"
     MQOIP = "MQOIP"
     MQOAP = "MQOAP"
     MQOC = "MQOC"
     MQOBOC = "MQOBOC"
+
+    # Cabin operator qualifications
+    CABINE_OPERATIONS = "CABINE_OPERATIONS"
+    COMMUNICATION = "COMMUNICATION"
+    SAFETY_EQUIPMENT = "SAFETY_EQUIPMENT"
+
+    # Tactical controller qualifications
+    TACTICAL_CONTROL = "TACTICAL_CONTROL"
+    RADAR_OPERATIONS = "RADAR_OPERATIONS"
+    COORDINATION = "COORDINATION"
+
+    # Surveillance operator qualifications
+    SURVEILLANCE = "SURVEILLANCE"
+    DETECTION_SYSTEMS = "DETECTION_SYSTEMS"
+    MONITORING = "MONITORING"
+
+    # Operations qualifications
+    OPERATIONS_PLANNING = "OPERATIONS_PLANNING"
+    LOGISTICS = "LOGISTICS"
+    ADMINISTRATION = "ADMINISTRATION"
 
 
 class TipoTripulante(Enum):
@@ -22,3 +58,61 @@ class TipoTripulante(Enum):
     CONTROLADOR_TATICO = "CONTROLADOR TATICO"
     OPERADOR_VIGILANCIA = "OPERADOR VIGILANCIA"
     OPERACOES = "OPERAÇÕES"
+
+
+# Mapping qualification groups to applicable crew types
+QUALIFICATION_GROUP_TO_CREW_TYPES = {
+    # Pilot qualifications
+    GrupoQualificacoes.CURRENCY: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQP: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQOBP: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQOIP: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQOAP: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQOC: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.MQOBOC: [TipoTripulante.PILOTO],
+    # Cabin operator qualifications
+    GrupoQualificacoes.CABINE_OPERATIONS: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.COMMUNICATION: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.SAFETY_EQUIPMENT: [TipoTripulante.OPERADOR_CABINE],
+    # Tactical controller qualifications
+    GrupoQualificacoes.TACTICAL_CONTROL: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.RADAR_OPERATIONS: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.COORDINATION: [TipoTripulante.CONTROLADOR_TATICO],
+    # Surveillance operator qualifications
+    GrupoQualificacoes.SURVEILLANCE: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.DETECTION_SYSTEMS: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.MONITORING: [TipoTripulante.OPERADOR_VIGILANCIA],
+    # Operations qualifications
+    GrupoQualificacoes.OPERATIONS_PLANNING: [TipoTripulante.OPERACOES],
+    GrupoQualificacoes.LOGISTICS: [TipoTripulante.OPERACOES],
+    GrupoQualificacoes.ADMINISTRATION: [TipoTripulante.OPERACOES],
+}
+
+
+def get_qualification_groups_for_crew_type(crew_type: TipoTripulante) -> list[GrupoQualificacoes]:
+    """Get all qualification groups that apply to a specific crew type."""
+    applicable_groups = []
+    for group, crew_types in QUALIFICATION_GROUP_TO_CREW_TYPES.items():
+        if crew_type in crew_types:
+            applicable_groups.append(group)
+    return applicable_groups
+
+
+def get_crew_types_for_qualification_group(group: GrupoQualificacoes) -> list[TipoTripulante]:
+    """Get all crew types that can use a specific qualification group."""
+    return QUALIFICATION_GROUP_TO_CREW_TYPES.get(group, [])
+
+
+def get_all_qualification_groups() -> list[GrupoQualificacoes]:
+    """Get all available qualification groups."""
+    return list(GrupoQualificacoes)
+
+
+def get_all_crew_types() -> list[TipoTripulante]:
+    """Get all available crew types."""
+    return list(TipoTripulante)
+
+
+def is_qualification_group_applicable_to_crew_type(group: GrupoQualificacoes, crew_type: TipoTripulante) -> bool:
+    """Check if a qualification group is applicable to a specific crew type."""
+    return crew_type in QUALIFICATION_GROUP_TO_CREW_TYPES.get(group, [])

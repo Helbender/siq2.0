@@ -30,8 +30,23 @@ import { api } from "../../utils/api";
 
 const CreateQualModal = ({ setQualifications, edit, qualification }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Reset form and groups when modal opens
+  const handleModalOpen = () => {
+    if (!edit) {
+      qualificacao.reset({
+        nome: "",
+        validade: "",
+        tipo_aplicavel: "",
+        grupo: "",
+      });
+      setGrupos([]);
+    }
+    onOpen();
+  };
   const [tipos, setTipos] = useState([]);
   const [grupos, setGrupos] = useState([]);
+  const [allGrupos, setAllGrupos] = useState([]);
   const toast = useToast();
   const qualificacao = useForm(
     qualification || {
@@ -89,18 +104,58 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
     }
   };
 
+  // Function to fetch qualification groups for a specific crew type
+  const fetchQualificationGroups = async (crewType) => {
+    if (!crewType) {
+      setGrupos([]);
+      return;
+    }
+    
+    try {
+      const res = await api.get(`/v2/qualification-groups/${crewType}`);
+      setGrupos(res.data);
+    } catch (error) {
+      console.error("Error fetching qualification groups:", error);
+      setGrupos([]);
+    }
+  };
+
+  // Function to fetch all qualification groups (for initial load)
+  const fetchAllQualificationGroups = async () => {
+    try {
+      const res = await api.get("/v2/qualification-groups");
+      setAllGrupos(res.data);
+    } catch (error) {
+      console.error("Error fetching all qualification groups:", error);
+    }
+  };
+
   useMemo(() => {
     const fetchData = async () => {
       try {
         const res = await api.get("/v2/listas");
         setTipos(res.data.tipos);
-        setGrupos(res.data.grupos);
+        // Also fetch all qualification groups
+        await fetchAllQualificationGroups();
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, []);
+  
+  // Watch for crew type changes and update qualification groups
+  useEffect(() => {
+    const subscription = qualificacao.watch((value, { name }) => {
+      if (name === "tipo_aplicavel" && value.tipo_aplicavel) {
+        fetchQualificationGroups(value.tipo_aplicavel);
+        // Clear the grupo field when crew type changes
+        qualificacao.setValue("grupo", "");
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [qualificacao]);
 
   // Populate form fields if in edit mode and qualification is provided
   useEffect(() => {
@@ -111,6 +166,10 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
         tipo_aplicavel: qualification.tipo_aplicavel || "",
         grupo: qualification.grupo || "",
       });
+      // If editing and we have a crew type, fetch the appropriate groups
+      if (qualification.tipo_aplicavel) {
+        fetchQualificationGroups(qualification.tipo_aplicavel);
+      }
     }
   }, [edit, qualification]);
   return (
@@ -123,7 +182,7 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
           aria-label="Edit User"
         />
       ) : (
-        <Button onClick={onOpen} colorScheme="green">
+        <Button onClick={handleModalOpen} colorScheme="green">
           Nova Qualificação
         </Button>
       )}
@@ -163,11 +222,22 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
                 <FormControl>
                   <FormLabel>Grupo de Qualificação</FormLabel>
                   <Select
-                    placeholder="Selecione um grupo"
+                    placeholder={
+                      qualificacao.watch("tipo_aplicavel") 
+                        ? grupos.length > 0 
+                          ? "Selecione um grupo" 
+                          : "Carregando grupos..."
+                        : "Primeiro selecione um tipo de tripulante"
+                    }
                     {...qualificacao.register("grupo")}
+                    isDisabled={!qualificacao.watch("tipo_aplicavel") || grupos.length === 0}
                   >
                     {grupos &&
-                      grupos.map((tipo) => <option key={tipo}>{tipo}</option>)}
+                      grupos.map((grupo) => (
+                        <option key={grupo.value} value={grupo.value}>
+                          {grupo.name}
+                        </option>
+                      ))}
                   </Select>
                 </FormControl>
               </Stack>

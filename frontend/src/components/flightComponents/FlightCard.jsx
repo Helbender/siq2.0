@@ -100,7 +100,7 @@ const FlightCard = ({ flight }) => {
         </Flex>
 
         <Divider my="5" />
-        {/* <TableContainer overflowY={"auto"} maxHeight={"300px"}>
+        <TableContainer overflowY={"auto"} maxHeight={"300px"}>
           <Table size={"sm"}>
             <Thead>
               <Tr>
@@ -213,7 +213,7 @@ const FlightCard = ({ flight }) => {
               })}
             </Tbody>
           </Table>
-        </TableContainer> */}
+        </TableContainer>
       </CardBody>
     </Card>
   );

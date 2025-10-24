@@ -4,6 +4,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import engine  # type:ignore
+from models.enums import (
+    get_all_crew_types,
+    get_all_qualification_groups,
+    get_crew_types_for_qualification_group,
+    get_qualification_groups_for_crew_type,
+    is_qualification_group_applicable_to_crew_type,
+)
 from models.qualificacoes import GrupoQualificacoes, Qualificacao
 from models.tripulantes import TipoTripulante, Tripulante
 
@@ -201,13 +208,6 @@ def apagar_qualificacao(id: int) -> tuple[Response, int]:
 
 @v2.route("/listas", methods=["GET"])
 def listar_tipos_e_grupos():
-    print("Getting LISTs")
-    print(
-        {
-            "tipos": [t.value for t in TipoTripulante],
-            "grupos": [g.value for g in GrupoQualificacoes],
-        }
-    )
     return jsonify(
         {
             "tipos": [t.value for t in TipoTripulante],
@@ -331,3 +331,59 @@ def listar_tipos_e_grupos():
 #             if pq.data_expiracao() < hoje
 #         ]
 #         return jsonify(resultado)
+
+
+# New endpoints for qualification group segregation
+
+
+@v2.route("/qualification-groups", methods=["GET"])
+def get_qualification_groups() -> Response:
+    """Get all available qualification groups."""
+    groups = get_all_qualification_groups()
+    return jsonify([{"value": group.value, "name": group.value} for group in groups])
+
+
+@v2.route("/crew-types", methods=["GET"])
+def get_crew_types() -> Response:
+    """Get all available crew types."""
+    crew_types = get_all_crew_types()
+    return jsonify([{"value": crew_type.value, "name": crew_type.value} for crew_type in crew_types])
+
+
+@v2.route("/qualification-groups/<crew_type>", methods=["GET"])
+def get_qualification_groups_for_crew(crew_type: str) -> Response:
+    """Get qualification groups applicable to a specific crew type."""
+    try:
+        crew_type_enum = TipoTripulante(crew_type)
+    except ValueError:
+        abort(400, f"Invalid crew type: {crew_type}")
+
+    groups = get_qualification_groups_for_crew_type(crew_type_enum)
+    return jsonify([{"value": group.value, "name": group.value} for group in groups])
+
+
+@v2.route("/crew-types-for-group/<group>", methods=["GET"])
+def get_crew_types_for_group(group: str) -> Response:
+    """Get crew types that can use a specific qualification group."""
+    try:
+        group_enum = GrupoQualificacoes(group)
+    except ValueError:
+        abort(400, f"Invalid qualification group: {group}")
+
+    crew_types = get_crew_types_for_qualification_group(group_enum)
+    return jsonify([{"value": crew_type.value, "name": crew_type.value} for crew_type in crew_types])
+
+
+@v2.route("/qualification-groups/check", methods=["POST"])
+def check_qualification_group_applicability() -> Response:
+    """Check if a qualification group is applicable to a crew type."""
+    data = request.get_json()
+
+    try:
+        group_enum = GrupoQualificacoes(data["group"])
+        crew_type_enum = TipoTripulante(data["crew_type"])
+    except (ValueError, KeyError) as e:
+        abort(400, f"Invalid data: {e}")
+
+    is_applicable = is_qualification_group_applicable_to_crew_type(group_enum, crew_type_enum)
+    return jsonify({"applicable": is_applicable})
