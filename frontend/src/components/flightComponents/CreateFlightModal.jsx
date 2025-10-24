@@ -116,10 +116,8 @@ function CreateFlightModal({ flight }) {
     });
     try {
       let res;
-      if (flight && !isNewFlight) {
-        res = await api.patch(`/api/flights/${flight.id}`, data, {
-          headers: { Authorization: "Bearer " + token },
-        });
+      if (flight) {
+        res = await apiAuth.patch(`/flights/${flight.id}`, data);
       } else {
         res = await apiAuth.post("/flights", data);
       }
@@ -152,11 +150,6 @@ function CreateFlightModal({ flight }) {
         );
       }
     } catch (error) {
-      if (error.response.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-        navigate("/");
-      }
       toast.closeAll();
 
       toast({
@@ -549,17 +542,15 @@ function CreateFlightModal({ flight }) {
                         Qualificações
                       </GridItem>
                       <GridItem m="auto" />
-                      {fields.map((member, index) => {
-                        return (
-                          <PilotInput
-                            key={index}
-                            index={index}
-                            remove={remove}
-                            member={flight_pilots[index]}
-                            pilotos={users}
-                          />
-                        );
-                      })}
+                      {fields.map((member, index) => (
+                        <PilotInput
+                          key={member.id}
+                          index={index}
+                          remove={remove}
+                          member={flight_pilots[index]}
+                          pilotos={users}
+                        />
+                      ))}
                     </Grid>
                   </Box>
                   <Button

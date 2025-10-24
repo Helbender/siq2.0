@@ -55,12 +55,6 @@ const Pilots = ({ tipo }) => {
       setSelectedTypes(types); // Select all types by default
     } catch (error) {
       console.log(error);
-      console.log(error.response.status);
-      if (error.response.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-        navigate("/");
-      }
     }
   };
   useEffect(() => {

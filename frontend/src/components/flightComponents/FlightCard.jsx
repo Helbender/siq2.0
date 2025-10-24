@@ -130,12 +130,73 @@ const FlightCard = ({ flight }) => {
             </Thead>
             <Tbody>
               {flight.flight_pilots.map((pilot) => {
+                let qualification = [];
+                if (pilot.QA1) {
+                  qualification = [...qualification, "QA1"];
+                }
+                if (pilot.QA2) {
+                  qualification = [...qualification, "QA2"];
+                }
+                if (pilot.BSP1) {
+                  qualification = [...qualification, "BSP1"];
+                }
+                if (pilot.BSP2) {
+                  qualification = [...qualification, "BSP2"];
+                }
+                if (pilot.TA) {
+                  qualification = [...qualification, "TA"];
+                }
+                if (pilot.VRP1) {
+                  qualification = [...qualification, "VRP1"];
+                }
+                if (pilot.VRP2) {
+                  qualification = [...qualification, "VRP2"];
+                }
+                if (pilot.CTO) {
+                  qualification = [...qualification, "CTO"];
+                }
+                if (pilot.SID) {
+                  qualification = [...qualification, "SID"];
+                }
+                if (pilot.MONO) {
+                  qualification = [...qualification, "MONO"];
+                }
+                if (pilot.NFP) {
+                  qualification = [...qualification, "NFP"];
+                }
+                if (pilot.BSKIT) {
+                  qualification = [...qualification, "BSKIT"];
+                }
+                if (pilot.BSOC) {
+                  qualification = [...qualification, "BSOC"];
+                }
+                if (pilot.PARAS) {
+                  qualification = [...qualification, "PARAS"];
+                }
+                if (pilot.NVG) {
+                  qualification = [...qualification, "NVG"];
+                }
+                if (pilot.QUAL1) {
+                  qualification = [...qualification, pilot.QUAL1];
+                }
+                if (pilot.QUAL2) {
+                  qualification = [...qualification, pilot.QUAL2];
+                }
+                if (pilot.QUAL3) {
+                  qualification = [...qualification, pilot.QUAL3];
+                }
+                if (pilot.QUAL4) {
+                  qualification = [...qualification, pilot.QUAL4];
+                }
+                if (pilot.QUAL5) {
+                  qualification = [...qualification, pilot.QUAL5];
+                }
+                if (pilot.QUAL6) {
+                  qualification = [...qualification, pilot.QUAL6];
+                }
                 let texto = "";
-                for (let i = 1; i <= 6; i++) {
-                  const qual = pilot[`QUAL${i}`];
-                  if (qual && qual.trim() !== "") {
-                    texto += (texto ? " " : "") + qual;
-                  }
+                for (let i = 0; i < qualification.length; i++) {
+                  texto = texto + " " + qualification[i];
                 }
                 return (
                   <Tr key={pilot.nip}>

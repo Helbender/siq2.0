@@ -24,17 +24,19 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
       if (!member.nip) {
         setQualP([]);
         return;
-      }
       
-      try {
-        console.log("Fetching Data");
-        const response = await apiAuth.get(`/v2/qualificacoes/${member.nip}`);
-        console.log("Data Fetched");
-        setQualP(response.data);
-        // console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching qualifications:", error);
-        setQualP([]);
+        try {
+          console.log("Fetching Data");
+          const response = await apiAuth.get(
+            `/v2/qualificacoeslist/${member.nip}`,
+          );
+          console.log("Data Fetched");
+          setQualP(response.data);
+          // console.log(response.data);
+        } catch (error) {
+          console.error("Error fetching qualifications:", error);
+          setQualP([]);
+        }
       }
     };
 

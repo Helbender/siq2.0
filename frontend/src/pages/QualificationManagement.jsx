@@ -56,12 +56,6 @@ function QualificationManagement() {
       setSelectedTypes(types); // Select all types by default
     } catch (error) {
       console.log(error);
-      console.log(error.response.status);
-      if (error.response.status === 401) {
-        console.log("Unauthorized, redirecting to login...");
-        // removeToken();
-        navigate("/login");
-      }
     }
   };
   useEffect(() => {

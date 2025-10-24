@@ -100,11 +100,6 @@ function CreateUserModal({ edit, add, isDelete, user }) {
 
       onClose();
     } catch (error) {
-      if (error.response.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-        navigate("/");
-      }
       toast({
         title: "Error editing user",
         description: error.response.data.message,

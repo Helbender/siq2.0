@@ -1,13 +1,17 @@
 from __future__ import annotations  # noqa: D100, INP001
 
+import json
 import os
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, Response
 from flask_cors import CORS  # type: ignore
 from flask_jwt_extended import (
     JWTManager,
+    create_access_token,
+    get_jwt,
+    get_jwt_identity,
 )
 
 from config import setup_database
@@ -57,25 +61,40 @@ if APPLY_CORS:
         supports_credentials=True,
     )
 
-# apli login routes
-# @app.after_request
-# def refresh_expiring_jwts(response: Response) -> Response:
-#     """Handle Token Expiration."""
-#     try:
-#         exp_timestamp = get_jwt()["exp"]
-#         now = datetime.now(timezone.utc)
-#         target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
-#         if target_timestamp > exp_timestamp:
-#             access_token = create_access_token(identity=get_jwt_identity())
-#             data = response.get_json()
-#             if type(data) is dict:
-#                 data["access_token"] = access_token
-#                 response.data = json.dumps(data)
-#         return response  # noqa: TRY300
-#     except (RuntimeError, KeyError) as e:
-#         print(f"\nError\n{e}\n")
-#         # Case where there is not a valid JWT. Just return the original respone
-#         return response
+
+# Token refresh functionality
+@app.after_request
+def refresh_expiring_jwts(response: Response) -> Response:
+    """Handle Token Expiration - Refresh token if it expires within 30 minutes."""
+    try:
+        # Get the current JWT payload
+        jwt_payload = get_jwt()
+        exp_timestamp = jwt_payload["exp"]
+        now = datetime.now(UTC)
+
+        # Calculate if token expires within 30 minutes
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+
+        # If token expires within 30 minutes, create a new one
+        if target_timestamp > exp_timestamp:
+            # Get the current user identity and claims
+            identity = get_jwt_identity()
+            claims = jwt_payload.get("additional_claims", {})
+
+            # Create new access token with same identity and claims
+            access_token = create_access_token(identity=identity, additional_claims=claims)
+
+            # Add the new token to the response
+            data = response.get_json()
+            if isinstance(data, dict):
+                data["access_token"] = access_token
+                response.data = json.dumps(data)
+
+        return response
+    except (RuntimeError, KeyError) as e:
+        print(f"\nToken refresh error: {e}\n")
+        # Case where there is not a valid JWT. Just return the original response
+        return response
 
 
 # Main api resgistration

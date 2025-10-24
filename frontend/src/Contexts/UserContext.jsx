@@ -18,11 +18,6 @@ export const UserProvider = ({ children }) => {
       console.log("Users Loaded from context");
     } catch (error) {
       console.log(error);
-      if (error.response?.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-        // navigate("/");
-      }
     }
   };
   useEffect(() => {

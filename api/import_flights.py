@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from sqlalchemy.orm import Session, sessionmaker
 
 from config import engine  # adjust as needed
-from models import Flight  # Adjust import as needed
+from models.flights import Flight  # Adjust import as needed
 from routes.flight_blueprint import add_crew_and_pilots
 
 

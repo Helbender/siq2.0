@@ -19,11 +19,7 @@ export const FlightProvider = ({ children }) => {
       console.log("Flights Loaded from context");
     } catch (error) {
       console.log(error);
-      console.log(error.response?.status);
-      if (error.response?.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-      }
+      setLoading(false);
     }
   };
 

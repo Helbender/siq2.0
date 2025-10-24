@@ -71,11 +71,6 @@ function Dashboard() {
       setqa1(response.data.qa1);
     } catch (error) {
       console.log(error);
-      if (error.response.status === 401) {
-        console.log("Removing Token");
-        removeToken();
-        navigate("/");
-      }
     }
   };
 
