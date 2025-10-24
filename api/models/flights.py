@@ -15,9 +15,7 @@ from models.basemodels import Base  # type: ignore
 
 # locale.setlocale(locale.LC_TIME, "pt_PT.UTF-8")  # Ou 'pt_BR.UTF-8' para português do Brasil
 if TYPE_CHECKING:
-    from models.tripulantes import (  # type: ignore
-        Tripulante,
-    )
+    from models.tripulantes import Tripulante  # type: ignore
 
 
 class Flight(Base):
@@ -140,13 +138,10 @@ class FlightPilots(Base):
             "ATN": self.night_landings,
             "precapp": self.prec_app,
             "nprecapp": self.nprec_app,
-            "QUAL1": self.qual1,
-            "QUAL2": self.qual2,
-            "QUAL3": self.qual3,
-            "QUAL4": self.qual4,
-            "QUAL5": self.qual5,
-            "QUAL6": self.qual6,
         }
+        # for i in self.tripulante.qualification.get_qualification_list():
+        #     # print(f"{i.lower()}: {getattr(self, i.lower())}")
+        #     response[i] = getattr(self, i.lower(), False)
 
         return response
 

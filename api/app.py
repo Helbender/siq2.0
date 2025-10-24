@@ -10,6 +10,7 @@ from flask_jwt_extended import (
     JWTManager,
 )
 
+from config import setup_database
 from routes.api_blueprint import api
 
 # logging.basicConfig(level=logging.DEBUG)  # noqa: ERA001
@@ -79,6 +80,9 @@ if APPLY_CORS:
 
 # Main api resgistration
 app.register_blueprint(api, url_prefix="/api")
+
+# Setup database
+setup_database()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5051, debug=True)  # noqa: S201

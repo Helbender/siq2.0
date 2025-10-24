@@ -1,12 +1,14 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
 from models.basemodels import Base  # type: ignore
 from models.enums import GrupoQualificacoes, TipoTripulante
-from models.tripulantes import (  # type: ignore
-    TripulanteQualificacao,
-)
+
+if TYPE_CHECKING:
+    from models.tripulantes import TripulanteQualificacao  # type: ignore
 
 
 class Qualificacao(Base):

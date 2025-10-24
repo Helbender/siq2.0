@@ -1,5 +1,6 @@
 from datetime import date, timedelta  # noqa: TCH003
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,7 +8,10 @@ from sqlalchemy.types import Enum as SQLEnum
 
 from models.basemodels import Base  # type: ignore
 from models.enums import TipoTripulante
-from models.flights import FlightPilots  # type: ignore
+
+if TYPE_CHECKING:
+    from models.flights import FlightPilots  # type: ignore
+    from models.qualificacoes import Qualificacao  # type: ignore
 
 
 class Tripulante(Base):
@@ -27,7 +31,9 @@ class Tripulante(Base):
     qualificacoes: Mapped[list["TripulanteQualificacao"]] = relationship(
         back_populates="tripulante", cascade="all, delete-orphan"
     )
-    flight_pilots: Mapped[list[FlightPilots]] = relationship(back_populates="tripulante", cascade="all, delete-orphan")
+    flight_pilots: Mapped[list["FlightPilots"]] = relationship(
+        back_populates="tripulante", cascade="all, delete-orphan"
+    )
 
     def to_json(self):
         response = {}
