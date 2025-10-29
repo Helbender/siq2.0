@@ -140,6 +140,8 @@ def apagar_qualificacao(id: int) -> tuple[Response, int]:
             data = request.get_json()
             stmt = select(Qualificacao).where(Qualificacao.id == id)
             qualificacao = session.execute(stmt).scalar_one_or_none()
+            print(f"Data: {data}")
+            print(f"Qualificacao: {qualificacao}")
             if not qualificacao:
                 abort(404, "Qualificação não encontrada")
             if "nome" in data:

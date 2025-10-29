@@ -28,13 +28,10 @@ class GrupoQualificacoes(Enum):
     MQOBP = "MQOBP"
     MQOIP = "MQOIP"
     MQOAP = "MQOAP"
-    MQOC = "MQOC"
-    MQOBOC = "MQOBOC"
 
     # Cabin operator qualifications
-    CABINE_OPERATIONS = "CABINE_OPERATIONS"
-    COMMUNICATION = "COMMUNICATION"
-    SAFETY_EQUIPMENT = "SAFETY_EQUIPMENT"
+    MQOC = "MQOC"
+    MQOBOC = "MQOBOC"
 
     # Tactical controller qualifications
     TACTICAL_CONTROL = "TACTICAL_CONTROL"
@@ -68,12 +65,9 @@ QUALIFICATION_GROUP_TO_CREW_TYPES = {
     GrupoQualificacoes.MQOBP: [TipoTripulante.PILOTO],
     GrupoQualificacoes.MQOIP: [TipoTripulante.PILOTO],
     GrupoQualificacoes.MQOAP: [TipoTripulante.PILOTO],
-    GrupoQualificacoes.MQOC: [TipoTripulante.PILOTO],
-    GrupoQualificacoes.MQOBOC: [TipoTripulante.PILOTO],
     # Cabin operator qualifications
-    GrupoQualificacoes.CABINE_OPERATIONS: [TipoTripulante.OPERADOR_CABINE],
-    GrupoQualificacoes.COMMUNICATION: [TipoTripulante.OPERADOR_CABINE],
-    GrupoQualificacoes.SAFETY_EQUIPMENT: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.MQOC: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.MQOBOC: [TipoTripulante.OPERADOR_CABINE],
     # Tactical controller qualifications
     GrupoQualificacoes.TACTICAL_CONTROL: [TipoTripulante.CONTROLADOR_TATICO],
     GrupoQualificacoes.RADAR_OPERATIONS: [TipoTripulante.CONTROLADOR_TATICO],
