@@ -131,12 +131,21 @@ function CreateFlightModal({ flight }) {
     console.log("Creating new flight with data:", formData);
     await handleCreateFlight(formData, true);
   };
-
+  const handleEditFlight = async () => {
+    const formData = methods.getValues();
+    
+    // Ensure the flight ID is included in the data when editing
+    if (flight && flight.id) {
+      formData.id = flight.id;
+    }
+    console.log("Editingflight with data:", formData);
+    await handleCreateFlight(formData, false);
+  };
   // Create Flight Endpoint
   const handleCreateFlight = async (data, isNewFlight = false) => {
 
     toast({
-      title: "A adicionar voo",
+      title: isNewFlight ? "A adicionar voo" : "A editar voo",
       description: "Em processo.",
       status: "loading",
       duration: 10000,
@@ -145,15 +154,19 @@ function CreateFlightModal({ flight }) {
     });
     try {
       let res;
-      if (flight) {
-        res = await apiAuth.patch(`/flights/${flight.id}`, data);
+      // Check if we're editing an existing flight (has ID and not creating new)
+      if ((flight?.id || data?.id) && !isNewFlight) {
+        const flightId = data?.id || flight?.id;
+        res = await apiAuth.patch(`/api/flights/${flightId}`, data,
+      );
       } else {
         res = await apiAuth.post("/flights", data);
       }
+      // Response 201 is for creating new flight
       console.log(res);
       if (res.status === 201) {
         toast.closeAll();
-        const message = flight ? "Novo voo criado com sucesso" : "Voo adicionado com sucesso";
+        const message = isNewFlight ? "Novo voo criado com sucesso" : "Voo adicionado com sucesso";
         toast({
           title: "Sucesso",
           description: `${message}. ID: ${res.data?.message}`,
@@ -164,9 +177,11 @@ function CreateFlightModal({ flight }) {
         data.id = res.data?.message;
         setFlights((prev) => [...prev, data]);
         // If creating new flight from edit mode, reset form to create mode
-        if (flight) {
-          reset(defaultFlightData);
-      }}
+        if (isNewFlight && flight) {
+   reset(defaultFlightData);
+ }
+      }
+      //Response 204 is for editing flight
       if (res.status === 204) {
         toast.closeAll();
         toast({
@@ -184,6 +199,11 @@ function CreateFlightModal({ flight }) {
       }
 
     } catch (error) {
+      if (error.response.status === 401) {
+        console.log("Removing Token");
+        removeToken();
+        navigate("/");
+      }
       toast.closeAll();
 
       toast({
@@ -218,6 +238,15 @@ function CreateFlightModal({ flight }) {
   useEffect(() => {
     setValue("destination", DESTINATION.toUpperCase());
   }, [DESTINATION]);
+
+    // Reset form when modal opens with flight data
+  useEffect(() => {
+    if (isOpen && flight) {
+      reset(flight);
+    } else if (isOpen && !flight) {
+      reset(defaultFlightData);
+    }
+  }, [isOpen, flight, reset]);
   return (
     <>
       {flight ? (
@@ -241,7 +270,9 @@ function CreateFlightModal({ flight }) {
       >
         <ModalOverlay />
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(handleCreateFlight)}>
+          <form 
+          // onSubmit={handleSubmit(handleCreateFlight)}
+          >
             <ModalContent
             // minWidth={"1200px"}
             >
@@ -578,7 +609,7 @@ function CreateFlightModal({ flight }) {
                       <GridItem m="auto" />
                       {fields.map((member, index) => (
                         <PilotInput
-                          key={index}
+                          key={member.id}
                           index={index}
                           remove={remove}
                           member={flight_pilots[index]}
@@ -607,7 +638,7 @@ function CreateFlightModal({ flight }) {
                     Novo Voo
                   </Button>
                 )}
-                <Button colorScheme="green" mr={3} type="submit">
+                <Button colorScheme="green" mr={3} onClick={flight ? handleEditFlight : handleCreateNewFlight}>
                   {flight ? "Editar Voo" : "Registar Voo"}
                 </Button>
                 <Button
