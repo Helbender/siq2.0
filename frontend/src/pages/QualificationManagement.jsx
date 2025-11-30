@@ -19,6 +19,7 @@ import {
   Checkbox,
   CheckboxGroup,
   Flex,
+  Button,
 } from "@chakra-ui/react";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ import CreateQualModal from "../components/qualificationComponents/CreateQualMod
 import DeleteQualModal from "../components/qualificationComponents/DeleteQualModal";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
 import { api, apiAuth } from "../utils/api";
+import { BiRefresh } from "react-icons/bi";
 
 function QualificationManagement() {
   const [filteredQualifications, setFilteredQualifications] = useState([]);
@@ -36,7 +38,9 @@ function QualificationManagement() {
   const [availableGroups, setAvailableGroups] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
+  const [isReprocessing, setIsReprocessing] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
   // const { removeToken } = AuthContext();
   const getData = async () => {
     try {
@@ -87,11 +91,56 @@ function QualificationManagement() {
 
     setFilteredQualifications(results);
   }, [searchTerm, qualifications, selectedGroups, selectedTypes]);
+
+  const handleReprocessAllFlights = async () => {
+    setIsReprocessing(true);
+    toast({
+      title: "A reprocessar voos",
+      description: "Por favor aguarde, isto pode demorar alguns minutos...",
+      status: "info",
+      duration: 10000,
+      isClosable: true,
+    });
+
+    try {
+      const res = await apiAuth.post("/flights/reprocess-all-qualifications");
+      toast.closeAll();
+      toast({
+        title: "Sucesso!",
+        description: res.data.message,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast.closeAll();
+      toast({
+        title: "Erro",
+        description:
+          error.response?.data?.message || "Erro ao reprocessar voos",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsReprocessing(false);
+    }
+  };
+
   return (
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10} align={"center"}>
         <CreateQualModal setQualifications={setQualifications} />
         <Spacer />
+        <Button
+          leftIcon={<BiRefresh />}
+          colorScheme="blue"
+          onClick={handleReprocessAllFlights}
+          isLoading={isReprocessing}
+          loadingText="A processar..."
+        >
+          Reprocessar Todas as Qualificações
+        </Button>
         <Input
           m="auto"
           placeholder="Search..."

@@ -1,13 +1,27 @@
+#!/usr/bin/env python3
+"""Script to import flights from a folder containing base64-encoded flight data files.
+
+This script scans a folder (inside scripts/) for flight data files, decodes them,
+and imports them into the database.
+"""
+
+import argparse
 import base64
 import json
 import os
-from datetime import UTC, datetime
+import sys
+from datetime import UTC
+from datetime import datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
-from config import engine  # adjust as needed
-from models.flights import Flight  # Adjust import as needed
+# Add the parent directory (api/) to Python path to import local modules
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config import engine
+from models.flights import Flight
 from routes.flight_blueprint import add_crew_and_pilots
 
 
@@ -24,6 +38,7 @@ def check_duplicate_flight(session: Session, airtask: str, date, departure_time:
 
 
 def import_flights_from_folder(root_folder: str, db: Session):
+    """Import flights from all files in the given folder."""
     for dirpath, _, filenames in os.walk(root_folder):
         print(f"Processing directory: {dirpath}")
         for filename in filenames:
@@ -161,6 +176,48 @@ def import_flights_from_folder(root_folder: str, db: Session):
                         print(f"Created new flight: {flight.airtask} on {flight.date}")
 
 
-SessionLocal = sessionmaker(bind=engine)
-db = SessionLocal()
-import_flights_from_folder("/home/tiago/Projects/siq_react_vite.worktrees/DinamicQualification/api/2025", db)
+def main():
+    """Main function to parse arguments and import flights."""
+    parser = argparse.ArgumentParser(
+        description="Import flights from a folder containing base64-encoded flight data files"
+    )
+    parser.add_argument(
+        "foldername", type=str, help="Name of the folder inside scripts/ directory to scan for flight data files"
+    )
+
+    args = parser.parse_args()
+
+    # Get the scripts directory path
+    scripts_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the full path to the folder
+    folder_path = os.path.join(scripts_dir, args.foldername)
+
+    # Check if folder exists
+    if not os.path.exists(folder_path):
+        print(f"❌ Error: Folder '{folder_path}' does not exist!")
+        sys.exit(1)
+
+    if not os.path.isdir(folder_path):
+        print(f"❌ Error: '{folder_path}' is not a directory!")
+        sys.exit(1)
+
+    print(f"🚀 Starting flight import from folder: {folder_path}")
+    print(f"📅 Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("-" * 60)
+
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+
+    try:
+        import_flights_from_folder(folder_path, db)
+        print("\n" + "=" * 60)
+        print("✅ Import completed successfully!")
+        print(f"📅 Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
+    except Exception as e:
+        print(f"\n❌ Fatal error during import: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

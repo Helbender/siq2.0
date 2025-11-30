@@ -4,7 +4,6 @@ import {
   Input,
   Select,
   IconButton,
-  Text,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { Fragment, useEffect, useMemo } from "react";
@@ -12,16 +11,11 @@ import { FaMinus } from "react-icons/fa";
 import { Controller, useFormContext } from "react-hook-form";
 import { apiAuth } from "../../utils/api";
 
+const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
+
 const PilotInput = ({ index, pilotos, member, remove }) => {
   const [qualP, setQualP] = useState([]);
-  const {
-    register,
-    formState: { errors },
-    setValue,
-    getValues,
-    control,
-    watch,
-  } = useFormContext();
+  const { register, setValue, getValues, control } = useFormContext();
 
   useEffect(() => {
     const fetchQualifications = async () => {
@@ -35,8 +29,28 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             `/v2/qualificacoeslist/${member.nip}`,
           );
           console.log("Data Fetched");
+          // const normalizedQualifications = Array.isArray(response.data)
+          //   ? response.data
+          //       .map((qual) => {
+          //         if (!qual) return null;
+          //         const id =
+          //           typeof qual.id !== "undefined"
+          //             ? String(qual.id)
+          //             : Array.isArray(qual) && typeof qual[0] !== "undefined"
+          //               ? String(qual[0])
+          //               : null;
+          //         const nome =
+          //           qual.nome ??
+          //           (Array.isArray(qual) && typeof qual[1] !== "undefined"
+          //             ? qual[1]
+          //             : null);
+          //         if (!id || !nome) return null;
+          //         return { id, nome };
+          //       })
+          //       .filter(Boolean)
+          //   : [];
           setQualP(response.data);
-          // console.log(response.data);
+          console.log(response.data);
         } catch (error) {
           console.error("Error fetching qualifications:", error);
           setQualP([]);
@@ -68,16 +82,25 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
 
   // Ensure qualification values are preserved when options load
   useEffect(() => {
-    if (qualP.length > 0) {
-      // When qualifications load, ensure existing values are preserved
-      // This is needed because the Select might not recognize values before options are available
-      for (let n = 1; n <= 6; n++) {
-        const qualFieldName = `flight_pilots.${index}.QUAL${n}`;
-        const currentValue = getValues(qualFieldName);
-        if (currentValue && qualP.includes(currentValue)) {
-          // Value exists and is valid, ensure it's set
-          setValue(qualFieldName, currentValue, { shouldValidate: false });
-        }
+    if (!qualP?.length) {
+      return;
+    }
+    for (let n = 1; n <= 6; n++) {
+      const qualFieldName = `flight_pilots.${index}.QUAL${n}`;
+      const currentValue = getValues(qualFieldName);
+      if (!currentValue) continue;
+      const valueAsString = String(currentValue);
+      const matchedById = qualP.find((qual) => qual.id === valueAsString);
+      if (matchedById) {
+        // Ensure stored value is normalized to the ID string
+        setValue(qualFieldName, matchedById.id, { shouldValidate: false });
+        continue;
+      }
+      const matchedByName = qualP.find(
+        (qual) => qual.nome?.toUpperCase() === valueAsString.toUpperCase(),
+      );
+      if (matchedByName) {
+        setValue(qualFieldName, matchedByName.id, { shouldValidate: false });
       }
     }
   }, [qualP, index, getValues, setValue]);
@@ -181,13 +204,27 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
                 name={qualFieldName}
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} placeholder=" " value={field.value || ""}>
+                  <Select
+                    {...field}
+                    placeholder=" "
+                    value={field.value ? String(field.value) : ""}
+                    onChange={(event) =>
+                      field.onChange(event.target.value || "")
+                    }
+                  >
                     {qualP &&
-                      qualP.map((qual, i) => (
-                        <option key={i} value={qual}>
-                          {qual}
-                        </option>
-                      ))}
+                      qualP
+                        .filter(
+                          (qual) =>
+                            !HIDDEN_QUALIFICATIONS.includes(
+                              (qual.nome || "").toUpperCase(),
+                            ),
+                        )
+                        .map((qual) => (
+                          <option key={qual.id} value={qual.id}>
+                            {qual.nome}
+                          </option>
+                        ))}
                   </Select>
                 )}
               />

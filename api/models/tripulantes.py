@@ -46,7 +46,12 @@ class Tripulante(Base):
                 response[col_name] = value.value
             else:
                 response[col_name] = value
-        response["qualificacoes"] = [q.to_json() for q in self.qualificacoes]
+        # Sort qualificacoes by grupo and nome for consistent ordering
+        sorted_quals = sorted(
+            self.qualificacoes,
+            key=lambda q: (q.qualificacao.grupo.value, q.qualificacao.nome),
+        )
+        response["qualificacoes"] = [q.to_json() for q in sorted_quals]
         return response
 
 

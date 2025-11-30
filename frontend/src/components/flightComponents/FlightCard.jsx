@@ -104,100 +104,32 @@ const FlightCard = ({ flight }) => {
           <Table size={"sm"}>
             <Thead>
               <Tr>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  NIP
-                </Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  Func
-                </Th>
-                <Th>Nome</Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  ATR
-                </Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  ATN
-                </Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  Precisão
-                </Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  Não Precisão
-                </Th>
-                <Th textAlign={"center"} fontSize={"md"}>
-                  Qualificações
-                </Th>
+                {[
+                  "NIP",
+                  "Func",
+                  "Nome",
+                  "ATR",
+                  "ATN",
+                  "Precisão",
+                  "Não Precisão",
+                  "Qualificações",
+                ].map((header) => (
+                  <Th key={header} textAlign={"center"} fontSize={"md"}>
+                    {header}
+                  </Th>
+                ))}
               </Tr>
             </Thead>
             <Tbody>
               {flight.flight_pilots.map((pilot) => {
-                let qualification = [];
-                if (pilot.QA1) {
-                  qualification = [...qualification, "QA1"];
-                }
-                if (pilot.QA2) {
-                  qualification = [...qualification, "QA2"];
-                }
-                if (pilot.BSP1) {
-                  qualification = [...qualification, "BSP1"];
-                }
-                if (pilot.BSP2) {
-                  qualification = [...qualification, "BSP2"];
-                }
-                if (pilot.TA) {
-                  qualification = [...qualification, "TA"];
-                }
-                if (pilot.VRP1) {
-                  qualification = [...qualification, "VRP1"];
-                }
-                if (pilot.VRP2) {
-                  qualification = [...qualification, "VRP2"];
-                }
-                if (pilot.CTO) {
-                  qualification = [...qualification, "CTO"];
-                }
-                if (pilot.SID) {
-                  qualification = [...qualification, "SID"];
-                }
-                if (pilot.MONO) {
-                  qualification = [...qualification, "MONO"];
-                }
-                if (pilot.NFP) {
-                  qualification = [...qualification, "NFP"];
-                }
-                if (pilot.BSKIT) {
-                  qualification = [...qualification, "BSKIT"];
-                }
-                if (pilot.BSOC) {
-                  qualification = [...qualification, "BSOC"];
-                }
-                if (pilot.PARAS) {
-                  qualification = [...qualification, "PARAS"];
-                }
-                if (pilot.NVG) {
-                  qualification = [...qualification, "NVG"];
-                }
-                if (pilot.QUAL1) {
-                  qualification = [...qualification, pilot.QUAL1];
-                }
-                if (pilot.QUAL2) {
-                  qualification = [...qualification, pilot.QUAL2];
-                }
-                if (pilot.QUAL3) {
-                  qualification = [...qualification, pilot.QUAL3];
-                }
-                if (pilot.QUAL4) {
-                  qualification = [...qualification, pilot.QUAL4];
-                }
-                if (pilot.QUAL5) {
-                  qualification = [...qualification, pilot.QUAL5];
-                }
-                if (pilot.QUAL6) {
-                  qualification = [...qualification, pilot.QUAL6];
-                }
-                let texto = "";
-                for (let i = 0; i < qualification.length; i++) {
-                  texto = texto + " " + qualification[i];
-                }
+                // Collect qualifications from QUAL1-QUAL6, filtering out empty strings
+                const qualifications = [1, 2, 3, 4, 5, 6]
+                  .map((n) => pilot[`QUAL${n}`])
+                  .filter((qual) => qual && qual.trim() !== "");
+
+                // Join qualifications into a single string
+                const qualificationsText = qualifications.join(" ");
+
                 return (
                   <Tr key={pilot.nip}>
                     <Td textAlign={"center"}>{pilot.nip}</Td>
@@ -207,7 +139,7 @@ const FlightCard = ({ flight }) => {
                     <Td textAlign={"center"}>{pilot.ATN}</Td>
                     <Td textAlign={"center"}>{pilot.precapp}</Td>
                     <Td textAlign={"center"}>{pilot.nprecapp}</Td>
-                    <Td textAlign={"center"}>{texto}</Td>
+                    <Td textAlign={"center"}>{qualificationsText}</Td>
                   </Tr>
                 );
               })}

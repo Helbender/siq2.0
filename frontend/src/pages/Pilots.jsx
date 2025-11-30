@@ -3,7 +3,7 @@ import { Grid, useToast, Stack, Box } from "@chakra-ui/react";
 import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Contexts/AuthContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
 
@@ -16,8 +16,7 @@ const Pilots = ({ tipo }) => {
   const [filteredCrew, setFilteredCrew] = useState([]);
 
   const [pilotos, setPilotos] = useState([]);
-  const { token, removeToken } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
   const location = useLocation();
   const toast = useToast();
 

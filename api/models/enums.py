@@ -28,25 +28,28 @@ class GrupoQualificacoes(Enum):
     MQOBP = "MQOBP"
     MQOIP = "MQOIP"
     MQOAP = "MQOAP"
+    STANDARD = "STANDARD"
 
     # Cabin operator qualifications
     MQOC = "MQOC"
     MQOBOC = "MQOBOC"
+    MQOIOC = "MQOIOC"
+    MQOAOC = "MQOAOC"
 
     # Tactical controller qualifications
-    TACTICAL_CONTROL = "TACTICAL_CONTROL"
-    RADAR_OPERATIONS = "RADAR_OPERATIONS"
-    COORDINATION = "COORDINATION"
+    MQCT = "MQCT"
+    MQOBCT = "MQOBCT"
+    MQOICT = "MQOICT"
+    MQOACT = "MQOACT"
 
     # Surveillance operator qualifications
-    SURVEILLANCE = "SURVEILLANCE"
-    DETECTION_SYSTEMS = "DETECTION_SYSTEMS"
-    MONITORING = "MONITORING"
+    MQOPV = "MQOPV"
+    MQOBOPV = "MQOBOPV"
+    MQOIOPV = "MQOIOPV"
+    MQOAOPV = "MQOAOPV"
 
     # Operations qualifications
     OPERATIONS_PLANNING = "OPERATIONS_PLANNING"
-    LOGISTICS = "LOGISTICS"
-    ADMINISTRATION = "ADMINISTRATION"
 
 
 class TipoTripulante(Enum):
@@ -68,18 +71,20 @@ QUALIFICATION_GROUP_TO_CREW_TYPES = {
     # Cabin operator qualifications
     GrupoQualificacoes.MQOC: [TipoTripulante.OPERADOR_CABINE],
     GrupoQualificacoes.MQOBOC: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.MQOIOC: [TipoTripulante.OPERADOR_CABINE],
+    GrupoQualificacoes.MQOAOC: [TipoTripulante.OPERADOR_CABINE],
     # Tactical controller qualifications
-    GrupoQualificacoes.TACTICAL_CONTROL: [TipoTripulante.CONTROLADOR_TATICO],
-    GrupoQualificacoes.RADAR_OPERATIONS: [TipoTripulante.CONTROLADOR_TATICO],
-    GrupoQualificacoes.COORDINATION: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.MQCT: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.MQOBCT: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.MQOICT: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.MQOACT: [TipoTripulante.CONTROLADOR_TATICO],
     # Surveillance operator qualifications
-    GrupoQualificacoes.SURVEILLANCE: [TipoTripulante.OPERADOR_VIGILANCIA],
-    GrupoQualificacoes.DETECTION_SYSTEMS: [TipoTripulante.OPERADOR_VIGILANCIA],
-    GrupoQualificacoes.MONITORING: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.MQOPV: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.MQOBOPV: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.MQOIOPV: [TipoTripulante.OPERADOR_VIGILANCIA],
+    GrupoQualificacoes.MQOAOPV: [TipoTripulante.OPERADOR_VIGILANCIA],
     # Operations qualifications
     GrupoQualificacoes.OPERATIONS_PLANNING: [TipoTripulante.OPERACOES],
-    GrupoQualificacoes.LOGISTICS: [TipoTripulante.OPERACOES],
-    GrupoQualificacoes.ADMINISTRATION: [TipoTripulante.OPERACOES],
 }
 
 

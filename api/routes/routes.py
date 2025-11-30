@@ -11,8 +11,8 @@ from models.enums import (
     get_qualification_groups_for_crew_type,
     is_qualification_group_applicable_to_crew_type,
 )
-from models.qualificacoes import GrupoQualificacoes, Qualificacao
-from models.tripulantes import TipoTripulante, Tripulante
+from models.qualificacoes import GrupoQualificacoes, Qualificacao  # type:ignore
+from models.tripulantes import TipoTripulante, Tripulante  # type:ignore
 
 v2 = Blueprint("v2", __name__)
 
@@ -22,7 +22,7 @@ v2 = Blueprint("v2", __name__)
 def listar_qualificacoes() -> Response:
     verify_jwt_in_request()
     with Session(engine) as session:
-        stmt = select(Qualificacao)
+        stmt = select(Qualificacao).order_by(Qualificacao.grupo, Qualificacao.nome)
         qualificacoes = session.execute(stmt).scalars().all()
 
         result = [
@@ -75,7 +75,7 @@ def criar_qualificacao() -> Response:
 @v2.route("/tripulantes/qualificacoes/<tipo>", methods=["GET"])
 def listar_qualificacoes_tipo(tipo: str) -> Response:
     with Session(engine) as session:
-        stmt = select(Tripulante).where(Tripulante.tipo == tipo)
+        stmt = select(Tripulante).where(Tripulante.tipo == tipo).order_by(Tripulante.nip, Tripulante.rank)
         tripulantes = session.execute(stmt).scalars().all()
 
         return jsonify([t.to_json() for t in tripulantes])
@@ -91,8 +91,7 @@ def listar_qualificacoes_tripulante(nip: int) -> Response:
 
         stmt2 = select(Qualificacao).where(Qualificacao.tipo_aplicavel == tripulante.tipo)
         qualificacoes = session.execute(stmt2).scalars().all()
-        message = [q.nome for q in qualificacoes]
-        return jsonify(message)
+        return jsonify([{"id": q.id, "nome": q.nome} for q in qualificacoes])
 
 
 # 4. Listar qualificações válidas para um tipo de tripulante

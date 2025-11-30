@@ -1,4 +1,4 @@
-import { Flex, Text, Stack, Grid, GridItem } from "@chakra-ui/react";
+import { Flex, Text, Grid, GridItem } from "@chakra-ui/react";
 import QualificationsPanel from "./QualificationsPanel";
 import { Fragment } from "react";
 import StandardText from "../styledcomponents/StandardText";
@@ -11,9 +11,27 @@ const GroupedQualifications = ({ qualificacoes }) => {
     return acc;
   }, {});
 
+  // Sort groups alphabetically and sort qualifications within each group
+  const sortedGroups = Object.entries(grouped)
+    .sort(([grupoA], [grupoB]) => {
+      // Handle cases where grupo might be null/undefined
+      const a = grupoA || "";
+      const b = grupoB || "";
+      return a.localeCompare(b);
+    })
+    .map(([grupo, quals]) => [
+      grupo,
+      [...quals].sort((a, b) => {
+        // Sort qualifications by nome alphabetically
+        const nomeA = a.nome || "";
+        const nomeB = b.nome || "";
+        return nomeA.localeCompare(nomeB);
+      }),
+    ]);
+
   return (
     <Fragment>
-      {Object.entries(grouped).map(([grupo, quals]) => (
+      {sortedGroups.map(([grupo, quals]) => (
         <Flex
           key={grupo}
           m={"auto"}

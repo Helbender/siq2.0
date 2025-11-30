@@ -57,7 +57,28 @@ function InsertInitQual(props) {
           headers: { Authorization: "Bearer " + token },
         },
       );
-      setQualList(response.data);
+      const normalized =
+        Array.isArray(response.data) && response.data.length > 0
+          ? response.data
+              .map((qual) => {
+                if (!qual) return null;
+                const id =
+                  typeof qual.id !== "undefined"
+                    ? String(qual.id)
+                    : Array.isArray(qual) && typeof qual[0] !== "undefined"
+                      ? String(qual[0])
+                      : null;
+                const nome =
+                  qual.nome ??
+                  (Array.isArray(qual) && typeof qual[1] !== "undefined"
+                    ? qual[1]
+                    : null);
+                if (!id || !nome) return null;
+                return { id, nome };
+              })
+              .filter(Boolean)
+          : [];
+      setQualList(normalized);
     } catch (error) {
       console.log(error);
     }
@@ -127,8 +148,10 @@ function InsertInitQual(props) {
                       {...register("qualification")}
                       bg={"gray.600"}
                     >
-                      {qualList.map((qual, index) => (
-                        <option key={index}>{qual}</option>
+                      {qualList.map((qual) => (
+                        <option key={qual.id} value={qual.id}>
+                          {qual.nome}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>

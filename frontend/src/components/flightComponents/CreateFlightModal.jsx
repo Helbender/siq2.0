@@ -44,8 +44,16 @@ function CreateFlightModal({ flight }) {
   const { token, removeToken } = useContext(AuthContext);
   const { users } = useContext(UserContext);
   const scrollRef = useRef(null);
+  const flightRef = useRef(flight); // Store initial flight reference
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Update flightRef when modal opens, so it doesn't change during editing
+  useEffect(() => {
+    if (isOpen) {
+      flightRef.current = flight;
+    }
+  }, [isOpen, flight]);
 
   const defaultFlightData = flight ?? {
     airtask: "",
@@ -106,44 +114,52 @@ function CreateFlightModal({ flight }) {
   const DESTINATION = watch("destination");
 
   // Handle creating new flight from existing form data
-  const handleCreateNewFlight = async () => {
+  const handleCreateNewFlight = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const formData = methods.getValues();
-    
+
     // Ensure flight_pilots data is properly formatted
     if (formData.flight_pilots && formData.flight_pilots.length > 0) {
-      formData.flight_pilots = formData.flight_pilots.map(pilot => ({
+      formData.flight_pilots = formData.flight_pilots.map((pilot) => ({
         ...pilot,
         // Ensure required fields have default values
-        ATR: pilot.ATR || 0,
-        ATN: pilot.ATN || 0,
-        precapp: pilot.precapp || 0,
-        nprecapp: pilot.nprecapp || 0,
+        ATR: pilot.ATR || null,
+        ATN: pilot.ATN || null,
+        precapp: pilot.precapp || null,
+        nprecapp: pilot.nprecapp || null,
         // Ensure qualification fields are properly set
-        QUAL1: pilot.QUAL1 || "",
-        QUAL2: pilot.QUAL2 || "",
-        QUAL3: pilot.QUAL3 || "",
-        QUAL4: pilot.QUAL4 || "",
-        QUAL5: pilot.QUAL5 || "",
-        QUAL6: pilot.QUAL6 || "",
+        QUAL1: pilot.QUAL1 ? String(pilot.QUAL1) : "",
+        QUAL2: pilot.QUAL2 ? String(pilot.QUAL2) : "",
+        QUAL3: pilot.QUAL3 ? String(pilot.QUAL3) : "",
+        QUAL4: pilot.QUAL4 ? String(pilot.QUAL4) : "",
+        QUAL5: pilot.QUAL5 ? String(pilot.QUAL5) : "",
+        QUAL6: pilot.QUAL6 ? String(pilot.QUAL6) : "",
       }));
     }
-    
+
     console.log("Creating new flight with data:", formData);
     await handleCreateFlight(formData, true);
   };
-  const handleEditFlight = async () => {
+  const handleEditFlight = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const formData = methods.getValues();
-    
-    // Ensure the flight ID is included in the data when editing
-    if (flight && flight.id) {
-      formData.id = flight.id;
+
+    // Use flightRef.current to get stable flight reference even after state updates
+    const currentFlight = flightRef.current || flight;
+    if (currentFlight && currentFlight.id) {
+      formData.id = currentFlight.id;
     }
     console.log("Editingflight with data:", formData);
     await handleCreateFlight(formData, false);
   };
   // Create Flight Endpoint
   const handleCreateFlight = async (data, isNewFlight = false) => {
-
     toast({
       title: isNewFlight ? "A adicionar voo" : "A editar voo",
       description: "Em processo.",
@@ -155,10 +171,11 @@ function CreateFlightModal({ flight }) {
     try {
       let res;
       // Check if we're editing an existing flight (has ID and not creating new)
-      if ((flight?.id || data?.id) && !isNewFlight) {
-        const flightId = data?.id || flight?.id;
-        res = await apiAuth.patch(`/api/flights/${flightId}`, data,
-      );
+      // Use flightRef.current for stable reference even after state updates
+      const currentFlight = flightRef.current || flight;
+      if ((currentFlight?.id || data?.id) && !isNewFlight) {
+        const flightId = data?.id || currentFlight?.id;
+        res = await apiAuth.patch(`/flights/${flightId}`, data);
       } else {
         res = await apiAuth.post("/flights", data);
       }
@@ -166,7 +183,9 @@ function CreateFlightModal({ flight }) {
       console.log(res);
       if (res.status === 201) {
         toast.closeAll();
-        const message = isNewFlight ? "Novo voo criado com sucesso" : "Voo adicionado com sucesso";
+        const message = isNewFlight
+          ? "Novo voo criado com sucesso"
+          : "Voo adicionado com sucesso";
         toast({
           title: "Sucesso",
           description: `${message}. ID: ${res.data?.message}`,
@@ -177,9 +196,9 @@ function CreateFlightModal({ flight }) {
         data.id = res.data?.message;
         setFlights((prev) => [...prev, data]);
         // If creating new flight from edit mode, reset form to create mode
-        if (isNewFlight && flight) {
-   reset(defaultFlightData);
- }
+        if (isNewFlight && flightRef.current) {
+          reset(defaultFlightData);
+        }
       }
       //Response 204 is for editing flight
       if (res.status === 204) {
@@ -197,7 +216,6 @@ function CreateFlightModal({ flight }) {
           ),
         );
       }
-
     } catch (error) {
       if (error.response.status === 401) {
         console.log("Removing Token");
@@ -239,14 +257,15 @@ function CreateFlightModal({ flight }) {
     setValue("destination", DESTINATION.toUpperCase());
   }, [DESTINATION]);
 
-    // Reset form when modal opens with flight data
+  // Reset form when modal opens with flight data
+  // Use flightRef.current to avoid re-triggering when flight prop changes during edit
   useEffect(() => {
-    if (isOpen && flight) {
-      reset(flight);
-    } else if (isOpen && !flight) {
+    if (isOpen && flightRef.current) {
+      reset(flightRef.current);
+    } else if (isOpen && !flightRef.current) {
       reset(defaultFlightData);
     }
-  }, [isOpen, flight, reset]);
+  }, [isOpen, reset]);
   return (
     <>
       {flight ? (
@@ -267,10 +286,12 @@ function CreateFlightModal({ flight }) {
         onClose={onClose}
         scrollBehavior="inside"
         size={"full"}
+        closeOnOverlayClick={false}
+        closeOnEsc={true}
       >
         <ModalOverlay />
         <FormProvider {...methods}>
-          <form 
+          <form
           // onSubmit={handleSubmit(handleCreateFlight)}
           >
             <ModalContent
@@ -629,8 +650,9 @@ function CreateFlightModal({ flight }) {
                 </Stack>
               </ModalBody>
               <ModalFooter>
-               { flight && (
+                {flight && (
                   <Button
+                    type="button"
                     colorScheme="purple"
                     mr={3}
                     onClick={handleCreateNewFlight}
@@ -638,10 +660,16 @@ function CreateFlightModal({ flight }) {
                     Novo Voo
                   </Button>
                 )}
-                <Button colorScheme="green" mr={3} onClick={flight ? handleEditFlight : handleCreateNewFlight}>
+                <Button
+                  type="button"
+                  colorScheme="green"
+                  mr={3}
+                  onClick={flight ? handleEditFlight : handleCreateNewFlight}
+                >
                   {flight ? "Editar Voo" : "Registar Voo"}
                 </Button>
                 <Button
+                  type="button"
                   colorScheme="blue"
                   mr={3}
                   onClick={() => {

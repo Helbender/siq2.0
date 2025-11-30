@@ -37,26 +37,21 @@ application = app  # to work with CPANEL PYTHON APPS
 
 if APPLY_CORS:
     print("\n\nCORS is enabled\n\n")
-    # CORS(
-    #     app,
-    #     origins=[
-    #         "http://0.0.0.0:5173",
-    #         "http://localhost:5173",
-    #     ],
-    #     allow_headers=[
-    #         "Content-Type",
-    #         "Authorization",
-    #         "Access-Control-Allow-Credentials",
-    #         "Access-Control-Allow-Origin",
-    #     ],
-    #     supports_credentials=True,
-    # )
+
     CORS(
         app,
         origins=[
+            "http://0.0.0.0:5173",
+            "http://172.16.7.225:5173",
             "https://esq502.onrender.com",
             "http://localhost:5173",
             "https://siq-react-vite.onrender.com",
+        ],
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "Access-Control-Allow-Credentials",
+            "Access-Control-Allow-Origin",
         ],
         supports_credentials=True,
     )

@@ -2,7 +2,7 @@ from __future__ import annotations  # noqa: D100, INP001
 
 # import locale
 from datetime import date  # noqa: TC003
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
@@ -53,15 +53,20 @@ class Flight(Base):
     ready_ac: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
     med_arrival: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
 
-    flight_pilots: Mapped[List[FlightPilots]] = relationship(  # noqa: UP006
+    flight_pilots: Mapped[list[FlightPilots]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
 
-    def to_json(self) -> dict:
-        """Return all model data in JSON format."""
-        flight_crewmembers = [flightpilot.to_json() for flightpilot in self.flight_pilots]
+    def to_json(self, qual_cache: dict[int, str] | None = None) -> dict:
+        """Return all model data in JSON format.
+
+        Args:
+            qual_cache: Optional dictionary mapping qualification IDs to names.
+                       If provided, qualification IDs will be converted to names.
+        """
+        flight_crewmembers = [flightpilot.to_json(qual_cache) for flightpilot in self.flight_pilots]
 
         # Return the JSON response
         return {
@@ -127,8 +132,24 @@ class FlightPilots(Base):
     tripulante: Mapped[Tripulante] = relationship(back_populates="flight_pilots")
     flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
 
-    def to_json(self) -> dict:
-        """Return all model data in JSON format."""
+    def to_json(self, qual_cache: dict[int, str] | None = None) -> dict:
+        """Return all model data in JSON format.
+
+        Args:
+            qual_cache: Optional dictionary mapping qualification IDs to names.
+                       If provided, qualification IDs will be converted to names.
+        """
+
+        def get_qual_name(qual_id: str | None) -> str | None:
+            """Convert qualification ID to name if cache is available."""
+            if qual_cache is None or qual_id is None or qual_id == "":
+                return qual_id
+            try:
+                qual_id_int = int(qual_id)
+                return qual_cache.get(qual_id_int, qual_id)
+            except (ValueError, TypeError):
+                return qual_id
+
         response = {
             "name": self.tripulante.name,
             "nip": self.tripulante.nip,
@@ -138,47 +159,12 @@ class FlightPilots(Base):
             "ATN": self.night_landings,
             "precapp": self.prec_app,
             "nprecapp": self.nprec_app,
+            "QUAL1": get_qual_name(self.qual1),
+            "QUAL2": get_qual_name(self.qual2),
+            "QUAL3": get_qual_name(self.qual3),
+            "QUAL4": get_qual_name(self.qual4),
+            "QUAL5": get_qual_name(self.qual5),
+            "QUAL6": get_qual_name(self.qual6),
         }
-        # for i in self.tripulante.qualification.get_qualification_list():
-        #     # print(f"{i.lower()}: {getattr(self, i.lower())}")
-        #     response[i] = getattr(self, i.lower(), False)
 
         return response
-
-
-# class FlightCrew(Base):
-#     """SQLALCHEMY Database class with the Crew of each flight."""
-
-#     __tablename__ = "flight_crew"
-
-#     flight_id: Mapped[int] = mapped_column(
-#         ForeignKey("flights_table.fid", ondelete="CASCADE"),
-#         primary_key=True,
-#     )
-
-#     crew_id: Mapped[int] = mapped_column(
-#         ForeignKey("crew.nip", ondelete="CASCADE"), primary_key=True
-#     )
-#     position: Mapped[str] = mapped_column(String(5))
-
-#     qual1: Mapped[str | None]  # noqa: UP007
-#     qual2: Mapped[str | None]  # noqa: UP007
-#     qual3: Mapped[str | None]  # noqa: UP007
-#     qual4: Mapped[str | None]  # noqa: UP007
-#     qual5: Mapped[str | None]  # noqa: UP007
-#     qual6: Mapped[str | None]  # noqa: UP007
-
-#     crew: Mapped[Crew] = relationship(back_populates="flight_crew")
-#     flight: Mapped[Flight] = relationship(back_populates="flight_crew")
-
-#     def to_json(self) -> dict:
-#         """Return all model data in JSON format."""
-#         response = {
-#             "name": self.crew.name,
-#             "position": self.position,
-#             "nip": self.crew.nip,
-#         }
-#         for i in self.crew.qualification.get_qualification_list():
-#             # print(f"{i.lower()}: {getattr(self, i.lower())}")
-#             response[i] = getattr(self, i.lower(), False)
-#         return response
