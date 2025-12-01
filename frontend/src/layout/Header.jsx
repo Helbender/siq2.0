@@ -28,6 +28,7 @@ import {
   FaSignOutAlt,
   FaPlaneArrival,
   FaTable,
+  FaTh,
   FaTools,
   FaUsers,
 } from "react-icons/fa";
@@ -105,7 +106,7 @@ function Header() {
             {colorMode === "light" ? <IoMoon /> : <LuSun />}
           </Button>
         </Flex>
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+        <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
           <DrawerOverlay>
             <DrawerContent>
               <DrawerCloseButton />
@@ -201,22 +202,39 @@ function Header() {
                           <Box ml={2}>Qualificações</Box>
                         </Flex>
                       </ChakraLink>
-
-                      {User.admin ? (<ChakraLink
+                      <ChakraLink
                         p={2}
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
-                          navigate("/qualificacoes");
+                          navigate("/piloto-table");
                           onClose();
                         }}
+                        aria-label="Tabela de Qualificações"
                       >
                         <Flex align="center">
-                          <FaTools />
-
-                          <Box ml={2}>Gerir Qualificações</Box>
+                          <FaTh />
+                          <Box ml={2}>Tabela de Qualificações</Box>
                         </Flex>
-                      </ChakraLink>):null}
+                      </ChakraLink>
+
+                      {User.admin ? (
+                        <ChakraLink
+                          p={2}
+                          color="teal.500"
+                          fontSize="lg"
+                          onClick={() => {
+                            navigate("/qualificacoes");
+                            onClose();
+                          }}
+                        >
+                          <Flex align="center">
+                            <FaTools />
+
+                            <Box ml={2}>Gerir Qualificações</Box>
+                          </Flex>
+                        </ChakraLink>
+                      ) : null}
 
                       {User.admin ? (
                         <ChakraLink

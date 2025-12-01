@@ -53,6 +53,13 @@ export const formatMinutesToTime = (totalMinutes) => {
   const minutes = totalMinutes % 60;
   return `${hours}h ${minutes.toString().padStart(2, "0")}min`;
 };
+
+// Format hours for display
+export const formatHours = (hours) => {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return `${h}h ${m.toString().padStart(2, "0")}min`;
+};
 export function formatDateISO(date) {
   return date.toISOString().split("T")[0];
 }

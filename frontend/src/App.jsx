@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import Pilots from "./pages/Pilots";
-import Crew from "./pages/Crew";
 import Flights from "./pages/Flights";
 import Master from "./layout/Master";
 import LoginPage from "./pages//LoginPage";
@@ -9,7 +8,7 @@ import { Fragment, useContext } from "react";
 import Footer from "./layout/Footer";
 import AboutPage from "./pages/About";
 import RecoverProcess from "./components/loginComponents/RecoverProcess";
-
+import Sidebar from "./components/Sidebar";
 import { AuthContext } from "./Contexts/AuthContext";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage";
@@ -18,6 +17,7 @@ import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
 import FileUpload from "./components/UserC/FileUpload";
 import QualificationManagement from "./pages/QualificationManagement";
+import QualificationTable from "./pages/QualificationTable";
 import api from "./utils/api";
 
 function App() {
@@ -39,6 +39,7 @@ function App() {
   return (
     <HashRouter>
       <Header />
+      <Sidebar />
       {!token && token !== "" && token !== undefined ? (
         <Routes>
           <Route index element={<Navigate replace to="login" />} />
@@ -82,9 +83,17 @@ function App() {
                   element={<Pilots tipo={tipo} />}
                 />
               ))}
-              {/* <Route path="/pilots" element={<Pilots position="PC" />} />
-              <Route path="/co-pilots" element={<Pilots position="CP" />} />
-              <Route path="/crew" element={<Crew />} /> */}
+              {tipos.map((tipo) => (
+                <Route
+                  key={`${tipo}-table`}
+                  path={`/${tipo
+                    .toLowerCase()
+                    .replace(" ", "-")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")}-table`}
+                  element={<QualificationTable tipo={tipo} />}
+                />
+              ))}
             </Route>
             <Route path="/about" element={<AboutPage />} />
           </Routes>

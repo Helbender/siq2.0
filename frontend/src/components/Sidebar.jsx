@@ -46,7 +46,7 @@ const Sidebar = () => {
           >
             <Flex
               align="center"
-              px={4}
+              px={2}
               py={2}
               role="group"
               cursor="pointer"

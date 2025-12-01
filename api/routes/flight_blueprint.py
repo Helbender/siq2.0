@@ -9,7 +9,7 @@ from typing import Any
 from dotenv import load_dotenv
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request
-from sqlalchemy import exc, func, select
+from sqlalchemy import exc, extract, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type:ignore  # noqa: PGH003
@@ -28,6 +28,22 @@ flights = Blueprint("flights", __name__)
 # Load enviroment variables
 load_dotenv(dotenv_path="./.env")
 DEV = bool(os.environ.get("DEV", "0"))
+
+
+def parse_time_to_minutes(time_str: str) -> int:
+    """Parse time string in format 'HH:MM' to total minutes."""
+    if not time_str or time_str == "" or time_str == "__:__":
+        return 0
+    try:
+        parts = time_str.split(":")
+        if len(parts) != 2:
+            return 0
+        hours = int(parts[0])
+        minutes = int(parts[1])
+        return hours * 60 + minutes
+    except (ValueError, AttributeError):
+        return 0
+
 
 converter: dict = {"ATR": "day_landings", "ATN": "night_landings", "precapp": "prec_app", "nprecapp": "nprec_app"}
 
@@ -237,6 +253,112 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             return jsonify({"deleted_id": f"Flight {flight_id}"}), 200
 
     return jsonify({"message": "Bad Manual Request"}), 403
+
+
+@flights.route("/statistics", methods=["GET"], strict_slashes=False)
+def get_flight_statistics() -> tuple[Response, int]:
+    """Get flight statistics for dashboard.
+
+    Query Parameters:
+        year (int, optional): Year to filter flights. Defaults to current year.
+
+    Returns:
+        - total_flights: Total number of flights
+        - hours_by_type: Total hours grouped by flight_type (pie chart data)
+        - hours_by_action: Total hours grouped by flight_action (pie chart data)
+        - total_passengers: Sum of all passengers
+        - total_doe: Sum of all DOE
+        - total_cargo: Sum of all cargo
+    """
+    # Get year from query parameter, default to current year
+    year = request.args.get("year", type=int)
+    if year is None:
+        year = datetime.now(UTC).year
+
+    with Session(engine) as session:
+        # Get total flights count for the selected year
+        total_flights = (
+            session.execute(select(func.count(Flight.fid)).where(extract("year", Flight.date) == year)).scalar() or 0
+        )
+
+        # Get all flights for the selected year
+        all_flights = session.execute(select(Flight).where(extract("year", Flight.date) == year)).scalars().all()
+
+        # Calculate hours by flight_type
+        hours_by_type: dict[str, int] = {}  # type -> total minutes
+        hours_by_action: dict[str, int] = {}  # action -> total minutes
+        total_passengers = 0
+        total_doe = 0
+        total_cargo = 0
+        total_minutes = 0  # Total flight minutes for the year
+
+        for flight in all_flights:
+            # Parse total_time to minutes
+            minutes = parse_time_to_minutes(flight.total_time)
+            total_minutes += minutes  # Add to total
+
+            # Group by flight_type
+            flight_type = flight.flight_type  # or "Unknown"
+            hours_by_type[flight_type] = hours_by_type.get(flight_type, 0) + minutes
+
+            # Group by flight_action
+            flight_action = flight.flight_action  # or "Unknown"
+            hours_by_action[flight_action] = hours_by_action.get(flight_action, 0) + minutes
+
+            # Sum passengers, doe, cargo
+            total_passengers += flight.passengers or 0
+            total_doe += flight.doe or 0
+            total_cargo += flight.cargo or 0
+
+        # Convert minutes to hours for display and format for pie charts
+        def format_for_pie_chart(data_dict: dict[str, int]) -> list[dict[str, Any]]:
+            """Convert minutes dict to pie chart format with hours."""
+            result = []
+            for key, minutes in data_dict.items():
+                hours = minutes / 60
+                result.append(
+                    {
+                        "name": key,
+                        "value": hours,  # hours for display
+                        "minutes": minutes,  # keep minutes for calculations
+                    }
+                )
+            return result
+
+        # Calculate total hours from total minutes
+        total_hours = total_minutes / 60
+
+        statistics = {
+            "total_flights": total_flights,
+            "total_hours": total_hours,  # Total flight hours for the year
+            "hours_by_type": format_for_pie_chart(hours_by_type),
+            "hours_by_action": format_for_pie_chart(hours_by_action),
+            "total_passengers": total_passengers,
+            "total_doe": total_doe,
+            "total_cargo": total_cargo,
+            "year": year,
+        }
+        print(statistics)
+        return jsonify(statistics), 200
+
+
+@flights.route("/available-years", methods=["GET"], strict_slashes=False)
+def get_available_years() -> tuple[Response, int]:
+    """Get list of years that have flights in the database."""
+    with Session(engine) as session:
+        # Get distinct years from flights
+        years = (
+            session.execute(
+                select(extract("year", Flight.date).label("year"))
+                .distinct()
+                .order_by(extract("year", Flight.date).desc())
+            )
+            .scalars()
+            .all()
+        )
+        # Convert to list of integers
+        years_list = [int(year) for year in years if year is not None]
+        return jsonify({"years": years_list}), 200
 
 
 @flights.route("/reprocess-all-qualifications", methods=["POST"], strict_slashes=False)

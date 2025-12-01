@@ -21,6 +21,18 @@ const Navbar = () => {
     fontWeight: "bold",
   };
 
+  // Check if we're on a table page (path ends with -table)
+  const isTablePage = location.pathname.endsWith("-table");
+
+  // Helper function to normalize tipo to path format
+  const normalizeTipo = (tipo) => {
+    return tipo
+      .toLowerCase()
+      .replace(" ", "-")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
   useMemo(() => {
     const fetchData = async () => {
       try {
@@ -49,31 +61,28 @@ const Navbar = () => {
         >
           {/* Left Side*/}
           <Breadcrumb separator={"-"}>
-            {tipos.map((tipo) => (
-              <BreadcrumbItem key={tipo}>
-                <BreadcrumbLink
-                  p={2}
-                  as={Link}
-                  to={tipo
-                    .toLowerCase()
-                    .replace(" ", "-")
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")}
-                  sx={
-                    location.pathname ===
-                    `/${tipo
-                      .toLowerCase()
-                      .replace(" ", "-")
-                      .normalize("NFD")
-                      .replace(/[\u0300-\u036f]/g, "")}`
-                      ? selected_style
-                      : null
-                  }
-                >
-                  {tipo}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            ))}
+            {tipos.map((tipo) => {
+              const normalizedTipo = normalizeTipo(tipo);
+              const basePath = `/${normalizedTipo}`;
+              const tablePath = `${basePath}-table`;
+              const linkPath = isTablePage ? tablePath : basePath;
+              const currentPath = isTablePage ? tablePath : basePath;
+
+              return (
+                <BreadcrumbItem key={tipo}>
+                  <BreadcrumbLink
+                    p={2}
+                    as={Link}
+                    to={linkPath}
+                    sx={
+                      location.pathname === currentPath ? selected_style : null
+                    }
+                  >
+                    {tipo}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              );
+            })}
           </Breadcrumb>
         </Flex>
       </Box>
