@@ -158,7 +158,10 @@ def retrieve_flights() -> tuple[Response, int]:
                 return jsonify({"message": "At least one pilot is required"}), 400
 
             for pilot in f["flight_pilots"]:
-                add_crew_and_pilots(session, flight, pilot)
+                result = add_crew_and_pilots(session, flight, pilot)
+                if result is None:
+                    # Pilot not found, but continue with other pilots
+                    continue
             try:
                 session.flush()
             except exc.IntegrityError as e:
@@ -218,7 +221,10 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
             # Then process the new pilot data which will update/create qualifications
             for pilot in f["flight_pilots"]:
-                add_crew_and_pilots(session, flight, pilot, edit=True)
+                result = add_crew_and_pilots(session, flight, pilot, edit=True)
+                if result is None:
+                    # Pilot not found, but continue with other pilots
+                    continue
 
             session.commit()
             session.refresh(flight)
@@ -546,16 +552,20 @@ def update_qualifications_on_delete(
         session.add(pq)
 
 
-def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> FlightPilots:  # noqa: FBT001, FBT002
+def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> FlightPilots | None:  # noqa: FBT001, FBT002
     """Check type of crew and add it to respective Model Object."""
     # Garanties data integrety while introducing several flights
 
-    print(f"Processing Pilot/Crew NIP: {pilot['nip']}")
+    # print(f"Processing Pilot/Crew NIP: {pilot['nip']}")
     pilot_obj: Tripulante | None = session.get(Tripulante, pilot["nip"])  # type: ignore  # noqa: PGH003
 
     if pilot_obj is None:
-        print(f"Error: Pilot {pilot['nip']} not found")
-        raise ValueError(f"Pilot {pilot['nip']} not found")
+        pilot_name = pilot.get("name", "Unknown")
+        print(
+            f"⚠️  Warning: Pilot NIP {pilot['nip']} ({pilot_name}) not found in database "
+            f"(Flight: {flight.airtask} on {flight.date}). Skipping pilot."
+        )
+        return None
     # Check if the pilot already exists in the database and edit it if true
     if edit:
         # Update the existing FlightPilots object
@@ -691,6 +701,25 @@ def update_tripulante_qualificacao(
 
     if not convert:
         qual_id = getattr(flight_pilot, qual_name)
+
+        # If qual_id is a string (name) instead of an ID, try to look it up
+        if isinstance(qual_id, str) and qual_id.strip() and not qual_id.isdigit():
+            qual_name_from_value = qual_id.strip()
+            qual = session.scalars(
+                select(Qualificacao).where(
+                    Qualificacao.nome == qual_name_from_value,
+                    Qualificacao.tipo_aplicavel == pilot_obj.tipo,
+                )
+            ).first()
+            if qual:
+                qual_id = qual.id
+            else:
+                # Qualification name not found in database - skip and warn
+                print(
+                    f"⚠️  Warning: Qualification '{qual_name_from_value}' not found for type {pilot_obj.tipo.value} "
+                    f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
+                )
+                return
     else:
         # When convert is True, look for the qualification in the pilot's existing qualifications
         # First, check if pilot already has this qualification
@@ -709,10 +738,26 @@ def update_tripulante_qualificacao(
             ).first()
             if qual:
                 qual_id = qual.id
+            else:
+                # Qualification name not found in database - skip and warn
+                print(
+                    f"⚠️  Warning: Qualification '{qual_name}' not found for type {pilot_obj.tipo.value} "
+                    f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
+                )
+                return
 
+    # Ensure qual_id is an integer or None
     if qual_id == "" or qual_id is None:
-        print("Empty field, skipping qualification update")
-        # print(f"Error: Qualification {qual_name} not found for type {pilot_obj.tipo.value}")
+        return
+
+    # Convert to int if it's a string representation of a number
+    try:
+        qual_id = int(qual_id)
+    except (ValueError, TypeError):
+        print(
+            f"⚠️  Warning: Invalid qualification ID '{qual_id}' for qualification '{qual_name}' "
+            f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
+        )
         return
 
     pq = session.scalars(

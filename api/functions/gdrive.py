@@ -1,17 +1,18 @@
 import base64
 import io
 import json
-import os.path
-from dotenv import load_dotenv
 import logging
-from functions.pdfcreator import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
+import os.path
 
+from dotenv import load_dotenv
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials  # type:ignore
 from google.oauth2 import service_account  # type:ignore
+from google.oauth2.credentials import Credentials  # type:ignore
 from google_auth_oauthlib.flow import InstalledAppFlow  # type:ignore
 from googleapiclient.discovery import build  # type:ignore
 from googleapiclient.http import MediaIoBaseUpload  # type:ignore
+
+from functions.pdfcreator import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]

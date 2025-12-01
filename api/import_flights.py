@@ -10,12 +10,10 @@ import base64
 import json
 import os
 import sys
-from datetime import UTC
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 # Add the parent directory (api/) to Python path to import local modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -155,7 +153,10 @@ def import_flights_from_folder(root_folder: str, db: Session):
                             continue
 
                         for pilot in flight_data["flight_pilots"]:
-                            add_crew_and_pilots(session, existing_flight, pilot)
+                            result = add_crew_and_pilots(session, existing_flight, pilot)
+                            if result is None:
+                                # Pilot not found, but continue with other pilots
+                                continue
 
                         session.commit()
                         print(f"Updated flight: {existing_flight.airtask} on {existing_flight.date}")
@@ -170,7 +171,10 @@ def import_flights_from_folder(root_folder: str, db: Session):
                             continue
 
                         for pilot_data in flight_data["flight_pilots"]:
-                            add_crew_and_pilots(session, flight, pilot_data)
+                            result = add_crew_and_pilots(session, flight, pilot_data)
+                            if result is None:
+                                # Pilot not found, but continue with other pilots
+                                continue
 
                         session.commit()
                         print(f"Created new flight: {flight.airtask} on {flight.date}")
