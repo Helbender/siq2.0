@@ -100,7 +100,7 @@ function UserManagementPage() {
             {filteredUsers.map((user) => (
               <Tr key={user.nip}>
                 <Td>{user.nip}</Td>
-                <Td>{user.nome}</Td>
+                <Td>{user.name}</Td>
                 <Td>{user.rank}</Td>
                 <Td>{user.position}</Td>
                 <Td>{user.tipo}</Td>

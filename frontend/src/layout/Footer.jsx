@@ -17,6 +17,8 @@ function Footer() {
       boxShadow="lg"
       position="fixed"
       bottom={0}
+      zIndex={1001}
+      h="5vh"
     >
       <Spacer />
 

@@ -39,7 +39,7 @@ function App() {
   return (
     <HashRouter>
       <Header />
-      <Sidebar />
+      {/* <Sidebar /> */}
       {!token && token !== "" && token !== undefined ? (
         <Routes>
           <Route index element={<Navigate replace to="login" />} />

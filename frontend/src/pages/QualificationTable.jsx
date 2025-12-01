@@ -173,25 +173,13 @@ const QualificationTable = ({ tipo }) => {
         <Table size="sm" variant="simple">
           <Thead bg={headerBg}>
             <Tr>
-              {/* <Th
-                fontSize={"lg"}
-                position="sticky"
-                left={0}
-                bg={headerBg}
-                zIndex={2}
-                minW="80px"
-                borderRight="1px solid"
-                borderColor={useColorModeValue("gray.300", "gray.600")}
-              >
-                NIP
-              </Th> */}
               <Th
                 fontSize={"lg"}
                 position="sticky"
                 left="0px"
                 bg={headerBg}
                 zIndex={2}
-                minW="20px"
+                // minW="20px"
                 maxW="30px"
                 borderRight="1px solid"
                 borderColor={useColorModeValue("gray.300", "gray.600")}
@@ -204,8 +192,7 @@ const QualificationTable = ({ tipo }) => {
                 left="30px"
                 bg={headerBg}
                 zIndex={2}
-                minW="30px"
-                maxW="50px"
+                // maxW="200px"
                 borderRight="1px solid"
                 borderColor={useColorModeValue("gray.300", "gray.600")}
               >
@@ -253,16 +240,6 @@ const QualificationTable = ({ tipo }) => {
                   key={member.nip}
                   _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
                 >
-                  {/* <Td
-                    position="sticky"
-                    left={0}
-                    bg={cardBg}
-                    zIndex={1}
-                    borderRight="1px solid"
-                    borderColor={useColorModeValue("gray.300", "gray.600")}
-                  >
-                    {member.nip}
-                  </Td> */}
                   <Td
                     position="sticky"
                     left="0px"
@@ -275,13 +252,15 @@ const QualificationTable = ({ tipo }) => {
                   </Td>
                   <Td
                     position="sticky"
-                    left="50px"
+                    left="30px"
                     bg={cardBg}
                     zIndex={1}
                     borderRight="1px solid"
                     borderColor={useColorModeValue("gray.300", "gray.600")}
+                    width="200px"
+                    isTruncated
                   >
-                    {member.name}
+                    {member.name?.trim() || member.name}
                   </Td>
                   {allQualifications.map((qualName) => {
                     const daysLeft = getDaysLeft(member, qualName);

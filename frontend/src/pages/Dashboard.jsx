@@ -277,7 +277,14 @@ function Dashboard() {
 
   return (
     <>
-      <Box p={6} overflow={"scroll"} h={"87vh"} bg={bgColor}>
+      <Box
+        p={6}
+        overflow={"hidden"}
+        h={"calc(95vh - 75px)"}
+        // w={"calc(100vw - 60px)"}
+        bg={bgColor}
+        // ml={"60px"}
+      >
         {/* OLD HEADING - COMMENTED OUT */}
         <Heading mb={6} textAlign={"center"}>
           Dashboard (WIP)
