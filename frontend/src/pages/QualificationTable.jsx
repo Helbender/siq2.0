@@ -179,8 +179,8 @@ const QualificationTable = ({ tipo }) => {
                 left="0px"
                 bg={headerBg}
                 zIndex={2}
-                // minW="20px"
-                maxW="30px"
+                minW="20px"
+                // maxW="30px"
                 borderRight="1px solid"
                 borderColor={useColorModeValue("gray.300", "gray.600")}
               >
@@ -207,7 +207,7 @@ const QualificationTable = ({ tipo }) => {
                   onClick={() => handleSort(qualName)}
                   _hover={{ bg: useColorModeValue("gray.300", "gray.600") }}
                   userSelect="none"
-                  minW="120px"
+                  minW="20px"
                 >
                   <Flex align="center" justify="center" gap={2}>
                     <Text fontSize="lg" isTruncated>

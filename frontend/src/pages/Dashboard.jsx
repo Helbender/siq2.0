@@ -12,6 +12,9 @@ import {
   Select,
   FormControl,
   FormLabel,
+  Skeleton,
+  SkeletonCircle,
+  SkeletonText,
 } from "@chakra-ui/react";
 import { UserContext } from "../Contexts/UserContext";
 import {
@@ -88,6 +91,7 @@ function Dashboard() {
   const [totalPassengers, setTotalPassengers] = useState(0);
   const [totalDoe, setTotalDoe] = useState(0);
   const [totalCargo, setTotalCargo] = useState(0);
+  const [topPilotsByType, setTopPilotsByType] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
@@ -122,6 +126,7 @@ function Dashboard() {
       setTotalPassengers(data.total_passengers);
       setTotalDoe(data.total_doe);
       setTotalCargo(data.total_cargo);
+      setTopPilotsByType(data.top_pilots_by_type || {});
       setLoading(false);
     } catch (error) {
       console.error("Error fetching statistics:", error);
@@ -270,7 +275,38 @@ function Dashboard() {
   if (loading) {
     return (
       <Box p={6} ml={"60px"}>
-        <Text>Loading statistics...</Text>
+        <Heading mb={6} textAlign={"center"}>
+          Dashboard (A carregar estatísticas...)
+        </Heading>
+        <Flex justifyContent="center" alignItems="center" mb={6}>
+          <Skeleton width="300px" height="30px" mb={6} />
+        </Flex>
+        <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4} mb={6}>
+          <Box padding="6" boxShadow="lg">
+            <SkeletonCircle size="5" />
+            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          </Box>
+          <Box padding="6" boxShadow="lg">
+            <SkeletonCircle size="5" />
+            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          </Box>
+          <Box padding="6" boxShadow="lg">
+            <SkeletonCircle size="5" />
+            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          </Box>
+          <Box padding="6" boxShadow="lg">
+            <SkeletonCircle size="5" />
+            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          </Box>
+          <Box padding="6" boxShadow="lg">
+            <SkeletonCircle size="5" />
+            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          </Box>
+        </SimpleGrid>
+        <Flex direction={{ base: "column", lg: "row" }} gap={6} mb={6}>
+          <Skeleton w="100%" height={"450px"} mb={6} />
+          <Skeleton w="100%" height={"450px"} mb={6} />
+        </Flex>
       </Box>
     );
   }
@@ -279,7 +315,7 @@ function Dashboard() {
     <>
       <Box
         p={6}
-        overflow={"hidden"}
+        overflow={"scroll"}
         h={"calc(95vh - 75px)"}
         // w={"calc(100vw - 60px)"}
         bg={bgColor}
@@ -287,12 +323,19 @@ function Dashboard() {
       >
         {/* OLD HEADING - COMMENTED OUT */}
         <Heading mb={6} textAlign={"center"}>
-          Dashboard (WIP)
+          Dashboard
         </Heading>
 
-        {/* <Flex justifyContent="space-between" alignItems="center" mb={6}>
-          <Heading>Flight Statistics Dashboard</Heading> */}
-        <Flex justifyContent="center" alignItems="center" mb={6}>
+        <Flex justifyContent="space-between" alignItems="center" mb={2}>
+          {/* {loadingSunTimes && <Text size={"lg"}>A carregar horário...</Text>} */}
+          {errorSunTimes && <Text>Error: {errorSunTimes}</Text>}
+          {sunrise && sunset && (
+            <Flex mb={0} alignItems={"center"} flexDirection={"column"}>
+              <Heading>Hoje</Heading>
+              <Text>{`SR: ${sunrise.toLocaleTimeString()}L`}</Text>
+              <Text>{`SS: ${sunset.toLocaleTimeString()}L`}</Text>
+            </Flex>
+          )}
           <FormControl width="auto" display="flex" alignItems="center" gap={3}>
             <FormLabel mb={0}>Selecionar Ano</FormLabel>
             <Select
@@ -308,7 +351,19 @@ function Dashboard() {
               ))}
             </Select>
           </FormControl>
+          {/* {loadingT && <Text size={"lg"}>A carregar horário...</Text>} */}
+          {errorT && <Text>Error: {errorT}</Text>}
+          {sunriseT && sunsetT && (
+            <Flex mb={0} alignItems={"center"} flexDirection={"column"}>
+              <Heading>Amanhã</Heading>
+              <Text>{`SR: ${sunriseT.toLocaleTimeString()}L`}</Text>
+              <Text>{`SS: ${sunsetT.toLocaleTimeString()}L`}</Text>
+            </Flex>
+          )}
         </Flex>
+        <Text mb={4} textAlign={"right"}>
+          https://sunrise-sunset.org/
+        </Text>
         {/* </Flex> */}
         {/* Summary Statistics */}
         <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4} mb={6}>
@@ -329,8 +384,8 @@ function Dashboard() {
             <StatNumber>{totalDoe.toLocaleString()}</StatNumber>
           </Stat>
           <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Total de Carga (Kg)</StatLabel>
-            <StatNumber>{totalCargo.toLocaleString()}</StatNumber>
+            <StatLabel>Total de Carga</StatLabel>
+            <StatNumber>{totalCargo.toLocaleString() + " Kg"}</StatNumber>
           </Stat>
         </SimpleGrid>
 
@@ -376,7 +431,13 @@ function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => formatHours(value)}
+                    formatter={(value) => {
+                      const percentage =
+                        totalHours > 0
+                          ? ((value / totalHours) * 100).toFixed(1)
+                          : 0;
+                      return `${percentage}%`;
+                    }}
                     labelFormatter={(label) => `Type: ${label}`}
                   />
                   <Legend
@@ -441,7 +502,13 @@ function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => formatHours(value)}
+                    formatter={(value) => {
+                      const percentage =
+                        totalHours > 0
+                          ? ((value / totalHours) * 100).toFixed(1)
+                          : 0;
+                      return `${percentage}%`;
+                    }}
                     labelFormatter={(label) => `Action: ${label}`}
                   />
                   <Legend
@@ -466,6 +533,57 @@ function Dashboard() {
             )}
           </Box>
         </Flex>
+        {/* Top Pilots by Type */}
+        {Object.keys(topPilotsByType).length > 0 && (
+          <Box mb={6}>
+            <Heading size="md" mb={4} textAlign="center">
+              Tripulantes com Mais Horas por Tipo ({selectedYear})
+            </Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+              {[
+                "PILOTO",
+                "OPERADOR CABINE",
+                "CONTROLADOR TATICO",
+                "OPERADOR VIGILANCIA",
+                "OPERAÇÕES",
+              ]
+                .filter((tipo) => topPilotsByType[tipo])
+                .map((tipo) => {
+                  const pilot = topPilotsByType[tipo];
+                  if (!pilot) return null;
+                  return (
+                    <Box
+                      key={tipo}
+                      bg={cardBg}
+                      p={4}
+                      borderRadius="lg"
+                      boxShadow="md"
+                    >
+                      <Heading
+                        size="sm"
+                        mb={2}
+                        textAlign="center"
+                        color="teal.500"
+                      >
+                        {tipo}
+                      </Heading>
+                      <Flex direction="column" align="center" gap={2}>
+                        <Text fontSize="lg" fontWeight="bold">
+                          {pilot.rank} {pilot.name}
+                        </Text>
+                        <Text fontSize="md" color="gray.600">
+                          NIP: {pilot.nip}
+                        </Text>
+                        <Text fontSize="xl" fontWeight="bold" color="teal.500">
+                          {formatHours(pilot.hours)}
+                        </Text>
+                      </Flex>
+                    </Box>
+                  );
+                })}
+            </SimpleGrid>
+          </Box>
+        )}
 
         {/* Realtime Status Indicator */}
         <Box
@@ -476,34 +594,11 @@ function Dashboard() {
           textAlign="center"
         >
           <Text fontSize="sm" color="green.500">
-            ● Auto-refresh - Estatísticas atualizam automaticamente a cada 30
-            segundos
+            ● Auto-refresh - Estatísticas atualizam automaticamente a cada 5
+            minutos
           </Text>
         </Box>
-        {/* OLD SUN TIMES SECTION - COMMENTED OUT */}
-        <Flex justifyContent={"space-between"} mt={6}>
-          {loadingSunTimes && <Text size={"lg"}>A carregar horário...</Text>}
-          {errorSunTimes && <Text>Error: {errorSunTimes}</Text>}
-          {sunrise && sunset && (
-            <Flex mb={4} alignItems={"center"} flexDirection={"column"}>
-              <Heading>Hoje</Heading>
-              <Text>{`SR: ${sunrise.toLocaleTimeString()}L`}</Text>
-              <Text>{`SS: ${sunset.toLocaleTimeString()}L`}</Text>
-            </Flex>
-          )}
-          {loadingT && <Text size={"lg"}>A carregar horário...</Text>}
-          {errorT && <Text>Error: {errorT}</Text>}
-          {sunriseT && sunsetT && (
-            <Flex mb={4} alignItems={"center"} flexDirection={"column"}>
-              <Heading>Amanhã</Heading>
-              <Text>{`SR: ${sunriseT.toLocaleTimeString()}L`}</Text>
-              <Text>{`SS: ${sunsetT.toLocaleTimeString()}L`}</Text>
-            </Flex>
-          )}
-        </Flex>
-        <Text mb={4} textAlign={"right"}>
-          https://sunrise-sunset.org/
-        </Text>
+
         {/* OLD CONTENT - COMMENTED OUT */}
         {/* <Accordion defaultIndex={[0]} allowMultiple={true}>
         <AccordionItem>

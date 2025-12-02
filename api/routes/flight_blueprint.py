@@ -287,8 +287,17 @@ def get_flight_statistics() -> tuple[Response, int]:
             session.execute(select(func.count(Flight.fid)).where(extract("year", Flight.date) == year)).scalar() or 0
         )
 
-        # Get all flights for the selected year
-        all_flights = session.execute(select(Flight).where(extract("year", Flight.date) == year)).scalars().all()
+        # Get all flights for the selected year with pilots loaded
+        all_flights = (
+            session.execute(
+                select(Flight)
+                .where(extract("year", Flight.date) == year)
+                .options(joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante))
+            )
+            .unique()
+            .scalars()
+            .all()
+        )
 
         # Calculate hours by flight_type
         hours_by_type: dict[str, int] = {}  # type -> total minutes
@@ -297,6 +306,12 @@ def get_flight_statistics() -> tuple[Response, int]:
         total_doe = 0
         total_cargo = 0
         total_minutes = 0  # Total flight minutes for the year
+        pilot_hours: dict[int, int] = {}  # pilot_id -> total minutes
+        pilot_hours_by_type: dict[TipoTripulante, dict[int, int]] = {}  # tipo -> {pilot_id -> total minutes}
+
+        # Initialize dictionaries for each crew type
+        for crew_type in TipoTripulante:
+            pilot_hours_by_type[crew_type] = {}
 
         for flight in all_flights:
             # Parse total_time to minutes
@@ -316,6 +331,21 @@ def get_flight_statistics() -> tuple[Response, int]:
             total_doe += flight.doe or 0
             total_cargo += flight.cargo or 0
 
+            # Calculate hours per pilot (overall and by type)
+            for flight_pilot in flight.flight_pilots:
+                if flight_pilot.pilot_id and flight_pilot.tripulante:
+                    pilot_id = flight_pilot.pilot_id
+                    pilot_tipo = flight_pilot.tripulante.tipo
+
+                    # Overall hours
+                    pilot_hours[pilot_id] = pilot_hours.get(pilot_id, 0) + minutes
+
+                    # Hours by crew type
+                    if pilot_tipo in pilot_hours_by_type:
+                        pilot_hours_by_type[pilot_tipo][pilot_id] = (
+                            pilot_hours_by_type[pilot_tipo].get(pilot_id, 0) + minutes
+                        )
+
         # Convert minutes to hours for display and format for pie charts
         def format_for_pie_chart(data_dict: dict[str, int]) -> list[dict[str, Any]]:
             """Convert minutes dict to pie chart format with hours."""
@@ -334,6 +364,27 @@ def get_flight_statistics() -> tuple[Response, int]:
         # Calculate total hours from total minutes
         total_hours = total_minutes / 60
 
+        # Find top pilot for each crew type
+        top_pilots_by_type: dict[str, dict[str, Any] | None] = {}
+        for crew_type, hours_dict in pilot_hours_by_type.items():
+            if hours_dict:
+                # Find the pilot ID with maximum hours for this type
+                top_pilot_id = max(hours_dict, key=lambda pid: hours_dict[pid])
+                top_pilot_minutes = hours_dict[top_pilot_id]
+                top_pilot_obj = session.get(Tripulante, top_pilot_id)
+                if top_pilot_obj:
+                    top_pilots_by_type[crew_type.value] = {
+                        "nip": top_pilot_obj.nip,
+                        "name": top_pilot_obj.name,
+                        "rank": top_pilot_obj.rank or "",
+                        "hours": top_pilot_minutes / 60,  # Convert minutes to hours
+                        "tipo": crew_type.value,
+                    }
+                else:
+                    top_pilots_by_type[crew_type.value] = None
+            else:
+                top_pilots_by_type[crew_type.value] = None
+
         statistics = {
             "total_flights": total_flights,
             "total_hours": total_hours,  # Total flight hours for the year
@@ -342,6 +393,7 @@ def get_flight_statistics() -> tuple[Response, int]:
             "total_passengers": total_passengers,
             "total_doe": total_doe,
             "total_cargo": total_cargo,
+            "top_pilots_by_type": top_pilots_by_type,  # Top pilot for each crew type
             "year": year,
         }
         print(statistics)
