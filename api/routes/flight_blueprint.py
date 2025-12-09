@@ -641,6 +641,31 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         else:
             raise ValueError(f"FlightPilots record not found for pilot {pilot['nip']} in flight {flight.fid}")
     else:
+        i: int = 0
+        # for l in ["QA1", "QA2","BSP1","BSP2","MONO","CTO","SID","NFP", "VRP1","VRP2"]:
+        qual_list = session.scalars(select(Qualificacao).where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)).all()
+
+        # Filter out non-qualification fields
+        excluded_names = {"ATR", "ATN", "precapp", "nprecapp"}
+        qual_list = [q for q in qual_list if q.nome not in excluded_names]
+
+        for l in qual_list:
+            # print(f"Qualification: {l.nome}")
+            qual_value = pilot.get(l.nome)
+            if qual_value is not None and qual_value is not False:
+                # print(f"Qualification {l.nome}: {qual_value}")
+                qual = session.scalars(
+                    select(Qualificacao).where(
+                        Qualificacao.nome == l.nome,
+                        Qualificacao.tipo_aplicavel == pilot_obj.tipo,
+                    )
+                ).first()
+                if qual:
+                    pilot[f"QUAL{i + 1}"] = str(qual.id)
+                    i += 1
+                else:
+                    print(f"Qualification {l} not found for type {pilot_obj.tipo.value}")
+        # flight_pilot = FlightPilots(**pilot)
         flight_pilot = FlightPilots(
             position=pilot["position"],
             day_landings=safe_int_or_none(pilot.get("ATR")),
@@ -656,6 +681,7 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
         )
 
     for k in ["QUAL1", "QUAL2", "QUAL3", "QUAL4", "QUAL5", "QUAL6"]:
+        # print(f"Qualification {k}: {getattr(flight_pilot, k.lower())}")
         update_tripulante_qualificacao(session, pilot_obj, k.lower(), flight, flight_pilot)
 
     if pilot_obj.tipo.value == "PILOTO":
@@ -752,11 +778,14 @@ def update_tripulante_qualificacao(
     qual_id: str | int | None = None
 
     if not convert:
-        qual_id = getattr(flight_pilot, qual_name)
+        qual_id = getattr(flight_pilot, qual_name.lower())
+        # print(f"Qualification ID before conversion: {qual_id}")
 
         # If qual_id is a string (name) instead of an ID, try to look it up
         if isinstance(qual_id, str) and qual_id.strip() and not qual_id.isdigit():
+            print(f"Qualification ID is a string: {qual_id}")
             qual_name_from_value = qual_id.strip()
+            print(f"Qualification name from value: {qual_name_from_value}")
             qual = session.scalars(
                 select(Qualificacao).where(
                     Qualificacao.nome == qual_name_from_value,
@@ -778,6 +807,7 @@ def update_tripulante_qualificacao(
         for trip_qual in pilot_obj.qualificacoes:
             if trip_qual.qualificacao.nome == qual_name:
                 qual_id = trip_qual.qualificacao_id
+                # print(f"Qualification ID found in pilot's qualifications: {qual_id}")
                 break
 
         # If not found in pilot's qualifications, look it up in the database by name and tipo

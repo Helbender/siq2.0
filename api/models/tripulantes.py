@@ -73,5 +73,5 @@ class TripulanteQualificacao(Base):
         return {
             "nome": self.qualificacao.nome,
             "grupo": self.qualificacao.grupo.value,
-            "validade_info": [dias_restantes, expiry_date.strftime("%d-%b-%Y")],
+            "validade_info": [dias_restantes, expiry_date.strftime("%d-%b-%Y"), validade],
         }
