@@ -61,6 +61,7 @@ def import_flights_from_folder(root_folder: str, db: Session):
                 # You must adapt this to your actual file format and DB schema
                 # Example filename: "1M 50A0023 02Apr2025 03_20 16710.1m"
                 parts = filename.split()
+                # print(flight_data)
                 if len(parts) < 5:
                     continue  # skip malformed files
                 try:
@@ -119,7 +120,8 @@ def import_flights_from_folder(root_folder: str, db: Session):
 
                     if existing_flight:
                         print(f"Duplicate found - updating existing flight: {flight.airtask} on {flight.date}")
-                        continue
+                        # continue
+
                         # Update existing flight with new data
                         existing_flight.airtask = flight.airtask
                         existing_flight.date = flight.date
@@ -153,6 +155,7 @@ def import_flights_from_folder(root_folder: str, db: Session):
                             continue
 
                         for pilot in flight_data["flight_pilots"]:
+                            # print(f"Pilot: {pilot}")
                             result = add_crew_and_pilots(session, existing_flight, pilot)
                             if result is None:
                                 # Pilot not found, but continue with other pilots
