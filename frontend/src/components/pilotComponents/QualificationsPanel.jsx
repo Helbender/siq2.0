@@ -1,11 +1,11 @@
 import { HStack, Text } from "@chakra-ui/react";
 
 const QualificationsPanel = (props) => {
-  const type = props.type === 2 ? 10 : 45;
+  const validade = props.qualification.validade_info[2] / 6;
   function colorFormatter(days) {
     let color = "";
     if (days < 0) return (color = "red.600");
-    if (days < type) return (color = "yellow");
+    if (days < validade) return (color = "yellow");
     // eslint-disable-next-line no-unused-vars
     else return (color = "green");
   }

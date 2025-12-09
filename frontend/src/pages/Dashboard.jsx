@@ -537,9 +537,9 @@ function Dashboard() {
         {Object.keys(topPilotsByType).length > 0 && (
           <Box mb={6}>
             <Heading size="md" mb={4} textAlign="center">
-              Tripulantes com Mais Horas por Tipo ({selectedYear})
+              Tripulantes com Mais Horas de Voo ({selectedYear})
             </Heading>
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
               {[
                 "PILOTO",
                 "OPERADOR CABINE",
@@ -571,9 +571,9 @@ function Dashboard() {
                         <Text fontSize="lg" fontWeight="bold">
                           {pilot.rank} {pilot.name}
                         </Text>
-                        <Text fontSize="md" color="gray.600">
+                        {/* <Text fontSize="md" color="gray.600">
                           NIP: {pilot.nip}
-                        </Text>
+                        </Text> */}
                         <Text fontSize="xl" fontWeight="bold" color="teal.500">
                           {formatHours(pilot.hours)}
                         </Text>

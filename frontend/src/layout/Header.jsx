@@ -74,9 +74,10 @@ function Header() {
       color="white"
       p={4}
       boxShadow="md"
-      // position="fixed"
+      position="fixed"
       top={0}
-      // zIndex={1000}
+      left={0}
+      zIndex={1000}
     >
       <Flex align="center" justify="space-between">
         {/* Menu Button on the Left */}

@@ -12,6 +12,7 @@ import Sidebar from "./components/Sidebar";
 import { AuthContext } from "./Contexts/AuthContext";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage";
+import { Box } from "@chakra-ui/react";
 
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
@@ -40,66 +41,68 @@ function App() {
     <HashRouter>
       <Header />
       {/* <Sidebar /> */}
-      {!token && token !== "" && token !== undefined ? (
-        <Routes>
-          <Route index element={<Navigate replace to="login" />} />
-
-          <Route
-            path="/login"
-            element={
-              <LoginPage setToken={setToken} removeToken={removeToken} />
-            }
-          />
-          <Route path="/recover" element={<RecoverPass />} />
-          <Route
-            exact
-            path="/recovery/:token/:email"
-            element={<RecoverProcess />}
-          />
-          <Route path="/about" element={<AboutPage />} />
-        </Routes>
-      ) : (
-        <Fragment>
+      <Box pt="75px">
+        {!token && token !== "" && token !== undefined ? (
           <Routes>
-            <Route index element={<Navigate replace to="dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/flights" element={<Flights />} />
-            <Route path="/fileupload" element={<FileUpload />} />
-            <Route path="/users" element={<UserManagementPage />} />
-            <Route
-              path="/qualificacoes"
-              element={<QualificationManagement />}
-            />
+            <Route index element={<Navigate replace to="login" />} />
 
-            <Route path="/" element={<Master />}>
-              {tipos.map((tipo) => (
-                <Route
-                  key={tipo}
-                  path={`/${tipo
-                    .toLowerCase()
-                    .replace(" ", "-")
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")}`}
-                  element={<Pilots tipo={tipo} />}
-                />
-              ))}
-              {tipos.map((tipo) => (
-                <Route
-                  key={`${tipo}-table`}
-                  path={`/${tipo
-                    .toLowerCase()
-                    .replace(" ", "-")
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")}-table`}
-                  element={<QualificationTable tipo={tipo} />}
-                />
-              ))}
-            </Route>
+            <Route
+              path="/login"
+              element={
+                <LoginPage setToken={setToken} removeToken={removeToken} />
+              }
+            />
+            <Route path="/recover" element={<RecoverPass />} />
+            <Route
+              exact
+              path="/recovery/:token/:email"
+              element={<RecoverProcess />}
+            />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
-        </Fragment>
-      )}
-      <Footer />
+        ) : (
+          <Fragment>
+            <Routes>
+              <Route index element={<Navigate replace to="dashboard" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/flights" element={<Flights />} />
+              <Route path="/fileupload" element={<FileUpload />} />
+              <Route path="/users" element={<UserManagementPage />} />
+              <Route
+                path="/qualificacoes"
+                element={<QualificationManagement />}
+              />
+
+              <Route path="/" element={<Master />}>
+                {tipos.map((tipo) => (
+                  <Route
+                    key={tipo}
+                    path={`/${tipo
+                      .toLowerCase()
+                      .replace(" ", "-")
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")}`}
+                    element={<Pilots tipo={tipo} />}
+                  />
+                ))}
+                {tipos.map((tipo) => (
+                  <Route
+                    key={`${tipo}-table`}
+                    path={`/${tipo
+                      .toLowerCase()
+                      .replace(" ", "-")
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")}-table`}
+                    element={<QualificationTable tipo={tipo} />}
+                  />
+                ))}
+              </Route>
+              <Route path="/about" element={<AboutPage />} />
+            </Routes>
+          </Fragment>
+        )}
+        <Footer />
+      </Box>
     </HashRouter>
   );
 }

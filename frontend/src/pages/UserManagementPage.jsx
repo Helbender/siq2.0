@@ -15,6 +15,7 @@ import {
   Grid,
   useToast,
   Image,
+  Text,
 } from "@chakra-ui/react";
 import { UserContext } from "../Contexts/UserContext";
 import CreateUserModal from "../components/UserC/CreateUserModal";
@@ -72,7 +73,8 @@ function UserManagementPage() {
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10} align={"center"}>
         <CreateUserModal add={true} />
-
+        <Spacer />
+        <Text>Nº de Utilizadores: {filteredUsers.length}</Text>
         <Spacer />
         <Input
           placeholder="Search..."
@@ -82,6 +84,20 @@ function UserManagementPage() {
           flex="1"
         />
       </HStack>
+      <HStack>
+        {Array.from(
+          filteredUsers.reduce((set, user) => {
+            if (user.position) set.add(user.position);
+            return set;
+          }, new Set()),
+        ).map((position) => (
+          <Text key={position}>
+            <b>{position}</b>:{" "}
+            {filteredUsers.filter((user) => user.position === position).length}
+          </Text>
+        ))}
+      </HStack>
+
       {displayAsTable ? (
         <Table variant="simple" mt={4} overflowX="auto">
           <Thead>

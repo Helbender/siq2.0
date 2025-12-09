@@ -1,4 +1,11 @@
 {
+  "files.associations": {
+    "*.1m": "json"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
     "[python]": {
       "editor.formatOnSave": true,
       "editor.defaultFormatter": "charliermarsh.ruff",
@@ -6,8 +13,8 @@
           "source.fixAll": "explicit",
           "source.organizeImports": "explicit",
     }
-    },
-
+    }
+  ,
     "eslint.enable": true,
     "eslint.useFlatConfig":true,
     // "eslint.options": {"overrideConfigFile":"./frontend/eslint.config.js"},
@@ -15,6 +22,7 @@
     "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit",
         },
+    "ruff.lineLength": 120,
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
     "editor.formatOnType": false, // required
     "editor.formatOnPaste": true, // optional
