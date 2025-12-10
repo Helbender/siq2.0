@@ -11,23 +11,14 @@ import {
   Tbody,
   Td,
   Box,
-  IconButton,
-  useBreakpointValue,
-  Grid,
   useToast,
-  Text,
-  Checkbox,
-  CheckboxGroup,
   Flex,
   Button,
 } from "@chakra-ui/react";
-import { AuthContext } from "../Contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import CreateQualModal from "../components/qualificationComponents/CreateQualModal";
 import DeleteQualModal from "../components/qualificationComponents/DeleteQualModal";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
-import { api, apiAuth } from "../utils/api";
+import { apiAuth } from "../utils/api";
 import { BiRefresh } from "react-icons/bi";
 
 function QualificationManagement() {
@@ -39,7 +30,6 @@ function QualificationManagement() {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
   const [isReprocessing, setIsReprocessing] = useState(false);
-  const navigate = useNavigate();
   const toast = useToast();
   // const { removeToken } = AuthContext();
   const getData = async () => {
@@ -162,7 +152,7 @@ function QualificationManagement() {
           availableGroups={availableTypes}
           selectedGroups={selectedTypes}
           onGroupChange={setSelectedTypes}
-          filter={true}
+          filter={"Posição"}
         />
       </Flex>
 

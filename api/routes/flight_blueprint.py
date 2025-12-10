@@ -604,8 +604,19 @@ def update_qualifications_on_delete(
         session.add(pq)
 
 
-def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: bool = False) -> FlightPilots | None:  # noqa: FBT001, FBT002
-    """Check type of crew and add it to respective Model Object."""
+def add_crew_and_pilots(
+    session: Session, flight: Flight, pilot: dict, edit: bool = False, auto_commit: bool = False
+) -> FlightPilots | None:  # noqa: FBT001, FBT002
+    """Check type of crew and add it to respective Model Object.
+
+    Args:
+        session: Database session
+        flight: Flight object
+        pilot: Pilot data dictionary
+        edit: Whether this is an edit operation
+        auto_commit: If True, commit immediately. If False (default), caller should commit.
+                    Note: Callers typically commit after processing all pilots, so default is False.
+    """
     # Garanties data integrety while introducing several flights
 
     # print(f"Processing Pilot/Crew NIP: {pilot['nip']}")
@@ -642,7 +653,6 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
             raise ValueError(f"FlightPilots record not found for pilot {pilot['nip']} in flight {flight.fid}")
     else:
         i: int = 0
-        # for l in ["QA1", "QA2","BSP1","BSP2","MONO","CTO","SID","NFP", "VRP1","VRP2"]:
         qual_list = session.scalars(select(Qualificacao).where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)).all()
 
         # Filter out non-qualification fields
@@ -698,7 +708,10 @@ def add_crew_and_pilots(session: Session, flight: Flight, pilot: dict, edit: boo
 
     pilot_obj.flight_pilots.append(flight_pilot)
     flight.flight_pilots.append(flight_pilot)
-    session.commit()
+    if auto_commit:
+        session.commit()
+    else:
+        session.flush()  # Flush to get IDs but don't commit yet
     return flight_pilot
 
 
@@ -805,9 +818,9 @@ def update_tripulante_qualificacao(
         # When convert is True, look for the qualification in the pilot's existing qualifications
         # First, check if pilot already has this qualification
         for trip_qual in pilot_obj.qualificacoes:
-            if trip_qual.qualificacao.nome == qual_name:
+            if trip_qual.qualificacao.id == qual_name:
                 qual_id = trip_qual.qualificacao_id
-                # print(f"Qualification ID found in pilot's qualifications: {qual_id}")
+                print(f"Qualification ID found in pilot's qualifications: {qual_id}")
                 break
 
         # If not found in pilot's qualifications, look it up in the database by name and tipo

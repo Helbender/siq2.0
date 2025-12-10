@@ -13,6 +13,7 @@ import {
   useToast,
   Flex,
   Text,
+  Spacer,
 } from "@chakra-ui/react";
 import { AuthContext } from "../Contexts/AuthContext";
 import { useLocation } from "react-router-dom";
@@ -25,6 +26,8 @@ const QualificationTable = ({ tipo }) => {
   const [filteredCrew, setFilteredCrew] = useState([]);
   const [crew, setCrew] = useState([]);
   const [sortBy, setSortBy] = useState(null); // { qualName: string, direction: 'asc' | 'desc' }
+  const [visibleGroups, setVisibleGroups] = useState([]);
+  const [availableGroups, setAvailableGroups] = useState([]);
   const { token } = useContext(AuthContext);
   const location = useLocation();
   const toast = useToast();
@@ -83,18 +86,79 @@ const QualificationTable = ({ tipo }) => {
     setFilteredCrew(results);
   }, [crew, selectedTypes]);
 
-  // Get all unique qualifications from all crew members
+  // Get all unique qualifications from all crew members with their groups
   const allQualifications = useMemo(() => {
-    const qualSet = new Set();
+    const qualMap = new Map(); // Map of qualName -> { nome, grupo }
     filteredCrew.forEach((member) => {
       if (member.qualificacoes) {
         member.qualificacoes.forEach((qual) => {
-          qualSet.add(qual.nome);
+          if (!qualMap.has(qual.nome)) {
+            qualMap.set(qual.nome, {
+              nome: qual.nome,
+              grupo: qual.grupo || "Ungrouped",
+            });
+          }
         });
       }
     });
-    return Array.from(qualSet).sort();
+    return Array.from(qualMap.values()).sort((a, b) => {
+      // Sort by grupo first, then by nome
+      const grupoCompare = a.grupo.localeCompare(b.grupo);
+      if (grupoCompare !== 0) return grupoCompare;
+      return a.nome.localeCompare(b.nome);
+    });
   }, [filteredCrew]);
+
+  // Group qualifications by grupo
+  const qualificationsByGroup = useMemo(() => {
+    const grouped = {};
+    allQualifications.forEach((qual) => {
+      const grupo = qual.grupo || "Ungrouped";
+      if (!grouped[grupo]) {
+        grouped[grupo] = [];
+      }
+      grouped[grupo].push(qual);
+    });
+    return grouped;
+  }, [allQualifications]);
+
+  // Initialize visible groups when qualificationsByGroup changes
+  useEffect(() => {
+    const groups = Object.keys(qualificationsByGroup);
+    setAvailableGroups(groups);
+    // Set all groups as visible by default if not already set
+    if (groups.length > 0) {
+      setVisibleGroups((prev) => {
+        // Only update if we have new groups or if prev is empty
+        if (prev.length === 0) {
+          return groups;
+        }
+        // Keep existing visible groups that still exist, add new ones
+        const existingGroups = prev.filter((g) => groups.includes(g));
+        const newGroups = groups.filter((g) => !prev.includes(g));
+        return [...existingGroups, ...newGroups];
+      });
+    }
+  }, [qualificationsByGroup]);
+
+  // Filter qualifications by visible groups
+  const visibleQualificationsByGroup = useMemo(() => {
+    const filtered = {};
+    Object.entries(qualificationsByGroup).forEach(([grupo, quals]) => {
+      if (visibleGroups.includes(grupo)) {
+        filtered[grupo] = quals;
+      }
+    });
+    return filtered;
+  }, [qualificationsByGroup, visibleGroups]);
+
+  // Get total count of visible qualifications for colspan calculation
+  const visibleQualificationsCount = useMemo(() => {
+    return Object.values(visibleQualificationsByGroup).reduce(
+      (sum, quals) => sum + quals.length,
+      0,
+    );
+  }, [visibleQualificationsByGroup]);
 
   // Get days left for a specific qualification for a crew member
   const getDaysLeft = (member, qualName) => {
@@ -154,14 +218,26 @@ const QualificationTable = ({ tipo }) => {
   const headerBg = useColorModeValue("gray.200", "gray.700");
 
   return (
-    <Stack m={4}>
-      <Box ml={4} mb={6} alignSelf={"flex-start"}>
-        <QualificationGroupFilter
-          availableGroups={availableTypes}
-          selectedGroups={selectedTypes}
-          onGroupChange={setSelectedTypes}
-        />
-      </Box>
+    <Stack m={4} pb={10}>
+      <Flex ml={4} mb={6} gap={4} direction={{ base: "column", md: "row" }}>
+        <Box alignSelf={"flex-start"}>
+          <QualificationGroupFilter
+            availableGroups={availableTypes}
+            selectedGroups={selectedTypes}
+            onGroupChange={setSelectedTypes}
+            filter={"Função"}
+          />
+        </Box>
+        <Spacer />
+        <Box alignSelf={"flex-start"}>
+          <QualificationGroupFilter
+            availableGroups={availableGroups}
+            selectedGroups={visibleGroups}
+            onGroupChange={setVisibleGroups}
+            filter={"Tipo"}
+          />
+        </Box>
+      </Flex>
 
       <TableContainer
         bg={cardBg}
@@ -172,62 +248,90 @@ const QualificationTable = ({ tipo }) => {
       >
         <Table size="sm" variant="simple">
           <Thead bg={headerBg}>
+            {/* Group header row */}
             <Tr>
               <Th
+                rowSpan={2}
                 fontSize={"lg"}
                 position="sticky"
                 left="0px"
                 bg={headerBg}
-                zIndex={2}
+                zIndex={3}
                 minW="20px"
-                // maxW="30px"
                 borderRight="1px solid"
                 borderColor={useColorModeValue("gray.300", "gray.600")}
               >
                 Posição
               </Th>
               <Th
+                rowSpan={2}
                 fontSize={"lg"}
                 position="sticky"
                 left="30px"
                 bg={headerBg}
-                zIndex={2}
-                // maxW="200px"
+                zIndex={3}
                 borderRight="1px solid"
                 borderColor={useColorModeValue("gray.300", "gray.600")}
               >
                 Nome
               </Th>
-              {allQualifications.map((qualName) => (
-                <Th
-                  key={qualName}
-                  fontSize={"lg"}
-                  textAlign="center"
-                  cursor="pointer"
-                  onClick={() => handleSort(qualName)}
-                  _hover={{ bg: useColorModeValue("gray.300", "gray.600") }}
-                  userSelect="none"
-                  minW="20px"
-                >
-                  <Flex align="center" justify="center" gap={2}>
-                    <Text fontSize="lg" isTruncated>
-                      {qualName}
-                    </Text>
-                    {sortBy && sortBy.qualName === qualName && (
-                      <Text fontSize="xs" fontWeight="bold">
-                        {sortBy.direction === "asc" ? "↑" : "↓"}
-                      </Text>
-                    )}
-                  </Flex>
-                </Th>
-              ))}
+              {Object.entries(visibleQualificationsByGroup)
+                .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
+                .map(([grupo, quals]) => (
+                  <Th
+                    key={grupo}
+                    colSpan={quals.length}
+                    fontSize={"md"}
+                    textAlign="center"
+                    bg={useColorModeValue("gray.300", "gray.600")}
+                    borderRight="1px solid"
+                    borderColor={useColorModeValue("gray.400", "gray.500")}
+                  >
+                    <Text fontWeight="bold">{grupo}</Text>
+                  </Th>
+                ))}
+            </Tr>
+            {/* Qualification name row */}
+            <Tr>
+              {Object.entries(visibleQualificationsByGroup)
+                .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
+                .flatMap(([, quals]) =>
+                  quals.map((qual) => (
+                    <Th
+                      key={qual.nome}
+                      fontSize={"lg"}
+                      textAlign="center"
+                      cursor="pointer"
+                      onClick={() => handleSort(qual.nome)}
+                      _hover={{ bg: useColorModeValue("gray.300", "gray.600") }}
+                      userSelect="none"
+                      minW="20px"
+                      borderRight="1px solid"
+                      borderColor={useColorModeValue("gray.300", "gray.600")}
+                      borderRightWidth={
+                        quals[quals.length - 1] === qual ? "2px" : "1px"
+                      }
+                    >
+                      <Flex align="center" justify="center" gap={2}>
+                        <Text fontSize="lg" isTruncated>
+                          {qual.nome}
+                        </Text>
+                        {sortBy && sortBy.qualName === qual.nome && (
+                          <Text fontSize="xs" fontWeight="bold">
+                            {sortBy.direction === "asc" ? "↑" : "↓"}
+                          </Text>
+                        )}
+                      </Flex>
+                    </Th>
+                  )),
+                )}
             </Tr>
           </Thead>
           <Tbody>
             {sortedCrew.length === 0 ? (
               <Tr>
                 <Td
-                  colSpan={3 + allQualifications.length}
+                  colSpan={2 + visibleQualificationsCount}
                   textAlign="center"
                   py={8}
                 >
@@ -262,26 +366,40 @@ const QualificationTable = ({ tipo }) => {
                   >
                     {member.name?.trim() || member.name}
                   </Td>
-                  {allQualifications.map((qualName) => {
-                    const daysLeft = getDaysLeft(member, qualName);
-                    return (
-                      <Td
-                        key={qualName}
-                        textAlign="center"
-                        bg={getColorForDays(daysLeft)}
-                        fontWeight={
-                          daysLeft !== null && daysLeft < 10 ? "bold" : "normal"
-                        }
-                        color={
-                          daysLeft !== null && daysLeft < 10
-                            ? "black"
-                            : "inherit"
-                        }
-                      >
-                        {daysLeft !== null ? daysLeft : "-"}
-                      </Td>
-                    );
-                  })}
+                  {Object.entries(visibleQualificationsByGroup)
+                    .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
+                    .flatMap(([, quals]) =>
+                      quals.map((qual) => {
+                        const daysLeft = getDaysLeft(member, qual.nome);
+                        return (
+                          <Td
+                            key={qual.nome}
+                            textAlign="center"
+                            bg={getColorForDays(daysLeft)}
+                            fontWeight={
+                              daysLeft !== null && daysLeft < 10
+                                ? "bold"
+                                : "normal"
+                            }
+                            color={
+                              daysLeft !== null && daysLeft < 10
+                                ? "black"
+                                : "inherit"
+                            }
+                            borderRight="1px solid"
+                            borderColor={useColorModeValue(
+                              "gray.300",
+                              "gray.600",
+                            )}
+                            borderRightWidth={
+                              quals[quals.length - 1] === qual ? "2px" : "1px"
+                            }
+                          >
+                            {daysLeft !== null ? daysLeft : "-"}
+                          </Td>
+                        );
+                      }),
+                    )}
                 </Tr>
               ))
             )}

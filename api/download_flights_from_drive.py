@@ -35,13 +35,77 @@ def get_drive_service():
     return service
 
 
-def list_files_in_folder(service, folder_id: str, file_extension: str = ".1m"):
-    """List all files with given extension in a folder and its subfolders.
+def find_folder_by_name(service, parent_id: str, folder_name: str) -> str | None:
+    """Find a folder by name within a parent folder.
+
+    Args:
+        service: Google Drive service object
+        parent_id: ID of the parent folder
+        folder_name: Name of the folder to find
+
+    Returns:
+        Folder ID if found, None otherwise
+    """
+    query = (
+        f"name = '{folder_name}' "
+        f"and mimeType = 'application/vnd.google-apps.folder' "
+        f"and '{parent_id}' in parents "
+        f"and trashed = false"
+    )
+    response = service.files().list(q=query, fields="files(id, name)").execute()
+    files = response.get("files", [])
+
+    if files:
+        return files[0]["id"]
+    return None
+
+
+def navigate_to_folder_path(
+    service, base_folder_id: str, year: str | None = None, month: str | None = None, day: str | None = None
+) -> str | None:
+    """Navigate to a specific folder path in Google Drive based on year/month/day.
+
+    Args:
+        service: Google Drive service object
+        base_folder_id: ID of the base folder
+        year: Year folder name (e.g., "2025")
+        month: Month folder name (e.g., "Apr")
+        day: Day folder name (e.g., "02")
+
+    Returns:
+        Folder ID if the path exists, None otherwise
+    """
+    current_folder_id = base_folder_id
+
+    if year:
+        folder_id = find_folder_by_name(service, current_folder_id, year)
+        if not folder_id:
+            return None
+        current_folder_id = folder_id
+
+        if month:
+            folder_id = find_folder_by_name(service, current_folder_id, month)
+            if not folder_id:
+                return None
+            current_folder_id = folder_id
+
+            if day:
+                folder_id = find_folder_by_name(service, current_folder_id, day)
+                if not folder_id:
+                    return None
+                current_folder_id = folder_id
+
+    return current_folder_id
+
+
+def list_files_in_folder(service, folder_id: str, file_extension: str = ".1m", recursive: bool = True):
+    """List all files with given extension in a folder and optionally its subfolders.
 
     Args:
         service: Google Drive service object
         folder_id: ID of the folder to search
         file_extension: File extension to filter (default: .1m)
+        recursive: If True, search subfolders recursively. If False, only search current folder.
 
     Returns:
         List of file dictionaries with id, name, and parents
@@ -57,8 +121,8 @@ def list_files_in_folder(service, folder_id: str, file_extension: str = ".1m"):
 
         for item in items:
             mime_type = item.get("mimeType", "")
-            # If it's a folder, recurse into it
-            if mime_type == "application/vnd.google-apps.folder":
+            # If it's a folder and recursive is True, recurse into it
+            if mime_type == "application/vnd.google-apps.folder" and recursive:
                 list_files_recursive(item["id"])
             # If it's a file with the target extension, add it to the list
             elif item["name"].endswith(file_extension):
@@ -123,9 +187,8 @@ def get_folder_structure_from_filename(filename: str):
     """
     try:
         parts = filename.split()
-        if len(parts) < 3:
+        if len(parts) < 5:
             return None
-
         date_str = parts[2]  # "02Apr2025"
         day = date_str[:2]  # "02"
         month = date_str[2:5]  # "Apr"
@@ -164,8 +227,33 @@ def download_flights_from_drive(
         print(f"📅 Day filter: {day_filter}")
     print("-" * 60)
 
-    # List all .1m files
-    all_files = list_files_in_folder(service, base_folder_id, ".1m")
+    # Try to navigate to the filtered folder path first
+    search_folder_id = base_folder_id
+    recursive_search = True
+    navigation_successful = False
+
+    if year_filter or month_filter or day_filter:
+        # Navigate to the specific folder path based on filters
+        target_folder_id = navigate_to_folder_path(service, base_folder_id, year_filter, month_filter, day_filter)
+
+        if target_folder_id:
+            search_folder_id = target_folder_id
+            navigation_successful = True
+            # If all three filters are provided, we're at the day folder, so no need to recurse
+            if year_filter and month_filter and day_filter:
+                recursive_search = False
+                print(f"✅ Navigated to filtered folder path: {year_filter}/{month_filter}/{day_filter}")
+            else:
+                print(
+                    f"✅ Navigated to filtered folder: {year_filter or 'root'}/{month_filter or ''}/{day_filter or ''}"
+                )
+                print("   (Searching recursively in subfolders)")
+        else:
+            print("⚠️  Filtered folder path not found, searching from base folder")
+            print("   (This may take longer)")
+
+    # List all .1m files in the target folder
+    all_files = list_files_in_folder(service, search_folder_id, ".1m", recursive=recursive_search)
     print(f"📊 Found {len(all_files)} .1m files in Google Drive")
 
     if not all_files:
@@ -178,7 +266,38 @@ def download_flights_from_drive(
     # First, filter files and prepare download list
     files_to_download = []
     skipped_count = 0
+    skipped_wrong_format = []  # Track files skipped due to wrong filename format
     total_processed = 0
+
+    # Determine which filters still need to be applied based on navigation
+    # If we successfully navigated to a folder level, we don't need to filter at that level
+    # We only need to filter at levels we didn't navigate to
+    if navigation_successful:
+        # If we navigated to day folder (all 3 filters), no filtering needed
+        if year_filter and month_filter and day_filter and not recursive_search:
+            need_year_filter = False
+            need_month_filter = False
+            need_day_filter = False
+        # If we navigated to month folder (year + month), only filter by day
+        elif year_filter and month_filter:
+            need_year_filter = False
+            need_month_filter = False
+            need_day_filter = day_filter is not None
+        # If we navigated to year folder (only year), filter by month and day
+        elif year_filter:
+            need_year_filter = False
+            need_month_filter = month_filter is not None
+            need_day_filter = day_filter is not None
+        else:
+            # Navigation happened but unclear state, apply all filters
+            need_year_filter = year_filter is not None
+            need_month_filter = month_filter is not None
+            need_day_filter = day_filter is not None
+    else:
+        # Navigation failed or no filters, apply all filters
+        need_year_filter = year_filter is not None
+        need_month_filter = month_filter is not None
+        need_day_filter = day_filter is not None
 
     print("\rProcessing files..." + " " * 50, end="", flush=True)
 
@@ -189,23 +308,25 @@ def download_flights_from_drive(
 
         # Extract folder structure from filename
         folder_structure = get_folder_structure_from_filename(file_name)
-        if not folder_structure:
+        if not folder_structure or None:
             print(
                 f"\r⚠️  Skipping {file_name} (could not parse date) - {total_processed}/{len(all_files)}" + " " * 20,
                 flush=True,
             )
-            skipped_count += 1
+            skipped_wrong_format.append(file_name)
             continue
 
         year, month, day = folder_structure
 
-        # Apply filters
-        if year_filter and year != year_filter:
+        # Apply remaining filters (only if we didn't navigate to that level)
+        if need_year_filter and year_filter and year != year_filter:
             continue
-        if month_filter and month != month_filter:
+        if need_month_filter and month_filter and month != month_filter:
             continue
-        if day_filter and day != day_filter:
+        if need_day_filter and day_filter and day != day_filter:
             continue
+
+        print(f"File to download: {file_name}")
 
         # Create local folder structure: output_folder/year/month/day/
         local_folder = os.path.join(output_folder, year, month, day)
@@ -258,6 +379,10 @@ def download_flights_from_drive(
     print(f"  ⏭️  Skipped (already exists): {skipped_count}")
     print(f"  ❌ Errors: {error_count}")
     print(f"  📁 Total files: {len(all_files)}")
+    if skipped_wrong_format:
+        print(f"\n⚠️  Files skipped due to wrong filename format ({len(skipped_wrong_format)}):")
+        for filename in skipped_wrong_format:
+            print(f"    - {filename}")
     print("=" * 60)
 
 

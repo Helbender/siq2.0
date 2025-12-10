@@ -152,18 +152,18 @@ def add_users() -> tuple[Response, int]:
             continue
 
     # Para compatibilidade com o formato anterior do ficheiro de backup
-    for item in data["crew"]:
-        obj = Tripulante()
-        for k, v in item.items():
-            print(f"Key: {k}, Value: {v}")
-            # if k == "qualification":
-            #     continue
-            setattr(obj, k, v)
-        obj.password = hash_code("12345")
-        obj.tipo = "PILOTO"
-        session.add(obj)
-        check_integrity(session)
-        continue
+    # for item in data["crew"]:
+    #     obj = Tripulante()
+    #     for k, v in item.items():
+    #         print(f"Key: {k}, Value: {v}")
+    #         # if k == "qualification":
+    #         #     continue
+    #         setattr(obj, k, v)
+    #     obj.password = hash_code("12345")
+    #     # obj.tipo = TipoTripulante.PILOTO
+    #     session.add(obj)
+    #     check_integrity(session)
+    #     continue
 
     session.commit()
     return jsonify({"message": "Users added successfully"}), 201

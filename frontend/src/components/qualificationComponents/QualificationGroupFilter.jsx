@@ -28,7 +28,7 @@ const QualificationGroupFilter = ({
       minW="200px"
     >
       <Text fontWeight="bold" mb={3} fontSize="sm" color="gray.600">
-        {filter ? "Filtrar por Tipo" : "Filtrar por Grupo"}
+        {filter ? `Filtrar por ${filter}` : "Filtrar por Grupo"}
       </Text>
       <CheckboxGroup value={selectedGroups} onChange={onGroupChange}>
         <Stack spacing={2} direction={{ base: "column", md: "row" }}>
