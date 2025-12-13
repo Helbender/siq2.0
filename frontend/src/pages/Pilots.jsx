@@ -8,9 +8,6 @@ import { api } from "../utils/api";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
 
 const Pilots = ({ tipo }) => {
-  //For testing purposes only
-  // position = "PILOTO";
-  //
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
   const [filteredCrew, setFilteredCrew] = useState([]);
@@ -46,7 +43,6 @@ const Pilots = ({ tipo }) => {
         position: "bottom",
       });
       setPilotos(res.data || []);
-      console.log(res.data);
       const types = [
         ...new Set(res.data.map((qual) => qual.position).filter(Boolean)),
       ];
@@ -69,15 +65,6 @@ const Pilots = ({ tipo }) => {
       results = results.filter((qual) => selectedTypes.includes(qual.position));
     }
 
-    // Filter by search term
-    // if (searchTerm) {
-    //   results = results.filter((qual) =>
-    //     [qual.nome, qual.validade, qual.tipo_aplicavel, qual.grupo]
-    //       .map((field) => (field ? field.toString().toLowerCase() : ""))
-    //       .some((field) => field.includes(searchTerm.toLowerCase())),
-    //   );
-    // }
-
     setFilteredCrew(results);
   }, [pilotos, selectedTypes]);
   return (
@@ -90,7 +77,6 @@ const Pilots = ({ tipo }) => {
         />
       </Box>
       <Grid
-        // mx="auto"
         templateColumns={{
           base: "1fr",
           lg: "repeat(2,1fr)",
@@ -98,7 +84,6 @@ const Pilots = ({ tipo }) => {
         }}
         gap={4}
         mt="8"
-        // justifyContent={"center"}
       >
         {filteredCrew.map((pilot) => (
           <PilotCard key={pilot.nip} user={pilot} />

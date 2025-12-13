@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Flex,
   Box,
@@ -15,6 +15,13 @@ import {
   Skeleton,
   SkeletonCircle,
   SkeletonText,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  TableContainer,
 } from "@chakra-ui/react";
 import { UserContext } from "../Contexts/UserContext";
 import {
@@ -25,16 +32,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useNavigate } from "react-router-dom";
 import { apiAuth } from "../utils/api";
-import {
-  parseTimeToMinutes,
-  formatMinutesToTime,
-  formatHours,
-} from "../Functions/timeCalc";
+import { formatHours } from "../Functions/timeCalc";
 import { useSunTimes } from "../utils/useSunTimes";
-import { formatDateISO } from "../Functions/timeCalc"; // Assuming this is a utility function to format date to ISO string
-import { supabase } from "../utils/supabase";
+import { formatDateISO } from "../Functions/timeCalc";
 
 const COLORS = [
   "#E53E3E",
@@ -44,7 +45,6 @@ const COLORS = [
   "#D69E2E",
   "#805AD5",
 ];
-const COLORS2 = ["#38A169", "#E53E3E"]; // verde, vermelho
 
 function getTomorrow() {
   const d = new Date();
@@ -53,35 +53,18 @@ function getTomorrow() {
 }
 
 function Dashboard() {
-  const { token, removeToken } = useContext(UserContext);
-  const navigate = useNavigate();
-
-  // OLD STATE - COMMENTED OUT
-  // const [numberUser, setNumberUser] = useState([]);
-  // const [numberQualified, setNumberQualified] = useState([]);
-  // const [numberVRP, setNumberVRP] = useState([]);
-  // const [numberCurrencies, setNumberCurrencies] = useState([]);
-  // const [modalidades, setModalidades] = useState([]);
-  // const [qa1, setqa1] = useState([]);
+  const { token } = useContext(UserContext);
 
   const todayStr = formatDateISO(new Date());
   const tomorrowStr = formatDateISO(getTomorrow());
 
-  const {
-    sunrise,
-    sunset,
-    loading: loadingSunTimes,
-    error: errorSunTimes,
-  } = useSunTimes(todayStr);
-  console.log(sunrise);
+  const { sunrise, sunset, error: errorSunTimes } = useSunTimes(todayStr);
 
   const {
     sunrise: sunriseT,
     sunset: sunsetT,
-    loading: loadingT,
     error: errorT,
   } = useSunTimes(tomorrowStr);
-  console.log(sunriseT);
 
   // Statistics state
   const [totalFlights, setTotalFlights] = useState(0);
@@ -95,6 +78,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
+  const [expiringQualifications, setExpiringQualifications] = useState([]);
+  const [loadingExpiring, setLoadingExpiring] = useState(true);
 
   // Fetch available years
   const fetchAvailableYears = async () => {
@@ -134,140 +119,31 @@ function Dashboard() {
     }
   };
 
-  // OLD API CALL - COMMENTED OUT
-  // //Get Data from API Function
-  // const getDataFromAPI = async () => {
-  //   try {
-  //     const response = await apiAuth.get("/api/dashboard", {
-  //       headers: { Authorization: "Bearer " + token },
-  //     });
-  //     console.log(response.data);
-  //     setNumberUser(response.data.numberUser);
-  //     setNumberQualified(response.data.alerta);
-  //     setNumberVRP(response.data.vrp);
-  //     setNumberCurrencies(response.data.currencies);
-  //     setModalidades(response.data.modalidades);
-  //     setqa1(response.data.qa1);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  // Fetch expiring qualifications from API
+  const fetchExpiringQualifications = async () => {
+    try {
+      setLoadingExpiring(true);
+      const response = await apiAuth.get("/dashboard/expiring-qualifications", {
+        headers: { Authorization: "Bearer " + token },
+      });
+      setExpiringQualifications(response.data.expiring_qualifications || []);
+      setLoadingExpiring(false);
+    } catch (error) {
+      console.error("Error fetching expiring qualifications:", error);
+      setLoadingExpiring(false);
+    }
+  };
 
-  // const formatedHoras = modalidades.map((item) => ({
-  //   name: item.name.toUpperCase(),
-  //   minutes: parseTimeToMinutes(item.value),
-  // }));
-  // // Calcula o total para percentagem
-  // // const totalMinutes = formatedHoras.reduce(
-  // //   (sum, item) => sum + item.minutes,
-  // //   0,
-  // // );
-
-  // // const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
-
-  // const CustomLegend = ({ payload, dados }) => (
-  //   <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-  //     {payload.map((entry, index) => (
-  //       <li key={`item-${index}`} style={{ marginBottom: "4px" }}>
-  //         <span style={{ color: entry.color }}>
-  //           ● {entry.value}: {formatMinutesToTime(dados[index].minutes)}
-  //         </span>
-  //       </li>
-  //     ))}
-  //   </ul>
-  // );
-
-  // // Custom label component with padding
-  // const renderCustomLabel = ({
-  //   cx,
-  //   cy,
-  //   midAngle,
-  //   innerRadius,
-  //   outerRadius,
-  //   percent,
-  // }) => {
-  //   // Only show label if percentage is significant enough
-  //   if (percent < 0.02) return null;
-
-  //   const RADIAN = Math.PI / 180;
-  //   const radius = innerRadius + (outerRadius - innerRadius) * 0.75;
-  //   const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  //   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  //   return (
-  //     <text
-  //       x={x}
-  //       y={y}
-  //       fill="white"
-  //       textAnchor={"middle"}
-  //       dominantBaseline="central"
-  //       fontSize={12}
-  //       fontWeight="bold"
-  //       style={{
-  //         textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-  //         padding: "4px",
-  //       }}
-  //     >
-  //       {`${(percent * 100).toFixed(1)}%`}
-  //     </text>
-  //   );
-  // };
-
-  // OLD useEffect - COMMENTED OUT
-  // useEffect(() => {
-  //   getDataFromAPI();
-  // }, []);
-
-  // Set up Supabase realtime subscription
   useEffect(() => {
-    // Fetch available years first
     fetchAvailableYears();
+    fetchExpiringQualifications();
   }, [token]);
 
-  // Fetch statistics when year changes
   useEffect(() => {
     if (availableYears.length > 0) {
       fetchStatistics(selectedYear);
     }
   }, [selectedYear, availableYears, token]);
-
-  // Set up realtime updates
-  // useEffect(() => {
-  //   // Option 1: Supabase Realtime (requires replication enabled)
-  //   // Uncomment this if you have replication enabled in Supabase
-  //   /*
-  //   const channel = supabase
-  //     .channel("flights-changes")
-  //     .on(
-  //       "postgres_changes",
-  //       {
-  //         event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
-  //         schema: "public",
-  //         table: "flights_table",
-  //       },
-  //       (payload) => {
-  //         console.log("Flight change detected:", payload);
-  //         fetchStatistics(selectedYear);
-  //       },
-  //     )
-  //     .subscribe();
-
-  //   return () => {
-  //     supabase.removeChannel(channel);
-  //   };
-  //   */
-
-  //   // Option 2: Polling (works without replication)
-  //   // Polls every 5 minutes for updates
-  //   const pollInterval = setInterval(() => {
-  //     fetchStatistics(selectedYear);
-  //   }, 300000); // 5 minute
-
-  //   // Cleanup interval on unmount
-  //   return () => {
-  //     clearInterval(pollInterval);
-  //   };
-  // }, [selectedYear, token]);
 
   const bgColor = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
@@ -313,21 +189,12 @@ function Dashboard() {
 
   return (
     <>
-      <Box
-        p={6}
-        overflow={"scroll"}
-        h={"calc(95vh - 75px)"}
-        // w={"calc(100vw - 60px)"}
-        bg={bgColor}
-        // ml={"60px"}
-      >
-        {/* OLD HEADING - COMMENTED OUT */}
+      <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg={bgColor}>
         <Heading mb={6} textAlign={"center"}>
           Dashboard
         </Heading>
 
         <Flex justifyContent="space-between" alignItems="center" mb={2}>
-          {/* {loadingSunTimes && <Text size={"lg"}>A carregar horário...</Text>} */}
           {errorSunTimes && <Text>Error: {errorSunTimes}</Text>}
           {sunrise && sunset && (
             <Flex mb={0} alignItems={"center"} flexDirection={"column"}>
@@ -351,7 +218,6 @@ function Dashboard() {
               ))}
             </Select>
           </FormControl>
-          {/* {loadingT && <Text size={"lg"}>A carregar horário...</Text>} */}
           {errorT && <Text>Error: {errorT}</Text>}
           {sunriseT && sunsetT && (
             <Flex mb={0} alignItems={"center"} flexDirection={"column"}>
@@ -364,7 +230,7 @@ function Dashboard() {
         <Text mb={4} textAlign={"right"}>
           https://sunrise-sunset.org/
         </Text>
-        {/* </Flex> */}
+
         {/* Summary Statistics */}
         <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4} mb={6}>
           <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
@@ -412,11 +278,8 @@ function Dashboard() {
                     nameKey="name"
                     cx="50%"
                     cy="45%"
-                    // label={renderCustomLabel}
                     label={({ name, value, percent }) => {
-                      // Only show label if percentage is significant enough
-                      if (percent < 0.02) return ""; // Hide labels for very small slices
-                      // return `${name}: ${(percent * 100).toFixed(1)}%`;
+                      if (percent < 0.02) return "";
                       return `${name}: ${formatHours(value)}`;
                     }}
                     labelLine={false}
@@ -483,11 +346,8 @@ function Dashboard() {
                     nameKey="name"
                     cx="50%"
                     cy="45%"
-                    // label={renderCustomLabel}
                     label={({ name, value, percent }) => {
-                      // Only show label if percentage is significant enough
-                      if (percent < 0.02) return ""; // Hide labels for very small slices
-                      // return `${name}: ${(percent * 100).toFixed(1)}%`;
+                      if (percent < 0.02) return "";
                       return `${name}: ${formatHours(value)}`;
                     }}
                     labelLine={false}
@@ -571,9 +431,6 @@ function Dashboard() {
                         <Text fontSize="lg" fontWeight="bold">
                           {pilot.rank} {pilot.name}
                         </Text>
-                        {/* <Text fontSize="md" color="gray.600">
-                          NIP: {pilot.nip}
-                        </Text> */}
                         <Text fontSize="xl" fontWeight="bold" color="teal.500">
                           {formatHours(pilot.hours)}
                         </Text>
@@ -584,6 +441,87 @@ function Dashboard() {
             </SimpleGrid>
           </Box>
         )}
+
+        {/* Expiring Qualifications List */}
+        <Box mb={6}>
+          <Heading size="md" mb={4} textAlign="center">
+            Qualificações com Menor Tempo Restante (Top 10)
+          </Heading>
+          <Box bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
+            {loadingExpiring ? (
+              <Text textAlign="center">A carregar...</Text>
+            ) : expiringQualifications.length > 0 ? (
+              <TableContainer>
+                <Table variant="simple" size="sm">
+                  <Thead>
+                    <Tr>
+                      <Th>Tripulante</Th>
+                      <Th>Qualificação</Th>
+                      <Th isNumeric>Dias Restantes</Th>
+                      <Th>Data de Expiração</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {expiringQualifications.map((item, index) => {
+                      const isExpired = item.remaining_days < 0;
+                      const isExpiringSoon =
+                        item.remaining_days >= 0 && item.remaining_days <= 30;
+                      return (
+                        <Tr key={index}>
+                          <Td>
+                            <Text fontWeight="medium">
+                              {item.crew_member.rank} {item.crew_member.name}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              NIP: {item.crew_member.nip}
+                            </Text>
+                          </Td>
+                          <Td>
+                            <Text fontWeight="medium">
+                              {item.qualification_name}
+                            </Text>
+                          </Td>
+                          <Td isNumeric>
+                            <Text
+                              fontWeight="bold"
+                              color={
+                                isExpired
+                                  ? "red.500"
+                                  : isExpiringSoon
+                                    ? "orange.500"
+                                    : "gray.700"
+                              }
+                            >
+                              {item.remaining_days > 0
+                                ? `${item.remaining_days} dias`
+                                : item.remaining_days < 0
+                                  ? `Expirou há ${Math.abs(item.remaining_days)} dias`
+                                  : "Expira hoje"}
+                            </Text>
+                          </Td>
+                          <Td>
+                            <Text fontSize="sm">
+                              {new Date(item.expiry_date).toLocaleDateString(
+                                "pt-PT",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
+                            </Text>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Text textAlign="center">Nenhuma qualificação encontrada</Text>
+            )}
+          </Box>
+        </Box>
 
         {/* Realtime Status Indicator */}
         <Box
@@ -598,249 +536,6 @@ function Dashboard() {
             minutos
           </Text>
         </Box>
-
-        {/* OLD CONTENT - COMMENTED OUT */}
-        {/* <Accordion defaultIndex={[0]} allowMultiple={true}>
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Estatisticas
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel>
-        <Flex
-          mt={10}
-          direction={"column"}
-          bg={useColorModeValue("gray.500", "gray.900")}
-          p={2}
-          shadow={"2xl"}
-          pb={4}
-          borderRadius={"lg"}
-        >
-          <Heading pb={2}>Estatisticas</Heading>
-          <Flex direction={["column", "row"]} gap={10} overflow={"auto"}>
-            <Box
-              w={["100%", "50%"]}
-              h="350px"
-              shadow={"lg"}
-              bg={useColorModeValue("gray.400", "gray.700")}
-              pb={10}
-              borderRadius={"lg"}
-            >
-              <Heading size="md" mb={2} pt={1} pl={2}>
-                Horas de Voo
-              </Heading>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={formatedHoras}
-                    dataKey="minutes"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                  >
-                    {formatedHoras.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatMinutesToTime(value)} />
-                  <Legend
-                    content={<CustomLegend dados={formatedHoras} />}
-                    layout="vertical"
-                    verticalAlign="middle"
-                    align="right"
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
-            <Box
-              w={["100%", "50%"]}
-              h="350px"
-              shadow={"lg"}
-              bg={useColorModeValue("gray.400", "gray.700")}
-              pb={10}
-              borderRadius={"lg"}
-            >
-              <Heading size="md" mb={2} pt={1} pl={2}>
-                Número dos Utilizadores
-              </Heading>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={numberUser}
-                    cx="50%"
-                    cy="50%"
-                    label
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {numberUser.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
-          </Flex>
-        </Flex>
-        </AccordionPanel>
-          </AccordionItem> */}
-        {/* <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box as="span" flex="1" textAlign="left">
-                  Pilotos
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4}> */}
-        {/* <Flex
-          mt={10}
-          direction={"column"}
-          bg={useColorModeValue("gray.500", "gray.900")}
-          p={2}
-          shadow={"2xl"}
-          pb={4}
-          borderRadius={"lg"}
-        >
-          <Heading pb={2}>Pilotos</Heading>
-          <Flex
-            direction={["column", "row"]}
-            gap={10}
-            // mt={10}
-            w={"100%"}
-            // _hover={{ bg: "whiteAlpha.400" }}
-            // p={5}
-          >
-            <Box
-              w={["100%", "50%"]}
-              h="350px"
-              shadow={"lg"}
-              bg={useColorModeValue("gray.400", "gray.700")}
-              pb={10}
-              borderRadius={"lg"}
-              border={"1px"}
-              borderColor={"blackAlpha.400"}
-            >
-              <Heading textAlign={"center"} size="md" mb={2} pt={1}>
-                Alerta
-              </Heading>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={numberQualified}
-                    cx="50%"
-                    cy="50%"
-                    label
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {numberQualified.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS2[index % COLORS2.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
-            <Box
-              w={["100%", "50%"]}
-              h="350px"
-              shadow={"lg"}
-              bg={useColorModeValue("gray.400", "gray.700")}
-              pb={10}
-              borderRadius={"lg"}
-              border={"1px"}
-              borderColor={"blackAlpha.400"}
-            >
-              <Heading textAlign={"center"} size="md" mb={2} pt={1}>
-                VRP
-              </Heading>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={numberVRP}
-                    cx="50%"
-                    cy="50%"
-                    label
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {numberVRP.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS2[index % COLORS2.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
-            <Box
-              w={["100%", "50%"]}
-              h="350px"
-              shadow={"lg"}
-              bg={useColorModeValue("gray.400", "gray.700")}
-              pb={10}
-              borderRadius={"lg"}
-              border={"1px"}
-              borderColor={"blackAlpha.400"}
-            >
-              <Heading textAlign={"center"} size="md" mb={2} pt={1}>
-                Currencies
-              </Heading>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={numberCurrencies}
-                    cx="50%"
-                    cy="50%"
-                    label
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {numberCurrencies.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS2[index % COLORS2.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-            </Box>
-          </Flex>
-        </Flex> */}
-        {/* </AccordionPanel>
-          </AccordionItem>
-        </Accordion> */}
-        {/* <TableQ data={qa1} /> */}
-        {/* {qa1.map((item) => (
-          <Text key={item.name}> {`${item.name}: ${item.value}`}</Text>
-          // <Text key={index}> {`${item.name}: ${item.value}`}</Text>
-        ))} */}
       </Box>
     </>
   );

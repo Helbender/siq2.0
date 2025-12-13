@@ -48,8 +48,6 @@ const Navbar = () => {
     <Container maxW={"80%"} my={10}>
       <Box
         px={5}
-        // my={4}
-        // mx={10}
         borderRadius={20}
         bg={useColorModeValue("gray.400", "gray.700")}
       >

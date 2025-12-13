@@ -28,7 +28,6 @@ export default function Flights() {
   const [searchTerm, setSearchTerm] = useState("");
   const { token, removeToken, getUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const showed = 100;
   const User = getUser();
   const filteredFlights = useMemo(() => {
     return flights.filter((flight) =>
@@ -37,9 +36,6 @@ export default function Flights() {
         flight.flightType,
         flight.flightAction,
         formatDate(flight.date),
-        // flight.date,
-        // flight.origin,
-        // flight.destination,
         flight.tailNumber,
         flight.id,
       ]
@@ -50,7 +46,6 @@ export default function Flights() {
 
   useEffect(() => {
     if (!token && token !== "" && token !== undefined) {
-      console.log("Removing Token");
       removeToken();
       navigate("/");
     }
@@ -77,7 +72,6 @@ export default function Flights() {
         {isColumn ? null : (
           <StyledText
             query={["Mostrados:", "Encontrados"]}
-            // text={`Mostrados: ${filteredFlights.length >= showed ? showed : filteredFlights.length} / ${filteredFlights.length} Encontrados`}
             text={`${filteredFlights.length} Encontrados`}
           />
         )}
@@ -109,22 +103,6 @@ export default function Flights() {
             )}
           </List>
         </Box>
-        // <Stack
-        //   gap={5}
-        //   mt="8"
-        //   overflowY="auto"
-        //   w={"95%"}
-        //   maxW={"1200px"}
-        //   h={"80vh"}
-        //   p={2}
-        // >
-        //   {filteredFlights.length
-        //     ? // !!filteredFlights.length &&
-        //       filteredFlights
-        //         .slice(0, showed)
-        //         .map((flight) => <FlightCard key={flight.id} flight={flight} />)
-        //     : null}
-        // </Stack>
       )}
     </VStack>
   );

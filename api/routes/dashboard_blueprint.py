@@ -1,6 +1,6 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from flask import Blueprint, Response, jsonify, request
@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from config import engine  # type: ignore
 from models.enums import TipoTripulante  # type: ignore
 from models.flights import Flight, FlightPilots  # type: ignore
-from models.tripulantes import Tripulante  # type: ignore
+from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
 
 dashboard = Blueprint("dashboard", __name__)
 
@@ -188,3 +188,56 @@ def get_available_years() -> tuple[Response, int]:
         # Convert to list of integers
         years_list = [int(year) for year in years if year is not None]
         return jsonify({"years": years_list}), 200
+
+
+@dashboard.route("/expiring-qualifications", methods=["GET"], strict_slashes=False)
+def get_expiring_qualifications() -> tuple[Response, int]:
+    """Get top 10 qualifications with lowest remaining days across all crew members.
+
+    Returns a list of 10 elements sorted from lowest to highest remaining days.
+    Each element contains:
+    - crew_member: Information about the crew member (nip, name, rank)
+    - qualification_name: Name of the qualification
+    - remaining_days: Number of days until expiration (can be negative if expired)
+    - expiry_date: Date when the qualification expires
+
+    Same crew member may appear multiple times if they have multiple
+    qualifications among the lowest remaining days.
+    """
+    with Session(engine) as session:
+        # Get all TripulanteQualificacao records with related data
+        stmt = select(TripulanteQualificacao).options(
+            joinedload(TripulanteQualificacao.tripulante),
+            joinedload(TripulanteQualificacao.qualificacao),
+        )
+        all_qualifications = session.execute(stmt).unique().scalars().all()
+
+        # Calculate remaining days for each qualification
+        today = date.today()
+        qualification_data = []
+
+        for tq in all_qualifications:
+            validade = tq.qualificacao.validade  # validity in days
+            expiry_date = tq.data_ultima_validacao + timedelta(days=validade)
+            remaining_days = (expiry_date - today).days
+
+            qualification_data.append(
+                {
+                    "crew_member": {
+                        "nip": tq.tripulante.nip,
+                        "name": tq.tripulante.name,
+                        "rank": tq.tripulante.rank or "",
+                    },
+                    "qualification_name": tq.qualificacao.nome,
+                    "remaining_days": remaining_days,
+                    "expiry_date": expiry_date.isoformat(),
+                }
+            )
+
+        # Sort by remaining_days (ascending - lowest first)
+        qualification_data.sort(key=lambda x: int(x["remaining_days"]))
+
+        # Get top 10 (lowest remaining days)
+        top_10 = qualification_data[:10]
+
+        return jsonify({"expiring_qualifications": top_10}), 200

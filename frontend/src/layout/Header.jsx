@@ -44,11 +44,7 @@ function Header() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
 
-  // const [isSmallScreen] = useMediaQuery("(max-width: 480px)");
-  // if (token) {
   const User = getUser();
-
-  // }
   const handleLogout = async () => {
     try {
       const response = await axios.post("/api/logout");
@@ -152,7 +148,6 @@ function Header() {
                         boxSize="50px"
                         alignSelf={"center"}
                         objectFit="cover"
-                        // mb={2}
                       />
                     </Flex>
                   </DrawerHeader>

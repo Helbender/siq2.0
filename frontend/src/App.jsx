@@ -40,7 +40,6 @@ function App() {
   return (
     <HashRouter>
       <Header />
-      {/* <Sidebar /> */}
       <Box pt="75px">
         {!token && token !== "" && token !== undefined ? (
           <Routes>

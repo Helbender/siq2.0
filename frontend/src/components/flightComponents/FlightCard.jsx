@@ -29,11 +29,7 @@ const FlightCard = ({ flight }) => {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   const { colorMode } = useColorMode();
   return (
-    <Card
-      boxShadow={"lg"}
-      bg={colorMode === "light" ? "gray.300" : "gray.700"}
-      // height={"600px"}
-    >
+    <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
       <CardHeader>
         <Flex align={"center"}>
           {isColumn ? (
@@ -45,7 +41,6 @@ const FlightCard = ({ flight }) => {
             <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
           )}
           <Spacer />
-          {/* <EditFlightModal flight={flight} /> */}
           <CreateFlightModal flight={flight} />
 
           <Heading as="h3">{flight.ATD}</Heading>

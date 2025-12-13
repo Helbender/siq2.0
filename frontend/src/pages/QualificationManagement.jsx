@@ -31,7 +31,7 @@ function QualificationManagement() {
   const [availableTypes, setAvailableTypes] = useState([]);
   const [isReprocessing, setIsReprocessing] = useState(false);
   const toast = useToast();
-  // const { removeToken } = AuthContext();
+
   const getData = async () => {
     try {
       const res = await apiAuth.get("/v2/qualificacoes");

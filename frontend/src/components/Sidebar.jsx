@@ -38,13 +38,6 @@ const navItems = [
   { label: "Tabela de Qualificações", icon: FaTh, to: "/piloto-table" },
   { label: "Gerir Qualificações", icon: FaTools, to: "/qualificacoes" },
   { label: "Utilizadores", icon: FaUsers, to: "/users" },
-  // { label: "About", icon: FaInfoCircle, to: "/about" },
-  // {
-  //   label: "Instagram",
-  //   icon: FaInstagram,
-  //   to: "https://www.instagram.com/esquadra502/",
-  // },
-  // { label: "Logout", icon: FaSignOutAlt, to: "/logout" },
 ];
 
 const Sidebar = () => {
@@ -82,7 +75,6 @@ const Sidebar = () => {
       h="calc(95vh - 75px)"
       bg={bg}
       w={isHovered ? "250px" : "60px"}
-      // w="250px"
       transition="width 0.2s ease"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -91,11 +83,7 @@ const Sidebar = () => {
     >
       <VStack align="stretch" spacing={0} mt={0}>
         {navItems.map(({ label, icon: Icon, to }) => (
-          <ChakraLink
-            // href={to}
-            key={label}
-            p={2}
-          >
+          <ChakraLink key={label} p={2}>
             <ChakraLink
               p={2}
               color="teal.500"
@@ -129,7 +117,6 @@ const Sidebar = () => {
       </ChakraLink>
       <Divider borderWidth="1px" borderColor={"teal.500"} />
       <Flex
-        // display={isHovered ? "flex" : "none"}
         direction="row"
         textAlign={"center"}
         justify={"center"}
