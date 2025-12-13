@@ -99,7 +99,7 @@ function Dashboard() {
   // Fetch available years
   const fetchAvailableYears = async () => {
     try {
-      const response = await apiAuth.get("/flights/available-years");
+      const response = await apiAuth.get("/dashboard/available-years");
       const years = response.data.years;
       setAvailableYears(years);
       // Set selected year to current year if available, otherwise first year in list
@@ -115,7 +115,7 @@ function Dashboard() {
   const fetchStatistics = async (year = selectedYear) => {
     try {
       setLoading(true);
-      const response = await apiAuth.get(`/flights/statistics?year=${year}`, {
+      const response = await apiAuth.get(`/dashboard/statistics?year=${year}`, {
         headers: { Authorization: "Bearer " + token },
       });
       const data = response.data;

@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from config import engine  # type:ignore
 from functions.sendemail import hash_code, main  # type:ignore
 from models.tripulantes import Tripulante  # type:ignore
+from routes.dashboard_blueprint import dashboard  # type: ignore
 from routes.flight_blueprint import flights  # type:ignore
 from routes.routes import v2  # type:ignore
 from routes.users_blueprint import users  # type:ignore
@@ -30,7 +31,7 @@ api.register_blueprint(users, url_prefix="/users")
 api.register_blueprint(flights, url_prefix="/flights")
 
 # register dashboard blueprints with api blueprint
-# api.register_blueprint(dashboard, url_prefix="/dashboard")
+api.register_blueprint(dashboard, url_prefix="/dashboard")
 
 api.register_blueprint(v2, url_prefix="/v2")
 

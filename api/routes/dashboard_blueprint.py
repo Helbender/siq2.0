@@ -1,120 +1,190 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 from datetime import UTC, datetime
+from typing import Any
+
+from flask import Blueprint, Response, jsonify, request
+from sqlalchemy import extract, func, select
+from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type: ignore
-from flask import Blueprint, Response, jsonify
-from models.crew import Crew  # type: ignore
-from models.flights import Flight  # type: ignore
-from models.pilots import Pilot, Qualification  # type: ignore
-from models.users import User  # type: ignore
-from sqlalchemy import Interval, cast, extract, func, select  # type: ignore
-from sqlalchemy.orm import Session
+from models.enums import TipoTripulante  # type: ignore
+from models.flights import Flight, FlightPilots  # type: ignore
+from models.tripulantes import Tripulante  # type: ignore
 
 dashboard = Blueprint("dashboard", __name__)
 
 
-# @dashboard.route("/", strict_slashes=False)
-# def send_data() -> tuple[Response | dict[str, str], int]:
-#     """Send data to dashboard."""
-
-#     print("Dashboard route called")
-#     # verify_jwt_in_request()
-#     with Session(engine) as session:
-#         # Get the current year
-#         current_year = datetime.now(UTC).year
-
-#         # Get the number of pilots0
-#         pilots = session.execute(select(func.count()).select_from(Pilot)).scalar()
-
-#         # Get the number of crew members
-#         crew = session.execute(select(func.count()).select_from(Crew)).scalar()
-
-#         # Get the number of general users members
-#         users = session.execute(select(func.count()).select_from(User)).scalar()
-
-        # Get the number of flights
-        flights = session.execute(
-            select(func.count()).select_from(Flight).where(extract("year", Flight.date) == current_year),
-        ).scalar()
-        print(f"Number of flights in 2025: {flights}")
-
-        # Get the total time spent in each flight action
-        stmt = select(Flight.flight_action, func.sum(cast(Flight.total_time, Interval)).label("total_ate")).group_by(
-            Flight.flight_action,
-        )
-        results = session.execute(stmt).all()
-
-        def format_timedelta_as_hhmm(td) -> str:
-            total_minutes = int(td.total_seconds() // 60)
-            total_hours = total_minutes // 60
-            minutes = total_minutes % 60
-            return f"{total_hours:02d}:{minutes:02d}"
-
-        # for modalidade, total in results:
-        #     print(f"{modalidade}: {format_timedelta_as_hhmm(total)}")
-
-        stmt = select(Pilot, Qualification.last_qa1_date).join(Pilot.qualification).order_by(Qualification.last_qa1_date)
-        pilotos_por_qa1 = session.execute(stmt).all()
-        for pilot, qa1_date in pilotos_por_qa1:
-            print(pilot.name, qa1_date)
-    alerta: dict = is_pilot_qualified("Alerta")
-    vrp: dict = is_pilot_qualified("VRP")
-    cur: dict = is_pilot_qualified("Currencies")
-
-    data: dict = {
-        "numberUser": [
-            {"name": "Pilotos", "value": pilots},
-            {"name": "OCs", "value": crew},
-            {"name": "Usuários", "value": users},
-        ],
-        "alerta": [
-            {"name": "Qualificados", "value": alerta["qualificados"]},
-            {"name": "Não qualificados", "value": alerta["nao_qualificados"]},
-        ],
-        "vrp": [
-            {"name": "Qualificados", "value": vrp["qualificados"]},
-            {"name": "Não qualificados", "value": vrp["nao_qualificados"]},
-        ],
-        "currencies": [
-            {"name": "Qualificados", "value": cur["qualificados"]},
-            {"name": "Não qualificados", "value": cur["nao_qualificados"]},
-        ],
-        "flights": flights,
-        "modalidades": [{"name": modalidade, "value": format_timedelta_as_hhmm(total)} for modalidade, total in results if modalidade != ""],
-        "qa1": [{"name": pilot.name, "value": date.strftime("%d-%m-%Y")} for pilot, date in pilotos_por_qa1 if date is not None],
-    }
-    print("\n\nData to be sent:", data)
-    return jsonify(data), 200
+def parse_time_to_minutes(time_str: str) -> int:
+    """Parse time string in format 'HH:MM' to total minutes."""
+    if not time_str or time_str == "" or time_str == "__:__":
+        return 0
+    try:
+        parts = time_str.split(":")
+        if len(parts) != 2:
+            return 0
+        hours = int(parts[0])
+        minutes = int(parts[1])
+        return hours * 60 + minutes
+    except (ValueError, AttributeError):
+        return 0
 
 
-def is_pilot_qualified(type_qual: str) -> dict[str, int]:
-    """Check if a pilot is qualified for a specific type.
+@dashboard.route("/statistics", methods=["GET"], strict_slashes=False)
+def get_flight_statistics() -> tuple[Response, int]:
+    """Get flight statistics for dashboard.
 
-    Args:
-        type_qual (str): _description_
+    Query Parameters:
+        year (int, optional): Year to filter flights. Defaults to current year.
 
     Returns:
-        dict[str, int]: _description_
-
+        - total_flights: Total number of flights
+        - total_hours: Total flight hours for the year
+        - hours_by_type: Total hours grouped by flight_type (pie chart data)
+        - hours_by_action: Total hours grouped by flight_action (pie chart data)
+        - total_passengers: Sum of all passengers
+        - total_doe: Sum of all DOE
+        - total_cargo: Sum of all cargo
+        - top_pilots_by_type: Top pilot for each crew type
+        - year: Selected year
     """
+    # Get year from query parameter, default to current year
+    year = request.args.get("year", type=int)
+    if year is None:
+        year = datetime.now(UTC).year
+
     with Session(engine) as session:
-        result: list = []
-        stmt = select(Pilot).order_by(Pilot.nip)
-        if session.execute(stmt).scalars().all() is not None:
-            result.extend(session.execute(stmt).scalars().all())
+        # Get total flights count for the selected year
+        total_flights = (
+            session.execute(select(func.count(Flight.fid)).where(extract("year", Flight.date) == year)).scalar() or 0
+        )
 
-#         qualificados: int = 0
-#         não_qualificados: int = 0
+        # Get all flights for the selected year with pilots loaded
+        all_flights = (
+            session.execute(
+                select(Flight)
+                .where(extract("year", Flight.date) == year)
+                .options(joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante))
+            )
+            .unique()
+            .scalars()
+            .all()
+        )
 
-#         for i in result:
-#             # print(f"\nNome: {i.name}")
-#             # print(i.qualification.is_qualified())
-#             if i.qualification.is_qualified(type_qual):
-#                 qualificados += 1
-#             else:
-#                 não_qualificados += 1
+        # Calculate hours by flight_type
+        hours_by_type: dict[str, int] = {}  # type -> total minutes
+        hours_by_action: dict[str, int] = {}  # action -> total minutes
+        total_passengers = 0
+        total_doe = 0
+        total_cargo = 0
+        total_minutes = 0  # Total flight minutes for the year
+        pilot_hours: dict[int, int] = {}  # pilot_id -> total minutes
+        pilot_hours_by_type: dict[TipoTripulante, dict[int, int]] = {}  # tipo -> {pilot_id -> total minutes}
 
-#     # print(f"Qualificados: {qualificados}")
-#     # print(f"Não qualificados: {não_qualificados}")
-#     return {"qualificados": qualificados, "nao_qualificados": não_qualificados}
+        # Initialize dictionaries for each crew type
+        for crew_type in TipoTripulante:
+            pilot_hours_by_type[crew_type] = {}
+
+        for flight in all_flights:
+            # Parse total_time to minutes
+            minutes = parse_time_to_minutes(flight.total_time)
+            total_minutes += minutes  # Add to total
+
+            # Group by flight_type
+            flight_type = flight.flight_type  # or "Unknown"
+            hours_by_type[flight_type] = hours_by_type.get(flight_type, 0) + minutes
+
+            # Group by flight_action
+            flight_action = flight.flight_action  # or "Unknown"
+            hours_by_action[flight_action] = hours_by_action.get(flight_action, 0) + minutes
+
+            # Sum passengers, doe, cargo
+            total_passengers += flight.passengers or 0
+            total_doe += flight.doe or 0
+            total_cargo += flight.cargo or 0
+
+            # Calculate hours per pilot (overall and by type)
+            for flight_pilot in flight.flight_pilots:
+                if flight_pilot.pilot_id and flight_pilot.tripulante:
+                    pilot_id = flight_pilot.pilot_id
+                    pilot_tipo = flight_pilot.tripulante.tipo
+
+                    # Overall hours
+                    pilot_hours[pilot_id] = pilot_hours.get(pilot_id, 0) + minutes
+
+                    # Hours by crew type
+                    if pilot_tipo in pilot_hours_by_type:
+                        pilot_hours_by_type[pilot_tipo][pilot_id] = (
+                            pilot_hours_by_type[pilot_tipo].get(pilot_id, 0) + minutes
+                        )
+
+        # Convert minutes to hours for display and format for pie charts
+        def format_for_pie_chart(data_dict: dict[str, int]) -> list[dict[str, Any]]:
+            """Convert minutes dict to pie chart format with hours."""
+            result = []
+            for key, minutes in data_dict.items():
+                hours = minutes / 60
+                result.append(
+                    {
+                        "name": key,
+                        "value": hours,  # hours for display
+                        "minutes": minutes,  # keep minutes for calculations
+                    }
+                )
+            return result
+
+        # Calculate total hours from total minutes
+        total_hours = total_minutes / 60
+
+        # Find top pilot for each crew type
+        top_pilots_by_type: dict[str, dict[str, Any] | None] = {}
+        for crew_type, hours_dict in pilot_hours_by_type.items():
+            if hours_dict:
+                # Find the pilot ID with maximum hours for this type
+                top_pilot_id = max(hours_dict, key=lambda pid: hours_dict[pid])
+                top_pilot_minutes = hours_dict[top_pilot_id]
+                top_pilot_obj = session.get(Tripulante, top_pilot_id)
+                if top_pilot_obj:
+                    top_pilots_by_type[crew_type.value] = {
+                        "nip": top_pilot_obj.nip,
+                        "name": top_pilot_obj.name,
+                        "rank": top_pilot_obj.rank or "",
+                        "hours": top_pilot_minutes / 60,  # Convert minutes to hours
+                        "tipo": crew_type.value,
+                    }
+                else:
+                    top_pilots_by_type[crew_type.value] = None
+            else:
+                top_pilots_by_type[crew_type.value] = None
+
+        statistics = {
+            "total_flights": total_flights,
+            "total_hours": total_hours,  # Total flight hours for the year
+            "hours_by_type": format_for_pie_chart(hours_by_type),
+            "hours_by_action": format_for_pie_chart(hours_by_action),
+            "total_passengers": total_passengers,
+            "total_doe": total_doe,
+            "total_cargo": total_cargo,
+            "top_pilots_by_type": top_pilots_by_type,  # Top pilot for each crew type
+            "year": year,
+        }
+        return jsonify(statistics), 200
+
+
+@dashboard.route("/available-years", methods=["GET"], strict_slashes=False)
+def get_available_years() -> tuple[Response, int]:
+    """Get list of years that have flights in the database."""
+    with Session(engine) as session:
+        # Get distinct years from flights
+        years = (
+            session.execute(
+                select(extract("year", Flight.date).label("year"))
+                .distinct()
+                .order_by(extract("year", Flight.date).desc())
+            )
+            .scalars()
+            .all()
+        )
+        # Convert to list of integers
+        years_list = [int(year) for year in years if year is not None]
+        return jsonify({"years": years_list}), 200
