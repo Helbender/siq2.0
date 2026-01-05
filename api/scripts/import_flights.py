@@ -32,8 +32,8 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
-from models.flights import Flight
-from routes.flight_blueprint import add_crew_and_pilots
+from app.features.flights.models import Flight
+from app.features.flights.service import FlightService
 
 # Old format boolean qualification fields (should not be present in new format)
 OLD_PILOT_QUAL_FIELDS = {
@@ -117,6 +117,7 @@ def validate_new_format(flight_data: dict, filename: str) -> tuple[bool, str | N
 
 
 def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 50, skip_duplicates: bool = False):
+    flight_service = FlightService()
     """Import flights from all files in the given folder.
 
     Args:
@@ -266,7 +267,7 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                                 errors.append(f"{filename}: Pilot/crew without NIP")
                                 continue
 
-                            result = add_crew_and_pilots(
+                            result = flight_service._add_crew_and_pilots(
                                 db,
                                 existing_flight,
                                 pilot,
@@ -300,7 +301,7 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                                 errors.append(f"{filename}: Pilot/crew without NIP")
                                 continue
 
-                            result = add_crew_and_pilots(
+                            result = flight_service._add_crew_and_pilots(
                                 db,
                                 flight,
                                 pilot_data,

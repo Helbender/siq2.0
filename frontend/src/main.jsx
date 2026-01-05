@@ -5,7 +5,7 @@ import App from "./App";
 // import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthProvider } from "@/features/auth/contexts/AuthContext";
-import { FlightProvider } from "./Contexts/FlightsContext";
+import { FlightProvider } from "@/features/flights/contexts/FlightsContext";
 import { UserProvider } from "@/features/users/contexts/UserContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

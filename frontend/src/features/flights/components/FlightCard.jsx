@@ -19,13 +19,13 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { useColorMode } from "@chakra-ui/react";
-import StyledText from "../styledcomponents/StyledText";
-import DeleteFlightModal from "./DeleteFlightModal";
-import CreateFlightModal from "./CreateFlightModal";
-import { formatDate } from "../../Functions/timeCalc";
-import InfoMed from "./InfoMed";
+import StyledText from "../../../components/styledcomponents/StyledText";
+import { DeleteFlightModal } from "./DeleteFlightModal";
+import { CreateFlightModal } from "./CreateFlightModal";
+import { formatDate } from "@/Functions/timeCalc";
+import { InfoMed } from "./InfoMed";
 
-const FlightCard = ({ flight }) => {
+export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   const { colorMode } = useColorMode();
   return (
@@ -144,6 +144,4 @@ const FlightCard = ({ flight }) => {
       </CardBody>
     </Card>
   );
-};
-
-export default FlightCard;
+}

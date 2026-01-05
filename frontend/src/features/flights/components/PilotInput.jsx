@@ -9,11 +9,11 @@ import React, { useState } from "react";
 import { Fragment, useEffect, useMemo } from "react";
 import { FaMinus } from "react-icons/fa";
 import { Controller, useFormContext } from "react-hook-form";
-import { apiAuth } from "../../utils/api";
+import { apiAuth } from "@/utils/api";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
-const PilotInput = ({ index, pilotos, member, remove }) => {
+export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   const [qualP, setQualP] = useState([]);
   const { register, setValue, getValues, control } = useFormContext();
 
@@ -29,26 +29,6 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
             `/v2/qualificacoeslist/${member.nip}`,
           );
           console.log("Data Fetched");
-          // const normalizedQualifications = Array.isArray(response.data)
-          //   ? response.data
-          //       .map((qual) => {
-          //         if (!qual) return null;
-          //         const id =
-          //           typeof qual.id !== "undefined"
-          //             ? String(qual.id)
-          //             : Array.isArray(qual) && typeof qual[0] !== "undefined"
-          //               ? String(qual[0])
-          //               : null;
-          //         const nome =
-          //           qual.nome ??
-          //           (Array.isArray(qual) && typeof qual[1] !== "undefined"
-          //             ? qual[1]
-          //             : null);
-          //         if (!id || !nome) return null;
-          //         return { id, nome };
-          //       })
-          //       .filter(Boolean)
-          //   : [];
           setQualP(response.data);
           console.log(response.data);
         } catch (error) {
@@ -109,10 +89,7 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
       <GridItem alignContent={"center"} alignItems={"center"}>
         <FormControl alignContent={"center"} alignItems={"center"}>
           <Select
-            // m="auto"
             minW={"100px"}
-            // maxW={"200px"}
-            // width={"100px"}
             nome="posição"
             placeholder=" "
             type="text"
@@ -243,6 +220,4 @@ const PilotInput = ({ index, pilotos, member, remove }) => {
       </GridItem>
     </Fragment>
   );
-};
-
-export default React.memo(PilotInput);
+});

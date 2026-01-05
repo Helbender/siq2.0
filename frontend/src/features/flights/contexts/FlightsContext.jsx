@@ -1,12 +1,12 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { apiAuth } from "../utils/api";
+import { apiAuth } from "@/utils/api";
 
 // Create the context
 export const FlightContext = createContext();
 
 // Create a provider component
-export const FlightProvider = ({ children }) => {
+export function FlightProvider({ children }) {
   const [flights, setFlights] = useState([]);
   const { removeToken } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
@@ -32,4 +32,4 @@ export const FlightProvider = ({ children }) => {
       {children}
     </FlightContext.Provider>
   );
-};
+}

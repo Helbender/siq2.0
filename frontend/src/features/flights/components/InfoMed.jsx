@@ -1,9 +1,9 @@
 import React from "react";
 import { Fragment } from "react";
-import StyledText from "../styledcomponents/StyledText";
+import StyledText from "../../../components/styledcomponents/StyledText";
 import { Spacer, Stack } from "@chakra-ui/react";
 
-const InfoMed = ({ flight }) => {
+export function InfoMed({ flight }) {
   return (
     <Fragment>
       {flight.activationFirst === "__:__" ||
@@ -32,6 +32,4 @@ const InfoMed = ({ flight }) => {
       )}
     </Fragment>
   );
-};
-
-export default InfoMed;
+}

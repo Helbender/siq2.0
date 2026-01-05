@@ -26,19 +26,19 @@ import {
 import { useContext, useRef, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
-import PilotInput from "./PilotInput";
-import { FlightContext } from "../../Contexts/FlightsContext";
+import { PilotInput } from "./PilotInput";
+import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { UserContext } from "@/features/users/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { api, apiAuth } from "../../utils/api";
-import { getTimeDiff } from "../../Functions/timeCalc";
+import { api, apiAuth } from "@/utils/api";
+import { getTimeDiff } from "@/Functions/timeCalc";
 import { BiEdit } from "react-icons/bi";
 
 const today = new Date();
 
 // Componente
-function CreateFlightModal({ flight }) {
+export function CreateFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { setFlights } = useContext(FlightContext);
   const { token, removeToken } = useContext(AuthContext);
@@ -291,12 +291,8 @@ function CreateFlightModal({ flight }) {
       >
         <ModalOverlay />
         <FormProvider {...methods}>
-          <form
-          // onSubmit={handleSubmit(handleCreateFlight)}
-          >
-            <ModalContent
-            // minWidth={"1200px"}
-            >
+          <form>
+            <ModalContent>
               <ModalHeader textAlign={"center"}>
                 {flight ? `Editar o Modelo ${flight.id}` : "Novo Modelo 1M"}
               </ModalHeader>
@@ -386,10 +382,7 @@ function CreateFlightModal({ flight }) {
                         <FormLabel textAlign={"center"}>ATD</FormLabel>
                         <Input type="time" {...register("ATD")} />
                       </FormControl>
-                      <FormControl
-                        // maxW={{ lg: "fit-content" }}
-                        maxW={"fit-content"}
-                      >
+                      <FormControl maxW={"fit-content"}>
                         <FormLabel textAlign={"center"}>ATA</FormLabel>
                         <Input
                           textAlign={"center"}
@@ -591,7 +584,6 @@ function CreateFlightModal({ flight }) {
                   >
                     <Grid
                       minW="max-content"
-                      // maxWidth={"1000px"}
                       templateColumns="repeat(17, auto)"
                       rowGap={2}
                       columnGap={1}
@@ -687,5 +679,3 @@ function CreateFlightModal({ flight }) {
     </>
   );
 }
-
-export default CreateFlightModal;

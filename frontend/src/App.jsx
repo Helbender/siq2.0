@@ -3,7 +3,7 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 
 import Pilots from "./pages/Pilots";
-import Flights from "./pages/Flights";
+import { FlightsPage } from "@/features/flights/pages/FlightsPage";
 import Master from "./layout/Master";
 import Footer from "./layout/Footer";
 import AboutPage from "./pages/About";
@@ -60,7 +60,7 @@ function App() {
             <Routes>
               <Route index element={<Navigate replace to="dashboard" />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/flights" element={<Flights />} />
+              <Route path="/flights" element={<FlightsPage />} />
               <Route path="/fileupload" element={<FileUpload />} />
               <Route path="/users" element={<UserManagementPage />} />
               <Route

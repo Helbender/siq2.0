@@ -12,17 +12,17 @@ import {
   Heading,
   Box,
 } from "@chakra-ui/react";
-import FlightCard from "../components/flightComponents/FlightCard";
-import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
+import { FlightCard } from "../components/FlightCard";
+import { CreateFlightModal } from "../components/CreateFlightModal";
 import { useContext, useEffect, useState } from "react";
-import { FlightContext } from "../Contexts/FlightsContext";
+import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import StyledText from "../components/styledcomponents/StyledText";
-import { formatDate } from "../Functions/timeCalc";
+import StyledText from "../../../components/styledcomponents/StyledText";
+import { formatDate } from "@/Functions/timeCalc";
 import { FixedSizeList as List } from "react-window";
 
-export default function Flights() {
+export function FlightsPage() {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   const { flights, loading } = useContext(FlightContext);
   const [searchTerm, setSearchTerm] = useState("");

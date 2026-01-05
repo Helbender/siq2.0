@@ -25,7 +25,7 @@ load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine  # type: ignore
 from models.enums import GrupoQualificacoes, TipoTripulante  # type: ignore
-from models.flights import FlightPilots  # noqa: F401  # type: ignore
+from app.features.flights.models import FlightPilots  # noqa: F401  # type: ignore
 from models.qualificacoes import Qualificacao  # type: ignore
 from models.tripulantes import TripulanteQualificacao  # noqa: F401  # type: ignore
 

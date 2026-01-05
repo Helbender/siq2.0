@@ -15,10 +15,10 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
-import { FlightContext } from "../../Contexts/FlightsContext";
-import { api, apiAuth } from "../../utils/api";
+import { FlightContext } from "../contexts/FlightsContext";
+import { api, apiAuth } from "@/utils/api";
 
-function DeleteFlightModal({ flight }) {
+export function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { token } = useContext(AuthContext);
@@ -47,7 +47,6 @@ function DeleteFlightModal({ flight }) {
           duration: 5000,
           position: "bottom",
         });
-        // window.location.reload(f);
         setFlights(flights.filter((f) => f.id != flight.id));
         onClose();
       }
@@ -99,4 +98,3 @@ function DeleteFlightModal({ flight }) {
     </>
   );
 }
-export default DeleteFlightModal;
