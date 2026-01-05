@@ -7,7 +7,7 @@ from sqlalchemy import delete, exc, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from functions.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
+from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
 from models.enums import StatusTripulante, TipoTripulante  # type: ignore
 from models.tripulantes import Tripulante  # type: ignore
 

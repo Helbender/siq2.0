@@ -15,7 +15,7 @@ from flask_jwt_extended import (
 )
 
 from config import setup_database
-from routes.api_blueprint import api
+from app.api.routes import api
 
 # logging.basicConfig(level=logging.DEBUG)  # noqa: ERA001
 # logger = logging.getLogger(__name__)  # noqa: ERA001

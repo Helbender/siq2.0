@@ -25,7 +25,7 @@ from google.oauth2 import service_account  # type:ignore
 from googleapiclient.discovery import build  # type:ignore
 from googleapiclient.http import MediaIoBaseDownload  # type:ignore
 
-from functions.gdrive import ID_PASTA_VOO  # type: ignore
+from app.utils.gdrive import ID_PASTA_VOO  # type: ignore
 
 # Scopes needed for reading from Drive (using same as upload)
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]

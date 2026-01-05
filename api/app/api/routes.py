@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: D100, INP001
+"""Main API blueprint registration."""
 
 from flask import Blueprint
 
@@ -25,3 +25,5 @@ api.register_blueprint(qualifications_bp, url_prefix="/v2")
 
 # Register dashboard blueprint
 api.register_blueprint(dashboard_bp, url_prefix="/dashboard")
+
+

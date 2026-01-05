@@ -11,7 +11,7 @@ from sqlalchemy import exc, func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type: ignore
-from functions.gdrive import tarefa_enviar_para_drive  # type: ignore
+from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
 from models import year_init  # type: ignore
 from models.enums import TipoTripulante  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
