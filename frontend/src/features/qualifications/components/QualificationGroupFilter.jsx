@@ -8,12 +8,12 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-const QualificationGroupFilter = ({
+export function QualificationGroupFilter({
   availableGroups,
   selectedGroups,
   onGroupChange,
   filter,
-}) => {
+}) {
   const bgColor = useColorModeValue("white", "gray.700");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
@@ -43,6 +43,4 @@ const QualificationGroupFilter = ({
       </CheckboxGroup>
     </Box>
   );
-};
-
-export default QualificationGroupFilter;
+}

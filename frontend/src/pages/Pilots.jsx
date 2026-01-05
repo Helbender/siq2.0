@@ -4,8 +4,8 @@ import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
-import { api } from "../utils/api";
-import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
+import { api } from "@/utils/api";
+import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
 
 const Pilots = ({ tipo }) => {
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -62,29 +62,25 @@ const Pilots = ({ tipo }) => {
 
     // Filter by selected types
     if (selectedTypes.length > 0) {
-      results = results.filter((qual) => selectedTypes.includes(qual.position));
+      results = results.filter((pilot) =>
+        selectedTypes.includes(pilot.position),
+      );
     }
 
     setFilteredCrew(results);
   }, [pilotos, selectedTypes]);
+
   return (
-    <Stack m={4}>
-      <Box ml={4} alignSelf={"flex-start"}>
+    <Stack m={4} pb={10}>
+      <Box ml={4} mb={6}>
         <QualificationGroupFilter
           availableGroups={availableTypes}
           selectedGroups={selectedTypes}
           onGroupChange={setSelectedTypes}
+          filter={"Função"}
         />
       </Box>
-      <Grid
-        templateColumns={{
-          base: "1fr",
-          lg: "repeat(2,1fr)",
-          "2xl": "repeat(3,1fr)",
-        }}
-        gap={4}
-        mt="8"
-      >
+      <Grid templateColumns="repeat(auto-fill, minmax(350px, 1fr))" gap={6}>
         {filteredCrew.map((pilot) => (
           <PilotCard key={pilot.nip} user={pilot} />
         ))}

@@ -17,10 +17,10 @@ import {
 } from "@chakra-ui/react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
-import { api } from "../utils/api";
-import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
+import { api } from "@/utils/api";
+import { QualificationGroupFilter } from "../components/QualificationGroupFilter";
 
-const QualificationTable = ({ tipo }) => {
+export function QualificationTablePage({ tipo }) {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
   const [filteredCrew, setFilteredCrew] = useState([]);
@@ -408,6 +408,4 @@ const QualificationTable = ({ tipo }) => {
       </TableContainer>
     </Stack>
   );
-};
-
-export default QualificationTable;
+}

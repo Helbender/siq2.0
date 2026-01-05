@@ -13,24 +13,18 @@ import {
   FormLabel,
   Input,
   Stack,
-  GridItem,
-  Grid,
-  Divider,
-  Select,
   useToast,
-  FormErrorMessage,
-  Box,
-  Center,
   IconButton,
+  Select,
 } from "@chakra-ui/react";
-import { useState, useContext, useRef, useEffect, useMemo } from "react";
-import { useForm, FormProvider, useFieldArray } from "react-hook-form";
-import { FaEdit, FaPlus } from "react-icons/fa";
-import { api } from "../../utils/api";
+import { useState, useContext, useEffect, useMemo } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { FaEdit } from "react-icons/fa";
+import { api, apiAuth } from "@/utils/api";
 
-const CreateQualModal = ({ setQualifications, edit, qualification }) => {
+export function CreateQualModal({ setQualifications, edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   // Reset form and groups when modal opens
   const handleModalOpen = () => {
     if (!edit) {
@@ -110,7 +104,7 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
       setGrupos([]);
       return;
     }
-    
+
     try {
       const res = await api.get(`/v2/qualification-groups/${crewType}`);
       setGrupos(res.data);
@@ -143,7 +137,7 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
     };
     fetchData();
   }, []);
-  
+
   // Watch for crew type changes and update qualification groups
   useEffect(() => {
     const subscription = qualificacao.watch((value, { name }) => {
@@ -153,7 +147,7 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
         qualificacao.setValue("grupo", "");
       }
     });
-    
+
     return () => subscription.unsubscribe();
   }, [qualificacao]);
 
@@ -223,14 +217,17 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
                   <FormLabel>Grupo de Qualificação</FormLabel>
                   <Select
                     placeholder={
-                      qualificacao.watch("tipo_aplicavel") 
-                        ? grupos.length > 0 
-                          ? "Selecione um grupo" 
+                      qualificacao.watch("tipo_aplicavel")
+                        ? grupos.length > 0
+                          ? "Selecione um grupo"
                           : "Carregando grupos..."
                         : "Primeiro selecione um tipo de tripulante"
                     }
                     {...qualificacao.register("grupo")}
-                    isDisabled={!qualificacao.watch("tipo_aplicavel") || grupos.length === 0}
+                    isDisabled={
+                      !qualificacao.watch("tipo_aplicavel") ||
+                      grupos.length === 0
+                    }
                   >
                     {grupos &&
                       grupos.map((grupo) => (
@@ -256,6 +253,4 @@ const CreateQualModal = ({ setQualifications, edit, qualification }) => {
       </Modal>
     </>
   );
-};
-
-export default CreateQualModal;
+}

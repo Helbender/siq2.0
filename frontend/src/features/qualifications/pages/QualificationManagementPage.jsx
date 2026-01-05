@@ -15,13 +15,13 @@ import {
   Flex,
   Button,
 } from "@chakra-ui/react";
-import CreateQualModal from "../components/qualificationComponents/CreateQualModal";
-import DeleteQualModal from "../components/qualificationComponents/DeleteQualModal";
-import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";
-import { apiAuth } from "../utils/api";
+import { CreateQualModal } from "../components/CreateQualModal";
+import { DeleteQualModal } from "../components/DeleteQualModal";
+import { QualificationGroupFilter } from "../components/QualificationGroupFilter";
+import { apiAuth } from "@/utils/api";
 import { BiRefresh } from "react-icons/bi";
 
-function QualificationManagement() {
+export function QualificationManagementPage() {
   const [filteredQualifications, setFilteredQualifications] = useState([]);
   const [qualifications, setQualifications] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +42,9 @@ function QualificationManagement() {
         ...new Set(res.data.map((qual) => qual.grupo).filter(Boolean)),
       ];
       const types = [
-        ...new Set(res.data.map((qual) => qual.tipo_aplicavel).filter(Boolean)),
+        ...new Set(
+          res.data.map((qual) => qual.tipo_aplicavel).filter(Boolean),
+        ),
       ];
       setAvailableGroups(groups);
       setSelectedGroups(groups); // Select all groups by default
@@ -195,5 +197,3 @@ function QualificationManagement() {
     </Container>
   );
 }
-
-export default QualificationManagement;

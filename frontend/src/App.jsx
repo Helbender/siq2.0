@@ -10,8 +10,8 @@ import AboutPage from "./pages/About";
 import Sidebar from "./components/Sidebar";
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
-import QualificationManagement from "./pages/QualificationManagement";
-import QualificationTable from "./pages/QualificationTable";
+import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
+import { QualificationTablePage } from "@/features/qualifications/pages/QualificationTablePage";
 
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 import { FileUpload } from "@/features/users/components/FileUpload";
@@ -65,7 +65,7 @@ function App() {
               <Route path="/users" element={<UserManagementPage />} />
               <Route
                 path="/qualificacoes"
-                element={<QualificationManagement />}
+                element={<QualificationManagementPage />}
               />
 
               <Route path="/" element={<Master />}>
@@ -88,7 +88,7 @@ function App() {
                       .replace(" ", "-")
                       .normalize("NFD")
                       .replace(/[\u0300-\u036f]/g, "")}-table`}
-                    element={<QualificationTable tipo={tipo} />}
+                    element={<QualificationTablePage tipo={tipo} />}
                   />
                 ))}
               </Route>

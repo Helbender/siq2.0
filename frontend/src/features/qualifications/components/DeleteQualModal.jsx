@@ -14,9 +14,9 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
-import { apiAuth } from "../../utils/api";
+import { apiAuth } from "@/utils/api";
 
-const DeleteQualModal = ({ qual, setQualifications }) => {
+export function DeleteQualModal({ qual, setQualifications }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -71,6 +71,4 @@ const DeleteQualModal = ({ qual, setQualifications }) => {
       </Modal>
     </Fragment>
   );
-};
-
-export default DeleteQualModal;
+}
