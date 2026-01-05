@@ -2,7 +2,7 @@ import React, { useMemo, useState, Fragment, useContext } from "react";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 
-import Pilots from "./pages/Pilots";
+import { PilotsPage } from "@/features/pilots/pages/PilotsPage";
 import { FlightsPage } from "@/features/flights/pages/FlightsPage";
 import Master from "./layout/Master";
 import Footer from "./layout/Footer";
@@ -77,7 +77,7 @@ function App() {
                       .replace(" ", "-")
                       .normalize("NFD")
                       .replace(/[\u0300-\u036f]/g, "")}`}
-                    element={<Pilots tipo={tipo} />}
+                    element={<PilotsPage tipo={tipo} />}
                   />
                 ))}
                 {tipos.map((tipo) => (

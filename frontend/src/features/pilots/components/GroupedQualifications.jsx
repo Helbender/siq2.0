@@ -1,9 +1,9 @@
 import { Flex, Text, Grid, GridItem } from "@chakra-ui/react";
-import QualificationsPanel from "./QualificationsPanel";
+import { QualificationsPanel } from "./QualificationsPanel";
 import { Fragment } from "react";
-import StandardText from "../styledcomponents/StandardText";
+import StandardText from "@/components/styledcomponents/StandardText";
 
-const GroupedQualifications = ({ qualificacoes }) => {
+export function GroupedQualifications({ qualificacoes }) {
   // Group by 'grupo'
   const grouped = qualificacoes.reduce((acc, qual) => {
     acc[qual.grupo] = acc[qual.grupo] || [];
@@ -73,6 +73,4 @@ const GroupedQualifications = ({ qualificacoes }) => {
       ))}
     </Fragment>
   );
-};
-
-export default GroupedQualifications;
+}

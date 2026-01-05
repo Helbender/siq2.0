@@ -1,6 +1,6 @@
 import { HStack, Text } from "@chakra-ui/react";
 
-const QualificationsPanel = (props) => {
+export function QualificationsPanel(props) {
   const validade = props.qualification.validade_info[2] / 6;
   function colorFormatter(days) {
     let color = "";
@@ -40,6 +40,4 @@ const QualificationsPanel = (props) => {
       </Text>
     </HStack>
   );
-};
-
-export default QualificationsPanel;
+}

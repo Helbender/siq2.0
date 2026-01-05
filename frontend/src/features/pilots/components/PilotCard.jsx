@@ -7,21 +7,10 @@ import {
   Flex,
   Circle,
   useColorModeValue,
-  Grid,
-  Stack,
-  Spacer,
-  GridItem,
 } from "@chakra-ui/react";
-import DaysLeftColumn from "./DaysLeftColumn";
-import QualificationsPanel from "./QualificationsPanel";
-import StandardText from "../styledcomponents/StandardText";
-import { Fragment, useState } from "react";
-// ...existing code...
-import GroupedQualifications from "./GroupedQualifications";
-// ...existing code...
+import { GroupedQualifications } from "./GroupedQualifications";
 
-// ...existing code...
-const PilotCard = ({ user }) => {
+export function PilotCard({ user }) {
   return (
     <Card
       bg={useColorModeValue("gray.400", "gray.700")}
@@ -56,6 +45,4 @@ const PilotCard = ({ user }) => {
       </CardBody>
     </Card>
   );
-};
-
-export default PilotCard;
+}

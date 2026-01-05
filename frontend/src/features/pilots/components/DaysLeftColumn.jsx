@@ -1,8 +1,6 @@
- 
- 
 import { Box, Divider, Text } from "@chakra-ui/react";
 
-const DaysLeftColumn = ({ qualification, dates }) => {
+export function DaysLeftColumn({ qualification, dates }) {
   let today = new Date();
   let days = dates.map((date) => {
     let qualificationDate = new Date(date);
@@ -44,6 +42,4 @@ const DaysLeftColumn = ({ qualification, dates }) => {
       })}
     </Box>
   );
-};
-
-export default DaysLeftColumn;
+}
