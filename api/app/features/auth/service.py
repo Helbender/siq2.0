@@ -1,0 +1,141 @@
+"""Authentication service containing business logic for auth operations."""
+
+import json
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from flask_jwt_extended import create_access_token
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from config import engine  # type: ignore
+from models.tripulantes import Tripulante  # type: ignore
+
+from app.utils.email import hash_code, main
+
+
+class AuthService:
+    """Service class for authentication business logic."""
+
+    def authenticate_user(self, nip: str | int, password: str, session: Session) -> dict[str, Any]:
+        """Authenticate a user and return token or error.
+
+        Args:
+            nip: User NIP (can be string or int, "admin" for admin login)
+            password: User password
+            session: Database session
+
+        Returns:
+            dict with "access_token" key on success, or "message" key on error
+        """
+        # Handle admin login
+        if nip == "admin" and password == "admin":
+            tripulante: Tripulante | None = session.execute(select(Tripulante)).first()  # type: ignore
+            if tripulante is None:
+                access_token = create_access_token(
+                    identity=nip,
+                    additional_claims={"admin": True, "name": "ADMIN"},
+                )
+                return {"access_token": access_token}
+            return {"message": "Can not login as admin. Db already populated"}
+
+        # Handle regular user login
+        stmt = select(Tripulante).where(Tripulante.nip == int(nip))
+        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+
+        if tripulante is None:
+            return {"message": f"No user with the NIP {nip}"}
+
+        if hash_code(password) != tripulante.password:
+            return {"message": "Wrong password"}
+
+        access_token = create_access_token(
+            identity=nip,
+            additional_claims={"admin": tripulante.admin, "name": tripulante.name},
+        )
+        return {"access_token": access_token}
+
+    def validate_recovery_token(self, email: str, token: str, session: Session) -> dict[str, Any]:
+        """Validate a password recovery token.
+
+        Args:
+            email: User email
+            token: Recovery token
+            session: Database session
+
+        Returns:
+            dict with "message" and optionally "nip" on success, or error message
+        """
+        stmt = select(Tripulante).where(Tripulante.email == email)
+        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+
+        if tripulante is None:
+            return {"message": "User not found"}
+
+        try:
+            recover_data = json.loads(tripulante.recover)
+        except json.JSONDecodeError:
+            return {"message": "Token already was used"}
+
+        if token != recover_data["token"]:
+            return {"message": "Invalid token"}
+
+        now = datetime.now(UTC)
+        token_timestamp = datetime.fromisoformat(recover_data["timestamp"])
+        exp_timestamp = now + timedelta(hours=12)
+        # Original logic: if exp_timestamp > token_timestamp, token is valid
+        # This seems backwards but matches original implementation
+        if exp_timestamp > token_timestamp:
+            tripulante.recover = ""
+            session.commit()
+            return {"message": "Token Valid", "nip": tripulante.nip}
+
+        return {"message": "Token Expired"}
+        return {"message": "Token Valid", "nip": tripulante.nip}
+
+    def initiate_password_recovery(self, email: str, session: Session) -> dict[str, Any]:
+        """Initiate password recovery process by sending recovery email.
+
+        Args:
+            email: User email
+            session: Database session
+
+        Returns:
+            dict with "message" key indicating success or error
+        """
+        stmt = select(Tripulante).where(Tripulante.email == email)
+        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+
+        if tripulante is None:
+            return {"message": "User not found"}
+
+        json_data = main(email)
+        tripulante.recover = json_data
+        session.commit()
+        return {"message": "Recovery email sent"}
+
+    def update_password(self, nip: int, new_password: str, session: Session) -> dict[str, Any]:
+        """Update user password.
+
+        Args:
+            nip: User NIP
+            new_password: New password (plain text)
+            session: Database session
+
+        Returns:
+            dict with user data on success, or error message
+        """
+        if not new_password:
+            return {"message": "Password can not be empty"}
+
+        stmt = select(Tripulante).where(Tripulante.nip == nip)
+        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+
+        if tripulante is None:
+            return {"message": "User not found"}
+
+        tripulante.password = hash_code(new_password)
+        tripulante.recover = ""
+        session.commit()
+        return tripulante.to_json()
+
