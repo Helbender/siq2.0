@@ -26,7 +26,7 @@ load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
 from app.features.flights.models import Flight
-from models.qualificacoes import Qualificacao
+from app.features.qualifications.models import Qualificacao
 from models.tripulantes import Tripulante  # noqa: F401 - Required for SQLAlchemy relationship resolution
 
 

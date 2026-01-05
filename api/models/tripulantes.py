@@ -40,7 +40,7 @@ class StatusTripulanteType(TypeDecorator):
 
 if TYPE_CHECKING:
     from app.features.flights.models import FlightPilots  # type: ignore
-    from models.qualificacoes import Qualificacao  # type: ignore
+    from app.features.qualifications.models import Qualificacao  # type: ignore
 
 
 class Tripulante(Base):

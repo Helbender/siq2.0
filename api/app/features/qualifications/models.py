@@ -1,3 +1,5 @@
+"""Qualification models for the qualifications feature."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Integer, String
@@ -12,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class Qualificacao(Base):
+    """Qualification model."""
+
     __tablename__ = "qualificacoes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -25,3 +29,4 @@ class Qualificacao(Base):
     atribuicoes: Mapped[list["TripulanteQualificacao"]] = relationship(
         back_populates="qualificacao", cascade="all, delete-orphan"
     )
+

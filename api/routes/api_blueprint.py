@@ -4,9 +4,9 @@ from flask import Blueprint
 
 from app.features.auth.routes import auth_bp  # type: ignore
 from app.features.flights.routes import flights_bp  # type: ignore
+from app.features.qualifications.routes import qualifications_bp  # type: ignore
 from app.features.users.routes import users_bp  # type: ignore
 from routes.dashboard_blueprint import dashboard  # type: ignore
-from routes.routes import v2  # type:ignore
 
 # Main Blueprint to register with application
 api = Blueprint("api", __name__)
@@ -20,7 +20,8 @@ api.register_blueprint(users_bp, url_prefix="/users")
 # Register flights blueprint
 api.register_blueprint(flights_bp, url_prefix="/flights")
 
+# Register qualifications blueprint (v2 routes)
+api.register_blueprint(qualifications_bp, url_prefix="/v2")
+
 # Register dashboard blueprints with api blueprint
 api.register_blueprint(dashboard, url_prefix="/dashboard")
-
-api.register_blueprint(v2, url_prefix="/v2")

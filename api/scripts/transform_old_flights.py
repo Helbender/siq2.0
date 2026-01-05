@@ -34,7 +34,7 @@ load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
 from models.enums import TipoTripulante
-from models.qualificacoes import Qualificacao
+from app.features.qualifications.models import Qualificacao
 from sqlalchemy.orm import Session
 
 # Mapping from old boolean qualification fields to qualification names

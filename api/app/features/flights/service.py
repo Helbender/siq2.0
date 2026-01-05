@@ -14,7 +14,7 @@ from config import engine  # type: ignore
 from functions.gdrive import tarefa_enviar_para_drive  # type: ignore
 from models import year_init  # type: ignore
 from models.enums import TipoTripulante  # type: ignore
-from models.qualificacoes import Qualificacao  # type: ignore
+from app.features.qualifications.models import Qualificacao  # type: ignore
 from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
