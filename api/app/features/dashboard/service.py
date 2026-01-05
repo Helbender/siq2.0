@@ -1,59 +1,33 @@
-from __future__ import annotations  # noqa: D100, INP001
+"""Dashboard service containing business logic for dashboard operations."""
 
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from flask import Blueprint, Response, jsonify, request
 from sqlalchemy import extract, func, select
 from sqlalchemy.orm import Session, joinedload
 
-from config import engine  # type: ignore
-from models.enums import StatusTripulante, TipoTripulante  # type: ignore
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
+from app.utils.time_utils import parse_time_to_minutes
+from models.enums import StatusTripulante, TipoTripulante  # type: ignore
 from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
 
-dashboard = Blueprint("dashboard", __name__)
 
+class DashboardService:
+    """Service class for dashboard business logic."""
 
-def parse_time_to_minutes(time_str: str) -> int:
-    """Parse time string in format 'HH:MM' to total minutes."""
-    if not time_str or time_str == "" or time_str == "__:__":
-        return 0
-    try:
-        parts = time_str.split(":")
-        if len(parts) != 2:
-            return 0
-        hours = int(parts[0])
-        minutes = int(parts[1])
-        return hours * 60 + minutes
-    except (ValueError, AttributeError):
-        return 0
+    def get_flight_statistics(self, year: int | None, session: Session) -> dict[str, Any]:
+        """Get flight statistics for dashboard.
 
+        Args:
+            year: Year to filter flights (None for current year)
+            session: Database session
 
-@dashboard.route("/statistics", methods=["GET"], strict_slashes=False)
-def get_flight_statistics() -> tuple[Response, int]:
-    """Get flight statistics for dashboard.
+        Returns:
+            dict with statistics data
+        """
+        if year is None:
+            year = datetime.now(UTC).year
 
-    Query Parameters:
-        year (int, optional): Year to filter flights. Defaults to current year.
-
-    Returns:
-        - total_flights: Total number of flights
-        - total_hours: Total flight hours for the year
-        - hours_by_type: Total hours grouped by flight_type (pie chart data)
-        - hours_by_action: Total hours grouped by flight_action (pie chart data)
-        - total_passengers: Sum of all passengers
-        - total_doe: Sum of all DOE
-        - total_cargo: Sum of all cargo
-        - top_pilots_by_type: Top pilot for each crew type
-        - year: Selected year
-    """
-    # Get year from query parameter, default to current year
-    year = request.args.get("year", type=int)
-    if year is None:
-        year = datetime.now(UTC).year
-
-    with Session(engine) as session:
         # Get total flights count for the selected year
         total_flights = (
             session.execute(select(func.count(Flight.fid)).where(extract("year", Flight.date) == year)).scalar() or 0
@@ -91,11 +65,11 @@ def get_flight_statistics() -> tuple[Response, int]:
             total_minutes += minutes  # Add to total
 
             # Group by flight_type
-            flight_type = flight.flight_type  # or "Unknown"
+            flight_type = flight.flight_type
             hours_by_type[flight_type] = hours_by_type.get(flight_type, 0) + minutes
 
             # Group by flight_action
-            flight_action = flight.flight_action  # or "Unknown"
+            flight_action = flight.flight_action
             hours_by_action[flight_action] = hours_by_action.get(flight_action, 0) + minutes
 
             # Sum passengers, doe, cargo
@@ -171,14 +145,17 @@ def get_flight_statistics() -> tuple[Response, int]:
             "top_pilots_by_type": top_pilots_by_type,  # Top pilot for each crew type
             "year": year,
         }
-        return jsonify(statistics), 200
+        return statistics
 
+    def get_available_years(self, session: Session) -> list[int]:
+        """Get list of years that have flights in the database.
 
-@dashboard.route("/available-years", methods=["GET"], strict_slashes=False)
-def get_available_years() -> tuple[Response, int]:
-    """Get list of years that have flights in the database."""
-    with Session(engine) as session:
-        # Get distinct years from flights
+        Args:
+            session: Database session
+
+        Returns:
+            List of years (integers)
+        """
         years = (
             session.execute(
                 select(extract("year", Flight.date).label("year"))
@@ -190,25 +167,21 @@ def get_available_years() -> tuple[Response, int]:
         )
         # Convert to list of integers
         years_list = [int(year) for year in years if year is not None]
-        return jsonify({"years": years_list}), 200
+        return years_list
 
+    def get_expiring_qualifications(self, session: Session, limit: int = 10) -> list[dict[str, Any]]:
+        """Get top qualifications with lowest remaining days across all crew members.
 
-@dashboard.route("/expiring-qualifications", methods=["GET"], strict_slashes=False)
-def get_expiring_qualifications() -> tuple[Response, int]:
-    """Get top 10 qualifications with lowest remaining days across all crew members.
+        Args:
+            session: Database session
+            limit: Number of qualifications to return (default: 10)
 
-    Returns a list of 10 elements sorted from lowest to highest remaining days.
-    Each element contains:
-    - crew_member: Information about the crew member (nip, name, rank)
-    - qualification_name: Name of the qualification
-    - remaining_days: Number of days until expiration (can be negative if expired)
-    - expiry_date: Date when the qualification expires
-
-    Same crew member may appear multiple times if they have multiple
-    qualifications among the lowest remaining days.
-    """
-    with Session(engine) as session:
+        Returns:
+            List of qualification dictionaries sorted by remaining days (lowest first)
+        """
         # Get all TripulanteQualificacao records with related data, filtering by status Presente
+        from sqlalchemy.orm import joinedload
+
         stmt = (
             select(TripulanteQualificacao)
             .join(Tripulante)
@@ -249,7 +222,8 @@ def get_expiring_qualifications() -> tuple[Response, int]:
 
         qualification_data.sort(key=get_remaining_days)
 
-        # Get top 10 (lowest remaining days)
-        top_10 = qualification_data[:10]
+        # Get top N (lowest remaining days)
+        top_n = qualification_data[:limit]
 
-        return jsonify({"expiring_qualifications": top_10}), 200
+        return top_n
+
