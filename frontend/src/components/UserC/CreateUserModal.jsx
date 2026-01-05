@@ -45,6 +45,7 @@ function CreateUserModal({ edit, add, isDelete, user }) {
       admin: false,
       squadron: "502 - Elefantes",
       tipo: "PILOTO",
+      status: "Presente",
     },
   );
   const { users, setUsers } = useContext(UserContext);
@@ -290,6 +291,17 @@ function CreateUserModal({ edit, add, isDelete, user }) {
                         OPERADOR VIGILÂNCIA
                       </option>
                       <option value="OPERACOES">OPERAÇÕES</option>
+                    </Select>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      value={inputs?.status ? inputs.status : "Presente"}
+                      name="status"
+                      onChange={handleInputsChange}
+                    >
+                      <option value="Presente">Presente</option>
+                      <option value="Fora">Fora</option>
                     </Select>
                   </FormControl>
                 </HStack>

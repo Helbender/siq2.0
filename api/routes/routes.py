@@ -74,8 +74,14 @@ def criar_qualificacao() -> Response:
 # 3. Listar qualificações para todos os tripulantes de um tipo específico
 @v2.route("/tripulantes/qualificacoes/<tipo>", methods=["GET"])
 def listar_qualificacoes_tipo(tipo: str) -> Response:
+    from models.enums import StatusTripulante
+
     with Session(engine) as session:
-        stmt = select(Tripulante).where(Tripulante.tipo == tipo).order_by(Tripulante.nip, Tripulante.rank)
+        stmt = (
+            select(Tripulante)
+            .where(Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value)
+            .order_by(Tripulante.nip, Tripulante.rank)
+        )
         tripulantes = session.execute(stmt).scalars().all()
 
         return jsonify([t.to_json() for t in tripulantes])

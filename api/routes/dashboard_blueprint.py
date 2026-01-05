@@ -8,7 +8,7 @@ from sqlalchemy import extract, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type: ignore
-from models.enums import TipoTripulante  # type: ignore
+from models.enums import StatusTripulante, TipoTripulante  # type: ignore
 from models.flights import Flight, FlightPilots  # type: ignore
 from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
 
@@ -106,6 +106,9 @@ def get_flight_statistics() -> tuple[Response, int]:
             # Calculate hours per pilot (overall and by type)
             for flight_pilot in flight.flight_pilots:
                 if flight_pilot.pilot_id and flight_pilot.tripulante:
+                    # Skip crew members with status "Fora"
+                    if flight_pilot.tripulante.status != StatusTripulante.PRESENTE:
+                        continue
                     pilot_id = flight_pilot.pilot_id
                     pilot_tipo = flight_pilot.tripulante.tipo
 
@@ -205,10 +208,15 @@ def get_expiring_qualifications() -> tuple[Response, int]:
     qualifications among the lowest remaining days.
     """
     with Session(engine) as session:
-        # Get all TripulanteQualificacao records with related data
-        stmt = select(TripulanteQualificacao).options(
-            joinedload(TripulanteQualificacao.tripulante),
-            joinedload(TripulanteQualificacao.qualificacao),
+        # Get all TripulanteQualificacao records with related data, filtering by status Presente
+        stmt = (
+            select(TripulanteQualificacao)
+            .join(Tripulante)
+            .where(Tripulante.status == StatusTripulante.PRESENTE.value)
+            .options(
+                joinedload(TripulanteQualificacao.tripulante),
+                joinedload(TripulanteQualificacao.qualificacao),
+            )
         )
         all_qualifications = session.execute(stmt).unique().scalars().all()
 
@@ -235,7 +243,11 @@ def get_expiring_qualifications() -> tuple[Response, int]:
             )
 
         # Sort by remaining_days (ascending - lowest first)
-        qualification_data.sort(key=lambda x: int(x["remaining_days"]))
+        def get_remaining_days(item: dict) -> int:
+            days = item["remaining_days"]
+            return int(days) if isinstance(days, (int, float, str)) else 0
+
+        qualification_data.sort(key=get_remaining_days)
 
         # Get top 10 (lowest remaining days)
         top_10 = qualification_data[:10]

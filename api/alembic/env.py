@@ -7,7 +7,20 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 load_dotenv(dotenv_path="./.env")
-DB_URL = os.environ.get("DB_URL", "")
+
+# Use the same connection string as config.py
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+
+# Use PostgreSQL connection string (same as config.py)
+DB_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+# Fallback to DB_URL env var if connection string components are not available
+if not all([USER, PASSWORD, HOST, PORT, DBNAME]):
+    DB_URL = os.environ.get("DB_URL", "")
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

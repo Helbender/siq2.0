@@ -2,12 +2,41 @@ from datetime import date, timedelta  # noqa: TCH003
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, String
+from sqlalchemy import Date, ForeignKey, String, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
 from models.basemodels import Base  # type: ignore
-from models.enums import TipoTripulante
+from models.enums import StatusTripulante, TipoTripulante
+
+
+class StatusTripulanteType(TypeDecorator):
+    """Custom type decorator for StatusTripulante enum to handle value-based matching."""
+
+    impl = String
+    cache_ok = True
+
+    def __init__(self, enum_class, length=20, **kwargs):
+        self.enum_class = enum_class
+        super().__init__(length=length, **kwargs)
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        if isinstance(value, self.enum_class):
+            return value.value
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        # Match by enum value, not name
+        for enum_member in self.enum_class:
+            if enum_member.value == value:
+                return enum_member
+        # If no match found, try direct value match as fallback
+        return value
+
 
 if TYPE_CHECKING:
     from models.flights import FlightPilots  # type: ignore
@@ -27,6 +56,11 @@ class Tripulante(Base):
     squadron: Mapped[str] = mapped_column(String(30), default="")
     password: Mapped[str] = mapped_column(String(150))
     tipo: Mapped[TipoTripulante] = mapped_column(SQLEnum(TipoTripulante), nullable=False)
+    status: Mapped[StatusTripulante] = mapped_column(
+        StatusTripulanteType(StatusTripulante),
+        nullable=False,
+        default=StatusTripulante.PRESENTE,
+    )
 
     qualificacoes: Mapped[list["TripulanteQualificacao"]] = relationship(
         back_populates="tripulante", cascade="all, delete-orphan"

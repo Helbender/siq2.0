@@ -14,7 +14,6 @@ import {
   useBreakpointValue,
   Grid,
   useToast,
-  Image,
   Text,
 } from "@chakra-ui/react";
 import { UserContext } from "../Contexts/UserContext";
@@ -26,6 +25,8 @@ import { AuthContext } from "../Contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { IoCloseCircleSharp } from "react-icons/io5";
+import { IoIosCheckmark } from "react-icons/io";
+import { IoIosClose } from "react-icons/io";
 import FileUpload from "../components/UserC/FileUpload";
 import InsertInitQual from "../components/UserC/InsertInitQual";
 
@@ -59,6 +60,7 @@ function UserManagementPage() {
           // user.admin ? "Yes" : "No",
           // user.squadron,
           user.tipo,
+          user.status,
         ]
           .map((field) => (field ? field.toString().toLowerCase() : ""))
           .some((field) => field.includes(searchTerm.toLowerCase())),
@@ -107,6 +109,7 @@ function UserManagementPage() {
               <Th>Posto</Th>
               <Th>Função</Th>
               <Th>Tipo</Th>
+              <Th>Status</Th>
               <Th>Admin</Th>
               {/* <Th>Squadron</Th> */}
               <Th></Th>
@@ -120,6 +123,14 @@ function UserManagementPage() {
                 <Td>{user.rank}</Td>
                 <Td>{user.position}</Td>
                 <Td>{user.tipo}</Td>
+                <Td>
+                  {user.status === "Presente" ? (
+                    <IoIosCheckmark size={"30px"} color="green" />
+                  ) : (
+                    <IoIosClose size={"30px"} color="red" />
+                  )}
+                </Td>
+                {/* <Td>{user.status || "Presente"}</Td> */}
                 <Td>
                   {user.admin ? (
                     <IoCheckmarkCircleSharp size={"30px"} color="green" />

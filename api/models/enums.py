@@ -60,6 +60,11 @@ class TipoTripulante(Enum):
     OPERACOES = "OPERAÇÕES"
 
 
+class StatusTripulante(Enum):
+    PRESENTE = "Presente"
+    FORA = "Fora"
+
+
 # Mapping qualification groups to applicable crew types
 QUALIFICATION_GROUP_TO_CREW_TYPES = {
     # Pilot qualifications

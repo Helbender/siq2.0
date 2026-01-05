@@ -55,6 +55,10 @@ function UserDataCard({ user }) {
             text={`Esquadra:  ${user.squadron}`}
           />
           <StyledText
+            query={"Status:"}
+            text={`Status:  ${user.status || "Presente"}`}
+          />
+          <StyledText
             query={"Admin:"}
             text={`Admin:  ${user.admin ? "Sim" : "Não"}`}
           />
