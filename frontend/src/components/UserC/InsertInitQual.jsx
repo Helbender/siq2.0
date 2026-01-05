@@ -26,7 +26,7 @@ import {
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import api, { apiAuth } from "../../utils/api";
-import { AuthContext } from "../../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 
 const today = new Date();
 

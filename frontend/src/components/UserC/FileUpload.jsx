@@ -12,7 +12,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { api } from "../../utils/api"; // Ajusta o caminho conforme necessário
-import { AuthContext } from "../../Contexts/AuthContext"; // Ajuste o caminho conforme necessário
+import { AuthContext } from "@/features/auth/contexts/AuthContext"; // Ajuste o caminho conforme necessário
 import { FiUploadCloud } from "react-icons/fi";
 export default function FileUpload() {
   const [file, setFile] = useState(null);

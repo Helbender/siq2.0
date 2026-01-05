@@ -23,7 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { useState, useContext } from "react";
-import { AuthContext } from "../../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { BiTrash } from "react-icons/bi";
 import api, { apiAuth } from "../../utils/api";

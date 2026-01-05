@@ -21,7 +21,7 @@ import CreateUserModal from "../components/UserC/CreateUserModal";
 import { FaMailBulk } from "react-icons/fa";
 import UserDataCard from "../components/UserC/UserDataCard";
 import { useSendEmail } from "../Functions/useSendEmail";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { IoCloseCircleSharp } from "react-icons/io5";

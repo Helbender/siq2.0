@@ -15,7 +15,7 @@ import {
   Text,
   Spacer,
 } from "@chakra-ui/react";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";

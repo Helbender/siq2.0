@@ -28,7 +28,7 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 import PilotInput from "./PilotInput";
 import { FlightContext } from "../../Contexts/FlightsContext";
-import { AuthContext } from "../../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { UserContext } from "../../Contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { api, apiAuth } from "../../utils/api";

@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, useToast, Stack, Box } from "@chakra-ui/react";
 import PilotCard from "../components/pilotComponents/PilotCard";
 import { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import QualificationGroupFilter from "../components/qualificationComponents/QualificationGroupFilter";

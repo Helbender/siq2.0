@@ -1,25 +1,25 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, Fragment, useContext } from "react";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Box } from "@chakra-ui/react";
+
 import Pilots from "./pages/Pilots";
 import Flights from "./pages/Flights";
 import Master from "./layout/Master";
-import LoginPage from "./pages//LoginPage";
-import RecoverPass from "./components/loginComponents/RecoverPass";
-import { Fragment, useContext } from "react";
 import Footer from "./layout/Footer";
 import AboutPage from "./pages/About";
-import RecoverProcess from "./components/loginComponents/RecoverProcess";
 import Sidebar from "./components/Sidebar";
-import { AuthContext } from "./Contexts/AuthContext";
-import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-import UserManagementPage from "./pages/UserManagementPage";
-import { Box } from "@chakra-ui/react";
-
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
 import FileUpload from "./components/UserC/FileUpload";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationTable from "./pages/QualificationTable";
-import api from "./utils/api";
+import UserManagementPage from "./pages/UserManagementPage";
+
+import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { RecoverPass } from "@/features/auth/components/RecoverPass";
+import { RecoverProcess } from "@/features/auth/components/RecoverProcess";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
+import api from "@/utils/api";
 
 function App() {
   const { token, removeToken, setToken } = useContext(AuthContext);
@@ -45,12 +45,7 @@ function App() {
           <Routes>
             <Route index element={<Navigate replace to="login" />} />
 
-            <Route
-              path="/login"
-              element={
-                <LoginPage setToken={setToken} removeToken={removeToken} />
-              }
-            />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/recover" element={<RecoverPass />} />
             <Route
               exact

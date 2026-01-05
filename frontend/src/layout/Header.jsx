@@ -34,7 +34,7 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { useContext } from "react";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { LuSun } from "react-icons/lu";
 import { IoMoon } from "react-icons/io5";
 

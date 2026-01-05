@@ -1,6 +1,6 @@
 import React from "react";
 import { useContext } from "react";
-import { AuthContext } from "../../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import {
   Button,
   IconButton,

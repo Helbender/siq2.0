@@ -16,7 +16,7 @@ import FlightCard from "../components/flightComponents/FlightCard";
 import CreateFlightModal from "../components/flightComponents/CreateFlightModal";
 import { useContext, useEffect, useState } from "react";
 import { FlightContext } from "../Contexts/FlightsContext";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import StyledText from "../components/styledcomponents/StyledText";
 import { formatDate } from "../Functions/timeCalc";

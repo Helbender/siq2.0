@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState, useContext } from "react";
-import { AuthContext } from "../Contexts/AuthContext";
+import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { apiAuth } from "../utils/api";
 
 // Create the context
