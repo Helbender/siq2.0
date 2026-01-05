@@ -23,7 +23,7 @@ import {
   Td,
   TableContainer,
 } from "@chakra-ui/react";
-import { UserContext } from "../Contexts/UserContext";
+import { UserContext } from "@/features/users/contexts/UserContext";
 import {
   Legend,
   PieChart,

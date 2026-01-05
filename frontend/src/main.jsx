@@ -6,7 +6,7 @@ import App from "./App";
 import { ChakraProvider } from "@chakra-ui/react";
 import { AuthProvider } from "@/features/auth/contexts/AuthContext";
 import { FlightProvider } from "./Contexts/FlightsContext";
-import { UserProvider } from "./Contexts/UserContext";
+import { UserProvider } from "@/features/users/contexts/UserContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

@@ -10,10 +10,11 @@ import AboutPage from "./pages/About";
 import Sidebar from "./components/Sidebar";
 import Header from "./layout/Header";
 import Dashboard from "./pages/Dashboard";
-import FileUpload from "./components/UserC/FileUpload";
 import QualificationManagement from "./pages/QualificationManagement";
 import QualificationTable from "./pages/QualificationTable";
-import UserManagementPage from "./pages/UserManagementPage";
+
+import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
+import { FileUpload } from "@/features/users/components/FileUpload";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { RecoverPass } from "@/features/auth/components/RecoverPass";
