@@ -2,11 +2,21 @@ from __future__ import annotations  # noqa: D100, INP001
 
 import base64
 import json
+import os
+import sys
+
+# Add the api/ directory to Python path to import local modules
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(api_dir)
+
+# Load environment variables from api/.env
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
-from models.crew import Crew
-from models.flights import Flight, FlightCrew, FlightPilots
-from models.pilots import Pilot
+from models.flights import Flight, FlightPilots
+from models.tripulantes import Tripulante
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -35,7 +45,7 @@ with Session(engine) as session:
 
         for flight_pilot in flight_pilots:
             result = session.execute(
-                select(Pilot).where(Pilot.nip == flight_pilot.pilot_id),
+                select(Tripulante).where(Tripulante.nip == flight_pilot.pilot_id),
             ).scalar_one_or_none()
             if result is None:
                 flights[i]["flight_pilots"].append(
@@ -44,19 +54,9 @@ with Session(engine) as session:
             else:
                 flights[i]["flight_pilots"].append(flight_pilot.to_json())
 
-        stmt3 = select(FlightCrew).where(FlightCrew.flight_id == row.fid)
-        flight_crews = session.execute(stmt3).scalars()
-
-        for flight_crew in flight_crews:
-            result = session.execute(
-                select(Crew).where(Crew.nip == flight_crew.crew_id),
-            ).scalar_one_or_none()
-            if result is None:
-                flights[i]["flight_pilots"].append(
-                    {"pilotName": "Not found, maybe deleted"}
-                )
-            else:
-                flights[i]["flight_pilots"].append(flight_crew.to_json())
+        # NOTE: FlightCrew model does not exist in the current codebase
+        # The original code attempted to query FlightCrew, but this functionality
+        # appears to have been removed or never implemented
         i += 1
 
 

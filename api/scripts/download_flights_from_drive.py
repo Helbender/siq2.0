@@ -11,7 +11,13 @@ import sys
 from datetime import datetime
 
 # Add the parent directory (api/) to Python path to import local modules
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(api_dir)
+
+# Load environment variables from api/.env
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 import io
 
@@ -28,7 +34,9 @@ SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 def get_drive_service():
     """Get authenticated Google Drive service."""
     # Carrega credenciais do arquivo JSON (same method as upload functions)
-    credentials = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+    api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    credentials_path = os.path.join(api_dir, "credentials.json")
+    credentials = service_account.Credentials.from_service_account_file(credentials_path, scopes=SCOPES)
 
     # Cria o cliente para a API do Drive
     service = build("drive", "v3", credentials=credentials)
@@ -415,8 +423,10 @@ def main():
 
     args = parser.parse_args()
 
-    # Check if credentials file exists
-    if not os.path.exists("credentials.json"):
+    # Check if credentials file exists (in parent api/ directory)
+    api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    credentials_path = os.path.join(api_dir, "credentials.json")
+    if not os.path.exists(credentials_path):
         print("❌ Error: credentials.json file not found!")
         print("   Please ensure credentials.json is in the api/ directory.")
         sys.exit(1)

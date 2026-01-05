@@ -14,8 +14,14 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-# Add the parent directory (api/) to Python path to import local modules
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add the api/ directory to Python path to import local modules
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(api_dir)
+
+# Load environment variables from api/.env
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine  # type: ignore
 from models.enums import GrupoQualificacoes, TipoTripulante  # type: ignore

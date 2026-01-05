@@ -56,7 +56,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
 
         stmt = select(Tripulante).where(Tripulante.nip == nip)
         tripulante: Tripulante = session.execute(stmt).scalar_one_or_none()  # type: ignore  # noqa: PGH003
-
+        print(f"\nTripulante: {tripulante}")
         if tripulante is not None:
             if hash_code(password) != tripulante.password:
                 print("Wrong Password")

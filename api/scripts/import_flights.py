@@ -3,6 +3,13 @@
 
 This script scans a folder (inside scripts/) for flight data files, decodes them,
 and imports them into the database.
+
+This script only supports the NEW format .1m files with:
+- QUAL1-QUAL6 fields containing qualification names/IDs
+- Unified flight_pilots array (no separate crew)
+
+For old format files (with boolean qualification fields like cto, sid, qa1, etc.),
+use transform_old_flights.py first to convert them to the new format.
 """
 
 import argparse
@@ -15,12 +22,43 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-# Add the parent directory (api/) to Python path to import local modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the api/ directory to Python path to import local modules
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(api_dir)
+
+# Load environment variables from api/.env
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
 from models.flights import Flight
 from routes.flight_blueprint import add_crew_and_pilots
+
+# Old format boolean qualification fields (should not be present in new format)
+OLD_PILOT_QUAL_FIELDS = {
+    "cto",
+    "sid",
+    "mono",
+    "nfp",
+    "qa1",
+    "qa2",
+    "bsp1",
+    "bsp2",
+    "ta",
+    "vrp1",
+    "vrp2",
+    "bskit",
+    "paras",
+    "nvg",
+    "nvg2",
+}
+
+OLD_CREW_QUAL_FIELDS = {
+    "bsoc",
+    "bskit",
+    "paras",
+}
 
 
 def check_duplicate_flight(session: Session, airtask: str, date, departure_time: str, tailnumber: int) -> Flight | None:
@@ -33,6 +71,49 @@ def check_duplicate_flight(session: Session, airtask: str, date, departure_time:
             Flight.tailnumber == tailnumber,
         )
     ).scalar_one_or_none()
+
+
+def is_old_format(pilot_data: dict) -> bool:
+    """Check if pilot data is in old format (has boolean qualification fields).
+
+    Args:
+        pilot_data: Dictionary with pilot/crew data
+
+    Returns:
+        True if old format detected, False otherwise
+    """
+    # Check for old pilot qualification fields
+    has_old_pilot_format = any(key in pilot_data for key in OLD_PILOT_QUAL_FIELDS)
+    # Check for old crew qualification fields
+    has_old_crew_format = any(key in pilot_data for key in OLD_CREW_QUAL_FIELDS)
+
+    return has_old_pilot_format or has_old_crew_format
+
+
+def validate_new_format(flight_data: dict, filename: str) -> tuple[bool, str | None]:
+    """Validate that flight data is in new format.
+
+    Args:
+        flight_data: Dictionary with flight data
+        filename: Name of the file being processed (for error messages)
+
+    Returns:
+        Tuple of (is_valid: bool, error_message: str | None)
+    """
+    flight_pilots = flight_data.get("flight_pilots", [])
+
+    if not flight_pilots:
+        return True, None  # Empty pilots list is valid (will be caught later)
+
+    for idx, pilot in enumerate(flight_pilots):
+        if is_old_format(pilot):
+            return (
+                False,
+                f"Old format detected in pilot/crew {idx + 1} (has boolean qualification fields). "
+                f"Please use transform_old_flights.py to convert this file first.",
+            )
+
+    return True, None
 
 
 def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 50, skip_duplicates: bool = False):
@@ -71,7 +152,16 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                 flight_data = content_raw
                 parts = filename.split()
                 if len(parts) < 5:
-                    continue  # skip malformed files
+                    print(f"⚠️  Skipping malformed filename: {filename}")
+                    errors.append(f"{filename}: Malformed filename")
+                    continue
+
+                # Validate new format
+                is_valid, validation_error = validate_new_format(flight_data, filename)
+                if not is_valid:
+                    print(f"❌ {validation_error}")
+                    errors.append(f"{filename}: {validation_error}")
+                    continue
 
                 try:
                     # Try to create flight object
@@ -170,10 +260,17 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                             continue
 
                         for pilot in flight_data["flight_pilots"]:
+                            # Ensure pilot data has required fields for new format
+                            if "nip" not in pilot:
+                                print(f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
+                                errors.append(f"{filename}: Pilot/crew without NIP")
+                                continue
+
                             result = add_crew_and_pilots(
                                 db,
                                 existing_flight,
                                 pilot,
+                                edit=False,  # Not editing, creating new
                                 auto_commit=False,  # Don't commit - we'll commit in batches
                             )
                             if result is None:
@@ -185,6 +282,8 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                     else:
                         print(f"New flight - creating: {flight.airtask} on {flight.date}")
                         db.add(flight)
+                        # Flush to get the flight ID before adding pilots
+                        db.flush()
 
                         try:
                             flight_data["flight_pilots"]
@@ -195,10 +294,17 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
                             continue
 
                         for pilot_data in flight_data["flight_pilots"]:
+                            # Ensure pilot data has required fields for new format
+                            if "nip" not in pilot_data:
+                                print(f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
+                                errors.append(f"{filename}: Pilot/crew without NIP")
+                                continue
+
                             result = add_crew_and_pilots(
                                 db,
                                 flight,
                                 pilot_data,
+                                edit=False,  # Not editing, creating new
                                 auto_commit=False,  # Don't commit - we'll commit in batches
                             )
                             if result is None:
@@ -248,7 +354,15 @@ def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 
 def main():
     """Main function to parse arguments and import flights."""
     parser = argparse.ArgumentParser(
-        description="Import flights from a folder containing base64-encoded flight data files"
+        description="Import flights from a folder containing base64-encoded flight data files (NEW format only)",
+        epilog="""
+This script only supports the NEW format .1m files with:
+  - QUAL1-QUAL6 fields containing qualification names/IDs
+  - Unified flight_pilots array (no separate crew)
+
+For old format files (with boolean qualification fields), use transform_old_flights.py
+first to convert them to the new format.
+        """,
     )
     parser.add_argument(
         "foldername", type=str, help="Name of the folder inside scripts/ directory to scan for flight data files"

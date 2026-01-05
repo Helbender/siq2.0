@@ -1,0 +1,50 @@
+# Python/Backend Rules
+- Always use `uv add` to add packages to Python virtual environment.
+- For DB migrations, provide the command but let the user run it (e.g., `flask db migrate` or `flask db upgrade head`).
+- Follow Python 3.13+ syntax and type hints where appropriate.
+- Use Flask-SQLAlchemy for database models and queries.
+- Use Flask-JWT-Extended for authentication.
+- Keep line length to 100 characters (as per ruff config).
+- Use double quotes for strings (as per ruff config).
+- Follow the feature-based folder structure: `app/features/[feature]/[routes.py|service.py|schemas.py|models.py]`.
+- Organize code into layers: models, services, routes/controllers, schemas.
+- Keep business logic inside service classes or modules, not in routes.
+- Keep routes/controllers thin and focused on request/response.
+- Place shared utilities in `app/shared/` (permissions, pagination, errors).
+- Place general utilities in `app/utils/` (time calculations, email, etc.).
+- Place API-level endpoints (like health checks) in `app/api/`.
+- Models should be in `app/features/[feature]/models.py` for feature-specific models.
+- Use schemas for request/response validation in `app/features/[feature]/schemas.py`.
+
+# Frontend Rules
+- Use React 19+ with functional components and hooks.
+- Use Chakra UI v3 for all UI components.
+- Follow the feature-based folder structure: `features/[feature]/[components|hooks|pages]/`.
+- Use `@/` alias for imports (configured in vite.config.js).
+- Prefer named exports over default exports for components.
+- Use custom hooks for data fetching and state management.
+- Keep components small and focused on a single responsibility.
+- Use i18next for internationalization (en/pt supported).
+
+# Code Style
+- Use meaningful variable and function names.
+- Add comments for complex logic, but prefer self-documenting code.
+- Follow existing code patterns and conventions in the codebase.
+- Keep functions small and focused.
+- Use async/await for asynchronous operations.
+
+# API/Backend Routes
+- Follow RESTful conventions for API endpoints.
+- Return consistent JSON response formats.
+- Handle errors gracefully with appropriate HTTP status codes.
+- Use JWT tokens for authentication in protected routes.
+
+# Database
+- Use Flask-Migrate for all database schema changes.
+- Never modify migration files manually after they're created.
+- Use SQLAlchemy models with proper relationships and constraints.
+
+# General
+- When adding new features, maintain consistency with existing code patterns.
+- Test changes locally before committing.
+- Keep dependencies up to date but test thoroughly when updating.

@@ -518,7 +518,13 @@ def add_crew_and_pilots(
                 else:
                     print(f"Qualification {l} not found for type {pilot_obj.tipo.value}")
         # flight_pilot = FlightPilots(**pilot)
+        # Ensure flight has an ID before creating FlightPilots
+        if flight.fid is None:
+            session.flush()  # Flush to get flight ID if not already set
+
         flight_pilot = FlightPilots(
+            flight_id=flight.fid,  # Explicitly set flight_id (part of primary key)
+            pilot_id=pilot["nip"],  # Explicitly set pilot_id (part of primary key)
             position=pilot["position"],
             day_landings=safe_int_or_none(pilot.get("ATR")),
             night_landings=safe_int_or_none(pilot.get("ATN")),
