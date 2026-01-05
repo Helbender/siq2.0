@@ -35,7 +35,7 @@ def setup_database():
     """Initialize database tables."""
     try:
         from models.basemodels import Base
-        from models.flights import Flight, FlightPilots  # noqa: F401
+        from app.features.flights.models import Flight, FlightPilots  # noqa: F401
         from models.qualificacoes import Qualificacao  # noqa: F401
         from models.tripulantes import Tripulante, TripulanteQualificacao  # noqa: F401
 

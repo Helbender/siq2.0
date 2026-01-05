@@ -3,9 +3,9 @@ from __future__ import annotations  # noqa: D100, INP001
 from flask import Blueprint
 
 from app.features.auth.routes import auth_bp  # type: ignore
+from app.features.flights.routes import flights_bp  # type: ignore
 from app.features.users.routes import users_bp  # type: ignore
 from routes.dashboard_blueprint import dashboard  # type: ignore
-from routes.flight_blueprint import flights  # type:ignore
 from routes.routes import v2  # type:ignore
 
 # Main Blueprint to register with application
@@ -17,8 +17,8 @@ api.register_blueprint(auth_bp, url_prefix="")
 # Register users blueprint
 api.register_blueprint(users_bp, url_prefix="/users")
 
-# Register flight blueprints with api blueprint
-api.register_blueprint(flights, url_prefix="/flights")
+# Register flights blueprint
+api.register_blueprint(flights_bp, url_prefix="/flights")
 
 # Register dashboard blueprints with api blueprint
 api.register_blueprint(dashboard, url_prefix="/dashboard")

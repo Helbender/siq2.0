@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type: ignore
 from models.enums import StatusTripulante, TipoTripulante  # type: ignore
-from models.flights import Flight, FlightPilots  # type: ignore
+from app.features.flights.models import Flight, FlightPilots  # type: ignore
 from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
 
 dashboard = Blueprint("dashboard", __name__)
