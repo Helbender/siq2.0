@@ -4,8 +4,6 @@ from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import unset_jwt_cookies
 from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
-
 from app.features.auth.schemas import (
     LoginRequestSchema,
     PasswordUpdateRequestSchema,
@@ -13,6 +11,7 @@ from app.features.auth.schemas import (
     validate_request,
 )
 from app.features.auth.service import AuthService
+from config import engine  # type: ignore
 
 auth_bp = Blueprint("auth", __name__)
 auth_service = AuthService()
@@ -25,7 +24,69 @@ password_update_schema = PasswordUpdateRequestSchema()
 
 @auth_bp.route("/token", methods=["POST"])
 def create_token() -> tuple[Response | dict[str, str], int]:
-    """Handle user login and return JWT token."""
+    """Handle user login and return JWT token.
+
+    ---
+    tags:
+      - Authentication
+    summary: User login
+    description: Authenticate a user and receive a JWT access token
+    parameters:
+      - in: body
+        name: body
+        description: Login credentials
+        required: true
+        schema:
+          type: object
+          required:
+            - nip
+            - password
+          properties:
+            nip:
+              type: integer
+              description: User NIP (or "admin" for admin login)
+              example: 123456
+            password:
+              type: string
+              description: User password
+              example: "password123"
+    responses:
+      201:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token
+              example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+      400:
+        description: Validation error
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Validation error"
+            errors:
+              type: object
+      401:
+        description: Wrong password
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Wrong password"
+      404:
+        description: User not found
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "No user with the NIP 123456"
+    """
     login_data: dict | None = request.get_json()
     if login_data is None:
         return jsonify({"message": "Request body must be JSON"}), 400

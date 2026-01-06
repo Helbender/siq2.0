@@ -13,9 +13,11 @@ from flask_jwt_extended import (
     get_jwt,
     get_jwt_identity,
 )
+from flasgger import Swagger  # type: ignore
 
 from config import setup_database
 from app.api.routes import api
+from app.api.openapi import OPENAPI_CONFIG
 
 # logging.basicConfig(level=logging.DEBUG)  # noqa: ERA001
 # logger = logging.getLogger(__name__)  # noqa: ERA001
@@ -92,6 +94,9 @@ def refresh_expiring_jwts(response: Response) -> Response:
         # This is normal for public endpoints, so just return the original response
         return response
 
+
+# Initialize Swagger/OpenAPI documentation
+swagger = Swagger(app, config=OPENAPI_CONFIG)
 
 # Main api resgistration
 app.register_blueprint(api, url_prefix="/api")
