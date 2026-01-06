@@ -20,7 +20,7 @@ import { UserContext } from "../contexts/UserContext";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { FaMailBulk } from "react-icons/fa";
 import { UserDataCard } from "../components/UserDataCard";
-import { useSendEmail } from "@/Functions/useSendEmail";
+import { useSendEmail } from "@/utils/useSendEmail";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";

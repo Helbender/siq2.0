@@ -13,9 +13,9 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { CreateUserModal } from "./CreateUserModal";
-import StyledText from "../../../components/styledcomponents/StyledText";
+import { StyledText } from "@/shared/components/StyledText";
 import { FaMailBulk } from "react-icons/fa";
-import { useSendEmail } from "@/Functions/useSendEmail";
+import { useSendEmail } from "@/utils/useSendEmail";
 import { InsertInitQual } from "./InsertInitQual";
 
 const colors = {

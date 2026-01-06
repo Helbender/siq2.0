@@ -38,7 +38,7 @@ import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { LuSun } from "react-icons/lu";
 import { IoMoon } from "react-icons/io5";
 
-function Header() {
+export function Header() {
   const { token, removeToken, getUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -348,5 +348,3 @@ function Header() {
     </Box>
   );
 }
-
-export default Header;

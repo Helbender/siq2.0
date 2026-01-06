@@ -1,8 +1,7 @@
- 
 import { Text } from "@chakra-ui/react";
 import React from "react";
 
-const StandardText = (props) => {
+export function StandardText(props) {
   return (
     <Text
       color={"white"}
@@ -22,6 +21,4 @@ const StandardText = (props) => {
       {props.text}
     </Text>
   );
-};
-
-export default StandardText;
+}

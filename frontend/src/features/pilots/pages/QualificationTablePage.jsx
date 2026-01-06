@@ -18,7 +18,7 @@ import {
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { api } from "@/utils/api";
-import { QualificationGroupFilter } from "../components/QualificationGroupFilter";
+import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
 
 export function QualificationTablePage({ tipo }) {
   const [selectedTypes, setSelectedTypes] = useState([]);

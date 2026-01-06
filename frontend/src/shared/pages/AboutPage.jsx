@@ -1,7 +1,7 @@
 import { Text, Box, Stack, Heading, Button } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
-function AboutPage() {
+export function AboutPage() {
   const navigate = useNavigate();
 
   const goBack = () => navigate("/");
@@ -59,5 +59,3 @@ function AboutPage() {
     </Box>
   );
 }
-
-export default AboutPage;

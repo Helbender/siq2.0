@@ -4,14 +4,14 @@ import { Box } from "@chakra-ui/react";
 
 import { PilotsPage } from "@/features/pilots/pages/PilotsPage";
 import { FlightsPage } from "@/features/flights/pages/FlightsPage";
-import Master from "./layout/Master";
-import Footer from "./layout/Footer";
-import AboutPage from "./pages/About";
-import Sidebar from "./components/Sidebar";
-import Header from "./layout/Header";
-import Dashboard from "./pages/Dashboard";
+import { Master } from "@/shared/layout/Master";
+import { Footer } from "@/shared/layout/Footer";
+import { AboutPage } from "@/shared/pages/AboutPage";
+import { Sidebar } from "@/shared/components/Sidebar";
+import { Header } from "@/shared/layout/Header";
+import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
-import { QualificationTablePage } from "@/features/qualifications/pages/QualificationTablePage";
+import { QualificationTablePage } from "@/features/pilots/pages/QualificationTablePage";
 
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 import { FileUpload } from "@/features/users/components/FileUpload";
@@ -59,7 +59,7 @@ function App() {
           <Fragment>
             <Routes>
               <Route index element={<Navigate replace to="dashboard" />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/flights" element={<FlightsPage />} />
               <Route path="/fileupload" element={<FileUpload />} />
               <Route path="/users" element={<UserManagementPage />} />

@@ -9,9 +9,9 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
-import api from "../utils/api";
+import api from "@/utils/api";
 
-const Navbar = () => {
+export function Navbar() {
   const [tipos, setTipos] = useState([]);
   const location = useLocation();
   const selected_style = {
@@ -87,5 +87,3 @@ const Navbar = () => {
     </Container>
   );
 };
-
-export default Navbar;

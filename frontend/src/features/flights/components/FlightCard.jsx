@@ -19,10 +19,10 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { useColorMode } from "@chakra-ui/react";
-import StyledText from "../../../components/styledcomponents/StyledText";
+import { StyledText } from "@/shared/components/StyledText";
 import { DeleteFlightModal } from "./DeleteFlightModal";
 import { CreateFlightModal } from "./CreateFlightModal";
-import { formatDate } from "@/Functions/timeCalc";
+import { formatDate } from "@/utils/timeCalc";
 import { InfoMed } from "./InfoMed";
 
 export function FlightCard({ flight }) {

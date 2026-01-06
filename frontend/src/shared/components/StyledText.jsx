@@ -1,6 +1,6 @@
 import { Text, Highlight, useColorMode } from "@chakra-ui/react";
 
-function StyledText({ query, text }) {
+export function StyledText({ query, text }) {
   const { colorMode } = useColorMode();
   let color = colorMode === "light" ? "black" : "white";
 
@@ -15,5 +15,3 @@ function StyledText({ query, text }) {
     </Text>
   );
 }
-
-export default StyledText;

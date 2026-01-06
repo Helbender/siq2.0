@@ -2,7 +2,7 @@
 // Footer.jsx
 import { HStack, Spacer, Text, useBreakpointValue } from "@chakra-ui/react";
 
-function Footer() {
+export function Footer() {
   const isSmall = useBreakpointValue({ base: true, sm: false });
   return (
     <HStack
@@ -34,5 +34,3 @@ function Footer() {
     </HStack>
   );
 }
-
-export default Footer;

@@ -40,7 +40,7 @@ const navItems = [
   { label: "Utilizadores", icon: FaUsers, to: "/users" },
 ];
 
-const Sidebar = () => {
+export function Sidebar() {
   const { token, removeToken, getUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -154,5 +154,3 @@ const Sidebar = () => {
     </Flex>
   );
 };
-
-export default Sidebar;

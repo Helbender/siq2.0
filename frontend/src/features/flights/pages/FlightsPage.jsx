@@ -18,8 +18,8 @@ import { useContext, useEffect, useState } from "react";
 import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import StyledText from "../../../components/styledcomponents/StyledText";
-import { formatDate } from "@/Functions/timeCalc";
+import { StyledText } from "@/shared/components/StyledText";
+import { formatDate } from "@/utils/timeCalc";
 import { FixedSizeList as List } from "react-window";
 
 export function FlightsPage() {

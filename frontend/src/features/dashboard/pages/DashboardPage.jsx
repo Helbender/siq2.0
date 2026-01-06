@@ -32,10 +32,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { apiAuth } from "../utils/api";
-import { formatHours } from "../Functions/timeCalc";
-import { useSunTimes } from "../utils/useSunTimes";
-import { formatDateISO } from "../Functions/timeCalc";
+import { apiAuth } from "@/utils/api";
+import { formatHours, formatDateISO } from "@/utils/timeCalc";
+import { useSunTimes } from "@/utils/useSunTimes";
+import { useAvailableYears } from "../hooks/useAvailableYears";
+import { useDashboardStats } from "../hooks/useDashboardStats";
 
 const COLORS = [
   "#E53E3E",
@@ -52,8 +53,24 @@ function getTomorrow() {
   return d;
 }
 
-function Dashboard() {
+export function DashboardPage() {
   const { token } = useContext(UserContext);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [expiringQualifications, setExpiringQualifications] = useState([]);
+  const [loadingExpiring, setLoadingExpiring] = useState(true);
+
+  const { availableYears, loading: loadingYears } = useAvailableYears();
+  const {
+    totalFlights,
+    totalHours,
+    hoursByType,
+    hoursByAction,
+    totalPassengers,
+    totalDoe,
+    totalCargo,
+    topPilotsByType,
+    loading: loadingStats,
+  } = useDashboardStats(selectedYear);
 
   const todayStr = formatDateISO(new Date());
   const tomorrowStr = formatDateISO(getTomorrow());
@@ -66,87 +83,35 @@ function Dashboard() {
     error: errorT,
   } = useSunTimes(tomorrowStr);
 
-  // Statistics state
-  const [totalFlights, setTotalFlights] = useState(0);
-  const [totalHours, setTotalHours] = useState(0);
-  const [hoursByType, setHoursByType] = useState([]);
-  const [hoursByAction, setHoursByAction] = useState([]);
-  const [totalPassengers, setTotalPassengers] = useState(0);
-  const [totalDoe, setTotalDoe] = useState(0);
-  const [totalCargo, setTotalCargo] = useState(0);
-  const [topPilotsByType, setTopPilotsByType] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [availableYears, setAvailableYears] = useState([]);
-  const [expiringQualifications, setExpiringQualifications] = useState([]);
-  const [loadingExpiring, setLoadingExpiring] = useState(true);
-
-  // Fetch available years
-  const fetchAvailableYears = async () => {
-    try {
-      const response = await apiAuth.get("/dashboard/available-years");
-      const years = response.data.years;
-      setAvailableYears(years);
-      // Set selected year to current year if available, otherwise first year in list
-      if (years.length > 0 && !years.includes(new Date().getFullYear())) {
-        setSelectedYear(years[0]);
-      }
-    } catch (error) {
-      console.error("Error fetching available years:", error);
+  // Set selected year to current year if available, otherwise first year in list
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(new Date().getFullYear())) {
+      setSelectedYear(availableYears[0]);
     }
-  };
+  }, [availableYears]);
 
-  // Fetch statistics from API
-  const fetchStatistics = async (year = selectedYear) => {
-    try {
-      setLoading(true);
-      const response = await apiAuth.get(`/dashboard/statistics?year=${year}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const data = response.data;
-      setTotalFlights(data.total_flights);
-      setTotalHours(data.total_hours || 0);
-      setHoursByType(data.hours_by_type);
-      setHoursByAction(data.hours_by_action);
-      setTotalPassengers(data.total_passengers);
-      setTotalDoe(data.total_doe);
-      setTotalCargo(data.total_cargo);
-      setTopPilotsByType(data.top_pilots_by_type || {});
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching statistics:", error);
-      setLoading(false);
-    }
-  };
-
-  // Fetch expiring qualifications from API
+  // Fetch expiring qualifications
   const fetchExpiringQualifications = async () => {
+    setLoadingExpiring(true);
     try {
-      setLoadingExpiring(true);
       const response = await apiAuth.get("/dashboard/expiring-qualifications", {
         headers: { Authorization: "Bearer " + token },
       });
       setExpiringQualifications(response.data.expiring_qualifications || []);
-      setLoadingExpiring(false);
     } catch (error) {
       console.error("Error fetching expiring qualifications:", error);
+    } finally {
       setLoadingExpiring(false);
     }
   };
 
   useEffect(() => {
-    fetchAvailableYears();
     fetchExpiringQualifications();
   }, [token]);
 
-  useEffect(() => {
-    if (availableYears.length > 0) {
-      fetchStatistics(selectedYear);
-    }
-  }, [selectedYear, availableYears, token]);
-
   const bgColor = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
+  const loading = loadingStats || loadingYears;
 
   if (loading) {
     return (
@@ -540,5 +505,3 @@ function Dashboard() {
     </>
   );
 }
-
-export default Dashboard;

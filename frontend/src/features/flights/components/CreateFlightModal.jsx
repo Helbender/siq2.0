@@ -32,7 +32,7 @@ import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { UserContext } from "@/features/users/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { api, apiAuth } from "@/utils/api";
-import { getTimeDiff } from "@/Functions/timeCalc";
+import { getTimeDiff } from "@/utils/timeCalc";
 import { BiEdit } from "react-icons/bi";
 
 const today = new Date();
