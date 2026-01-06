@@ -15,7 +15,7 @@ from models.enums import (
     StatusTripulante,
     TipoTripulante,
 )
-from models.tripulantes import Tripulante  # type: ignore
+from app.features.users.models import Tripulante  # type: ignore
 
 from app.features.qualifications.models import Qualificacao  # type: ignore
 

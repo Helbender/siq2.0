@@ -16,7 +16,7 @@ load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
 from app.features.flights.models import Flight, FlightPilots
-from models.tripulantes import Tripulante
+from app.features.users.models import Tripulante
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

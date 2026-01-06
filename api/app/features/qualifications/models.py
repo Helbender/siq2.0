@@ -10,7 +10,7 @@ from models.basemodels import Base  # type: ignore
 from models.enums import GrupoQualificacoes, TipoTripulante
 
 if TYPE_CHECKING:
-    from models.tripulantes import TripulanteQualificacao  # type: ignore
+    from app.features.users.models import TripulanteQualificacao  # type: ignore
 
 
 class Qualificacao(Base):

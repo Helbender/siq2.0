@@ -1,0 +1,149 @@
+[
+  {
+    "id": 5,
+    "nome": "ATN",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 1,
+    "nome": "ATR",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 10,
+    "nome": "CTO",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 11,
+    "nome": "MONO",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 12,
+    "nome": "NFP",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 7,
+    "nome": "nprecapp",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 6,
+    "nome": "precapp",
+    "validade": 45,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 8,
+    "nome": "SID",
+    "validade": 90,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "CURRENCY"
+  },
+  {
+    "id": 17,
+    "nome": "NVG",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOAP"
+  },
+  {
+    "id": 18,
+    "nome": "NVG2",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOAP"
+  },
+  {
+    "id": 15,
+    "nome": "BSOC",
+    "validade": 180,
+    "tipo_aplicavel": "OPERADOR CABINE",
+    "grupo": "MQOBOC"
+  },
+  {
+    "id": 22,
+    "nome": "BSKIT",
+    "validade": 360,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOBP"
+  },
+  {
+    "id": 16,
+    "nome": "BSP1",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOBP"
+  },
+  {
+    "id": 14,
+    "nome": "BSP2",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOBP"
+  },
+  {
+    "id": 4,
+    "nome": "TA",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOBP"
+  },
+  {
+    "id": 9,
+    "nome": "PARAS",
+    "validade": 180,
+    "tipo_aplicavel": "OPERADOR CABINE",
+    "grupo": "MQOIOC"
+  },
+  {
+    "id": 13,
+    "nome": "PARAS",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOIP"
+  },
+  {
+    "id": 20,
+    "nome": "VRP1",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOIP"
+  },
+  {
+    "id": 21,
+    "nome": "VRP2",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQOIP"
+  },
+  {
+    "id": 2,
+    "nome": "QA1",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQP"
+  },
+  {
+    "id": 3,
+    "nome": "QA2",
+    "validade": 180,
+    "tipo_aplicavel": "PILOTO",
+    "grupo": "MQP"
+  }
+]

@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import engine  # type: ignore
-from models.tripulantes import Tripulante  # type: ignore
+from app.features.users.models import Tripulante  # type: ignore
 
 from app.utils.email import hash_code, main
 

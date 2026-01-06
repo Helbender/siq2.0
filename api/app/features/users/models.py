@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
 from models.basemodels import Base  # type: ignore
-from models.enums import StatusTripulante, TipoTripulante
+from models.enums import StatusTripulante, TipoTripulante  # type: ignore
 
 
 class StatusTripulanteType(TypeDecorator):

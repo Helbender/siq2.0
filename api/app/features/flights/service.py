@@ -15,7 +15,7 @@ from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
 from models import year_init  # type: ignore
 from models.enums import TipoTripulante  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
-from models.tripulantes import Tripulante, TripulanteQualificacao  # type: ignore
+from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
 from app.utils.time_utils import parse_time_to_minutes

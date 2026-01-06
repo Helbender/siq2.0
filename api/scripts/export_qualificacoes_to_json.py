@@ -27,7 +27,7 @@ from config import engine  # type: ignore
 from models.enums import GrupoQualificacoes, TipoTripulante  # type: ignore
 from app.features.flights.models import FlightPilots  # noqa: F401  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
-from models.tripulantes import TripulanteQualificacao  # noqa: F401  # type: ignore
+from app.features.users.models import TripulanteQualificacao  # noqa: F401  # type: ignore
 
 
 def export_qualificacoes_to_json(output_file: str = "qualificacoes_export.json"):

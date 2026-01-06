@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.basemodels import Base  # type: ignore
 
 if TYPE_CHECKING:
-    from models.tripulantes import Tripulante  # type: ignore
+    from app.features.users.models import Tripulante  # type: ignore
 
 
 class Flight(Base):

@@ -37,7 +37,7 @@ def setup_database():
         from models.basemodels import Base
         from app.features.flights.models import Flight, FlightPilots  # noqa: F401
         from app.features.qualifications.models import Qualificacao  # noqa: F401
-        from models.tripulantes import Tripulante, TripulanteQualificacao  # noqa: F401
+        from app.features.users.models import Tripulante, TripulanteQualificacao  # noqa: F401
 
         # Create all tables
         Base.metadata.create_all(bind=engine)

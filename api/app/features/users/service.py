@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
 from models.enums import StatusTripulante, TipoTripulante  # type: ignore
-from models.tripulantes import Tripulante  # type: ignore
+from app.features.users.models import Tripulante  # type: ignore
 
 from app.utils.email import hash_code
 
