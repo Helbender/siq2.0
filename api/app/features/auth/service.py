@@ -1,10 +1,12 @@
 """Authentication service containing business logic for auth operations."""
 
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from flask_jwt_extended import create_access_token
+from flask import request
+from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -36,7 +38,11 @@ class AuthService:
                     identity=nip,
                     additional_claims={"admin": True, "name": "ADMIN"},
                 )
-                return {"access_token": access_token}
+                refresh_token = create_refresh_token(identity=str(nip))
+                return {
+                    "access_token": access_token,
+                    "refresh_token": refresh_token,
+                }
             return {"message": "Can not login as admin. Db already populated"}
 
         # Handle regular user login
@@ -53,7 +59,11 @@ class AuthService:
             identity=nip,
             additional_claims={"admin": tripulante.admin, "name": tripulante.name},
         )
-        return {"access_token": access_token}
+        refresh_token = create_refresh_token(identity=str(nip))
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
 
     def validate_recovery_token(self, email: str, token: str, session: Session) -> dict[str, Any]:
         """Validate a password recovery token.
@@ -138,4 +148,50 @@ class AuthService:
         tripulante.recover = ""
         session.commit()
         return tripulante.to_json()
+
+    @staticmethod
+    def refresh_access_token(nip: str | int) -> tuple[str | None, str | None]:
+        """Generate a new access token for a user.
+
+        Args:
+            nip: User NIP
+
+        Returns:
+            tuple of (access_token, error) where error is None on success
+        """
+        with Session(engine) as session:
+            stmt = select(Tripulante).where(Tripulante.nip == int(nip))
+            tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+
+            if tripulante is None:
+                return None, "User not found"
+
+            new_access_token = create_access_token(
+                identity=str(nip),
+                additional_claims={"admin": tripulante.admin, "name": tripulante.name},
+            )
+
+            return new_access_token, None
+
+    @staticmethod
+    def get_refresh_token_cookie_kwargs(refresh_token: str) -> dict[str, Any]:
+        """Get cookie kwargs for refresh token.
+
+        Args:
+            refresh_token: Refresh token string
+
+        Returns:
+            dict with cookie kwargs for setting refresh token
+        """
+        return {
+            "key": "refresh_token",
+            "value": refresh_token,
+            "httponly": True,
+            "samesite": "Lax",
+            "secure": request.is_secure
+            if not os.environ.get("FLASK_ENV") == "development"
+            else False,
+            "max_age": int(timedelta(days=30).total_seconds()),
+            "path": "/api/auth",
+        }
 

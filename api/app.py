@@ -5,7 +5,7 @@ import os
 from datetime import UTC, datetime, timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, Response
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS  # type: ignore
 from flask_jwt_extended import (
     JWTManager,
@@ -31,7 +31,25 @@ APPLY_CORS: bool = os.environ.get("APPLY_CORS", "true").lower() in ("1", "true",
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = JWT_KEY
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+# Allow access tokens in headers and refresh tokens in cookies
+app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
+app.config["JWT_HEADER_NAME"] = "Authorization"
+app.config["JWT_HEADER_TYPE"] = "Bearer"
+# Refresh tokens will be read from cookies
+app.config["JWT_REFRESH_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_REFRESH_COOKIE_NAME"] = "refresh_token"
+app.config["JWT_REFRESH_COOKIE_PATH"] = "/api/auth"
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+app.config["JWT_CSRF_IN_COOKIES"] = False
+app.config["JWT_CSRF_CHECK_FORM"] = False
+# Cookie settings
+app.config["JWT_COOKIE_SECURE"] = (
+    os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
+)
+app.config["JWT_COOKIE_HTTPONLY"] = True
+app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 jwt = JWTManager(app)
 
 application = app  # to work with CPANEL PYTHON APPS
@@ -59,40 +77,42 @@ if APPLY_CORS:
     )
 
 
-# Token refresh functionality
-@app.after_request
-def refresh_expiring_jwts(response: Response) -> Response:
-    """Handle Token Expiration - Refresh token if it expires within 30 minutes."""
-    try:
-        # Check if there's a valid JWT token in the request
-        # This will raise an exception if no JWT is present
-        jwt_payload = get_jwt()
-        exp_timestamp = jwt_payload["exp"]
-        now = datetime.now(UTC)
+# JWT error handlers
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({"error": "Token has expired"}), 401
 
-        # Calculate if token expires within 30 minutes
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
 
-        # If token expires within 30 minutes, create a new one
-        if target_timestamp > exp_timestamp:
-            # Get the current user identity and claims
-            identity = get_jwt_identity()
-            claims = jwt_payload.get("additional_claims", {})
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    import traceback
 
-            # Create new access token with same identity and claims
-            access_token = create_access_token(identity=identity, additional_claims=claims)
+    auth_header = request.headers.get("Authorization", "NOT FOUND")
+    print(f"Invalid token error: {error}")
+    print(f"Error type: {type(error)}")
+    print(
+        f"Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}"
+    )
+    traceback.print_exc()
+    return jsonify({"error": "Invalid token", "details": str(error)}), 422
 
-            # Add the new token to the response
-            data = response.get_json()
-            if isinstance(data, dict):
-                data["access_token"] = access_token
-                response.data = json.dumps(data)
 
-        return response
-    except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT or no JWT at all.
-        # This is normal for public endpoints, so just return the original response
-        return response
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    # Log details if refresh token is missing
+    if request.path == "/api/auth/refresh":
+        cookies = request.cookies
+        print("[auth.refresh] Missing token")
+        print(f"[auth.refresh] Cookies received: {list(cookies.keys())}")
+        print(
+            f"[auth.refresh] Cookie header: {request.headers.get('Cookie', 'NOT FOUND')}"
+        )
+    return jsonify({"error": "Authorization token is missing"}), 401
+
+
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback(jwt_header, jwt_payload):
+    return jsonify({"error": "Fresh token required"}), 401
 
 
 # Initialize Swagger/OpenAPI documentation

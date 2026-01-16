@@ -6,10 +6,9 @@ import {
   Text,
   Tooltip,
   VStack,
-  useColorModeValue,
   Link as ChakraLink,
   Spacer,
-  Divider,
+  Separator,
 } from "@chakra-ui/react";
 import { FiHome, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +45,6 @@ export function Sidebar() {
   const navigate = useNavigate();
 
   const [isHovered, setIsHovered] = useState(false);
-  const bg = useColorModeValue("gray.100", "gray.900");
 
   const handleLogout = async () => {
     try {
@@ -73,7 +71,7 @@ export function Sidebar() {
       left={0}
       top={"75px"}
       h="calc(95vh - 75px)"
-      bg={bg}
+      bg="bg.muted"
       w={isHovered ? "250px" : "60px"}
       transition="width 0.2s ease"
       onMouseEnter={() => setIsHovered(true)}
@@ -115,7 +113,7 @@ export function Sidebar() {
           <FaSignOutAlt /> {isHovered && <Box ml={2}>Logout</Box>}
         </Flex>
       </ChakraLink>
-      <Divider borderWidth="1px" borderColor={"teal.500"} />
+      <Separator borderWidth="1px" borderColor={"teal.500"} />
       <Flex
         direction="row"
         textAlign={"center"}

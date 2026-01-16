@@ -1,24 +1,22 @@
+import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-// import './index.css';
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-// import reportWebVitals from "./reportWebVitals";
-import { ChakraProvider } from "@chakra-ui/react";
-import { AuthProvider } from "@/features/auth/contexts/AuthContext";
-import { FlightProvider } from "@/features/flights/contexts/FlightsContext";
-import { UserProvider } from "@/features/users/contexts/UserContext";
+import { Toaster } from "./components/ui/toaster";
+import { ColorModeProvider } from "./components/ui/color-mode";
+import { system } from "./theme";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <ChakraProvider>
-      <AuthProvider>
-        <FlightProvider>
-          <UserProvider>
-            <App />
-          </UserProvider>
-        </FlightProvider>
-      </AuthProvider>
+    <ChakraProvider value={system}>
+      <ColorModeProvider>
+        <BrowserRouter>
+          <App />
+          <Toaster />
+        </BrowserRouter>
+      </ColorModeProvider>
     </ChakraProvider>
   </React.StrictMode>,
 );

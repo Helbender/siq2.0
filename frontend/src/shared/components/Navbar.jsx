@@ -6,7 +6,6 @@ import {
   BreadcrumbLink,
   Container,
   Flex,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { useState, useMemo } from "react";
 import api from "@/utils/api";
@@ -49,7 +48,7 @@ export function Navbar() {
       <Box
         px={5}
         borderRadius={20}
-        bg={useColorModeValue("gray.400", "gray.700")}
+        bg="bg.card-strong"
       >
         <Flex
           h="16"

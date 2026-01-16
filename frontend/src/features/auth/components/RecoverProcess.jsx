@@ -1,13 +1,12 @@
 import {
   Box,
-  FormControl,
-  FormLabel,
   Input,
   Stack,
   Heading,
   Button,
-  useToast,
+  Field,
 } from "@chakra-ui/react";
+import { useToast } from "@/utils/useToast";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
@@ -150,8 +149,8 @@ export function RecoverProcess() {
         maxWidth="md"
         alignItems="center" // Center the Stack items horizontally
       >
-        <FormControl mt={4}>
-          <FormLabel textAlign="center">New Password</FormLabel>
+        <Field.Root mt={4}>
+          <Field.Label textAlign="center">New Password</Field.Label>
           <Input
             type="password"
             value={newPassword}
@@ -162,10 +161,10 @@ export function RecoverProcess() {
             width={["80%", "60%", "100%"]} // Adjust input width for small screens and larger screens
             mx="auto" // Center the input field
           />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl mt={4}>
-          <FormLabel textAlign="center">Confirm Password</FormLabel>
+        <Field.Root mt={4}>
+          <Field.Label textAlign="center">Confirm Password</Field.Label>
           <Input
             type="password"
             value={confirmPassword}
@@ -176,7 +175,7 @@ export function RecoverProcess() {
             width={["80%", "60%", "100%"]} // Adjust input width for small screens and larger screens
             mx="auto" // Center the input field
           />
-        </FormControl>
+        </Field.Root>
 
         <Button
           mt={6}

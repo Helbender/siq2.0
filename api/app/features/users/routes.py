@@ -121,9 +121,15 @@ def retrieve_user() -> tuple[Response, int]:
               example: "Validation error"
     """
     if request.method == "GET":
-        with Session(engine) as session:
-            users = user_service.get_all_users(session)
-            return jsonify(users), 200
+        try:
+            with Session(engine) as session:
+                users = user_service.get_all_users(session)
+                return jsonify(users), 200
+        except Exception as e:
+            print(f"Error in GET /users: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
     # POST - Create new user
     # verify_jwt_in_request()  # Commented out in original

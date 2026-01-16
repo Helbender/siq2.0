@@ -5,14 +5,14 @@ import {
   Input,
   VStack,
   Text,
-  useToast,
   Flex,
-  FormLabel,
   Icon,
   HStack,
+  Field,
 } from "@chakra-ui/react";
 import api from "@/utils/api";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
+import { useToast } from "@/utils/useToast";
 import { FiUploadCloud } from "react-icons/fi";
 
 export function FileUpload() {
@@ -95,7 +95,7 @@ export function FileUpload() {
           Upload de Ficheiro
         </Text>
 
-        <FormLabel
+        <Field.Label
           htmlFor="file-upload"
           cursor="pointer"
           w="full"
@@ -115,7 +115,7 @@ export function FileUpload() {
             <Icon as={FiUploadCloud} boxSize={6} color="gray.500" />
             <Text>{file ? file.name : "Clique para escolher um ficheiro"}</Text>
           </Flex>
-        </FormLabel>
+        </Field.Label>
 
         <Input
           id="file-upload"

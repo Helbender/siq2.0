@@ -5,18 +5,13 @@ import {
   Input,
   Spacer,
   Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
   Box,
-  useToast,
   Flex,
   Button,
 } from "@chakra-ui/react";
 import { CreateQualModal } from "../components/CreateQualModal";
 import { DeleteQualModal } from "../components/DeleteQualModal";
+import { useToast } from "@/utils/useToast";
 import { QualificationGroupFilter } from "../components/QualificationGroupFilter";
 import { apiAuth } from "@/utils/api";
 import { BiRefresh } from "react-icons/bi";
@@ -158,26 +153,26 @@ export function QualificationManagementPage() {
         />
       </Flex>
 
-      <Table variant="simple" mt={4} overflowX="auto">
-        <Thead>
-          <Tr>
-            <Th>ID</Th>
-            <Th>Qualificação</Th>
-            <Th>Validade (Dias)</Th>
-            <Th>Tipo Tripulante</Th>
-            <Th>Grupo</Th>
-            <Th>Ações</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
+      <Table.Root variant="simple" mt={4} overflowX="auto">
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader>ID</Table.ColumnHeader>
+            <Table.ColumnHeader>Qualificação</Table.ColumnHeader>
+            <Table.ColumnHeader>Validade (Dias)</Table.ColumnHeader>
+            <Table.ColumnHeader>Tipo Tripulante</Table.ColumnHeader>
+            <Table.ColumnHeader>Grupo</Table.ColumnHeader>
+            <Table.ColumnHeader>Ações</Table.ColumnHeader>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
           {filteredQualifications.map((qual) => (
-            <Tr key={qual.id}>
-              <Td>{qual.id}</Td>
-              <Td>{qual.nome}</Td>
-              <Td>{qual.validade}</Td>
-              <Td>{qual.tipo_aplicavel}</Td>
-              <Td>{qual.grupo}</Td>
-              <Td>
+            <Table.Row key={qual.id}>
+              <Table.Cell>{qual.id}</Table.Cell>
+              <Table.Cell>{qual.nome}</Table.Cell>
+              <Table.Cell>{qual.validade}</Table.Cell>
+              <Table.Cell>{qual.tipo_aplicavel}</Table.Cell>
+              <Table.Cell>{qual.grupo}</Table.Cell>
+              <Table.Cell>
                 <Box gap={1} display={"flex"}>
                   <CreateQualModal
                     qualification={qual}
@@ -189,11 +184,11 @@ export function QualificationManagementPage() {
                     setQualifications={setQualifications}
                   />
                 </Box>
-              </Td>
-            </Tr>
+              </Table.Cell>
+            </Table.Row>
           ))}
-        </Tbody>
-      </Table>
+        </Table.Body>
+      </Table.Root>
     </Container>
   );
 }

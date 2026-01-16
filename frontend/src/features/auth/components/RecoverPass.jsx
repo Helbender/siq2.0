@@ -1,13 +1,12 @@
 import {
   Box,
-  FormControl,
-  FormLabel,
   Input,
   Stack,
   Heading,
   Button,
-  useToast,
+  Field,
 } from "@chakra-ui/react";
+import { useToast } from "@/utils/useToast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/api";
@@ -62,8 +61,8 @@ export function RecoverPass() {
         <Heading textAlign={"center"} my={10} fontSize={["xl", "2xl", "3xl"]}>
           Sistema Integrado de Qualificações
         </Heading>
-        <FormControl mx="auto">
-          <FormLabel textAlign={"center"}>Email</FormLabel>
+        <Field.Root mx="auto">
+          <Field.Label textAlign={"center"}>Email</Field.Label>
           <Input
             type="email"
             value={email}
@@ -77,7 +76,7 @@ export function RecoverPass() {
             alignSelf={"center"}
             width={["60", "80%", "100%"]} // Adjust input width for small screens and larger screens
           />
-        </FormControl>
+        </Field.Root>
 
         <Button
           mt={5}

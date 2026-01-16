@@ -1,28 +1,21 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   useDisclosure,
   Flex,
-  FormControl,
-  FormLabel,
   Input,
   Stack,
   GridItem,
   Grid,
-  Divider,
+  Separator,
   Select,
-  useToast,
-  FormErrorMessage,
   Box,
   Center,
   IconButton,
+  Dialog,
+  Portal,
+  Field,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
 import { useContext, useRef, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
@@ -31,6 +24,7 @@ import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { UserContext } from "@/features/users/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/utils/useToast";
 import { api, apiAuth } from "@/utils/api";
 import { getTimeDiff } from "@/utils/timeCalc";
 import { BiEdit } from "react-icons/bi";
@@ -281,23 +275,26 @@ export function CreateFlightModal({ flight }) {
           Novo Modelo
         </Button>
       )}
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        scrollBehavior="inside"
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={(e) => !e.open && onClose()}
         size={"full"}
-        closeOnOverlayClick={false}
-        closeOnEsc={true}
       >
-        <ModalOverlay />
-        <FormProvider {...methods}>
-          <form>
-            <ModalContent>
-              <ModalHeader textAlign={"center"}>
-                {flight ? `Editar o Modelo ${flight.id}` : "Novo Modelo 1M"}
-              </ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <FormProvider {...methods}>
+              <form>
+                <Dialog.Content>
+                  <Dialog.Header textAlign={"center"}>
+                    {flight ? `Editar o Modelo ${flight.id}` : "Novo Modelo 1M"}
+                  </Dialog.Header>
+                  <Dialog.CloseTrigger asChild>
+                    <IconButton variant="ghost" size="sm">
+                      <HiX />
+                    </IconButton>
+                  </Dialog.CloseTrigger>
+                  <Dialog.Body>
                 <Stack>
                   <Flex
                     gap={"5"}
@@ -306,10 +303,10 @@ export function CreateFlightModal({ flight }) {
                     justifyContent={"space-between"}
                   >
                     <Flex gap={2}>
-                      <FormControl minW={"100px"} isInvalid={!!errors.airtask}>
-                        <FormLabel htmlFor="airtask" textAlign={"center"}>
+                      <Field.Root minW={"100px"} invalid={!!errors.airtask}>
+                        <Field.Label htmlFor="airtask" textAlign={"center"}>
                           Airtask
-                        </FormLabel>
+                        </Field.Label>
                         <Input
                           id="airtask"
                           name="airtask"
@@ -324,12 +321,12 @@ export function CreateFlightModal({ flight }) {
                             },
                           })}
                         />
-                        <FormErrorMessage>
+                        <Field.ErrorText>
                           {errors.airtask?.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                      <FormControl minW={"100px"}>
-                        <FormLabel textAlign={"center"}>Modalidade</FormLabel>
+                        </Field.ErrorText>
+                      </Field.Root>
+                      <Field.Root minW={"100px"}>
+                        <Field.Label textAlign={"center"}>Modalidade</Field.Label>
                         <Select
                           textAlign={"center"}
                           type="text"
@@ -356,9 +353,9 @@ export function CreateFlightModal({ flight }) {
                           <option value="TRCA">TRCA</option>
                           <option value="SIM">SIM</option>
                         </Select>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>Acção</FormLabel>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>Acção</Field.Label>
                         <Select
                           type="text"
                           placeholder=" "
@@ -371,27 +368,27 @@ export function CreateFlightModal({ flight }) {
                           <option value="TRU">TRU</option>
                           <option value="INST">INST</option>
                         </Select>
-                      </FormControl>
+                      </Field.Root>
                     </Flex>
                     <Flex dir="row" gap={2}>
-                      <FormControl maxWidth={"fit-content"}>
-                        <FormLabel textAlign={"center"}>Data</FormLabel>
+                      <Field.Root maxWidth={"fit-content"}>
+                        <Field.Label textAlign={"center"}>Data</Field.Label>
                         <Input name="date" type="date" {...register("date")} />
-                      </FormControl>
-                      <FormControl maxW={"fit-content"}>
-                        <FormLabel textAlign={"center"}>ATD</FormLabel>
+                      </Field.Root>
+                      <Field.Root maxW={"fit-content"}>
+                        <Field.Label textAlign={"center"}>ATD</Field.Label>
                         <Input type="time" {...register("ATD")} />
-                      </FormControl>
-                      <FormControl maxW={"fit-content"}>
-                        <FormLabel textAlign={"center"}>ATA</FormLabel>
+                      </Field.Root>
+                      <Field.Root maxW={"fit-content"}>
+                        <Field.Label textAlign={"center"}>ATA</Field.Label>
                         <Input
                           textAlign={"center"}
                           type="time"
                           {...register("ATA")}
                         />
-                      </FormControl>
-                      <FormControl maxW={"fit-content"}>
-                        <FormLabel textAlign={"center"}>TOTAL</FormLabel>
+                      </Field.Root>
+                      <Field.Root maxW={"fit-content"}>
+                        <Field.Label textAlign={"center"}>TOTAL</Field.Label>
                         <Input
                           bg={"whiteAlpha.100"}
                           textAlign="center"
@@ -399,11 +396,11 @@ export function CreateFlightModal({ flight }) {
                           {...register("ATE")}
                           isReadOnly
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Flex>
                     <Flex gap={2}>
-                      <FormControl ml={[0, 0, 5]}>
-                        <FormLabel textAlign={"center"}>Origem</FormLabel>
+                      <Field.Root ml={[0, 0, 5]}>
+                        <Field.Label textAlign={"center"}>Origem</Field.Label>
                         <Input
                           p={0}
                           textAlign="center"
@@ -412,9 +409,9 @@ export function CreateFlightModal({ flight }) {
                           placeholder="XXXX"
                           {...register("origin")}
                         />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>Destino</FormLabel>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>Destino</Field.Label>
                         <Input
                           p={0}
                           textAlign="center"
@@ -424,7 +421,7 @@ export function CreateFlightModal({ flight }) {
                           placeholder="XXXX"
                           {...register("destination")}
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Flex>
                   </Flex>
                   <Flex
@@ -433,8 +430,8 @@ export function CreateFlightModal({ flight }) {
                     direction={{ base: "column", lg: "row" }}
                   >
                     <Flex gap={2}>
-                      <FormControl isInvalid={!!errors.tailNumber}>
-                        <FormLabel textAlign={"center"}>Nº Cauda</FormLabel>
+                      <Field.Root invalid={!!errors.tailNumber}>
+                        <Field.Label textAlign={"center"}>Nº Cauda</Field.Label>
                         <Select
                           name="tailNumber"
                           type="number"
@@ -456,12 +453,12 @@ export function CreateFlightModal({ flight }) {
                           <option value={16711}>16711</option>
                           <option value={16712}>16712</option>
                         </Select>
-                        <FormErrorMessage>
+                        <Field.ErrorText>
                           {errors.tailNumber?.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                      <FormControl isInvalid={!!errors.aterragens}>
-                        <FormLabel textAlign={"center"}>Aterragens</FormLabel>
+                        </Field.ErrorText>
+                      </Field.Root>
+                      <Field.Root invalid={!!errors.aterragens}>
+                        <Field.Label textAlign={"center"}>Aterragens</Field.Label>
                         <Input
                           textAlign="center"
                           name="aterragens"
@@ -470,14 +467,14 @@ export function CreateFlightModal({ flight }) {
                             required: "Ficaste lá em cima?",
                           })}
                         />
-                        <FormErrorMessage>
+                        <Field.ErrorText>
                           {errors.aterragens?.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>
+                        </Field.ErrorText>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>
                           Nº Tripulantes
-                        </FormLabel>
+                        </Field.Label>
                         <Input
                           bg={"whiteAlpha.100"}
                           textAlign={"center"}
@@ -485,20 +482,20 @@ export function CreateFlightModal({ flight }) {
                           {...register("numberOfCrew", { required: true })}
                           isReadOnly
                         />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>PAX</FormLabel>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>PAX</Field.Label>
                         <Input
                           textAlign={"center"}
                           name="passengers"
                           type="number"
                           {...register("passengers")}
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Flex>
                     <Flex gap={2}>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>Doentes</FormLabel>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>Doentes</Field.Label>
                         <Input
                           textAlign={"center"}
                           name="doe"
@@ -506,21 +503,21 @@ export function CreateFlightModal({ flight }) {
                           inputMode="numeric"
                           {...register("doe")}
                         />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>Carga</FormLabel>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>Carga</Field.Label>
                         <Input
                           name="cargo"
                           type="number"
                           {...register("cargo")}
                         />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel textAlign={"center"}>ORM</FormLabel>
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label textAlign={"center"}>ORM</Field.Label>
                         <Input type="number" {...register("orm")} />
-                      </FormControl>
-                      <FormControl isInvalid={!!errors.fuel}>
-                        <FormLabel textAlign={"center"}>FUEL</FormLabel>
+                      </Field.Root>
+                      <Field.Root invalid={!!errors.fuel}>
+                        <Field.Label textAlign={"center"}>FUEL</Field.Label>
                         <Input
                           name="fuel"
                           textAlign={"right"}
@@ -528,10 +525,10 @@ export function CreateFlightModal({ flight }) {
                           type="number"
                           {...register("fuel", { required: "Anda a água?" })}
                         />
-                        <FormErrorMessage>
+                        <Field.ErrorText>
                           {errors.fuel?.message}
-                        </FormErrorMessage>
-                      </FormControl>
+                        </Field.ErrorText>
+                      </Field.Root>
                     </Flex>
                   </Flex>
                   <Center
@@ -541,41 +538,41 @@ export function CreateFlightModal({ flight }) {
                     alignItems={"center"}
                     alignContent={"center"}
                   >
-                    <FormControl maxW={"fit-content"}>
-                      <FormLabel textAlign={"center"}>ACT 1º</FormLabel>
+                    <Field.Root maxW={"fit-content"}>
+                      <Field.Label textAlign={"center"}>ACT 1º</Field.Label>
                       <Input
                         name="activationFirst"
                         type="time"
                         {...register("activationFirst")}
                       />
-                    </FormControl>
-                    <FormControl maxW={"fit-content"}>
-                      <FormLabel textAlign={"center"}>ACT Ult.</FormLabel>
+                    </Field.Root>
+                    <Field.Root maxW={"fit-content"}>
+                      <Field.Label textAlign={"center"}>ACT Ult.</Field.Label>
                       <Input
                         name="activationLast"
                         {...register("activationLast")}
                         type="time"
                       />
-                    </FormControl>
-                    <FormControl maxW={"fit-content"}>
-                      <FormLabel textAlign={"center"}>AC Pronta</FormLabel>
+                    </Field.Root>
+                    <Field.Root maxW={"fit-content"}>
+                      <Field.Label textAlign={"center"}>AC Pronta</Field.Label>
                       <Input
                         name="readyAC"
                         type="time"
                         {...register("readyAC")}
                       />
-                    </FormControl>
-                    <FormControl maxW={"fit-content"}>
-                      <FormLabel textAlign={"center"}>Equipa Med</FormLabel>
+                    </Field.Root>
+                    <Field.Root maxW={"fit-content"}>
+                      <Field.Label textAlign={"center"}>Equipa Med</Field.Label>
                       <Input
                         textAlign={"center"}
                         name="medArrival"
                         type="time"
                         {...register("medArrival")}
                       />
-                    </FormControl>
+                    </Field.Root>
                   </Center>
-                  <Divider my={8} />
+                  <Separator my={8} />
                   <Box
                     overflowX="auto"
                     paddingBottom={5}
@@ -640,8 +637,8 @@ export function CreateFlightModal({ flight }) {
                     Adicionar Tripulante
                   </Button>
                 </Stack>
-              </ModalBody>
-              <ModalFooter>
+                  </Dialog.Body>
+                  <Dialog.Footer>
                 {flight && (
                   <Button
                     type="button"
@@ -671,11 +668,13 @@ export function CreateFlightModal({ flight }) {
                 >
                   Fechar
                 </Button>
-              </ModalFooter>
-            </ModalContent>
-          </form>
-        </FormProvider>
-      </Modal>
+                  </Dialog.Footer>
+                </Dialog.Content>
+              </form>
+            </FormProvider>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

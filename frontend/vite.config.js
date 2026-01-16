@@ -34,18 +34,18 @@ export default defineConfig({
     strictPort: true,
     host: true,
     origin: "http://0.0.0.0:5173",
-    proxy: {
-      "/api": {
-        // target for local deployment and NGINX and reverse proxy to /api
-        target: "http://localhost:5051",
-        // target: "https://siq-api.onrender.com",
+      proxy: {
+        "/api": {
+          // target for local deployment and NGINX and reverse proxy to /api
+          target: "http://localhost:5051",
+          // target: "https://siq-api.onrender.com",
 
-        // target for docker deployment with standard deployment
-        //     // target: "http://api:5051",
-        changeOrigin: true,
-        rewrite: (path) => path.replace("/^/api/", ""),
+          // target for docker deployment with standard deployment
+          //     // target: "http://api:5051",
+          changeOrigin: true,
+          // Don't rewrite - backend expects /api prefix
+        },
       },
-    },
   },
   define: {
     BUILD_DATE: JSON.stringify(new Date().toISOString().slice(0, 10)),

@@ -6,14 +6,13 @@ import {
   Heading,
   Flex,
   Circle,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { GroupedQualifications } from "./GroupedQualifications";
 
 export function PilotCard({ user }) {
   return (
     <Card
-      bg={useColorModeValue("gray.400", "gray.700")}
+      bg="bg.card-strong"
       boxShadow={"xl"}
       // maxW={"1000px"}
       // minW="550px"

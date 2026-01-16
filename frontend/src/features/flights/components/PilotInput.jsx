@@ -1,9 +1,9 @@
 import {
-  FormControl,
   GridItem,
   Input,
   Select,
   IconButton,
+  Field,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { Fragment, useEffect, useMemo } from "react";
@@ -87,7 +87,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   return (
     <Fragment>
       <GridItem alignContent={"center"} alignItems={"center"}>
-        <FormControl alignContent={"center"} alignItems={"center"}>
+        <Field.Root alignContent={"center"} alignItems={"center"}>
           <Select
             minW={"100px"}
             nome="posição"
@@ -111,10 +111,10 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             <option value="OPVI">OPVI</option>
             <option value="OPVA">OPVA</option>
           </Select>
-        </FormControl>
+        </Field.Root>
       </GridItem>
       <GridItem mx={1} w={"200px"}>
-        <FormControl>
+        <Field.Root>
           <Select
             nome="nome"
             textAlign={"center"}
@@ -129,10 +129,10 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
               </option>
             ))}
           </Select>
-        </FormControl>
+        </Field.Root>
       </GridItem>
       <GridItem bg={"whiteAlpha.100"} w={"80px"}>
-        <FormControl isReadOnly alignSelf={"center"}>
+        <Field.Root isReadOnly alignSelf={"center"}>
           <Input
             p={0}
             display="inline-block"
@@ -140,7 +140,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             isReadOnly
             {...register(`flight_pilots.${index}.nip`)}
           ></Input>
-        </FormControl>
+        </Field.Root>
       </GridItem>
       {["PI", "PC", "CP", "P"].includes(member.position)
         ? ["VIR", "VN", "CON", "ATR", "ATN", "precapp", "nprecapp"].map(
@@ -153,7 +153,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                     : "100px"
                 }
               >
-                <FormControl>
+                <Field.Root>
                   <Input
                     p={0}
                     nome={campo}
@@ -163,7 +163,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                     textAlign={"center"}
                     {...register(`flight_pilots.${index}.${campo}`)}
                   />
-                </FormControl>
+                </Field.Root>
               </GridItem>
             ),
           )
@@ -176,7 +176,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
 
         return (
           <GridItem key={n} minW={"70px"}>
-            <FormControl>
+            <Field.Root>
               <Controller
                 name={qualFieldName}
                 control={control}
@@ -205,7 +205,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                   </Select>
                 )}
               />
-            </FormControl>
+            </Field.Root>
           </GridItem>
         );
       })}

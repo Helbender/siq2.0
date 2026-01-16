@@ -3,26 +3,16 @@ import {
   Flex,
   Box,
   Heading,
-  useColorModeValue,
   Text,
   SimpleGrid,
-  Stat,
-  StatLabel,
-  StatNumber,
   Select,
-  FormControl,
-  FormLabel,
   Skeleton,
   SkeletonCircle,
   SkeletonText,
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
+  Stat,
 } from "@chakra-ui/react";
+import { Field } from "@chakra-ui/react";
 import { UserContext } from "@/features/users/contexts/UserContext";
 import {
   Legend,
@@ -85,7 +75,10 @@ export function DashboardPage() {
 
   // Set selected year to current year if available, otherwise first year in list
   useEffect(() => {
-    if (availableYears.length > 0 && !availableYears.includes(new Date().getFullYear())) {
+    if (
+      availableYears.length > 0 &&
+      !availableYears.includes(new Date().getFullYear())
+    ) {
       setSelectedYear(availableYears[0]);
     }
   }, [availableYears]);
@@ -109,8 +102,6 @@ export function DashboardPage() {
     fetchExpiringQualifications();
   }, [token]);
 
-  const bgColor = useColorModeValue("gray.50", "gray.900");
-  const cardBg = useColorModeValue("white", "gray.800");
   const loading = loadingStats || loadingYears;
 
   if (loading) {
@@ -154,7 +145,7 @@ export function DashboardPage() {
 
   return (
     <>
-      <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg={bgColor}>
+      <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg="bg.subtle">
         <Heading mb={6} textAlign={"center"}>
           Dashboard
         </Heading>
@@ -168,12 +159,12 @@ export function DashboardPage() {
               <Text>{`SS: ${sunset.toLocaleTimeString()}L`}</Text>
             </Flex>
           )}
-          <FormControl width="auto" display="flex" alignItems="center" gap={3}>
-            <FormLabel mb={0}>Selecionar Ano</FormLabel>
+          <Field.Root width="auto" display="flex" alignItems="center" gap={3}>
+            <Field.Label mb={0}>Selecionar Ano</Field.Label>
             <Select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              bg={cardBg}
+              bg="bg.card"
               width="150px"
             >
               {availableYears.map((year) => (
@@ -182,7 +173,7 @@ export function DashboardPage() {
                 </option>
               ))}
             </Select>
-          </FormControl>
+          </Field.Root>
           {errorT && <Text>Error: {errorT}</Text>}
           {sunriseT && sunsetT && (
             <Flex mb={0} alignItems={"center"} flexDirection={"column"}>
@@ -198,26 +189,28 @@ export function DashboardPage() {
 
         {/* Summary Statistics */}
         <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4} mb={6}>
-          <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Voos</StatLabel>
-            <StatNumber>{totalFlights}</StatNumber>
-          </Stat>
-          <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Total de Horas</StatLabel>
-            <StatNumber>{formatHours(totalHours)}</StatNumber>
-          </Stat>
-          <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Total de Passageiros</StatLabel>
-            <StatNumber>{totalPassengers.toLocaleString()}</StatNumber>
-          </Stat>
-          <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Total de Doentes</StatLabel>
-            <StatNumber>{totalDoe.toLocaleString()}</StatNumber>
-          </Stat>
-          <Stat bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
-            <StatLabel>Total de Carga</StatLabel>
-            <StatNumber>{totalCargo.toLocaleString() + " Kg"}</StatNumber>
-          </Stat>
+          <Stat.Root bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
+            <Stat.Label>Voos</Stat.Label>
+            <Stat.ValueText>{totalFlights}</Stat.ValueText>
+          </Stat.Root>
+          <Stat.Root bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
+            <Stat.Label>Total de Horas</Stat.Label>
+            <Stat.ValueText>{formatHours(totalHours)}</Stat.ValueText>
+          </Stat.Root>
+          <Stat.Root bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
+            <Stat.Label>Total de Passageiros</Stat.Label>
+            <Stat.ValueText>{totalPassengers.toLocaleString()}</Stat.ValueText>
+          </Stat.Root>
+          <Stat.Root bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
+            <Stat.Label>Total de Doentes</Stat.Label>
+            <Stat.ValueText>{totalDoe.toLocaleString()}</Stat.ValueText>
+          </Stat.Root>
+          <Stat.Root bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
+            <Stat.Label>Total de Carga</Stat.Label>
+            <Stat.ValueText>
+              {totalCargo.toLocaleString() + " Kg"}
+            </Stat.ValueText>
+          </Stat.Root>
         </SimpleGrid>
 
         {/* Pie Charts */}
@@ -225,7 +218,7 @@ export function DashboardPage() {
           {/* Hours by Flight Type */}
           <Box
             flex={1}
-            bg={cardBg}
+            bg="bg.card"
             p={4}
             borderRadius="lg"
             boxShadow="md"
@@ -293,7 +286,7 @@ export function DashboardPage() {
           {/* Hours by Flight Action */}
           <Box
             flex={1}
-            bg={cardBg}
+            bg="bg.card"
             p={4}
             borderRadius="lg"
             boxShadow="md"
@@ -379,7 +372,7 @@ export function DashboardPage() {
                   return (
                     <Box
                       key={tipo}
-                      bg={cardBg}
+                      bg="bg.card"
                       p={4}
                       borderRadius="lg"
                       boxShadow="md"
@@ -412,41 +405,43 @@ export function DashboardPage() {
           <Heading size="md" mb={4} textAlign="center">
             Qualificações com Menor Tempo Restante (Top 10)
           </Heading>
-          <Box bg={cardBg} p={4} borderRadius="lg" boxShadow="md">
+          <Box bg="bg.card" p={4} borderRadius="lg" boxShadow="md">
             {loadingExpiring ? (
               <Text textAlign="center">A carregar...</Text>
             ) : expiringQualifications.length > 0 ? (
-              <TableContainer>
-                <Table variant="simple" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Tripulante</Th>
-                      <Th>Qualificação</Th>
-                      <Th isNumeric>Dias Restantes</Th>
-                      <Th>Data de Expiração</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
+              <div>
+                <Table.Root variant="simple" size="sm">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Tripulante</Table.ColumnHeader>
+                      <Table.ColumnHeader>Qualificação</Table.ColumnHeader>
+                      <Table.ColumnHeader isNumeric>
+                        Dias Restantes
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader>Data de Expiração</Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
                     {expiringQualifications.map((item, index) => {
                       const isExpired = item.remaining_days < 0;
                       const isExpiringSoon =
                         item.remaining_days >= 0 && item.remaining_days <= 30;
                       return (
-                        <Tr key={index}>
-                          <Td>
+                        <Table.Row key={index}>
+                          <Table.Cell>
                             <Text fontWeight="medium">
                               {item.crew_member.rank} {item.crew_member.name}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
                               NIP: {item.crew_member.nip}
                             </Text>
-                          </Td>
-                          <Td>
+                          </Table.Cell>
+                          <Table.Cell>
                             <Text fontWeight="medium">
                               {item.qualification_name}
                             </Text>
-                          </Td>
-                          <Td isNumeric>
+                          </Table.Cell>
+                          <Table.Cell isNumeric>
                             <Text
                               fontWeight="bold"
                               color={
@@ -463,8 +458,8 @@ export function DashboardPage() {
                                   ? `Expirou há ${Math.abs(item.remaining_days)} dias`
                                   : "Expira hoje"}
                             </Text>
-                          </Td>
-                          <Td>
+                          </Table.Cell>
+                          <Table.Cell>
                             <Text fontSize="sm">
                               {new Date(item.expiry_date).toLocaleDateString(
                                 "pt-PT",
@@ -475,13 +470,13 @@ export function DashboardPage() {
                                 },
                               )}
                             </Text>
-                          </Td>
-                        </Tr>
+                          </Table.Cell>
+                        </Table.Row>
                       );
                     })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
+                  </Table.Body>
+                </Table.Root>
+              </div>
             ) : (
               <Text textAlign="center">Nenhuma qualificação encontrada</Text>
             )}
@@ -490,7 +485,7 @@ export function DashboardPage() {
 
         {/* Realtime Status Indicator */}
         <Box
-          bg={cardBg}
+          bg="bg.card"
           p={3}
           borderRadius="lg"
           boxShadow="md"

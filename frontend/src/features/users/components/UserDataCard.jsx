@@ -5,13 +5,12 @@ import {
   Circle,
   Heading,
   IconButton,
-  useColorModeValue,
   CardBody,
   CardFooter,
   VStack,
   Spacer,
-  useToast,
 } from "@chakra-ui/react";
+import { useToast } from "@/utils/useToast";
 import { CreateUserModal } from "./CreateUserModal";
 import { StyledText } from "@/shared/components/StyledText";
 import { FaMailBulk } from "react-icons/fa";
@@ -32,7 +31,7 @@ export function UserDataCard({ user }) {
   const toast = useToast();
   const sendEmail = useSendEmail();
   return (
-    <Card bg={useColorModeValue("gray.200", "gray.700")} boxShadow={"xl"}>
+    <Card bg="bg.card-subtle" boxShadow={"xl"}>
       <CardHeader>
         <Flex gap={4}>
           <Flex flex={"1"} flexDirection={"row"} align="center" gap={"5"}>

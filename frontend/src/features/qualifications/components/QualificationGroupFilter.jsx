@@ -5,7 +5,6 @@ import {
   Stack,
   Checkbox,
   Text,
-  useColorModeValue,
 } from "@chakra-ui/react";
 
 export function QualificationGroupFilter({
@@ -14,16 +13,13 @@ export function QualificationGroupFilter({
   onGroupChange,
   filter,
 }) {
-  const bgColor = useColorModeValue("white", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-
   return (
     <Box
       p={4}
-      bg={bgColor}
+      bg="bg.card"
       borderRadius="md"
       border="1px"
-      borderColor={borderColor}
+      borderColor="border.subtle"
       boxShadow="sm"
       minW="200px"
     >

@@ -1,66 +1,28 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Link as ChakraLink,
-  IconButton,
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  useDisclosure,
-  VStack,
-  Divider,
-  Spacer,
-  DrawerFooter,
-  useColorMode,
-  Image,
-} from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { MdSpaceDashboard } from "react-icons/md";
-import {
-  FaInfoCircle,
-  FaInstagram,
-  FaBars,
-  FaSignOutAlt,
-  FaPlaneArrival,
-  FaTable,
-  FaTh,
-  FaTools,
-  FaUsers,
-} from "react-icons/fa";
-import axios from "axios";
-import { useContext } from "react";
-import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { LuSun } from "react-icons/lu";
-import { IoMoon } from "react-icons/io5";
+import { Box, Flex, Heading } from "@chakra-ui/react";
 
 export function Header() {
-  const { token, removeToken, getUser } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { colorMode, toggleColorMode } = useColorMode();
+  // const { token, removeToken, getUser } = useContext(AuthContext);
+  // const navigate = useNavigate();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { colorMode, toggleColorMode } = useColorMode();
 
-  const User = getUser();
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post("/api/logout");
-      console.log(response.status);
-      navigate("/");
-      removeToken();
-    } catch (error) {
-      removeToken();
-      navigate("/");
-      if (error.response) {
-        console.log(error.response);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      }
-    }
-  };
+  // const User = getUser();
+  // const handleLogout = async () => {
+  //   try {
+  //     const response = await axios.post("/api/logout");
+  //     console.log(response.status);
+  //     navigate("/");
+  //     removeToken();
+  //   } catch (error) {
+  //     removeToken();
+  //     navigate("/");
+  //     if (error.response) {
+  //       console.log(error.response);
+  //       console.log(error.response.status);
+  //       console.log(error.response.headers);
+  //     }
+  //   }
+  // };
 
   return (
     <Box
@@ -70,21 +32,18 @@ export function Header() {
       color="white"
       p={4}
       boxShadow="md"
-      position="fixed"
-      top={0}
-      left={0}
-      zIndex={1000}
+      position="relative"
     >
       <Flex align="center" justify="space-between">
         {/* Menu Button on the Left */}
-        <IconButton
+        {/* <IconButton
           icon={<FaBars />}
           variant="outline"
           color="white"
           onClick={onOpen}
           aria-label="Open Menu"
           mr={4} // Adds margin to the right of the button
-        />
+        /> */}
 
         {/* Centered Heading */}
         <Flex flex="1" justify="center">
@@ -92,25 +51,38 @@ export function Header() {
             size="lg"
             cursor="pointer"
             textAlign={"center"}
-            onClick={() => navigate("/")}
+            // onClick={() => navigate("/")}
           >
             Sistema Integrado de Qualificações
           </Heading>
         </Flex>
         {/* Right Side Button Theme */}
-        <Flex display={{ base: "none", sm: "block" }}>
+        {/* <Flex display={{ base: "none", sm: "block" }}>
           <Button onClick={toggleColorMode}>
             {colorMode === "light" ? <IoMoon /> : <LuSun />}
           </Button>
-        </Flex>
-        <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-          <DrawerOverlay>
-            <DrawerContent>
-              <DrawerCloseButton />
+        </Flex> */}
+        {/* <Drawer.Root
+          open={isOpen}
+          onOpenChange={(details) => {
+            if (!details.open) {
+              onClose();
+            }
+          }}
+          placement="left"
+        >
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <Drawer.CloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </Drawer.CloseTrigger>
               {token ? (
                 //Drawer render if logged in
                 <>
-                  <DrawerHeader flexDirection={"row"}>
+                  <Drawer.Header flexDirection={"row"}>
                     <Flex flexDirection={"row"} pr={10}>
                       <Box>
                         <Heading
@@ -150,8 +122,8 @@ export function Header() {
                         objectFit="cover"
                       />
                     </Flex>
-                  </DrawerHeader>
-                  <DrawerBody>
+                  </Drawer.Header>
+                  <Drawer.Body>
                     <VStack align="flex-start" h="100%">
                       <ChakraLink
                         p={2}
@@ -282,14 +254,14 @@ export function Header() {
                         </Flex>
                       </ChakraLink>
                       {/* Horizontal line above Logout */}
-                      <Divider borderWidth="1px" borderColor={"teal.500"} />
+        {/* <Separator borderWidth="1px" borderColor={"teal.500"} />
                     </VStack>
-                  </DrawerBody>
+                  </Drawer.Body>
                 </>
               ) : (
                 //Drawer render if not logged in
 
-                <DrawerHeader>
+                <Drawer.Header>
                   <Heading
                     size="sm"
                     fontSize="sm"
@@ -299,10 +271,10 @@ export function Header() {
                   >
                     Por favor efetue o seu login
                   </Heading>
-                </DrawerHeader>
+                </Drawer.Header>
               )}
 
-              <DrawerFooter>
+              <Drawer.Footer>
                 <Flex
                   direction="row"
                   textAlign={"center"}
@@ -340,10 +312,10 @@ export function Header() {
                     </Flex>
                   </ChakraLink>
                 </Flex>
-              </DrawerFooter>
-            </DrawerContent>
-          </DrawerOverlay>
-        </Drawer>
+              </Drawer.Footer>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Drawer.Root> */}
       </Flex>
     </Box>
   );

@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   Stack,
-  FormControl,
   Input,
   VStack,
   Flex,
@@ -12,6 +11,7 @@ import {
   Heading,
   Box,
 } from "@chakra-ui/react";
+import { Field } from "@chakra-ui/react";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/CreateFlightModal";
 import { useContext, useEffect, useState } from "react";
@@ -20,7 +20,7 @@ import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { StyledText } from "@/shared/components/StyledText";
 import { formatDate } from "@/utils/timeCalc";
-import { FixedSizeList as List } from "react-window";
+import { List } from "react-window";
 
 export function FlightsPage() {
   const isColumn = useBreakpointValue({ base: true, lg: false });
@@ -61,13 +61,13 @@ export function FlightsPage() {
         )}
         <Spacer />
         {User.admin ? <CreateFlightModal /> : null}
-        <FormControl textAlign={"center"} ml={5} maxW="130px">
+        <Field.Root textAlign={"center"} ml={5} maxW="130px">
           <Input
             placeholder="Procurar..."
             textAlign={"center"}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </FormControl>
+        </Field.Root>
         <Spacer />
         {isColumn ? null : (
           <StyledText
@@ -85,23 +85,30 @@ export function FlightsPage() {
         </Center>
       ) : (
         <Box mt="8" overflowY="hidden" w={"95%"} maxW={"1210px"} h={"80vh"}>
-          <List
-            height={window.innerHeight}
-            itemCount={filteredFlights.length}
-            itemSize={650}
-            width={"100%"}
-          >
-            {({ index, style }) => (
-              <Box style={style} p={2}>
-                {filteredFlights.length ? (
-                  <FlightCard
-                    key={filteredFlights[index].id}
-                    flight={filteredFlights[index]}
-                  />
-                ) : null}
-              </Box>
-            )}
-          </List>
+          {filteredFlights.length > 0 ? (
+            <List
+              height={window.innerHeight}
+              itemCount={filteredFlights.length}
+              itemSize={650}
+              width={"100%"}
+              itemData={filteredFlights}
+            >
+              {({ index, style, data }) => (
+                <Box style={style} p={2}>
+                  {data && data[index] ? (
+                    <FlightCard
+                      key={data[index].id}
+                      flight={data[index]}
+                    />
+                  ) : null}
+                </Box>
+              )}
+            </List>
+          ) : (
+            <Center h="80vh">
+              <Heading fontSize={"lg"}>Nenhum voo encontrado</Heading>
+            </Center>
+          )}
         </Box>
       )}
     </VStack>

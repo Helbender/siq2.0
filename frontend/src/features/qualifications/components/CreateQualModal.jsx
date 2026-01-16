@@ -1,24 +1,19 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   useDisclosure,
   Flex,
-  FormControl,
-  FormLabel,
+  Field,
   Input,
   Stack,
-  useToast,
   IconButton,
   Select,
+  Dialog,
+  Portal,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
 import { useState, useContext, useEffect, useMemo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { useToast } from "@/utils/useToast";
 import { FaEdit } from "react-icons/fa";
 import { api, apiAuth } from "@/utils/api";
 
@@ -180,77 +175,85 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
           Nova Qualificação
         </Button>
       )}
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader textAlign={"center"}>Adicionar Qualificação</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormProvider>
-              <Stack spacing={4}>
-                <FormControl>
-                  <FormLabel>Nome da Qualificação</FormLabel>
-                  <Input
-                    placeholder="Nome da Qualificação"
-                    {...qualificacao.register("nome")}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Validade</FormLabel>
-                  <Input
-                    type="number"
-                    placeholder="Validade em dias"
-                    {...qualificacao.register("validade")}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Tipo de Tripulante</FormLabel>
-                  <Select
-                    placeholder="Selecione um tipo"
-                    {...qualificacao.register("tipo_aplicavel")}
-                  >
-                    {tipos &&
-                      tipos.map((tipo) => <option key={tipo}>{tipo}</option>)}
-                  </Select>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Grupo de Qualificação</FormLabel>
-                  <Select
-                    placeholder={
-                      qualificacao.watch("tipo_aplicavel")
-                        ? grupos.length > 0
-                          ? "Selecione um grupo"
-                          : "Carregando grupos..."
-                        : "Primeiro selecione um tipo de tripulante"
-                    }
-                    {...qualificacao.register("grupo")}
-                    isDisabled={
-                      !qualificacao.watch("tipo_aplicavel") ||
-                      grupos.length === 0
-                    }
-                  >
-                    {grupos &&
-                      grupos.map((grupo) => (
-                        <option key={grupo.value} value={grupo.value}>
-                          {grupo.name}
-                        </option>
-                      ))}
-                  </Select>
-                </FormControl>
-              </Stack>
-            </FormProvider>
-          </ModalBody>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="xl">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header textAlign={"center"}>Adicionar Qualificação</Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </Dialog.CloseTrigger>
+              <Dialog.Body>
+                <FormProvider>
+                  <Stack spacing={4}>
+                    <Field.Root>
+                      <Field.Label>Nome da Qualificação</Field.Label>
+                      <Input
+                        placeholder="Nome da Qualificação"
+                        {...qualificacao.register("nome")}
+                      />
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Validade</Field.Label>
+                      <Input
+                        type="number"
+                        placeholder="Validade em dias"
+                        {...qualificacao.register("validade")}
+                      />
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Tipo de Tripulante</Field.Label>
+                      <Select
+                        placeholder="Selecione um tipo"
+                        {...qualificacao.register("tipo_aplicavel")}
+                      >
+                        {tipos &&
+                          tipos.map((tipo) => <option key={tipo}>{tipo}</option>)}
+                      </Select>
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Grupo de Qualificação</Field.Label>
+                      <Select
+                        placeholder={
+                          qualificacao.watch("tipo_aplicavel")
+                            ? grupos.length > 0
+                              ? "Selecione um grupo"
+                              : "Carregando grupos..."
+                            : "Primeiro selecione um tipo de tripulante"
+                        }
+                        {...qualificacao.register("grupo")}
+                        isDisabled={
+                          !qualificacao.watch("tipo_aplicavel") ||
+                          grupos.length === 0
+                        }
+                      >
+                        {grupos &&
+                          grupos.map((grupo) => (
+                            <option key={grupo.value} value={grupo.value}>
+                              {grupo.name}
+                            </option>
+                          ))}
+                      </Select>
+                    </Field.Root>
+                  </Stack>
+                </FormProvider>
+              </Dialog.Body>
 
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-              {edit ? "Guardar Alterações" : "Salvar"}
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              Cancelar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <Dialog.Footer>
+                <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+                  {edit ? "Guardar Alterações" : "Salvar"}
+                </Button>
+                <Button variant="ghost" onClick={onClose}>
+                  Cancelar
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

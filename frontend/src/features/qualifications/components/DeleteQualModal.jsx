@@ -1,20 +1,16 @@
 import { React, Fragment } from "react";
 import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalOverlay,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
   Button,
   useDisclosure,
   IconButton,
-  useToast,
   Text,
+  Dialog,
+  Portal,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
 import { BiTrash } from "react-icons/bi";
 import { apiAuth } from "@/utils/api";
+import { useToast } from "@/utils/useToast";
 
 export function DeleteQualModal({ qual, setQualifications }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -51,24 +47,32 @@ export function DeleteQualModal({ qual, setQualifications }) {
         onClick={onOpen}
         aria-label="Delete User"
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Confirmar Ação</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text>
-              {`Tem certeza que deseja excluir a qualificação ${qual.nome} do grupo ${qual.grupo}?`}
-            </Text>
-          </ModalBody>
-          <ModalFooter gap={2}>
-            <Button colorScheme="red" onClick={deleteQual}>
-              Excluir
-            </Button>
-            <Button onClick={() => onClose()}>Cancelar</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>Confirmar Ação</Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </Dialog.CloseTrigger>
+              <Dialog.Body>
+                <Text>
+                  {`Tem certeza que deseja excluir a qualificação ${qual.nome} do grupo ${qual.grupo}?`}
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer gap={2}>
+                <Button colorScheme="red" onClick={deleteQual}>
+                  Excluir
+                </Button>
+                <Button onClick={() => onClose()}>Cancelar</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Fragment>
   );
 }

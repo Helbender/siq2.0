@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useToast } from "@chakra-ui/react";
+import { useToast } from "./useToast";
 
 /**
  * Custom hook to send an email and handle the response.

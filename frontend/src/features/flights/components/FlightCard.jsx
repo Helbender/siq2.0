@@ -5,20 +5,13 @@ import {
   CardHeader,
   Text,
   Heading,
-  Divider,
+  Separator,
   CardBody,
   Spacer,
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
   useBreakpointValue,
   Box,
 } from "@chakra-ui/react";
-import { useColorMode } from "@chakra-ui/react";
 import { StyledText } from "@/shared/components/StyledText";
 import { DeleteFlightModal } from "./DeleteFlightModal";
 import { CreateFlightModal } from "./CreateFlightModal";
@@ -27,9 +20,8 @@ import { InfoMed } from "./InfoMed";
 
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
-  const { colorMode } = useColorMode();
   return (
-    <Card boxShadow={"lg"} bg={colorMode === "light" ? "gray.300" : "gray.700"}>
+    <Card boxShadow={"lg"} bg="bg.card-muted">
       <CardHeader>
         <Flex align={"center"}>
           {isColumn ? (
@@ -48,7 +40,7 @@ export function FlightCard({ flight }) {
           <Spacer />
           {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>
-        <Divider />
+        <Separator />
       </CardHeader>
       <CardBody>
         <Flex alignItems={"top"} gap={2} overflowX={"auto"}>
@@ -94,11 +86,11 @@ export function FlightCard({ flight }) {
           <InfoMed flight={flight} />
         </Flex>
 
-        <Divider my="5" />
-        <TableContainer overflowY={"auto"} maxHeight={"300px"}>
-          <Table size={"sm"}>
-            <Thead>
-              <Tr>
+        <Separator my="5" />
+        <Box overflowY={"auto"} maxHeight={"300px"}>
+          <Table.Root size={"sm"}>
+            <Table.Header>
+              <Table.Row>
                 {[
                   "NIP",
                   "Func",
@@ -109,13 +101,13 @@ export function FlightCard({ flight }) {
                   "Não Precisão",
                   "Qualificações",
                 ].map((header) => (
-                  <Th key={header} textAlign={"center"} fontSize={"md"}>
+                  <Table.ColumnHeader key={header} textAlign={"center"} fontSize={"md"}>
                     {header}
-                  </Th>
+                  </Table.ColumnHeader>
                 ))}
-              </Tr>
-            </Thead>
-            <Tbody>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
               {flight.flight_pilots.map((pilot) => {
                 // Collect qualifications from QUAL1-QUAL6, filtering out empty strings
                 const qualifications = [1, 2, 3, 4, 5, 6]
@@ -126,21 +118,21 @@ export function FlightCard({ flight }) {
                 const qualificationsText = qualifications.join(" ");
 
                 return (
-                  <Tr key={pilot.nip}>
-                    <Td textAlign={"center"}>{pilot.nip}</Td>
-                    <Td textAlign={"center"}>{pilot.position}</Td>
-                    <Td>{pilot.name}</Td>
-                    <Td textAlign={"center"}>{pilot.ATR}</Td>
-                    <Td textAlign={"center"}>{pilot.ATN}</Td>
-                    <Td textAlign={"center"}>{pilot.precapp}</Td>
-                    <Td textAlign={"center"}>{pilot.nprecapp}</Td>
-                    <Td textAlign={"center"}>{qualificationsText}</Td>
-                  </Tr>
+                  <Table.Row key={pilot.nip}>
+                    <Table.Cell textAlign={"center"}>{pilot.nip}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{pilot.position}</Table.Cell>
+                    <Table.Cell>{pilot.name}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{pilot.ATR}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{pilot.ATN}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{pilot.precapp}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{pilot.nprecapp}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>{qualificationsText}</Table.Cell>
+                  </Table.Row>
                 );
               })}
-            </Tbody>
-          </Table>
-        </TableContainer>
+            </Table.Body>
+          </Table.Root>
+        </Box>
       </CardBody>
     </Card>
   );

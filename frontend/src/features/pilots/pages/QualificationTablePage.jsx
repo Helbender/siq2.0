@@ -2,15 +2,7 @@ import React, { useContext, useState, useEffect, useMemo } from "react";
 import {
   Box,
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  useColorModeValue,
   Stack,
-  useToast,
   Flex,
   Text,
   Spacer,
@@ -19,6 +11,7 @@ import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { api } from "@/utils/api";
 import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
+import { useToast } from "@/utils/useToast";
 
 export function QualificationTablePage({ tipo }) {
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -167,11 +160,9 @@ export function QualificationTablePage({ tipo }) {
     return qual.validade_info[0]; // days_restantes
   };
 
-  const emptyBg = useColorModeValue("gray.100", "gray.800");
-
   // Color formatter for days left (matching QualificationsPanel logic)
   const getColorForDays = (days) => {
-    if (days === null || days === undefined) return emptyBg;
+    if (days === null || days === undefined) return "bg.muted";
     if (days < 0) return "red.600";
     if (days < 10) return "yellow.400";
     return "green.400";
@@ -214,9 +205,6 @@ export function QualificationTablePage({ tipo }) {
     }
   };
 
-  const cardBg = useColorModeValue("white", "gray.800");
-  const headerBg = useColorModeValue("gray.200", "gray.700");
-
   return (
     <Stack m={4} pb={10}>
       <Flex ml={4} mb={6} gap={4} direction={{ base: "column", md: "row" }}>
@@ -239,75 +227,75 @@ export function QualificationTablePage({ tipo }) {
         </Box>
       </Flex>
 
-      <TableContainer
-        bg={cardBg}
+      <Box
+        bg="bg.card"
         borderRadius="lg"
         boxShadow="md"
         maxW="100%"
         overflowX="auto"
       >
-        <Table size="sm" variant="simple">
-          <Thead bg={headerBg}>
+        <Table.Root size="sm" variant="simple">
+          <Table.Header bg="bg.muted">
             {/* Group header row */}
-            <Tr>
-              <Th
+            <Table.Row>
+              <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
                 position="sticky"
                 left="0px"
-                bg={headerBg}
+                bg="bg.muted"
                 zIndex={3}
                 minW="20px"
                 borderRight="1px solid"
-                borderColor={useColorModeValue("gray.300", "gray.600")}
+                borderColor="border.muted"
               >
                 Posição
-              </Th>
-              <Th
+              </Table.ColumnHeader>
+              <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
                 position="sticky"
                 left="30px"
-                bg={headerBg}
+                bg="bg.muted"
                 zIndex={3}
                 borderRight="1px solid"
-                borderColor={useColorModeValue("gray.300", "gray.600")}
+                borderColor="border.muted"
               >
                 Nome
-              </Th>
+              </Table.ColumnHeader>
               {Object.entries(visibleQualificationsByGroup)
                 .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
                 .map(([grupo, quals]) => (
-                  <Th
+                  <Table.ColumnHeader
                     key={grupo}
                     colSpan={quals.length}
                     fontSize={"md"}
                     textAlign="center"
-                    bg={useColorModeValue("gray.300", "gray.600")}
+                    bg="bg.card-muted"
                     borderRight="1px solid"
-                    borderColor={useColorModeValue("gray.400", "gray.500")}
+                    borderColor="border.strong"
                   >
                     <Text fontWeight="bold">{grupo}</Text>
-                  </Th>
+                  </Table.ColumnHeader>
                 ))}
-            </Tr>
+            </Table.Row>
             {/* Qualification name row */}
-            <Tr>
+            <Table.Row>
               {Object.entries(visibleQualificationsByGroup)
                 .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
                 .flatMap(([, quals]) =>
                   quals.map((qual) => (
-                    <Th
+                    <Table.ColumnHeader
                       key={qual.nome}
                       fontSize={"lg"}
                       textAlign="center"
                       cursor="pointer"
                       onClick={() => handleSort(qual.nome)}
-                      _hover={{ bg: useColorModeValue("gray.300", "gray.600") }}
+                      _hover={{ bg: "bg.card-muted" }}
                       userSelect="none"
                       minW="20px"
                       borderRight="1px solid"
-                      borderColor={useColorModeValue("gray.300", "gray.600")}
+                      borderColor="border.muted"
                       borderRightWidth={
                         quals[quals.length - 1] === qual ? "2px" : "1px"
                       }
@@ -322,57 +310,57 @@ export function QualificationTablePage({ tipo }) {
                           </Text>
                         )}
                       </Flex>
-                    </Th>
+                    </Table.ColumnHeader>
                   )),
                 )}
-            </Tr>
-          </Thead>
-          <Tbody>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
             {sortedCrew.length === 0 ? (
-              <Tr>
-                <Td
+              <Table.Row>
+                <Table.Cell
                   colSpan={2 + visibleQualificationsCount}
                   textAlign="center"
                   py={8}
                 >
                   <Text>Nenhum tripulante encontrado</Text>
-                </Td>
-              </Tr>
+                </Table.Cell>
+              </Table.Row>
             ) : (
               sortedCrew.map((member) => (
-                <Tr
+                <Table.Row
                   key={member.nip}
-                  _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+                  _hover={{ bg: "bg.muted" }}
                 >
-                  <Td
+                  <Table.Cell
                     position="sticky"
                     left="0px"
-                    bg={cardBg}
+                    bg="bg.card"
                     zIndex={1}
                     borderRight="1px solid"
-                    borderColor={useColorModeValue("gray.300", "gray.600")}
+                    borderColor="border.muted"
                   >
                     {member.position}
-                  </Td>
-                  <Td
+                  </Table.Cell>
+                  <Table.Cell
                     position="sticky"
                     left="30px"
-                    bg={cardBg}
+                    bg="bg.card"
                     zIndex={1}
                     borderRight="1px solid"
-                    borderColor={useColorModeValue("gray.300", "gray.600")}
+                    borderColor="border.muted"
                     width="200px"
                     isTruncated
                   >
                     {member.name?.trim() || member.name}
-                  </Td>
+                  </Table.Cell>
                   {Object.entries(visibleQualificationsByGroup)
                     .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
                     .flatMap(([, quals]) =>
                       quals.map((qual) => {
                         const daysLeft = getDaysLeft(member, qual.nome);
                         return (
-                          <Td
+                          <Table.Cell
                             key={qual.nome}
                             textAlign="center"
                             bg={getColorForDays(daysLeft)}
@@ -387,25 +375,22 @@ export function QualificationTablePage({ tipo }) {
                                 : "inherit"
                             }
                             borderRight="1px solid"
-                            borderColor={useColorModeValue(
-                              "gray.300",
-                              "gray.600",
-                            )}
+                            borderColor="border.muted"
                             borderRightWidth={
                               quals[quals.length - 1] === qual ? "2px" : "1px"
                             }
                           >
                             {daysLeft !== null ? daysLeft : "-"}
-                          </Td>
+                          </Table.Cell>
                         );
                       }),
                     )}
-                </Tr>
+                </Table.Row>
               ))
             )}
-          </Tbody>
-        </Table>
-      </TableContainer>
+          </Table.Body>
+        </Table.Root>
+      </Box>
     </Stack>
   );
 }

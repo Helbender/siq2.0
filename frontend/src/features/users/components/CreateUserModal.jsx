@@ -1,26 +1,20 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   useDisclosure,
   Flex,
-  FormControl,
-  FormLabel,
+  Field,
   Input,
   IconButton,
   Text,
   VStack,
   HStack,
   Switch,
-  useToast,
   Select,
+  Dialog,
+  Portal,
   Tooltip,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { useState, useContext } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
@@ -28,6 +22,7 @@ import { UserContext } from "../contexts/UserContext";
 import { BiTrash } from "react-icons/bi";
 import api, { apiAuth } from "@/utils/api";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/utils/useToast";
 
 export function CreateUserModal({ edit, add, isDelete, user }) {
   const navigate = useNavigate();
@@ -145,46 +140,62 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
         />
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          {add ? (
-            <ModalHeader textAlign={"center"}>Novo Utilizador</ModalHeader>
-          ) : edit ? (
-            <ModalHeader>{`Editar ${user.rank} ${user.name}`}</ModalHeader>
-          ) : (
-            <ModalHeader>{`Apagar ${user.rank} ${user.name}`}</ModalHeader>
-          )}
-          <ModalCloseButton />
-          {isDelete ? (
-            <Text textAlign={"center"}>Tem a certeza?</Text>
-          ) : (
-            <ModalBody>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              {add ? (
+                <Dialog.Header textAlign={"center"}>Novo Utilizador</Dialog.Header>
+              ) : edit ? (
+                <Dialog.Header>{`Editar ${user.rank} ${user.name}`}</Dialog.Header>
+              ) : (
+                <Dialog.Header>{`Apagar ${user.rank} ${user.name}`}</Dialog.Header>
+              )}
+              <Dialog.CloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </Dialog.CloseTrigger>
+              {isDelete ? (
+                <Text textAlign={"center"}>Tem a certeza?</Text>
+              ) : (
+                <Dialog.Body>
               <Flex flexDirection={"row"} gap={"4"}>
-                <FormControl>
-                  <FormLabel>Posto</FormLabel>
+                <Field.Root>
+                  <Field.Label>Posto</Field.Label>
                   <Input
                     value={inputs?.rank ? inputs.rank : ""}
                     name="rank"
                     placeholder="Posto"
                     onChange={handleInputsChange}
                   ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>NIP</FormLabel>
-                  <Tooltip hasArrow label="Introduza o NIP sem modúlo">
-                    <Input
-                      value={inputs?.nip}
-                      name="nip"
-                      placeholder="NIP"
-                      onChange={handleInputsChange}
-                      isReadOnly={edit || isDelete}
-                      isDisabled={edit || isDelete}
-                    ></Input>
-                  </Tooltip>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Função</FormLabel>
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>NIP</Field.Label>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <Input
+                        value={inputs?.nip}
+                        name="nip"
+                        placeholder="NIP"
+                        onChange={handleInputsChange}
+                        isReadOnly={edit || isDelete}
+                        isDisabled={edit || isDelete}
+                      ></Input>
+                    </Tooltip.Trigger>
+                    <Tooltip.Positioner>
+                      <Tooltip.Content>
+                        <Tooltip.Arrow>
+                          <Tooltip.ArrowTip />
+                        </Tooltip.Arrow>
+                        Introduza o NIP sem modúlo
+                      </Tooltip.Content>
+                    </Tooltip.Positioner>
+                  </Tooltip.Root>
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>Função</Field.Label>
                   <Select
                     value={inputs?.position ? inputs.position : "Default"}
                     name="position"
@@ -206,11 +217,11 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                     <option>OPV</option>
                     <option>OPVA</option>
                   </Select>
-                </FormControl>
+                </Field.Root>
               </Flex>
               <VStack mt={5} spacing={4} align="stretch">
-                <FormControl>
-                  <FormLabel flexGrow={"2"}>Nome</FormLabel>
+                <Field.Root>
+                  <Field.Label flexGrow={"2"}>Nome</Field.Label>
                   <Input
                     value={inputs?.name ? inputs.name : ""}
                     name="name"
@@ -218,26 +229,33 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                     placeholder="Primeiro e Último Nome"
                     onChange={handleInputsChange}
                   ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Email</FormLabel>
-                  <Tooltip
-                    hasArrow
-                    label="O email serve para trocar/recuperar a password"
-                  >
-                    <Input
-                      value={inputs?.email ? inputs.email : ""}
-                      name="email"
-                      type="email"
-                      placeholder="Email"
-                      onChange={handleInputsChange}
-                    ></Input>
-                  </Tooltip>
-                </FormControl>
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>Email</Field.Label>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <Input
+                        value={inputs?.email ? inputs.email : ""}
+                        name="email"
+                        type="email"
+                        placeholder="Email"
+                        onChange={handleInputsChange}
+                      ></Input>
+                    </Tooltip.Trigger>
+                    <Tooltip.Positioner>
+                      <Tooltip.Content>
+                        <Tooltip.Arrow>
+                          <Tooltip.ArrowTip />
+                        </Tooltip.Arrow>
+                        O email serve para trocar/recuperar a password
+                      </Tooltip.Content>
+                    </Tooltip.Positioner>
+                  </Tooltip.Root>
+                </Field.Root>
                 <HStack>
                   {User.admin ? (
-                    <FormControl align={"center"}>
-                      <FormLabel textAlign={"center"}>Admin</FormLabel>
+                    <Field.Root align={"center"}>
+                      <Field.Label textAlign={"center"}>Admin</Field.Label>
                       <Switch
                         name="admin"
                         isChecked={inputs.admin}
@@ -248,10 +266,10 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                           }))
                         }
                       />
-                    </FormControl>
+                    </Field.Root>
                   ) : null}
-                  <FormControl hidden={true}>
-                    <FormLabel>Esquadra</FormLabel>
+                  <Field.Root hidden={true}>
+                    <Field.Label>Esquadra</Field.Label>
                     <Input
                       value={inputs.squadron}
                       name="squadron"
@@ -259,9 +277,9 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                       placeholder="Esquadra"
                       onChange={handleInputsChange}
                     />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Grupo</FormLabel>
+                  </Field.Root>
+                  <Field.Root>
+                    <Field.Label>Grupo</Field.Label>
                     <Select
                       value={inputs?.tipo ? inputs.tipo : ""}
                       name="tipo"
@@ -277,9 +295,9 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                       </option>
                       <option value="OPERACOES">OPERAÇÕES</option>
                     </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Status</FormLabel>
+                  </Field.Root>
+                  <Field.Root>
+                    <Field.Label>Status</Field.Label>
                     <Select
                       value={inputs?.status ? inputs.status : "Presente"}
                       name="status"
@@ -288,43 +306,45 @@ export function CreateUserModal({ edit, add, isDelete, user }) {
                       <option value="Presente">Presente</option>
                       <option value="Fora">Fora</option>
                     </Select>
-                  </FormControl>
+                  </Field.Root>
                 </HStack>
               </VStack>
-            </ModalBody>
-          )}
-          <ModalFooter>
-            {isDelete ? (
-              <Button
-                colorScheme="red"
-                mr={3}
-                type="submit"
-                onClick={handleDeleteUser}
-              >
-                Apagar
-              </Button>
-            ) : (
-              <Button
-                colorScheme="green"
-                mr={3}
-                type="submit"
-                onClick={edit ? handleEditUser : handleSubmit}
-              >
-                {edit ? "Guardar" : "Criar"}
-              </Button>
+              </Dialog.Body>
             )}
-            <Button
-              colorScheme="blue"
-              mr={3}
-              onClick={() => {
-                onClose();
-              }}
-            >
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <Dialog.Footer>
+                {isDelete ? (
+                  <Button
+                    colorScheme="red"
+                    mr={3}
+                    type="submit"
+                    onClick={handleDeleteUser}
+                  >
+                    Apagar
+                  </Button>
+                ) : (
+                  <Button
+                    colorScheme="green"
+                    mr={3}
+                    type="submit"
+                    onClick={edit ? handleEditUser : handleSubmit}
+                  >
+                    {edit ? "Guardar" : "Criar"}
+                  </Button>
+                )}
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  onClick={() => {
+                    onClose();
+                  }}
+                >
+                  Close
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

@@ -1,11 +1,12 @@
 import React from "react";
-import { Grid, useToast, Stack, Box } from "@chakra-ui/react";
+import { Grid, Stack, Box } from "@chakra-ui/react";
 import { PilotCard } from "../components/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { api } from "@/utils/api";
 import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
+import { useToast } from "@/utils/useToast";
 
 export function PilotsPage({ tipo }) {
   const [selectedTypes, setSelectedTypes] = useState([]);

@@ -5,15 +5,9 @@ import {
   Input,
   Spacer,
   Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
   IconButton,
   useBreakpointValue,
   Grid,
-  useToast,
   Text,
 } from "@chakra-ui/react";
 import { UserContext } from "../contexts/UserContext";
@@ -29,6 +23,7 @@ import { IoIosCheckmark } from "react-icons/io";
 import { IoIosClose } from "react-icons/io";
 import { FileUpload } from "../components/FileUpload";
 import { InsertInitQual } from "../components/InsertInitQual";
+import { useToast } from "@/utils/useToast";
 
 export function UserManagementPage() {
   const navigate = useNavigate();
@@ -97,42 +92,42 @@ export function UserManagementPage() {
       </HStack>
 
       {displayAsTable ? (
-        <Table variant="simple" mt={4} overflowX="auto">
-          <Thead>
-            <Tr>
-              <Th>NIP</Th>
-              <Th>Nome</Th>
-              <Th>Posto</Th>
-              <Th>Função</Th>
-              <Th>Tipo</Th>
-              <Th>Status</Th>
-              <Th>Admin</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
+        <Table.Root variant="simple" mt={4} overflowX="auto">
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>NIP</Table.ColumnHeader>
+              <Table.ColumnHeader>Nome</Table.ColumnHeader>
+              <Table.ColumnHeader>Posto</Table.ColumnHeader>
+              <Table.ColumnHeader>Função</Table.ColumnHeader>
+              <Table.ColumnHeader>Tipo</Table.ColumnHeader>
+              <Table.ColumnHeader>Status</Table.ColumnHeader>
+              <Table.ColumnHeader>Admin</Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
             {filteredUsers.map((user) => (
-              <Tr key={user.nip}>
-                <Td>{user.nip}</Td>
-                <Td>{user.name}</Td>
-                <Td>{user.rank}</Td>
-                <Td>{user.position}</Td>
-                <Td>{user.tipo}</Td>
-                <Td>
+              <Table.Row key={user.nip}>
+                <Table.Cell>{user.nip}</Table.Cell>
+                <Table.Cell>{user.name}</Table.Cell>
+                <Table.Cell>{user.rank}</Table.Cell>
+                <Table.Cell>{user.position}</Table.Cell>
+                <Table.Cell>{user.tipo}</Table.Cell>
+                <Table.Cell>
                   {user.status === "Presente" ? (
                     <IoIosCheckmark size={"30px"} color="green" />
                   ) : (
                     <IoIosClose size={"30px"} color="red" />
                   )}
-                </Td>
-                <Td>
+                </Table.Cell>
+                <Table.Cell>
                   {user.admin ? (
                     <IoCheckmarkCircleSharp size={"30px"} color="green" />
                   ) : (
                     <IoCloseCircleSharp size={"30px"} color="red" />
                   )}
-                </Td>
-                <Td>
+                </Table.Cell>
+                <Table.Cell>
                   <HStack spacing={2} align="center">
                     <CreateUserModal edit={true} user={user} />
                     <InsertInitQual user={user} />
@@ -154,11 +149,11 @@ export function UserManagementPage() {
                     />
                     <CreateUserModal isDelete={true} user={user} />
                   </HStack>
-                </Td>
-              </Tr>
+                </Table.Cell>
+              </Table.Row>
             ))}
-          </Tbody>
-        </Table>
+          </Table.Body>
+        </Table.Root>
       ) : (
         <Grid
           templateColumns={{

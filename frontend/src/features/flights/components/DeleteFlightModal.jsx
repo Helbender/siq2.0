@@ -4,16 +4,12 @@ import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import {
   Button,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   useDisclosure,
-  useToast,
+  Dialog,
+  Portal,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
+import { useToast } from "@/utils/useToast";
 import { BiTrash } from "react-icons/bi";
 import { FlightContext } from "../contexts/FlightsContext";
 import { api, apiAuth } from "@/utils/api";
@@ -75,26 +71,34 @@ export function DeleteFlightModal({ flight }) {
         onClick={onOpen}
         icon={<BiTrash />}
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{`Modelo ${flight.airtask} de ${flight.date} às ${flight.ATD}`}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>{"Deseja mesmo apagar o modelo 1M"}</ModalBody>
-          <ModalFooter>
-            <Button
-              colorScheme="red"
-              mr={3}
-              onClick={() => handleDeleteFlight(flight)}
-            >
-              Sim
-            </Button>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Não
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>{`Modelo ${flight.airtask} de ${flight.date} às ${flight.ATD}`}</Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <IconButton variant="ghost" size="sm">
+                  <HiX />
+                </IconButton>
+              </Dialog.CloseTrigger>
+              <Dialog.Body>{"Deseja mesmo apagar o modelo 1M"}</Dialog.Body>
+              <Dialog.Footer>
+                <Button
+                  colorScheme="red"
+                  mr={3}
+                  onClick={() => handleDeleteFlight(flight)}
+                >
+                  Sim
+                </Button>
+                <Button colorScheme="blue" mr={3} onClick={onClose}>
+                  Não
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Box, Divider, Text } from "@chakra-ui/react";
+import { Box, Separator, Text } from "@chakra-ui/react";
 
 export function DaysLeftColumn({ qualification, dates }) {
   let today = new Date();
@@ -32,7 +32,7 @@ export function DaysLeftColumn({ qualification, dates }) {
       >
         {qualification}
       </Text>
-      <Divider mt={2} mb={1} />
+      <Separator mt={2} mb={1} />
       {days.map((a, i) => {
         return (
           <Text key={i} bg={colorFormatter(a)} color="black">

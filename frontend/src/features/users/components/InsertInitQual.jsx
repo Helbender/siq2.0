@@ -1,32 +1,26 @@
 import React, { Fragment, useState, useContext, useEffect } from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   useDisclosure,
   Flex,
-  FormControl,
-  FormLabel,
+  Field,
   Input,
   IconButton,
   Text,
   VStack,
   HStack,
   Switch,
-  useToast,
   Select,
-  Tooltip,
   Image,
   Box,
+  Dialog,
+  Portal,
 } from "@chakra-ui/react";
+import { HiX } from "react-icons/hi";
 import { useForm } from "react-hook-form";
 import api, { apiAuth } from "@/utils/api";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
+import { useToast } from "@/utils/useToast";
 
 const today = new Date();
 
@@ -115,73 +109,81 @@ export function InsertInitQual(props) {
           getQualificationList();
         }}
       />
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <form onSubmit={handleSubmit(sendQualification)}>
-          <ModalContent bg={"gray.700"}>
-            <ModalHeader>Adicionar Qualificação Initial</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Box>
-                <Text
-                  margin={"auto"}
-                  align={"center"}
-                  alignSelf={"center"}
-                  textAlign={"center"}
-                  maxWidth={"-moz-max-content"}
-                  fontSize={"lg"}
-                >
-                  {`${props.user.rank} ${props.user.name}`}
-                </Text>
-                <Flex marginTop={8} justifyContent={"space-evenly"}>
-                  <FormControl w={"-moz-max-content"}>
-                    <FormLabel textAlign={"center"}>Qualificação</FormLabel>
-                    <Select
-                      name="qualfication"
-                      {...register("qualification")}
-                      bg={"gray.600"}
+      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <form onSubmit={handleSubmit(sendQualification)}>
+              <Dialog.Content bg={"gray.700"}>
+                <Dialog.Header>Adicionar Qualificação Initial</Dialog.Header>
+                <Dialog.CloseTrigger asChild>
+                  <IconButton variant="ghost" size="sm">
+                    <HiX />
+                  </IconButton>
+                </Dialog.CloseTrigger>
+                <Dialog.Body>
+                  <Box>
+                    <Text
+                      margin={"auto"}
+                      align={"center"}
+                      alignSelf={"center"}
+                      textAlign={"center"}
+                      maxWidth={"-moz-max-content"}
+                      fontSize={"lg"}
                     >
-                      {qualList.map((qual) => (
-                        <option key={qual.id} value={qual.id}>
-                          {qual.nome}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl w={"min-content"}>
-                    <FormLabel textAlign={"center"}>Data</FormLabel>
-                    <Input
-                      name="date"
-                      type="date"
-                      {...register("date")}
-                      bg={"gray.600"}
-                    />
-                  </FormControl>
-                </Flex>
-              </Box>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                colorScheme="green"
-                mr={3}
-                type="submit"
-                onClick={handleSubmit}
-              >
-                Guardar
-              </Button>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                onClick={() => {
-                  onClose();
-                }}
-              >
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </form>
-      </Modal>
+                      {`${props.user.rank} ${props.user.name}`}
+                    </Text>
+                    <Flex marginTop={8} justifyContent={"space-evenly"}>
+                      <Field.Root w={"-moz-max-content"}>
+                        <Field.Label textAlign={"center"}>Qualificação</Field.Label>
+                        <Select
+                          name="qualfication"
+                          {...register("qualification")}
+                          bg={"gray.600"}
+                        >
+                          {qualList.map((qual) => (
+                            <option key={qual.id} value={qual.id}>
+                              {qual.nome}
+                            </option>
+                          ))}
+                        </Select>
+                      </Field.Root>
+                      <Field.Root w={"min-content"}>
+                        <Field.Label textAlign={"center"}>Data</Field.Label>
+                        <Input
+                          name="date"
+                          type="date"
+                          {...register("date")}
+                          bg={"gray.600"}
+                        />
+                      </Field.Root>
+                    </Flex>
+                  </Box>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button
+                    colorScheme="green"
+                    mr={3}
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    Guardar
+                  </Button>
+                  <Button
+                    colorScheme="blue"
+                    mr={3}
+                    onClick={() => {
+                      onClose();
+                    }}
+                  >
+                    Close
+                  </Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </form>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Fragment>
   );
 }

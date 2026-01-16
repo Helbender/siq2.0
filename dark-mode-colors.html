@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Colors - SIQ 2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #171923;
+            color: #FFFFFF;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        h2 {
+            color: #A0AEC0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #4A5568;
+            padding-bottom: 5px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            background-color: #2D3748;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #4A5568;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .color-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-sample {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            margin-right: 15px;
+            border: 2px solid #4A5568;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .color-info {
+            flex: 1;
+        }
+        
+        .color-name {
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .color-code {
+            font-family: 'Courier New', monospace;
+            color: #A0AEC0;
+            font-size: 0.9em;
+            background-color: #1A202C;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .description {
+            color: #718096;
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .note {
+            background-color: #2C7A7B;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #319795;
+        }
+        
+        .note strong {
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌙 Dark Mode Colors - SIQ 2.0</h1>
+    <p style="color: #A0AEC0; margin-bottom: 30px;">
+        Complete reference of all colors used in dark mode, including semantic tokens and static colors.
+    </p>
+
+    <!-- Semantic Tokens (Theme Colors) -->
+    <div class="section">
+        <h2>Semantic Tokens (Theme Colors - Change in Dark Mode)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #171923;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.subtle</div>
+                    <div class="color-code">gray.900 - #171923</div>
+                    <div class="description">Background subtle</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #1A202C;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.muted</div>
+                    <div class="color-code">gray.800 - #1A202C</div>
+                    <div class="description">Background muted</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #1A202C;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.card</div>
+                    <div class="color-code">gray.800 - #1A202C</div>
+                    <div class="description">Card background</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #2D3748;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.card-subtle</div>
+                    <div class="color-code">gray.700 - #2D3748</div>
+                    <div class="description">Card subtle background</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #4A5568;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.card-muted</div>
+                    <div class="color-code">gray.600 - #4A5568</div>
+                    <div class="description">Card muted background</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #2D3748;"></div>
+                <div class="color-info">
+                    <div class="color-name">bg.card-strong</div>
+                    <div class="color-code">gray.700 - #2D3748</div>
+                    <div class="description">Card strong background</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #4A5568;"></div>
+                <div class="color-info">
+                    <div class="color-name">border.subtle</div>
+                    <div class="color-code">gray.600 - #4A5568</div>
+                    <div class="description">Subtle border</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #4A5568;"></div>
+                <div class="color-info">
+                    <div class="color-name">border.muted</div>
+                    <div class="color-code">gray.600 - #4A5568</div>
+                    <div class="description">Muted border</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #718096;"></div>
+                <div class="color-info">
+                    <div class="color-name">border.strong</div>
+                    <div class="color-code">gray.500 - #718096</div>
+                    <div class="description">Strong border</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #A0AEC0;"></div>
+                <div class="color-info">
+                    <div class="color-name">text.muted</div>
+                    <div class="color-code">gray.400 - #A0AEC0</div>
+                    <div class="description">Muted text</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #FFFFFF;"></div>
+                <div class="color-info">
+                    <div class="color-name">text.default</div>
+                    <div class="color-code">white - #FFFFFF</div>
+                    <div class="description">Default text color</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teal Colors (Primary Brand) -->
+    <div class="section">
+        <h2>Teal Colors (Primary Brand - Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #319795;"></div>
+                <div class="color-info">
+                    <div class="color-name">teal.500</div>
+                    <div class="color-code">#319795</div>
+                    <div class="description">Primary brand color (Header, links, accents)</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #2C7A7B;"></div>
+                <div class="color-info">
+                    <div class="color-name">teal.700</div>
+                    <div class="color-code">#2C7A7B</div>
+                    <div class="description">Darker teal variant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Red Colors -->
+    <div class="section">
+        <h2>Red Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #E53E3E;"></div>
+                <div class="color-info">
+                    <div class="color-name">red.500</div>
+                    <div class="color-code">#E53E3E</div>
+                    <div class="description">Error states, delete actions, PI/OCI positions</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #C53030;"></div>
+                <div class="color-info">
+                    <div class="color-name">red.600</div>
+                    <div class="color-code">#C53030</div>
+                    <div class="description">Expired qualifications</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #9B2C2C;"></div>
+                <div class="color-info">
+                    <div class="color-name">red.700</div>
+                    <div class="color-code">#9B2C2C</div>
+                    <div class="description">Darker red variant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blue Colors -->
+    <div class="section">
+        <h2>Blue Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #3182CE;"></div>
+                <div class="color-info">
+                    <div class="color-name">blue.500</div>
+                    <div class="color-code">#3182CE</div>
+                    <div class="description">Primary actions, P position, loading spinners</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #63B3ED;"></div>
+                <div class="color-info">
+                    <div class="color-name">blue.300</div>
+                    <div class="color-code">#63B3ED</div>
+                    <div class="description">CP position</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #1A365D;"></div>
+                <div class="color-info">
+                    <div class="color-name">blue.900</div>
+                    <div class="color-code">#1A365D</div>
+                    <div class="description">PC position</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Green Colors -->
+    <div class="section">
+        <h2>Green Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #38A169;"></div>
+                <div class="color-info">
+                    <div class="color-name">green / green.500</div>
+                    <div class="color-code">#38A169</div>
+                    <div class="description">OC position, success states, valid qualifications</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #48BB78;"></div>
+                <div class="color-info">
+                    <div class="color-name">green.400</div>
+                    <div class="color-code">#48BB78</div>
+                    <div class="description">Valid qualifications (days left)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yellow/Orange Colors -->
+    <div class="section">
+        <h2>Yellow/Orange Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #F6E05E;"></div>
+                <div class="color-info">
+                    <div class="color-name">yellow.400</div>
+                    <div class="color-code">#F6E05E</div>
+                    <div class="description">Warning states, expiring qualifications (&lt;10 days)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purple/Violet Colors -->
+    <div class="section">
+        <h2>Purple/Violet Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #805AD5;"></div>
+                <div class="color-info">
+                    <div class="color-name">purple.600</div>
+                    <div class="color-code">#805AD5</div>
+                    <div class="description">Navbar background, secondary actions</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #9F7AEA;"></div>
+                <div class="color-info">
+                    <div class="color-name">violet.500</div>
+                    <div class="color-code">#9F7AEA</div>
+                    <div class="description">Default position color</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gray Colors (Additional) -->
+    <div class="section">
+        <h2>Additional Gray Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #CBD5E0;"></div>
+                <div class="color-info">
+                    <div class="color-name">gray.300</div>
+                    <div class="color-code">#CBD5E0</div>
+                    <div class="description">Light borders, input backgrounds</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #A0AEC0;"></div>
+                <div class="color-info">
+                    <div class="color-name">gray.400</div>
+                    <div class="color-code">#A0AEC0</div>
+                    <div class="description">Muted text, icons</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #718096;"></div>
+                <div class="color-info">
+                    <div class="color-name">gray.500</div>
+                    <div class="color-code">#718096</div>
+                    <div class="description">Secondary text, icons</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #4A5568;"></div>
+                <div class="color-info">
+                    <div class="color-name">gray.600</div>
+                    <div class="color-code">#4A5568</div>
+                    <div class="description">Borders, muted backgrounds</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #2D3748;"></div>
+                <div class="color-info">
+                    <div class="color-name">gray.700</div>
+                    <div class="color-code">#2D3748</div>
+                    <div class="description">Modal backgrounds, card backgrounds</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Base Colors -->
+    <div class="section">
+        <h2>Base Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #FFFFFF; border: 2px solid #4A5568;"></div>
+                <div class="color-info">
+                    <div class="color-name">white</div>
+                    <div class="color-code">#FFFFFF</div>
+                    <div class="description">Text on dark backgrounds, icons</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #000000;"></div>
+                <div class="color-info">
+                    <div class="color-name">black</div>
+                    <div class="color-code">#000000</div>
+                    <div class="description">Text on light backgrounds (rare in dark mode)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hardcoded Hex Colors -->
+    <div class="section">
+        <h2>Hardcoded Hex Colors (Static)</h2>
+        <div class="color-grid">
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #E53E3E;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Red</div>
+                    <div class="color-code">#E53E3E</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #38A169;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Green</div>
+                    <div class="color-code">#38A169</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #3182CE;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Blue</div>
+                    <div class="color-code">#3182CE</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #633974;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Purple</div>
+                    <div class="color-code">#633974</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #D69E2E;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Yellow</div>
+                    <div class="color-code">#D69E2E</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #805AD5;"></div>
+                <div class="color-info">
+                    <div class="color-name">Chart Purple 2</div>
+                    <div class="color-code">#805AD5</div>
+                    <div class="description">Dashboard charts</div>
+                </div>
+            </div>
+            
+            <div class="color-item">
+                <div class="color-sample" style="background-color: #1A202C;"></div>
+                <div class="color-info">
+                    <div class="color-name">Dark Background</div>
+                    <div class="color-code">#1A202C</div>
+                    <div class="description">Grouped qualifications background</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> Semantic tokens (bg.*, border.*, text.*) automatically change between light and dark modes. 
+        All other colors (teal, red, blue, green, etc.) remain static regardless of the color mode.
+    </div>
+</body>
+</html>

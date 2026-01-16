@@ -1,87 +1,47 @@
 import {
   Box,
-  FormControl,
-  FormLabel,
   Input,
   Stack,
   Heading,
   Button,
-  Link,
-  useToast,
+  Alert,
+  Field,
 } from "@chakra-ui/react";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import { AuthContext } from "../contexts/AuthContext";
-import api from "@/utils/api";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 
 export function LoginPage() {
-  const { setToken } = useContext(AuthContext);
-
-  const [loginForm, setloginForm] = useState({
-    nip: "",
-    password: "",
-  });
+  const [nip, setNip] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const toast = useToast();
-  const navigateRecover = () => navigate("/recover");
 
-  const logMeIn = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast({
-      title: "A efetuar login.",
-      description: "Aguarde um momento.",
-      status: "loading",
-      duration: 50000,
-      isClosable: true,
-      position: "bottom",
-    });
+    setError("");
+    setLoading(true);
+
     try {
-      const data = {
-        nip: loginForm.nip,
-        password: loginForm.password,
-      };
-      const response = await api.post("/token", data);
-      if (response.status === 201) {
-        toast.closeAll();
-        const decodedToken = jwtDecode(response.data.access_token);
-
-        toast({
-          title: "Logado com sucesso.",
-          description: `Login efetuado como ${decodedToken.name}`,
-
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom",
-        });
-        // console.log(response);
-        // console.log(response.data.access_token);
-        setToken(response.data.access_token);
-        navigate("/flights");
+      const result = await login(nip, password);
+      if (result.success) {
+        // Small delay to ensure state is updated before navigation
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 100);
+      } else {
+        setError(result.error || "Login failed");
+        setLoading(false);
       }
-    } catch (error) {
-      if (error.response) {
-        const errorMessage = error.response.data?.message;
-        toast.closeAll();
-        toast({
-          title: "Login failed.",
-          description: errorMessage,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-        });
-        console.log(error.response);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      }
+    } catch (err) {
+      console.error("Login submission error:", err);
+      setError("Unexpected error");
+      setLoading(false);
     }
   };
-  function handleChange(event) {
-    const { value, name } = event.target;
-    setloginForm((prev) => ({ ...prev, [name]: value }));
-  }
+
   return (
     <Box
       w={"100vw"}
@@ -90,47 +50,61 @@ export function LoginPage() {
       justifyContent={"center"}
       alignItems={{ sm: "center", md: "top" }}
       overflowY="auto"
+      bg="#1A202C"
     >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          logMeIn();
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         <Stack>
-          <Heading mb={"25px"}>Esquadra 502</Heading>
-          <FormControl>
-            <FormLabel textAlign={"center"}>NIP</FormLabel>
+          <Heading mb={"25px"} textAlign="center" color="white">
+            Esquadra 502
+          </Heading>
+          {error && (
+            <Alert.Root status="error" mb={4}>
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>Error</Alert.Title>
+                <Alert.Description>{error}</Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
+          )}
+          <Field.Root>
+            <Field.Label textAlign={"center"}>NIP</Field.Label>
             <Input
-              type="text"
-              value={loginForm.nip}
+              bg="gray.700"
+              type="number"
+              value={nip}
               name="nip"
               placeholder="NIP"
-              onChange={handleChange}
+              onChange={(e) => setNip(e.target.value)}
             />
-          </FormControl>
-          <FormControl mt="2" onSubmit={logMeIn}>
-            <FormLabel textAlign={"center"}>Password</FormLabel>
+          </Field.Root>
+          <Field.Root mt="2">
+            <Field.Label textAlign={"center"}>Password</Field.Label>
             <Input
+              bg="gray.700"
               type="password"
-              value={loginForm.password}
+              value={password}
               name="password"
               placeholder="Password"
-              onChange={handleChange}
+              onChange={(e) => setPassword(e.target.value)}
             />
-          </FormControl>
-          <Link
+          </Field.Root>
+          {/* <Link
             mt={4}
             color="teal.500"
             fontWeight="bold"
-            onClick={navigateRecover}
+            onClick={() => navigate("/recover-password")}
             aria-label="Recover Password"
             width={["80%", "60%", "100%"]} // Adjust link width for small screens and larger screens
             textAlign="center"
           >
             Recover Password
-          </Link>
-          <Button mt="10" onClick={logMeIn} type="submit">
+          </Link> */}
+          <Button
+            mt="10"
+            type="submit"
+            isLoading={loading}
+            isDisabled={loading}
+          >
             Login
           </Button>
         </Stack>
