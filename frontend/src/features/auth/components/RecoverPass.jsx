@@ -9,7 +9,7 @@ import {
 import { useToast } from "@/utils/useToast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "@/utils/api";
+import { http } from "@/api/http";
 
 export function RecoverPass() {
   const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ export function RecoverPass() {
 
   const sendEmail = async () => {
     try {
-      const response = await api.post(`/api/recover/${email}`);
+      const response = await http.post(`/api/recover/${email}`);
       console.log("Email sent response:", response); // Log response for debugging
       toast({
         title: "Email sent.",

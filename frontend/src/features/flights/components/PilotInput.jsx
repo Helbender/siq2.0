@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import { Fragment, useEffect, useMemo } from "react";
 import { FaMinus } from "react-icons/fa";
 import { Controller, useFormContext } from "react-hook-form";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
@@ -25,7 +25,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       } else {
         try {
           console.log("Fetching Data");
-          const response = await apiAuth.get(
+          const response = await http.get(
             `/v2/qualificacoeslist/${member.nip}`,
           );
           console.log("Data Fetched");

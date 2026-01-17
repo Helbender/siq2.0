@@ -12,12 +12,11 @@ import { HiX } from "react-icons/hi";
 import { useToast } from "@/utils/useToast";
 import { BiTrash } from "react-icons/bi";
 import { FlightContext } from "../contexts/FlightsContext";
-import { api, apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 export function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { token } = useContext(AuthContext);
   const { flights, setFlights } = useContext(FlightContext);
   const toast = useToast();
   const handleDeleteFlight = async (flight) => {
@@ -30,9 +29,7 @@ export function DeleteFlightModal({ flight }) {
         isClosable: true,
         position: "bottom",
       });
-      const res = await apiAuth.delete(`/flights/${flight.id}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const res = await http.delete(`/flights/${flight.id}`);
       if (res.data?.deleted_id) {
         console.log(`Flight is Deleted ${flight.id}`);
         toast.closeAll();

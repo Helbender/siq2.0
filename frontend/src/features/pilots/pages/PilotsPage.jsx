@@ -4,7 +4,7 @@ import { PilotCard } from "../components/PilotCard";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
-import { api } from "@/utils/api";
+import { http } from "@/api/http";
 import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
 import { useToast } from "@/utils/useToast";
 
@@ -28,11 +28,8 @@ export function PilotsPage({ tipo }) {
       position: "bottom",
     });
     try {
-      const res = await api.get(
+      const res = await http.get(
         `/v2/tripulantes/qualificacoes/${tipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES")}`,
-        {
-          headers: { Authorization: "Bearer " + token },
-        },
       );
       toast.closeAll();
       toast({

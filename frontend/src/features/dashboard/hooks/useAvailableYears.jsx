@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 export function useAvailableYears() {
   const [availableYears, setAvailableYears] = useState([]);
@@ -11,7 +11,7 @@ export function useAvailableYears() {
       setLoading(true);
       setError(null);
       try {
-        const response = await apiAuth.get("/dashboard/available-years");
+        const response = await http.get("/dashboard/available-years");
         const years = response.data.years;
         setAvailableYears(years);
       } catch (err) {

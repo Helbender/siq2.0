@@ -1,5 +1,4 @@
 import { useDialogForm } from "@/features/shared/hooks/useDialogForm";
-import api, { apiAuth } from "@/utils/api";
 import { useToast } from "@/utils/useToast";
 import {
   Box,
@@ -18,6 +17,9 @@ import { FileUpload } from "../components/FileUpload";
 import { UserDataCard } from "../components/UserDataCard";
 import { UsersTable } from "../components/UsersTable";
 import { useUsers } from "../hooks/useUsers";
+import { useCreateUser } from "../mutations/useCreateUser";
+import { useUpdateUser } from "../mutations/useUpdateUser";
+import { useDeleteUser } from "../mutations/useDeleteUser";
 
 export function UserManagementPage() {
   const {
@@ -25,22 +27,23 @@ export function UserManagementPage() {
     searchTerm,
     setSearchTerm,
     loading,
-    fetchUsers,
   } = useUsers();
   const dialog = useDialogForm();
   const toast = useToast();
   const displayAsTable = useBreakpointValue({ base: false, xl: true });
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
 
   const handleSubmit = async (userNip, formData) => {
     try {
       if (userNip) {
-        await apiAuth.patch(`/users/${userNip}`, formData);
+        await updateUser.mutateAsync({ userId: userNip, userData: formData });
         toast({ title: "User updated successfully", status: "success" });
       } else {
-        await apiAuth.post("/users", formData);
+        await createUser.mutateAsync(formData);
         toast({ title: "User created successfully", status: "success" });
       }
-      await fetchUsers();
       dialog.close();
     } catch (error) {
       const errorMessage =
@@ -57,17 +60,13 @@ export function UserManagementPage() {
   const handleDelete = async (user) => {
     if (!window.confirm(`Are you sure you want to delete user ${user.name}?`)) return;
     try {
-      const token = localStorage.getItem("token");
-      const res = await api.delete(`/users/${user.nip}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (res.data?.deleted_id) {
+      const res = await deleteUser.mutateAsync(user.nip);
+      if (res?.deleted_id) {
         toast({
           title: "Utilizador apagado com sucesso",
-          description: `Utilizador com o nip ${res.data.deleted_id} apagado`,
+          description: `Utilizador com o nip ${res.deleted_id} apagado`,
           status: "info",
         });
-        await fetchUsers();
       }
     } catch (error) {
       const errorMessage =

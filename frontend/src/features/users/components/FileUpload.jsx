@@ -10,7 +10,7 @@ import {
   HStack,
   Field,
 } from "@chakra-ui/react";
-import api from "@/utils/api";
+import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
 import { FiUploadCloud } from "react-icons/fi";
 
@@ -38,11 +38,9 @@ export function FileUpload() {
     formData.append("file", file);
     console.log(formData);
     try {
-      const token = localStorage.getItem("token");
-      const response = await api.post("/users/add_users", formData, {
+      const response = await http.post("/users/add_users", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: "Bearer " + token,
         },
       });
       toast({
@@ -64,12 +62,7 @@ export function FileUpload() {
   };
   const handleBackup = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await api.get("/users/backup", {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      });
+      const response = await http.get("/users/backup");
       toast({
         title: "Sucesso",
         description: response.data.message || "Backup feito com sucesso!",

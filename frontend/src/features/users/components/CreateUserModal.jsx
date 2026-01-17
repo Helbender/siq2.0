@@ -23,18 +23,18 @@ export function CreateUserModal({
   const { formData, setFormData } = useUserForm(editingUser);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // async function handleSubmit(e) {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-  //   try {
-  //     await onSubmit(editingUser?.nip ?? null, formData);
-  //     onClose();
-  //   } catch (error) {
-  //     // Error handling is done in the parent component
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // }
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await onSubmit(editingUser?.nip ?? null, formData);
+      onClose();
+    } catch (error) {
+      // Error handling is done in the parent component
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   return (
     <Dialog.Root
       open={isOpen}
@@ -51,7 +51,7 @@ export function CreateUserModal({
           </Dialog.Header>
           
           <Dialog.Body>
-            <form onSubmit={(e) => { e.preventDefault(); }}>
+            <form onSubmit={handleSubmit}>
               <VStack spacing={4}>
                 <Flex flexDirection={"row"} gap={"4"} width="100%">
                   <Field.Root flex="1">

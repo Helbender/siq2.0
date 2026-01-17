@@ -10,7 +10,7 @@ import { useToast } from "@/utils/useToast";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
-import api from "@/utils/api";
+import { http } from "@/api/http";
 
 export function RecoverProcess() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export function RecoverProcess() {
 
   const checkToken = async () => {
     try {
-      const response = await api.post("/api/recovery", {
+      const response = await http.post("/api/recovery", {
         token: params.token,
         email: params.email,
       });
@@ -87,7 +87,7 @@ export function RecoverProcess() {
 
     try {
       // Update the API endpoint and payload
-      const response = await api.patch(`/api/storenewpass/${nip}`, {
+      const response = await http.patch(`/api/storenewpass/${nip}`, {
         password: newPassword,
       });
       console.log(response);

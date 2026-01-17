@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { useForm } from "react-hook-form";
-import api, { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
 
 const today = new Date();
@@ -74,7 +74,7 @@ export function InsertInitQual(props) {
   };
   const sendQualification = async (data) => {
     try {
-      const response = await apiAuth.post(
+      const response = await http.post(
         `/v2/qualificacoeslist/${props.user.nip}`,
         data,
       );

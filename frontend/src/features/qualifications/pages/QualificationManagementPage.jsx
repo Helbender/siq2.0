@@ -13,7 +13,7 @@ import { CreateQualModal } from "../components/CreateQualModal";
 import { DeleteQualModal } from "../components/DeleteQualModal";
 import { useToast } from "@/utils/useToast";
 import { QualificationGroupFilter } from "../components/QualificationGroupFilter";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 import { BiRefresh } from "react-icons/bi";
 
 export function QualificationManagementPage() {
@@ -90,7 +90,7 @@ export function QualificationManagementPage() {
     });
 
     try {
-      const res = await apiAuth.post("/flights/reprocess-all-qualifications");
+      const res = await http.post("/flights/reprocess-all-qualifications");
       toast.closeAll();
       toast({
         title: "Sucesso!",

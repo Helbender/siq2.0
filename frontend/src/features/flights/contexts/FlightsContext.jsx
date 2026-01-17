@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 // Create the context
 export const FlightContext = createContext();
@@ -13,7 +13,7 @@ export function FlightProvider({ children }) {
 
   const getSavedFlights = async () => {
     try {
-      const response = await apiAuth.get("/flights");
+      const response = await http.get("/flights");
       setFlights(response.data || []);
       setLoading(false);
       console.log("Flights Loaded from context");

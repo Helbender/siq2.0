@@ -13,7 +13,6 @@ import {
   Stat,
 } from "@chakra-ui/react";
 import { Field } from "@chakra-ui/react";
-import { UserContext } from "@/features/users/contexts/UserContext";
 import {
   Legend,
   PieChart,
@@ -22,7 +21,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 import { formatHours, formatDateISO } from "@/utils/timeCalc";
 import { useSunTimes } from "@/utils/useSunTimes";
 import { useAvailableYears } from "../hooks/useAvailableYears";
@@ -44,7 +43,6 @@ function getTomorrow() {
 }
 
 export function DashboardPage() {
-  const { token } = useContext(UserContext);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [expiringQualifications, setExpiringQualifications] = useState([]);
   const [loadingExpiring, setLoadingExpiring] = useState(true);
@@ -87,9 +85,7 @@ export function DashboardPage() {
   const fetchExpiringQualifications = async () => {
     setLoadingExpiring(true);
     try {
-      const response = await apiAuth.get("/dashboard/expiring-qualifications", {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const response = await http.get("/dashboard/expiring-qualifications");
       setExpiringQualifications(response.data.expiring_qualifications || []);
     } catch (error) {
       console.error("Error fetching expiring qualifications:", error);
@@ -100,7 +96,7 @@ export function DashboardPage() {
 
   useEffect(() => {
     fetchExpiringQualifications();
-  }, [token]);
+  }, []);
 
   const loading = loadingStats || loadingYears;
 

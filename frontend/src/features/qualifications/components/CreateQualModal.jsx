@@ -15,7 +15,7 @@ import { useState, useContext, useEffect, useMemo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { useToast } from "@/utils/useToast";
 import { FaEdit } from "react-icons/fa";
-import { api, apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 export function CreateQualModal({ setQualifications, edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -53,15 +53,13 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
       console.log(qualificacao.getValues());
       {
         edit
-          ? (res = await api.patch(
+          ? (res = await http.patch(
               `/v2/qualificacoes/${qualification.id}`,
               qualificacao.getValues(),
-              {},
             ))
-          : (res = await api.post(
+          : (res = await http.post(
               "/v2/qualificacoes",
               qualificacao.getValues(),
-              {},
             ));
       }
       if (edit) {
@@ -101,7 +99,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
     }
 
     try {
-      const res = await api.get(`/v2/qualification-groups/${crewType}`);
+      const res = await http.get(`/v2/qualification-groups/${crewType}`);
       setGrupos(res.data);
     } catch (error) {
       console.error("Error fetching qualification groups:", error);
@@ -112,7 +110,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
   // Function to fetch all qualification groups (for initial load)
   const fetchAllQualificationGroups = async () => {
     try {
-      const res = await api.get("/v2/qualification-groups");
+      const res = await http.get("/v2/qualification-groups");
       setAllGrupos(res.data);
     } catch (error) {
       console.error("Error fetching all qualification groups:", error);
@@ -122,7 +120,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
   useMemo(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get("/v2/listas");
+        const res = await http.get("/v2/listas");
         setTipos(res.data.tipos);
         // Also fetch all qualification groups
         await fetchAllQualificationGroups();

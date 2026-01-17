@@ -22,10 +22,10 @@ import { FaPlus } from "react-icons/fa";
 import { PilotInput } from "./PilotInput";
 import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { UserContext } from "@/features/users/contexts/UserContext";
+import { useUsersQuery } from "@/features/users/hooks/useUsersQuery";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/utils/useToast";
-import { api, apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 import { getTimeDiff } from "@/utils/timeCalc";
 import { BiEdit } from "react-icons/bi";
 
@@ -36,7 +36,7 @@ export function CreateFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { setFlights } = useContext(FlightContext);
   const { token, removeToken } = useContext(AuthContext);
-  const { users } = useContext(UserContext);
+  const { data: users = [] } = useUsersQuery();
   const scrollRef = useRef(null);
   const flightRef = useRef(flight); // Store initial flight reference
   const navigate = useNavigate();
@@ -169,9 +169,9 @@ export function CreateFlightModal({ flight }) {
       const currentFlight = flightRef.current || flight;
       if ((currentFlight?.id || data?.id) && !isNewFlight) {
         const flightId = data?.id || currentFlight?.id;
-        res = await apiAuth.patch(`/flights/${flightId}`, data);
+        res = await http.patch(`/flights/${flightId}`, data);
       } else {
-        res = await apiAuth.post("/flights", data);
+        res = await http.post("/flights", data);
       }
       // Response 201 is for creating new flight
       console.log(res);

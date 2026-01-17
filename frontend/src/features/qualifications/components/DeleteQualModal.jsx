@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { BiTrash } from "react-icons/bi";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
 
 export function DeleteQualModal({ qual, setQualifications }) {
@@ -18,7 +18,7 @@ export function DeleteQualModal({ qual, setQualifications }) {
 
   const deleteQual = async () => {
     try {
-      await apiAuth.delete(`/v2/qualificacoes/${qual.id}`);
+      await http.delete(`/v2/qualificacoes/${qual.id}`);
       toast({
         title: "Sucesso!",
         description: "Qualificação excluída com sucesso.",

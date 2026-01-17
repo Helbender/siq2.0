@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiAuth } from "@/utils/api";
+import { http } from "@/api/http";
 
 export function useDashboardStats(year) {
   const [totalFlights, setTotalFlights] = useState(0);
@@ -20,7 +20,7 @@ export function useDashboardStats(year) {
       setLoading(true);
       setError(null);
       try {
-        const response = await apiAuth.get(`/dashboard/statistics?year=${year}`);
+        const response = await http.get(`/dashboard/statistics?year=${year}`);
         const data = response.data;
 
         setTotalFlights(data.total_flights || 0);
