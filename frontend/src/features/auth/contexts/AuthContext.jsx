@@ -1,11 +1,10 @@
 import { setLoggingOut } from "@/api/http";
-import {
-  fetchMe,
-  loginRequest,
-  registerRequest,
-  updateUserRequest,
-} from "@/features/auth/services/api";
-import { createContext, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useEffect } from "react";
+import { useLogin } from "../mutations/useLogin";
+import { useRegister } from "../mutations/useRegister";
+import { useUpdateAuthUser } from "../mutations/useUpdateAuthUser";
+import { authQueryKeys, useAuthQuery } from "../queries/useAuthQuery";
 
 const AuthContext = createContext(null);
 
@@ -16,84 +15,44 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: user, isLoading: loading, error } = useAuthQuery();
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
+  const updateUserMutation = useUpdateAuthUser();
 
+  // Handle auth errors - clear token if unauthorized
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    fetchMe()
-      .then((user) => {
-        setUser(user);
-
-        setLoading(false);
-      })
-      .catch((error) => {
-        // Only clear token if it's an actual auth error, not if we're logging out
-        if (!localStorage.getItem("token")) {
-          // Token was already cleared (e.g., by logout)
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-        // Auth error - clear token and user
+    if (error) {
+      const status = error?.response?.status;
+      // Only clear token if it's an actual auth error, not if we're logging out
+      if (
+        (status === 401 || status === 404) &&
+        localStorage.getItem("token") &&
+        !localStorage.getItem("loggingOut")
+      ) {
         localStorage.removeItem("token");
-        setUser(null);
-        setLoading(false);
-      });
-  }, []);
+        queryClient.setQueryData(authQueryKeys.me(), null);
+      }
+    }
+  }, [error, queryClient]);
+
+  // Handle logout event from http interceptor
+  useEffect(() => {
+    const handleLogout = () => {
+      queryClient.setQueryData(authQueryKeys.me(), null);
+    };
+
+    window.addEventListener("auth:logout", handleLogout);
+
+    return () => {
+      window.removeEventListener("auth:logout", handleLogout);
+    };
+  }, [queryClient]);
 
   const login = async (nip, password) => {
     try {
-      // Ensure logout flag is reset before login attempt
-      setLoggingOut(false);
-
-      const response = await loginRequest(nip, password);
-      const { access_token } = response;
-
-      if (!access_token) {
-        return { success: false, error: "Invalid response from server" };
-      }
-
-      localStorage.setItem("token", access_token);
-
-      // Fetch user data after login
-      try {
-        console.log("[AuthContext] Fetching user data after login...");
-        const user = await fetchMe();
-        console.log("[AuthContext] User data fetched successfully:", user);
-        setUser(user);
-      } catch (error) {
-        console.error("[AuthContext] Error fetching user after login:", error);
-        // If fetchMe fails, it's likely a 404 - user doesn't exist
-        // This shouldn't happen if login succeeded, but handle it gracefully
-        const errorMessage =
-          error.response?.data?.error ||
-          error.message ||
-          "Failed to fetch user data";
-        if (error.response?.status === 404) {
-          // User not found - clear token and return error
-          console.error("[AuthContext] User not found (404), clearing token");
-          localStorage.removeItem("token");
-          return {
-            success: false,
-            error: `User not found: ${errorMessage}`,
-          };
-        }
-        // For other errors, log but don't block login
-        console.warn(
-          "[AuthContext] Non-critical error fetching user:",
-          errorMessage,
-        );
-      }
-
-      // Wait a tick to ensure state is updated
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
+      const result = await loginMutation.mutateAsync({ nip, password });
       return { success: true };
     } catch (e) {
       console.error("Login error:", e);
@@ -112,13 +71,7 @@ export function AuthProvider({ children }) {
 
   const register = async (username, email, password) => {
     try {
-      const { access_token, user } = await registerRequest(
-        username,
-        email,
-        password,
-      );
-      localStorage.setItem("token", access_token);
-      setUser(user);
+      await registerMutation.mutateAsync({ username, email, password });
       return { success: true };
     } catch (e) {
       const errorMessage =
@@ -130,36 +83,28 @@ export function AuthProvider({ children }) {
   const logout = () => {
     // Set flag to prevent refresh attempts
     setLoggingOut(true);
+    localStorage.setItem("loggingOut", "true");
     localStorage.removeItem("token");
-    setUser(null);
-    setLoading(false);
+    // Clear query cache
+    queryClient.setQueryData(authQueryKeys.me(), null);
+    queryClient.removeQueries({ queryKey: authQueryKeys.all });
     // Cancel any pending requests
-    // Note: This is a best-effort cancellation
     window.dispatchEvent(new Event("auth:logout"));
     // Reset flag after a short delay to allow cleanup
-    setTimeout(() => setLoggingOut(false), 1000);
+    setTimeout(() => {
+      setLoggingOut(false);
+      localStorage.removeItem("loggingOut");
+    }, 1000);
   };
 
   const updateUser = async (data) => {
     try {
-      const res = await updateUserRequest(data);
-      setUser(res.user);
+      await updateUserMutation.mutateAsync(data);
       return { success: true };
     } catch {
       return { success: false, error: "Update failed" };
     }
   };
-  useEffect(() => {
-    const handleLogout = () => {
-      setUser(null);
-    };
-
-    window.addEventListener("auth:logout", handleLogout);
-
-    return () => {
-      window.removeEventListener("auth:logout", handleLogout);
-    };
-  }, []);
 
   return (
     <AuthContext.Provider

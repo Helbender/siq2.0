@@ -9,37 +9,35 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { useLogin } from "../mutations/useLogin";
 import { HealthCard } from "../components/HealthCard";
 
 export function LoginPage() {
   const [nip, setNip] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const loginMutation = useLogin();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
     try {
-      const result = await login(nip, password);
-      if (result.success) {
-        // Small delay to ensure state is updated before navigation
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 100);
-      } else {
-        setError(result.error || "Login failed");
-        setLoading(false);
-      }
+      await loginMutation.mutateAsync({ nip, password });
+      // Small delay to ensure state is updated before navigation
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
     } catch (err) {
       console.error("Login submission error:", err);
-      setError("Unexpected error");
-      setLoading(false);
+      // Extract error message
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Login failed";
+      setError(errorMessage);
     }
   };
 
@@ -105,8 +103,8 @@ export function LoginPage() {
           <Button
             mt="10"
             type="submit"
-            isLoading={loading}
-            isDisabled={loading}
+            isLoading={loginMutation.isPending}
+            isDisabled={loginMutation.isPending}
           >
             Login
           </Button>
