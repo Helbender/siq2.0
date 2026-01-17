@@ -1,6 +1,6 @@
 import React from "react";
 import { Fragment } from "react";
-import { StyledText } from "@/shared/components/StyledText";
+import { StyledText } from "@/features/shared/components/StyledText";
 import { Spacer, Stack } from "@chakra-ui/react";
 
 export function InfoMed({ flight }) {

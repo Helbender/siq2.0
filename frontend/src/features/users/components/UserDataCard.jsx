@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useToast } from "@/utils/useToast";
 import { CreateUserModal } from "./CreateUserModal";
-import { StyledText } from "@/shared/components/StyledText";
+import { StyledText } from "@/features/shared/components/StyledText";
 import { FaMailBulk } from "react-icons/fa";
 import { useSendEmail } from "@/utils/useSendEmail";
 import { InsertInitQual } from "./InsertInitQual";

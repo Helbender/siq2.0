@@ -1,5 +1,5 @@
 import { useAuth } from "@/features/auth/contexts/AuthContext";
-import { Box, Link as ChakraLink, Separator, Spacer, Text, VStack } from "@chakra-ui/react";
+import { Box, Link as ChakraLink, Flex, Separator, Spacer, Text } from "@chakra-ui/react";
 import {
   FaPlaneArrival,
   FaSignOutAlt,
@@ -30,24 +30,25 @@ export function NavbarLeft() {
   };
 
   return (
-    <Box
-      w="250px"
+    <Flex
+      direction="column"
+      w="230px"
       h="100%"
-      bg="gray.800"
+      bg="gray.600"
       borderRight="1px solid"
       borderColor="gray.700"
       flexShrink={0}
     >
-      <VStack align="stretch" spacing={0} p={4}>
+      {/* <VStack align="stretch" spacing={0} p={2}> */}
         {user && (
-          <Box mb={2} px={3} py={2}>
+          <Box px={3} py={2}>
             <Text
-              color="gray.300"
+              color="teal.500"
               fontSize="sm"
               fontWeight="semibold"
               textAlign="left"
             >
-              Welcome {user.name}
+              Welcome, {user.name}
             </Text>
           </Box>
         )}
@@ -59,11 +60,10 @@ export function NavbarLeft() {
             <NavLink key={item.path} to={item.path} end>
               {({ isActive }) => (
                 <Box
-                  as="div"
-                  p={3}
+                  p={2}
                   borderRadius="md"
                   bg={isActive ? "teal.600" : "transparent"}
-                  color={isActive ? "white" : "gray.300"}
+                  color={isActive ? "white" : "teal.500"}
                   _hover={{
                     bg: isActive ? "teal.700" : "gray.700",
                     color: "white",
@@ -83,14 +83,14 @@ export function NavbarLeft() {
         })}
         
         <Spacer />
-        <Separator borderWidth="1px" borderColor="gray.700" my={2} />
+        <Separator borderWidth="1px" borderColor="gray.700" mt={2} />
         
         <ChakraLink
           onClick={handleLogout}
-          p={3}
+          p={2}
           borderRadius="md"
           bg="transparent"
-          color="gray.300"
+          color="teal.500"
           _hover={{
             bg: "red.600",
             color: "white",
@@ -104,7 +104,7 @@ export function NavbarLeft() {
           <FaSignOutAlt style={{ fontSize: "20px" }} />
           <Box as="span">Logout</Box>
         </ChakraLink>
-      </VStack>
-    </Box>
+      {/* </VStack> */}
+    </Flex>
   );
 }

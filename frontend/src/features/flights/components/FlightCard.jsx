@@ -12,7 +12,7 @@ import {
   useBreakpointValue,
   Box,
 } from "@chakra-ui/react";
-import { StyledText } from "@/shared/components/StyledText";
+import { StyledText } from "@/features/shared/components/StyledText";
 import { DeleteFlightModal } from "./DeleteFlightModal";
 import { CreateFlightModal } from "./CreateFlightModal";
 import { formatDate } from "@/utils/timeCalc";

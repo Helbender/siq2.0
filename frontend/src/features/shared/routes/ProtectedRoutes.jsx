@@ -1,6 +1,6 @@
-import { Navigate, Route } from "react-router";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
-import { AuthenticatedLayout } from "@/shared/layout/AuthenticatedLayout";
+import { AuthenticatedLayout } from "@/features/shared/layout/AuthenticatedLayout";
+import { Navigate, Route } from "react-router";
 
 // Test pages
 import { TestDashboardPage } from "@/features/test/pages/TestDashboardPage";

@@ -1,28 +1,7 @@
 import { Box, Flex, Heading } from "@chakra-ui/react";
 
 export function Header() {
-  // const { token, removeToken, getUser } = useContext(AuthContext);
-  // const navigate = useNavigate();
-  // const { isOpen, onOpen, onClose } = useDisclosure();
-  // const { colorMode, toggleColorMode } = useColorMode();
 
-  // const User = getUser();
-  // const handleLogout = async () => {
-  //   try {
-  //     const response = await axios.post("/api/logout");
-  //     console.log(response.status);
-  //     navigate("/");
-  //     removeToken();
-  //   } catch (error) {
-  //     removeToken();
-  //     navigate("/");
-  //     if (error.response) {
-  //       console.log(error.response);
-  //       console.log(error.response.status);
-  //       console.log(error.response.headers);
-  //     }
-  //   }
-  // };
 
   return (
     <Box
@@ -48,7 +27,7 @@ export function Header() {
         {/* Centered Heading */}
         <Flex flex="1" justify="center">
           <Heading
-            size="lg"
+            size="2xl"
             cursor="pointer"
             textAlign={"center"}
             // onClick={() => navigate("/")}

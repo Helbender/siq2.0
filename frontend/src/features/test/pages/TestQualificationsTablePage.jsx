@@ -1,4 +1,4 @@
-import { FeatureBasePage } from "@/shared/components/FeatureBasePage";
+import { FeatureBasePage } from "@/features/shared/components/FeatureBasePage";
 import { Box, Text } from "@chakra-ui/react";
 
 export function TestQualificationsTablePage() {

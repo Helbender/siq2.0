@@ -1,4 +1,4 @@
-import { NavbarLeft } from "@/shared/components/NavbarLeft";
+import { NavbarLeft } from "@/features/shared/components/NavbarLeft";
 import { Box, Flex } from "@chakra-ui/react";
 import { Outlet } from "react-router";
 import { Footer } from "./Footer";

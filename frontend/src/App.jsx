@@ -1,6 +1,6 @@
 import { AuthProvider } from "@/features/auth/contexts/AuthContext";
-import { ProtectedRoutes } from "@/shared/routes/ProtectedRoutes";
-import { PublicRoutes } from "@/shared/routes/PublicRoutes";
+import { ProtectedRoutes } from "@/features/shared/routes/ProtectedRoutes";
+import { PublicRoutes } from "@/features/shared/routes/PublicRoutes";
 import React from "react";
 import { Navigate, Route, Routes } from "react-router";
 

@@ -1,5 +1,5 @@
 import { Route } from "react-router";
-import { Layout } from "@/shared/layout/Layout";
+import { Layout } from "@/features/shared/layout/Layout";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 
 export const PublicRoutes = (

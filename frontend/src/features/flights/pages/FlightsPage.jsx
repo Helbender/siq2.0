@@ -18,7 +18,7 @@ import { useContext, useEffect, useState } from "react";
 import { FlightContext } from "../contexts/FlightsContext";
 import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { StyledText } from "@/shared/components/StyledText";
+import { StyledText } from "@/features/shared/components/StyledText";
 import { formatDate } from "@/utils/timeCalc";
 import { List } from "react-window";
 

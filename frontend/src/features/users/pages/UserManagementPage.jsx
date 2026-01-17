@@ -105,12 +105,19 @@ export function UserManagementPage() {
         <Text>Nº de Utilizadores: {filteredUsers.length}</Text>
         <Spacer />
         <Input
+          bg="bg.surface"
+          color="text.primary"
+          border="1px solid"
+          borderColor="border.subtle"
+          borderRadius="md"
           placeholder="Search..."
           maxWidth={200}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           size="md"
-          flex="1"
+          _hover={{
+            borderColor: "border.focus",
+          }}
         />
       </HStack>
       <HStack>
