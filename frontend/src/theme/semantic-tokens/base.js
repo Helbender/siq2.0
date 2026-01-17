@@ -5,13 +5,14 @@ export const baseSemanticTokens = defineSemanticTokens({
     bg: {
       canvas: { value: "{colors.gray.900}" },
       surface: { value: "{colors.gray.800}" },
-      muted: { value: "{colors.gray.800}" },
+      muted: { value: "{colors.gray.700}" },
     },
 
     text: {
       primary: { value: "{white}" },
       secondary: { value: "{colors.gray.300}" },
       muted: { value: "{colors.gray.400}" },
+      inverted: { value: "{black}" },
     },
 
     border: {

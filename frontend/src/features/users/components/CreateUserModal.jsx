@@ -46,8 +46,8 @@ export function CreateUserModal({
       <Dialog.Positioner>
         <Dialog.Content>
           <Dialog.CloseTrigger />
-          <Dialog.Header textAlign={"center"}>
-            <Dialog.Title>{editingUser ? `Editar ${editingUser.rank} ${editingUser.name}` : "Novo Utilizador"}</Dialog.Title>
+          <Dialog.Header>
+            <Dialog.Title textAlign={"center"}>{editingUser ? `Editar ${editingUser.rank} ${editingUser.name}` : "Novo Utilizador"}</Dialog.Title>
           </Dialog.Header>
           
           <Dialog.Body>

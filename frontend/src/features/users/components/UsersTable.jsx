@@ -6,10 +6,9 @@ import {
   Table,
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
-import { FaEdit, FaMailBulk } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { IoIosCheckmark, IoIosClose } from "react-icons/io";
 import { IoCheckmarkCircleSharp, IoCloseCircleSharp } from "react-icons/io5";
-import { InsertInitQual } from "./InsertInitQual";
 
 export function UsersTable({ users, onEdit, onDelete }) {
   const sendEmail = useSendEmail();
@@ -52,7 +51,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
             </Table.Cell>
             <Table.Cell>
               <HStack spacing={2} align="center">
-                <IconButton
+                {/* <IconButton
                   colorPalette="blue"
                   onClick={() => {
                     toast({
@@ -68,7 +67,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
                   aria-label="Email User"
                 >
                   <FaMailBulk />
-                </IconButton>
+                </IconButton> */}
                 <IconButton
                   colorPalette="yellow"
                   onClick={() => onEdit(user)}
@@ -76,7 +75,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
                 >
                   <FaEdit />
                 </IconButton>
-                <InsertInitQual user={user} />
+                {/* <InsertInitQual user={user} /> */}
                 <IconButton
                   colorPalette="red"
                   onClick={() => onDelete(user)}

@@ -1,6 +1,7 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react";
-import { baseSemanticTokens } from "./semantic-tokens/base";
+import { dialogRecipe } from "./recipes/dialog";
 import { tableRecipe } from "./recipes/table";
+import { baseSemanticTokens } from "./semantic-tokens/base";
 
 const system = createSystem(defaultConfig, {
   theme: {
@@ -18,6 +19,7 @@ const system = createSystem(defaultConfig, {
     },
     slotRecipes: {
       table: tableRecipe,
+      dialog: dialogRecipe,
     },
   },
 });
