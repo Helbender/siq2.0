@@ -35,7 +35,7 @@ export function DaysLeftColumn({ qualification, dates }) {
       <Separator mt={2} mb={1} />
       {days.map((a, i) => {
         return (
-          <Text key={i} bg={colorFormatter(a)} color="black">
+          <Text key={i} bg={colorFormatter(a)} color="text.primary">
             {a}
           </Text>
         );

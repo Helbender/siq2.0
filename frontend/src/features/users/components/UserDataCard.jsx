@@ -72,7 +72,7 @@ export function UserDataCard({ user }) {
 
           <IconButton
             icon={<FaMailBulk />}
-            colorScheme="blue"
+            colorPalette="blue"
             onClick={() => {
               toast({
                 title: "Sending Email",

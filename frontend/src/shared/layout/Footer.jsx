@@ -11,14 +11,10 @@ export function Footer() {
       color="white"
       py={2}
       px={3}
-      mt={6}
       textAlign="center"
-      // borderRadius="md"
       boxShadow="lg"
-      position="fixed"
-      bottom={0}
-      zIndex={1001}
-      h="5vh"
+      flexShrink={0}
+      h="60px"
     >
       <Spacer />
 

@@ -166,12 +166,12 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
       {edit ? (
         <IconButton
           icon={<FaEdit />}
-          colorScheme="yellow"
+          colorPalette="yellow"
           onClick={onOpen}
           aria-label="Edit User"
         />
       ) : (
-        <Button onClick={handleModalOpen} colorScheme="green">
+        <Button onClick={handleModalOpen} colorPalette="green">
           Nova Qualificação
         </Button>
       )}
@@ -243,7 +243,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+                <Button colorPalette="blue" mr={3} onClick={handleSubmit}>
                   {edit ? "Guardar Alterações" : "Salvar"}
                 </Button>
                 <Button variant="ghost" onClick={onClose}>

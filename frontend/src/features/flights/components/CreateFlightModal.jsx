@@ -265,13 +265,13 @@ export function CreateFlightModal({ flight }) {
       {flight ? (
         <IconButton
           variant="ghost"
-          colorScheme="yellow"
+          colorPalette="yellow"
           size={"lg"}
           onClick={onOpen}
           icon={<BiEdit />}
         />
       ) : (
-        <Button onClick={onOpen} colorScheme="green">
+        <Button onClick={onOpen} colorPalette="green">
           Novo Modelo
         </Button>
       )}
@@ -642,7 +642,7 @@ export function CreateFlightModal({ flight }) {
                 {flight && (
                   <Button
                     type="button"
-                    colorScheme="purple"
+                    colorPalette="purple"
                     mr={3}
                     onClick={handleCreateNewFlight}
                   >
@@ -651,7 +651,7 @@ export function CreateFlightModal({ flight }) {
                 )}
                 <Button
                   type="button"
-                  colorScheme="green"
+                  colorPalette="green"
                   mr={3}
                   onClick={flight ? handleEditFlight : handleCreateNewFlight}
                 >
@@ -659,7 +659,7 @@ export function CreateFlightModal({ flight }) {
                 </Button>
                 <Button
                   type="button"
-                  colorScheme="blue"
+                  colorPalette="blue"
                   mr={3}
                   onClick={() => {
                     reset();

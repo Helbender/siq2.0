@@ -212,7 +212,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       <GridItem justifyContent={"flex-end"} display={"flex"}>
         <IconButton
           icon={<FaMinus />}
-          colorScheme="red"
+          colorPalette="red"
           onClick={() => remove(index)}
           aria-label="Edit User"
           maxW={"50%"}

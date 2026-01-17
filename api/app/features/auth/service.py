@@ -35,10 +35,10 @@ class AuthService:
             tripulante: Tripulante | None = session.execute(select(Tripulante)).first()  # type: ignore
             if tripulante is None:
                 access_token = create_access_token(
-                    identity=nip,
+                    identity="admin",
                     additional_claims={"admin": True, "name": "ADMIN"},
                 )
-                refresh_token = create_refresh_token(identity=str(nip))
+                refresh_token = create_refresh_token(identity="admin")
                 return {
                     "access_token": access_token,
                     "refresh_token": refresh_token,
@@ -55,11 +55,13 @@ class AuthService:
         if hash_code(password) != tripulante.password:
             return {"message": "Wrong password"}
 
+        # Ensure identity is consistently a string for JWT
+        nip_str = str(nip)
         access_token = create_access_token(
-            identity=nip,
+            identity=nip_str,
             additional_claims={"admin": tripulante.admin, "name": tripulante.name},
         )
-        refresh_token = create_refresh_token(identity=str(nip))
+        refresh_token = create_refresh_token(identity=nip_str)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -101,7 +103,6 @@ class AuthService:
             return {"message": "Token Valid", "nip": tripulante.nip}
 
         return {"message": "Token Expired"}
-        return {"message": "Token Valid", "nip": tripulante.nip}
 
     def initiate_password_recovery(self, email: str, session: Session) -> dict[str, Any]:
         """Initiate password recovery process by sending recovery email.
@@ -154,20 +155,32 @@ class AuthService:
         """Generate a new access token for a user.
 
         Args:
-            nip: User NIP
+            nip: User NIP (can be string or int)
 
         Returns:
             tuple of (access_token, error) where error is None on success
         """
+        # Handle admin case
+        if str(nip) == "admin":
+            new_access_token = create_access_token(
+                identity="admin",
+                additional_claims={"admin": True, "name": "ADMIN"},
+            )
+            return new_access_token, None
+
         with Session(engine) as session:
-            stmt = select(Tripulante).where(Tripulante.nip == int(nip))
+            # Convert to int for database query
+            nip_int = int(nip) if isinstance(nip, str) else nip
+            stmt = select(Tripulante).where(Tripulante.nip == nip_int)
             tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
 
             if tripulante is None:
                 return None, "User not found"
 
+            # Always use string for JWT identity for consistency
+            nip_str = str(nip_int)
             new_access_token = create_access_token(
-                identity=str(nip),
+                identity=nip_str,
                 additional_claims={"admin": tripulante.admin, "name": tripulante.name},
             )
 

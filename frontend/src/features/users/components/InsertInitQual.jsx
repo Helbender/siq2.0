@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useContext, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 import {
   Button,
   useDisclosure,
@@ -19,14 +19,12 @@ import {
 import { HiX } from "react-icons/hi";
 import { useForm } from "react-hook-form";
 import api, { apiAuth } from "@/utils/api";
-import { AuthContext } from "@/features/auth/contexts/AuthContext";
 import { useToast } from "@/utils/useToast";
 
 const today = new Date();
 
 export function InsertInitQual(props) {
   const [qualList, setQualList] = useState([]);
-  const { token, removeToken } = useContext(AuthContext);
   const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -41,6 +39,7 @@ export function InsertInitQual(props) {
   });
   const getQualificationList = async () => {
     try {
+      const token = localStorage.getItem("token");
       const response = await api.get(
         `/v2/qualificacoeslist/${props.user.nip}`,
         {
@@ -103,7 +102,7 @@ export function InsertInitQual(props) {
     <Fragment>
       <IconButton
         icon={<Image src="plane.png" h={"30px"} w={"30px"} />}
-        colorScheme="green"
+        colorPalette="green"
         onClick={() => {
           onOpen();
           getQualificationList();
@@ -162,7 +161,7 @@ export function InsertInitQual(props) {
                 </Dialog.Body>
                 <Dialog.Footer>
                   <Button
-                    colorScheme="green"
+                    colorPalette="green"
                     mr={3}
                     type="submit"
                     onClick={handleSubmit}
@@ -170,7 +169,7 @@ export function InsertInitQual(props) {
                     Guardar
                   </Button>
                   <Button
-                    colorScheme="blue"
+                    colorPalette="blue"
                     mr={3}
                     onClick={() => {
                       onClose();

@@ -1,120 +1,17 @@
-import React, { useMemo, useState, Fragment, useContext } from "react";
-// import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-// import { Box } from "@chakra-ui/react";
-
-// import { PilotsPage } from "@/features/pilots/pages/PilotsPage";
-// import { FlightsPage } from "@/features/flights/pages/FlightsPage";
-// import { Master } from "@/shared/layout/Master";
-// import { Footer } from "@/shared/layout/Footer";
-// import { AboutPage } from "@/shared/pages/AboutPage";
-// import { Sidebar } from "@/shared/components/Sidebar";
-import { Header } from "@/layout/Header";
-// import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
-// import { QualificationTablePage } from "@/features/pilots/pages/QualificationTablePage";
-
-// import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
-// import { FileUpload } from "@/features/users/components/FileUpload";
-import { AuthProvider, useAuth } from "@/features/auth/contexts/AuthContext";
-import { LoginPage } from "@/features/auth/pages/LoginPage";
-import { RequireAuth } from "@/features/auth/components/RequireAuth";
-// import { RecoverPass } from "@/features/auth/components/RecoverPass";
-// import { RecoverProcess } from "@/features/auth/components/RecoverProcess";
-// import { AuthContext } from "@/features/auth/contexts/AuthContext";
-// import api from "@/utils/api";
-import { Layout } from "@/layout/Layout";
-import { Routes, Route } from "react-router-dom";
-function RootRoute() {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  return (
-    <RequireAuth>
-      <Layout />
-    </RequireAuth>
-  );
-}
+import { AuthProvider } from "@/features/auth/contexts/AuthContext";
+import { ProtectedRoutes } from "@/shared/routes/ProtectedRoutes";
+import { PublicRoutes } from "@/shared/routes/PublicRoutes";
+import React from "react";
+import { Navigate, Route, Routes } from "react-router";
 
 function App() {
-  // const { token, removeToken, setToken } = useContext(AuthContext);
-  // const [tipos, setTipos] = useState([]);
-
-  // useMemo(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await api.get("/v2/listas");
-  //       setTipos(res.data.tipos);
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
   return (
-    // <HashRouter>
-    //   <Header />
-    //   <Box pt="75px">
-    //     {!token || token === "" ? (
-    //       <Routes>
-    //         <Route index element={<Navigate replace to="/login" />} />
-    //         <Route path="/login" element={<LoginPage />} />
-    //         <Route path="/recover" element={<RecoverPass />} />
-    //         <Route
-    //           path="/recovery/:token/:email"
-    //           element={<RecoverProcess />}
-    //         />
-    //         <Route path="/about" element={<AboutPage />} />
-    //       </Routes>
-    //     ) : (
-    //       <Fragment>
-    //         <Routes>
-    //           <Route index element={<Navigate replace to="dashboard" />} />
-    //           <Route path="/flights" element={<FlightsPage />} />
-    //           <Route path="/fileupload" element={<FileUpload />} />
-    //           <Route path="/users" element={<UserManagementPage />} />
-    //           <Route
-    //             path="/qualificacoes"
-    //             element={<QualificationManagementPage />}
-    //           />
-
-    //           <Route path="/" element={<Master />}>
-    //             {tipos.map((tipo) => (
-    //               <Route
-    //                 key={tipo}
-    //                 path={`/${tipo
-    //                   .toLowerCase()
-    //                   .replace(" ", "-")
-    //                   .normalize("NFD")
-    //                   .replace(/[\u0300-\u036f]/g, "")}`}
-    //                 element={<PilotsPage tipo={tipo} />}
-    //               />
-    //             ))}
-    //             {tipos.map((tipo) => (
-    //               <Route
-    //                 key={`${tipo}-table`}
-    //                 path={`/${tipo
-    //                   .toLowerCase()
-    //                   .replace(" ", "-")
-    //                   .normalize("NFD")
-    //                   .replace(/[\u0300-\u036f]/g, "")}-table`}
-    //                 element={<QualificationTablePage tipo={tipo} />}
-    //               />
-    //             ))}
-    //           </Route>
-    //           <Route path="/about" element={<AboutPage />} />
-    //         </Routes>
-    //       </Fragment>
-    //     )}
-    //     <Footer />
-    //   </Box>
-    // </HashRouter>
     <AuthProvider>
-      <Header />
       <Routes>
-        <Route path="/" element={<RootRoute />} />
+        {PublicRoutes}
+        {ProtectedRoutes}
+        {/* Redirect unknown routes to login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AuthProvider>
   );

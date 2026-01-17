@@ -121,7 +121,7 @@ export function QualificationManagementPage() {
         <Spacer />
         <Button
           leftIcon={<BiRefresh />}
-          colorScheme="blue"
+          colorPalette="blue"
           onClick={handleReprocessAllFlights}
           isLoading={isReprocessing}
           loadingText="A processar..."

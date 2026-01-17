@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { HealthCard } from "../components/HealthCard";
 
 export function LoginPage() {
   const [nip, setNip] = useState("");
@@ -51,7 +52,9 @@ export function LoginPage() {
       alignItems={{ sm: "center", md: "top" }}
       overflowY="auto"
       bg="#1A202C"
+      position="relative"
     >
+      <HealthCard />
       <form onSubmit={handleSubmit}>
         <Stack>
           <Heading mb={"25px"} textAlign="center" color="white">

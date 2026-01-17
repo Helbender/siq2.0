@@ -131,19 +131,36 @@ def create_token() -> tuple[Response | dict[str, str], int]:
 def get_current_user():
     """Get current authenticated user."""
     try:
-        nip = get_jwt_identity()
+        nip_identity = get_jwt_identity()
+        
+        # Handle both string and int identity values
+        if isinstance(nip_identity, str):
+            # If it's "admin", handle specially
+            if nip_identity == "admin":
+                return jsonify({"nip": "admin", "name": "ADMIN", "admin": True}), 200
+            nip = int(nip_identity)
+        else:
+            nip = int(nip_identity)
+        
+        print(f"[auth/me] Looking for user with NIP: {nip} (type: {type(nip)})")
+        
         with Session(engine) as session:
-            stmt = select(Tripulante).where(Tripulante.nip == int(nip))
+            stmt = select(Tripulante).where(Tripulante.nip == nip)
             tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
 
             if tripulante is None:
-                return jsonify({"error": "User not found"}), 404
+                print(f"[auth/me] User with NIP {nip} not found in database")
+                return jsonify({"error": f"User with NIP {nip} not found"}), 404
 
+            print(f"[auth/me] Found user: {tripulante.name} (NIP: {tripulante.nip})")
             return jsonify(tripulante.to_json()), 200
+    except ValueError as e:
+        print(f"[auth/me] ValueError: {e} - Identity: {nip_identity}")
+        return jsonify({"error": f"Invalid user identity: {nip_identity}"}), 400
     except Exception as e:
         import traceback
 
-        print(f"Error in GET /me: {e}")
+        print(f"[auth/me] Error: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to get user"}), 500
 
@@ -154,16 +171,19 @@ def refresh():
     """Refresh access token using refresh token."""
     try:
         nip = get_jwt_identity()
+        print(f"[auth/refresh] Refreshing token for NIP: {nip}")
         access_token, error = AuthService.refresh_access_token(nip)
 
         if error:
+            print(f"[auth/refresh] Error refreshing token: {error}")
             return jsonify({"error": error}), 404
 
+        print(f"[auth/refresh] Successfully refreshed token for NIP: {nip}")
         return jsonify({"access_token": access_token}), 200
     except Exception as e:
         import traceback
 
-        print(f"Refresh token error: {e}")
+        print(f"[auth/refresh] Exception during refresh: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to refresh token"}), 401
 

@@ -1,350 +1,223 @@
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import {
   Button,
-  useDisclosure,
-  Flex,
-  Field,
-  Input,
-  IconButton,
-  Text,
-  VStack,
-  HStack,
-  Switch,
-  Select,
   Dialog,
-  Portal,
-  Tooltip,
+  Field,
+  Flex,
+  HStack,
+  Input,
+  NativeSelect,
+  Switch,
+  VStack
 } from "@chakra-ui/react";
-import { HiX } from "react-icons/hi";
-import { FaEdit, FaPlus } from "react-icons/fa";
-import { useState, useContext } from "react";
-import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { UserContext } from "../contexts/UserContext";
-import { BiTrash } from "react-icons/bi";
-import api, { apiAuth } from "@/utils/api";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/utils/useToast";
+import { useState } from "react";
+import { useUserForm } from "../hooks/useUserForm";
 
-export function CreateUserModal({ edit, add, isDelete, user }) {
-  const navigate = useNavigate();
+export function CreateUserModal({
+  isOpen,
+  onClose,
+  editingUser,
+  onSubmit,
+}) {
+  const { user: currentUser } = useAuth();
+  const { formData, setFormData } = useUserForm(editingUser);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { token, removeToken, getUser } = useContext(AuthContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
-  const [inputs, setInputs] = useState(
-    user ?? {
-      rank: "",
-      nip: "",
-      name: "",
-      email: "",
-      position: "Default",
-      admin: false,
-      squadron: "502 - Elefantes",
-      tipo: "PILOTO",
-      status: "Presente",
-    },
-  );
-  const { users, setUsers } = useContext(UserContext);
-  const User = getUser();
-
-  //Updates inputs when filling the form
-  const handleInputsChange = async (event) => {
-    event.preventDefault();
-    const { value, name } = event.target;
-    setInputs(() => ({ ...inputs, [name]: value }));
-  };
-
-  //Submits the form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      console.log(inputs);
-      const res = await apiAuth.post("/users", inputs, {});
-      toast({ title: "User created successfully", status: "success" });
-
-      setUsers([...users, res.data]);
-      onClose();
-    } catch (error) {
-      toast({ title: "Error saving user", status: "error" });
-      console.error("Error saving user:", error);
-    }
-  };
-
-  //Edits the user
-  const handleEditUser = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await apiAuth.patch(`/users/${user.nip}`, inputs);
-      toast({ title: "User updated successfully", status: "success" });
-
-      console.log(res.data);
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => (u.nip === user.nip ? res.data : u)),
-      );
-
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Error editing user",
-        description: error.response.data.message,
-        status: "error",
-      });
-      console.error("Error editing user:", error);
-    }
-  };
-
-  //Deletes the user
-  const handleDeleteUser = async () => {
-    try {
-      const res = await api.delete(`/users/${user.nip}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      console.log(res);
-      if (res.data?.deleted_id) {
-        setUsers(users.filter((piloto) => piloto.nip != user.nip));
-        toast({
-          title: "Utilizador apagado com sucesso",
-          description: `Utilizador com o nip ${res.data.deleted_id} apagado`,
-          status: "info",
-        });
-        onClose();
-      }
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Error deleting user",
-        description: error.response.data.message,
-        status: "error",
-      });
-    }
-  };
+  // async function handleSubmit(e) {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+  //   try {
+  //     await onSubmit(editingUser?.nip ?? null, formData);
+  //     onClose();
+  //   } catch (error) {
+  //     // Error handling is done in the parent component
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // }
   return (
-    <>
-      {add ? (
-        <Button leftIcon={<FaPlus />} onClick={onOpen}>
-          Criar Utilizador
-        </Button>
-      ) : edit ? (
-        <IconButton
-          icon={<FaEdit />}
-          colorScheme="yellow"
-          onClick={onOpen}
-          aria-label="Edit User"
-        />
-      ) : (
-        <IconButton
-          icon={<BiTrash />}
-          colorScheme="red"
-          onClick={onOpen}
-          aria-label="Delete User"
-        />
-      )}
-
-      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              {add ? (
-                <Dialog.Header textAlign={"center"}>Novo Utilizador</Dialog.Header>
-              ) : edit ? (
-                <Dialog.Header>{`Editar ${user.rank} ${user.name}`}</Dialog.Header>
-              ) : (
-                <Dialog.Header>{`Apagar ${user.rank} ${user.name}`}</Dialog.Header>
-              )}
-              <Dialog.CloseTrigger asChild>
-                <IconButton variant="ghost" size="sm">
-                  <HiX />
-                </IconButton>
-              </Dialog.CloseTrigger>
-              {isDelete ? (
-                <Text textAlign={"center"}>Tem a certeza?</Text>
-              ) : (
-                <Dialog.Body>
-              <Flex flexDirection={"row"} gap={"4"}>
-                <Field.Root>
-                  <Field.Label>Posto</Field.Label>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={({ open }) => {
+        if (!open) onClose();
+      }}
+    >
+      <Dialog.Backdrop />
+      <Dialog.Positioner>
+        <Dialog.Content>
+          <Dialog.CloseTrigger />
+          <Dialog.Header textAlign={"center"}>
+            <Dialog.Title>{editingUser ? `Editar ${editingUser.rank} ${editingUser.name}` : "Novo Utilizador"}</Dialog.Title>
+          </Dialog.Header>
+          
+          <Dialog.Body>
+            <form onSubmit={(e) => { e.preventDefault(); }}>
+              <VStack spacing={4}>
+                <Flex flexDirection={"row"} gap={"4"} width="100%">
+                  <Field.Root flex="1">
+                    <Field.Label>Posto</Field.Label>
+                    <Input
+                      bg="bg.surface"
+                      value={formData.rank}
+                      placeholder="Posto"
+                      onChange={(e) =>
+                        setFormData({ ...formData, rank: e.target.value })
+                      }
+                    />
+                  </Field.Root>
+                  <Field.Root flex="1">
+                    <Field.Label>NIP</Field.Label>
+                    <Input
+                      bg="bg.surface"
+                      value={formData.nip}
+                      placeholder="NIP"
+                      onChange={(e) =>
+                        setFormData({ ...formData, nip: e.target.value })
+                      }
+                      readOnly={!!editingUser}
+                      disabled={!!editingUser}
+                    />
+                  </Field.Root>
+                  <Field.Root flex="1">
+                    <Field.Label>Função</Field.Label>
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        bg="bg.surface"
+                        value={formData.position}
+                        onChange={(e) =>
+                          setFormData({ ...formData, position: e.target.value })
+                        }
+                      >
+                        <option>Default</option>
+                        <option>PC</option>
+                        <option>P</option>
+                        <option>CP</option>
+                        <option>PA</option>
+                        <option>PI</option>
+                        <option>OCI</option>
+                        <option>OC</option>
+                        <option>OCA</option>
+                        <option>CTI</option>
+                        <option>CT</option>
+                        <option>CTA</option>
+                        <option>OPVI</option>
+                        <option>OPV</option>
+                        <option>OPVA</option>
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                  </Field.Root>
+                </Flex>
+                <Field.Root width="100%">
+                  <Field.Label>Nome</Field.Label>
                   <Input
-                    value={inputs?.rank ? inputs.rank : ""}
-                    name="rank"
-                    placeholder="Posto"
-                    onChange={handleInputsChange}
-                  ></Input>
-                </Field.Root>
-                <Field.Root>
-                  <Field.Label>NIP</Field.Label>
-                  <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                      <Input
-                        value={inputs?.nip}
-                        name="nip"
-                        placeholder="NIP"
-                        onChange={handleInputsChange}
-                        isReadOnly={edit || isDelete}
-                        isDisabled={edit || isDelete}
-                      ></Input>
-                    </Tooltip.Trigger>
-                    <Tooltip.Positioner>
-                      <Tooltip.Content>
-                        <Tooltip.Arrow>
-                          <Tooltip.ArrowTip />
-                        </Tooltip.Arrow>
-                        Introduza o NIP sem modúlo
-                      </Tooltip.Content>
-                    </Tooltip.Positioner>
-                  </Tooltip.Root>
-                </Field.Root>
-                <Field.Root>
-                  <Field.Label>Função</Field.Label>
-                  <Select
-                    value={inputs?.position ? inputs.position : "Default"}
-                    name="position"
-                    onChange={handleInputsChange}
-                  >
-                    <option>Default</option>
-                    <option>PC</option>
-                    <option>P</option>
-                    <option>CP</option>
-                    <option>PA</option>
-                    <option>PI</option>
-                    <option>OCI</option>
-                    <option>OC</option>
-                    <option>OCA</option>
-                    <option>CTI</option>
-                    <option>CT</option>
-                    <option>CTA</option>
-                    <option>OPVI</option>
-                    <option>OPV</option>
-                    <option>OPVA</option>
-                  </Select>
-                </Field.Root>
-              </Flex>
-              <VStack mt={5} spacing={4} align="stretch">
-                <Field.Root>
-                  <Field.Label flexGrow={"2"}>Nome</Field.Label>
-                  <Input
-                    value={inputs?.name ? inputs.name : ""}
-                    name="name"
-                    flexGrow={"2"}
+                    bg="bg.surface"
+                    value={formData.name}
                     placeholder="Primeiro e Último Nome"
-                    onChange={handleInputsChange}
-                  ></Input>
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
                 </Field.Root>
-                <Field.Root>
+                <Field.Root width="100%">
                   <Field.Label>Email</Field.Label>
-                  <Tooltip.Root>
-                    <Tooltip.Trigger asChild>
-                      <Input
-                        value={inputs?.email ? inputs.email : ""}
-                        name="email"
-                        type="email"
-                        placeholder="Email"
-                        onChange={handleInputsChange}
-                      ></Input>
-                    </Tooltip.Trigger>
-                    <Tooltip.Positioner>
-                      <Tooltip.Content>
-                        <Tooltip.Arrow>
-                          <Tooltip.ArrowTip />
-                        </Tooltip.Arrow>
-                        O email serve para trocar/recuperar a password
-                      </Tooltip.Content>
-                    </Tooltip.Positioner>
-                  </Tooltip.Root>
+                  <Input
+                    bg="bg.surface"
+                    value={formData.email}
+                    type="email"
+                    placeholder="Email"
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
                 </Field.Root>
-                <HStack>
-                  {User.admin ? (
+                <HStack width="100%">
+                  {currentUser?.admin ? (
                     <Field.Root align={"center"}>
                       <Field.Label textAlign={"center"}>Admin</Field.Label>
-                      <Switch
-                        name="admin"
-                        isChecked={inputs.admin}
-                        onChange={(e) =>
-                          setInputs((prev) => ({
-                            ...prev,
-                            admin: e.target.checked,
-                          }))
+                      <Switch.Root
+                        checked={formData.admin}
+                        onCheckedChange={(details) =>
+                          setFormData({
+                            ...formData,
+                            admin: details.checked,
+                          })
                         }
-                      />
+                      >
+                        <Switch.HiddenInput />
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        <Switch.Label />
+                      </Switch.Root>
                     </Field.Root>
                   ) : null}
                   <Field.Root hidden={true}>
                     <Field.Label>Esquadra</Field.Label>
                     <Input
-                      value={inputs.squadron}
-                      name="squadron"
+                      bg="bg.surface"
+                      value={formData.squadron}
                       type="text"
                       placeholder="Esquadra"
-                      onChange={handleInputsChange}
+                      onChange={(e) =>
+                        setFormData({ ...formData, squadron: e.target.value })
+                      }
                     />
                   </Field.Root>
                   <Field.Root>
                     <Field.Label>Grupo</Field.Label>
-                    <Select
-                      value={inputs?.tipo ? inputs.tipo : ""}
-                      name="tipo"
-                      onChange={handleInputsChange}
-                    >
-                      <option value="PILOTO">PILOTO</option>
-                      <option value="OPERADOR_CABINE">OPERADOR CABINE</option>
-                      <option value="CONTROLADOR_TATICO">
-                        CONTROLADOR TÁTICO
-                      </option>
-                      <option value="OPERADOR_VIGILANCIA">
-                        OPERADOR VIGILÂNCIA
-                      </option>
-                      <option value="OPERACOES">OPERAÇÕES</option>
-                    </Select>
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        bg="bg.surface"
+                        value={formData.tipo}
+                        onChange={(e) =>
+                          setFormData({ ...formData, tipo: e.target.value })
+                        }
+                      >
+                        <option value="PILOTO">PILOTO</option>
+                        <option value="OPERADOR_CABINE">OPERADOR CABINE</option>
+                        <option value="CONTROLADOR_TATICO">
+                          CONTROLADOR TÁTICO
+                        </option>
+                        <option value="OPERADOR_VIGILANCIA">
+                          OPERADOR VIGILÂNCIA
+                        </option>
+                        <option value="OPERACOES">OPERAÇÕES</option>
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
                   </Field.Root>
                   <Field.Root>
                     <Field.Label>Status</Field.Label>
-                    <Select
-                      value={inputs?.status ? inputs.status : "Presente"}
-                      name="status"
-                      onChange={handleInputsChange}
-                    >
-                      <option value="Presente">Presente</option>
-                      <option value="Fora">Fora</option>
-                    </Select>
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        bg="bg.surface"
+                        value={formData.status}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: e.target.value })
+                        }
+                      >
+                        <option value="Presente">Presente</option>
+                        <option value="Fora">Fora</option>
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
                   </Field.Root>
                 </HStack>
-              </VStack>
-              </Dialog.Body>
-            )}
-              <Dialog.Footer>
-                {isDelete ? (
-                  <Button
-                    colorScheme="red"
-                    mr={3}
-                    type="submit"
-                    onClick={handleDeleteUser}
-                  >
-                    Apagar
-                  </Button>
-                ) : (
-                  <Button
-                    colorScheme="green"
-                    mr={3}
-                    type="submit"
-                    onClick={edit ? handleEditUser : handleSubmit}
-                  >
-                    {edit ? "Guardar" : "Criar"}
-                  </Button>
-                )}
                 <Button
-                  colorScheme="blue"
-                  mr={3}
-                  onClick={() => {
-                    onClose();
-                  }}
+                  type="submit"
+                  width="full"
+                  variant="solid"
+                  colorPalette="success"
+                  isLoading={isSubmitting}
                 >
-                  Close
+                  {editingUser ? "Guardar" : "Criar"}
                 </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
-    </>
+              </VStack>
+            </form>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Positioner>
+    </Dialog.Root>
   );
 }

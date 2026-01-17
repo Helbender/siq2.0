@@ -23,7 +23,7 @@ export function QualificationGroupFilter({
       boxShadow="sm"
       minW="200px"
     >
-      <Text fontWeight="bold" mb={3} fontSize="sm" color="gray.600">
+      <Text fontWeight="bold" mb={3} fontSize="sm" color="text.secondary">
         {filter ? `Filtrar por ${filter}` : "Filtrar por Grupo"}
       </Text>
       <CheckboxGroup value={selectedGroups} onChange={onGroupChange}>

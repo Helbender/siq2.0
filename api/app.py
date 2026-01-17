@@ -86,15 +86,41 @@ def expired_token_callback(jwt_header, jwt_payload):
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
     import traceback
+    from flask import make_response
 
     auth_header = request.headers.get("Authorization", "NOT FOUND")
-    print(f"Invalid token error: {error}")
-    print(f"Error type: {type(error)}")
+    cookies = request.cookies
+    is_refresh_endpoint = request.path == "/api/auth/refresh"
+    
+    print(f"[JWT] Invalid token error: {error}")
+    print(f"[JWT] Error type: {type(error)}")
+    print(f"[JWT] Request path: {request.path}")
+    print(f"[JWT] Is refresh endpoint: {is_refresh_endpoint}")
+    
+    if is_refresh_endpoint:
+        print(f"[JWT] Refresh endpoint - cookies received: {list(cookies.keys())}")
+        print(f"[JWT] Refresh token cookie value: {cookies.get('refresh_token', 'NOT FOUND')[:50] if cookies.get('refresh_token') else 'NOT FOUND'}")
+    
     print(
-        f"Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}"
+        f"[JWT] Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}"
     )
     traceback.print_exc()
-    return jsonify({"error": "Invalid token", "details": str(error)}), 422
+    
+    response = make_response(jsonify({"error": "Invalid token", "details": str(error)}), 422)
+    
+    # If it's a refresh endpoint with invalid token, clear the cookie
+    if is_refresh_endpoint:
+        response.set_cookie(
+            "refresh_token",
+            "",
+            expires=0,
+            path="/api/auth",
+            httponly=True,
+            samesite="Lax",
+        )
+        print("[JWT] Cleared invalid refresh token cookie")
+    
+    return response
 
 
 @jwt.unauthorized_loader

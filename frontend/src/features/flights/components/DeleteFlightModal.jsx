@@ -66,7 +66,7 @@ export function DeleteFlightModal({ flight }) {
     <>
       <IconButton
         variant="ghost"
-        colorScheme="red"
+        colorPalette="red"
         size={"lg"}
         onClick={onOpen}
         icon={<BiTrash />}
@@ -85,13 +85,13 @@ export function DeleteFlightModal({ flight }) {
               <Dialog.Body>{"Deseja mesmo apagar o modelo 1M"}</Dialog.Body>
               <Dialog.Footer>
                 <Button
-                  colorScheme="red"
+                  colorPalette="red"
                   mr={3}
                   onClick={() => handleDeleteFlight(flight)}
                 >
                   Sim
                 </Button>
-                <Button colorScheme="blue" mr={3} onClick={onClose}>
+                <Button colorPalette="blue" mr={3} onClick={onClose}>
                   Não
                 </Button>
               </Dialog.Footer>

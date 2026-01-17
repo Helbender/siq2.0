@@ -80,7 +80,7 @@ export function RecoverPass() {
 
         <Button
           mt={5}
-          colorScheme="teal"
+          colorPalette="teal"
           onClick={sendEmail}
           width={["60%", "80%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button

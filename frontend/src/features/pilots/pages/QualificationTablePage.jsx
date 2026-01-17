@@ -371,8 +371,8 @@ export function QualificationTablePage({ tipo }) {
                             }
                             color={
                               daysLeft !== null && daysLeft < 10
-                                ? "black"
-                                : "inherit"
+                                ? "text.primary"
+                                : "text.primary"
                             }
                             borderRight="1px solid"
                             borderColor="border.muted"

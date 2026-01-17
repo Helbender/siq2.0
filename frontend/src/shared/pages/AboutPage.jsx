@@ -48,7 +48,7 @@ export function AboutPage() {
         </Text>
         <Button
           mt={5}
-          colorScheme="teal"
+          colorPalette="teal"
           onClick={goBack}
           width={["80%", "60%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button

@@ -179,7 +179,7 @@ export function RecoverProcess() {
 
         <Button
           mt={6}
-          colorScheme="teal"
+          colorPalette="teal"
           onClick={setnewpass}
           aria-label="Recover"
           width={["80%", "60%", "100%"]} // Adjust button width for small screens and larger screens

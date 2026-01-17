@@ -15,7 +15,7 @@ export function QualificationsPanel(props) {
         align={"center"}
         alignContent={"center"}
         fontSize={14}
-        color="black"
+        color="text.primary"
         py={1}
         h="100%"
         // w={"52px"}

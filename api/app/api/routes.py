@@ -2,6 +2,7 @@
 
 from flask import Blueprint
 
+from app.api.health import health_bp  # type: ignore
 from app.features.auth.routes import auth_bp  # type: ignore
 from app.features.dashboard.routes import dashboard_bp  # type: ignore
 from app.features.flights.routes import flights_bp  # type: ignore
@@ -11,8 +12,11 @@ from app.features.users.routes import users_bp  # type: ignore
 # Main Blueprint to register with application
 api = Blueprint("api", __name__)
 
+# Register health blueprint
+api.register_blueprint(health_bp)
+
 # Register auth blueprint
-api.register_blueprint(auth_bp, url_prefix="")
+api.register_blueprint(auth_bp, url_prefix="/auth")
 
 # Register users blueprint
 api.register_blueprint(users_bp, url_prefix="/users")

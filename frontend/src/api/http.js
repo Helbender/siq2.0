@@ -73,10 +73,17 @@ http.interceptors.response.use(
       return http(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
-      localStorage.removeItem("token");
+      
+      // Handle both 401 (unauthorized) and 422 (invalid token) as auth failures
+      const isAuthError = refreshError.response?.status === 401 || 
+                         refreshError.response?.status === 422;
+      
+      if (isAuthError) {
+        localStorage.removeItem("token");
 
-      // 🔴 HARD LOGOUT EVENT
-      window.dispatchEvent(new Event("auth:logout"));
+        // 🔴 HARD LOGOUT EVENT
+        window.dispatchEvent(new Event("auth:logout"));
+      }
 
       return Promise.reject(refreshError);
     } finally {

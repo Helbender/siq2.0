@@ -1,11 +1,11 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router";
 import App from "./App";
-import { Toaster } from "./components/ui/toaster";
 import { ColorModeProvider } from "./components/ui/color-mode";
-import { system } from "./theme";
+import { Toaster } from "./components/ui/toaster";
+import system from "./theme/index.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

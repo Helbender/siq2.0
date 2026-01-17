@@ -1,10 +1,10 @@
+import { setLoggingOut } from "@/api/http";
 import {
   fetchMe,
   loginRequest,
   registerRequest,
   updateUserRequest,
 } from "@/features/auth/services/api";
-import { setLoggingOut } from "@/api/http";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
@@ -63,11 +63,32 @@ export function AuthProvider({ children }) {
 
       // Fetch user data after login
       try {
+        console.log("[AuthContext] Fetching user data after login...");
         const user = await fetchMe();
+        console.log("[AuthContext] User data fetched successfully:", user);
         setUser(user);
       } catch (error) {
-        console.error("Error fetching user after login:", error);
-        // Continue even if fetchMe fails
+        console.error("[AuthContext] Error fetching user after login:", error);
+        // If fetchMe fails, it's likely a 404 - user doesn't exist
+        // This shouldn't happen if login succeeded, but handle it gracefully
+        const errorMessage =
+          error.response?.data?.error ||
+          error.message ||
+          "Failed to fetch user data";
+        if (error.response?.status === 404) {
+          // User not found - clear token and return error
+          console.error("[AuthContext] User not found (404), clearing token");
+          localStorage.removeItem("token");
+          return {
+            success: false,
+            error: `User not found: ${errorMessage}`,
+          };
+        }
+        // For other errors, log but don't block login
+        console.warn(
+          "[AuthContext] Non-critical error fetching user:",
+          errorMessage,
+        );
       }
 
       // Wait a tick to ensure state is updated
@@ -81,7 +102,10 @@ export function AuthProvider({ children }) {
         return { success: false, error: "Invalid NIP or password" };
       }
       const errorMessage =
-        e.response?.data?.message || e.response?.data?.error || e.message || "Login failed";
+        e.response?.data?.message ||
+        e.response?.data?.error ||
+        e.message ||
+        "Login failed";
       return { success: false, error: errorMessage };
     }
   };

@@ -16,7 +16,7 @@ export function Navbar() {
   const selected_style = {
     bg: "purple.600",
     borderRadius: 10,
-    color: "black",
+    color: "text.primary",
     fontWeight: "bold",
   };
 

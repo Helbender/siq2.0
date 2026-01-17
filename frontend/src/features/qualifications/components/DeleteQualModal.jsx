@@ -43,7 +43,7 @@ export function DeleteQualModal({ qual, setQualifications }) {
     <Fragment>
       <IconButton
         icon={<BiTrash />}
-        colorScheme="red"
+        colorPalette="red"
         onClick={onOpen}
         aria-label="Delete User"
       />
@@ -64,7 +64,7 @@ export function DeleteQualModal({ qual, setQualifications }) {
                 </Text>
               </Dialog.Body>
               <Dialog.Footer gap={2}>
-                <Button colorScheme="red" onClick={deleteQual}>
+                <Button colorPalette="red" onClick={deleteQual}>
                   Excluir
                 </Button>
                 <Button onClick={() => onClose()}>Cancelar</Button>
