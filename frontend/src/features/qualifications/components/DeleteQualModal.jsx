@@ -1,15 +1,15 @@
-import { React, Fragment } from "react";
-import {
-  Button,
-  useDisclosure,
-  IconButton,
-  Text,
-  Dialog,
-  Portal,
-} from "@chakra-ui/react";
-import { HiX } from "react-icons/hi";
-import { BiTrash } from "react-icons/bi";
 import { useToast } from "@/utils/useToast";
+import {
+    Button,
+    Dialog,
+    IconButton,
+    Portal,
+    Text,
+    useDisclosure,
+} from "@chakra-ui/react";
+import { Fragment, React } from "react";
+import { BiTrash } from "react-icons/bi";
+import { HiX } from "react-icons/hi";
 import { useDeleteQualification } from "../mutations/useDeleteQualification";
 
 export function DeleteQualModal({ qual }) {

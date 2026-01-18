@@ -1,23 +1,19 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-import json
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify, request
+from flasgger import Swagger  # type: ignore
+from flask import Flask, jsonify, request
 from flask_cors import CORS  # type: ignore
 from flask_jwt_extended import (
     JWTManager,
-    create_access_token,
-    get_jwt,
-    get_jwt_identity,
 )
-from flasgger import Swagger  # type: ignore
 
-from config import setup_database
-from app.api.routes import api
 from app.api.openapi import OPENAPI_CONFIG
+from app.api.routes import api
+from config import setup_database
 
 # logging.basicConfig(level=logging.DEBUG)  # noqa: ERA001
 # logger = logging.getLogger(__name__)  # noqa: ERA001
@@ -45,9 +41,7 @@ app.config["JWT_COOKIE_CSRF_PROTECT"] = False
 app.config["JWT_CSRF_IN_COOKIES"] = False
 app.config["JWT_CSRF_CHECK_FORM"] = False
 # Cookie settings
-app.config["JWT_COOKIE_SECURE"] = (
-    os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
-)
+app.config["JWT_COOKIE_SECURE"] = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
 app.config["JWT_COOKIE_HTTPONLY"] = True
 app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 jwt = JWTManager(app)
@@ -86,28 +80,29 @@ def expired_token_callback(jwt_header, jwt_payload):
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
     import traceback
+
     from flask import make_response
 
     auth_header = request.headers.get("Authorization", "NOT FOUND")
     cookies = request.cookies
     is_refresh_endpoint = request.path == "/api/auth/refresh"
-    
+
     print(f"[JWT] Invalid token error: {error}")
     print(f"[JWT] Error type: {type(error)}")
     print(f"[JWT] Request path: {request.path}")
     print(f"[JWT] Is refresh endpoint: {is_refresh_endpoint}")
-    
+
     if is_refresh_endpoint:
         print(f"[JWT] Refresh endpoint - cookies received: {list(cookies.keys())}")
-        print(f"[JWT] Refresh token cookie value: {cookies.get('refresh_token', 'NOT FOUND')[:50] if cookies.get('refresh_token') else 'NOT FOUND'}")
-    
-    print(
-        f"[JWT] Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}"
-    )
+        print(
+            f"[JWT] Refresh token cookie value: {cookies.get('refresh_token', 'NOT FOUND')[:50] if cookies.get('refresh_token') else 'NOT FOUND'}"
+        )
+
+    print(f"[JWT] Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}")
     traceback.print_exc()
-    
+
     response = make_response(jsonify({"error": "Invalid token", "details": str(error)}), 422)
-    
+
     # If it's a refresh endpoint with invalid token, clear the cookie
     if is_refresh_endpoint:
         response.set_cookie(
@@ -119,7 +114,7 @@ def invalid_token_callback(error):
             samesite="Lax",
         )
         print("[JWT] Cleared invalid refresh token cookie")
-    
+
     return response
 
 
@@ -130,9 +125,7 @@ def missing_token_callback(error):
         cookies = request.cookies
         print("[auth.refresh] Missing token")
         print(f"[auth.refresh] Cookies received: {list(cookies.keys())}")
-        print(
-            f"[auth.refresh] Cookie header: {request.headers.get('Cookie', 'NOT FOUND')}"
-        )
+        print(f"[auth.refresh] Cookie header: {request.headers.get('Cookie', 'NOT FOUND')}")
     return jsonify({"error": "Authorization token is missing"}), 401
 
 

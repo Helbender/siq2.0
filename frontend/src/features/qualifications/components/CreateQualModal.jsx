@@ -1,21 +1,21 @@
 import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
+import {
+    Button,
+    Dialog,
+    Field,
+    IconButton,
+    Input,
+    Portal,
+    Stack,
+    useDisclosure
+} from "@chakra-ui/react";
+import { useEffect, useRef, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { FaEdit } from "react-icons/fa";
+import { HiX } from "react-icons/hi";
 import { useCreateQualification } from "../mutations/useCreateQualification";
 import { useUpdateQualification } from "../mutations/useUpdateQualification";
-import {
-  Button,
-  Dialog,
-  Field,
-  IconButton,
-  Input,
-  Portal,
-  Stack,
-  useDisclosure
-} from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { HiX } from "react-icons/hi";
-import { FaEdit } from "react-icons/fa";
 
 export function CreateQualModal({ edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -47,6 +47,7 @@ export function CreateQualModal({ edit, qualification }) {
       grupo: "",
     },
   );
+  const isMountedRef = useRef(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,16 +78,22 @@ export function CreateQualModal({ edit, qualification }) {
   // Function to fetch qualification groups for a specific crew type
   const fetchQualificationGroups = async (crewType) => {
     if (!crewType) {
-      setGrupos([]);
+      if (isMountedRef.current) {
+        setGrupos([]);
+      }
       return;
     }
 
     try {
       const res = await http.get(`/v2/qualification-groups/${crewType}`);
-      setGrupos(res.data);
+      if (isMountedRef.current) {
+        setGrupos(res.data);
+      }
     } catch (error) {
       console.error("Error fetching qualification groups:", error);
-      setGrupos([]);
+      if (isMountedRef.current) {
+        setGrupos([]);
+      }
     }
   };
 
@@ -94,24 +101,33 @@ export function CreateQualModal({ edit, qualification }) {
   const fetchAllQualificationGroups = async () => {
     try {
       const res = await http.get("/v2/qualification-groups");
-      setAllGrupos(res.data);
+      if (isMountedRef.current) {
+        setAllGrupos(res.data);
+      }
     } catch (error) {
       console.error("Error fetching all qualification groups:", error);
     }
   };
 
-  useMemo(() => {
+  useEffect(() => {
+    isMountedRef.current = true;
     const fetchData = async () => {
       try {
         const res = await http.get("/v2/listas");
-        setTipos(res.data.tipos);
-        // Also fetch all qualification groups
-        await fetchAllQualificationGroups();
+        if (isMountedRef.current) {
+          setTipos(res.data.tipos);
+          // Also fetch all qualification groups
+          await fetchAllQualificationGroups();
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   // Watch for crew type changes and update qualification groups
