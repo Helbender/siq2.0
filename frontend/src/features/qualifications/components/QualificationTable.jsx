@@ -2,7 +2,7 @@ import { HStack, Table } from "@chakra-ui/react";
 import { CreateQualModal } from "./CreateQualModal";
 import { DeleteQualModal } from "./DeleteQualModal";
 
-export function QualificationTable({ qualifications, setQualifications }) {
+export function QualificationTable({ qualifications }) {
   return (
     <Table.Root mt={4} overflowX="auto" striped variant="simple">
       <Table.Header>
@@ -25,15 +25,8 @@ export function QualificationTable({ qualifications, setQualifications }) {
             <Table.Cell>{qual.grupo}</Table.Cell>
             <Table.Cell>
               <HStack spacing={2} align="center">
-                <CreateQualModal
-                  qualification={qual}
-                  setQualifications={setQualifications}
-                  edit={true}
-                />
-                <DeleteQualModal
-                  qual={qual}
-                  setQualifications={setQualifications}
-                />
+                <CreateQualModal qualification={qual} edit={true} />
+                <DeleteQualModal qual={qual} />
               </HStack>
             </Table.Cell>
           </Table.Row>

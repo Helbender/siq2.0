@@ -1,4 +1,3 @@
-import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
 import {
   Button,
@@ -8,18 +7,19 @@ import {
   Input,
   Spacer,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 import { BiRefresh } from "react-icons/bi";
 
 import { CreateQualModal } from "../components/CreateQualModal";
 import { QualificationTable } from "../components/QualificationTable";
 import { SegmentFilter } from "../components/SegmentFilter";
 import { useQualificationFilters } from "../hooks/useQualificationFilters";
+import { useReprocessFlights } from "../mutations/useReprocessFlights";
+import { useQualificationsQuery } from "../queries/useQualificationsQuery";
 
 export function QualificationManagementPage() {
-  const [qualifications, setQualifications] = useState([]);
-  const [isReprocessing, setIsReprocessing] = useState(false);
   const toast = useToast();
+  const { data: qualifications = [], isLoading } = useQualificationsQuery();
+  const reprocessFlights = useReprocessFlights();
 
   const {
     search,
@@ -33,12 +33,7 @@ export function QualificationManagementPage() {
     filtered,
   } = useQualificationFilters(qualifications);
 
-  useEffect(() => {
-    http.get("/v2/qualificacoes").then(res => setQualifications(res.data));
-  }, []);
-
   const handleReprocessAllFlights = async () => {
-    setIsReprocessing(true);
     toast({
       title: "A reprocessar voos",
       description: "Por favor aguarde...",
@@ -48,9 +43,9 @@ export function QualificationManagementPage() {
     });
 
     try {
-      const res = await http.post("/flights/reprocess-all-qualifications");
+      const res = await reprocessFlights.mutateAsync();
       toast.closeAll();
-      toast({ title: "Sucesso!", description: res.data.message, status: "success" });
+      toast({ title: "Sucesso!", description: res.message, status: "success" });
     } catch (error) {
       toast.closeAll();
       toast({
@@ -58,22 +53,20 @@ export function QualificationManagementPage() {
         description: error.response?.data?.message || "Erro ao reprocessar",
         status: "error",
       });
-    } finally {
-      setIsReprocessing(false);
     }
   };
 
   return (
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10}>
-        <CreateQualModal setQualifications={setQualifications} />
+        <CreateQualModal />
         <Spacer />
 
         <Button
           leftIcon={<BiRefresh />}
           colorPalette="blue"
           onClick={handleReprocessAllFlights}
-          isLoading={isReprocessing}
+          isLoading={reprocessFlights.isPending}
           loadingText="A processar..."
         >
           Reprocessar Todas
@@ -105,10 +98,7 @@ export function QualificationManagementPage() {
         />
       </Flex>
 
-      <QualificationTable
-        qualifications={filtered}
-        setQualifications={setQualifications}
-      />
+      <QualificationTable qualifications={filtered} />
     </Container>
   );
 }

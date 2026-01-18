@@ -1,5 +1,7 @@
 import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
+import { useCreateQualification } from "../mutations/useCreateQualification";
+import { useUpdateQualification } from "../mutations/useUpdateQualification";
 import {
   Button,
   Dialog,
@@ -15,8 +17,10 @@ import { FormProvider, useForm } from "react-hook-form";
 import { HiX } from "react-icons/hi";
 import { FaEdit } from "react-icons/fa";
 
-export function CreateQualModal({ setQualifications, edit, qualification }) {
+export function CreateQualModal({ edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const createQualification = useCreateQualification();
+  const updateQualification = useUpdateQualification();
 
   // Reset form and groups when modal opens
   const handleModalOpen = () => {
@@ -46,45 +50,26 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let res;
     try {
-      console.log(qualificacao.getValues());
-      {
-        edit
-          ? (res = await http.patch(
-              `/v2/qualificacoes/${qualification.id}`,
-              qualificacao.getValues(),
-            ))
-          : (res = await http.post(
-              "/v2/qualificacoes",
-              qualificacao.getValues(),
-            ));
-      }
+      const formData = qualificacao.getValues();
       if (edit) {
-        // Update the qualification in the list
-        setQualifications((prev) =>
-          prev.map((q) =>
-            q.id === qualification.id
-              ? { ...q, ...qualificacao.getValues(), id: qualification.id }
-              : q,
-          ),
-        );
+        await updateQualification.mutateAsync({
+          qualificationId: qualification.id,
+          qualificationData: formData,
+        });
         toast({
           title: "Qualificação atualizada com sucesso",
           status: "success",
         });
       } else {
-        // Add the new qualification to the list
-        setQualifications((prev) => [
-          ...prev,
-          { ...qualificacao.getValues(), id: res.data.id },
-        ]);
+        await createQualification.mutateAsync(formData);
         toast({ title: "Qualificação criada com sucesso", status: "success" });
       }
-
       onClose();
     } catch (error) {
-      toast({ title: "Erro a salvar a Qualificação", status: "error" });
+      const errorMessage =
+        error.response?.data?.message || "Erro a salvar a Qualificação";
+      toast({ title: errorMessage, status: "error" });
       console.error("Erro a salvar a Qualificação:", error);
     }
   };

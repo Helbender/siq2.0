@@ -9,16 +9,17 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { BiTrash } from "react-icons/bi";
-import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
+import { useDeleteQualification } from "../mutations/useDeleteQualification";
 
-export function DeleteQualModal({ qual, setQualifications }) {
+export function DeleteQualModal({ qual }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const deleteQualification = useDeleteQualification();
 
   const deleteQual = async () => {
     try {
-      await http.delete(`/v2/qualificacoes/${qual.id}`);
+      await deleteQualification.mutateAsync(qual.id);
       toast({
         title: "Sucesso!",
         description: "Qualificação excluída com sucesso.",
@@ -26,13 +27,14 @@ export function DeleteQualModal({ qual, setQualifications }) {
         duration: 3000,
         isClosable: true,
       });
-      setQualifications((prev) => prev.filter((item) => item.id !== qual.id));
       onClose();
     } catch (error) {
-      console.log(error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Ocorreu um erro ao excluir a qualificação.";
       toast({
         title: "Erro!",
-        description: "Ocorreu um erro ao excluir a qualificação.",
+        description: errorMessage,
         status: "error",
         duration: 3000,
         isClosable: true,
