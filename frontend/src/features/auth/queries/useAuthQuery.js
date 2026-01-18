@@ -16,8 +16,12 @@ export function useAuthQuery() {
     enabled: !!localStorage.getItem("token"),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
-      // Don't retry on 401/404 errors
-      if (error?.response?.status === 401 || error?.response?.status === 404) {
+      // Don't retry on 401/404/422 errors (auth failures)
+      if (
+        error?.response?.status === 401 ||
+        error?.response?.status === 404 ||
+        error?.response?.status === 422
+      ) {
         return false;
       }
       return failureCount < 1;

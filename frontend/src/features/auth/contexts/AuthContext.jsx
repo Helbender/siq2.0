@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
       const status = error?.response?.status;
       // Only clear token if it's an actual auth error, not if we're logging out
       if (
-        (status === 401 || status === 404) &&
+        (status === 401 || status === 404 || status === 422) &&
         localStorage.getItem("token") &&
         !localStorage.getItem("loggingOut")
       ) {

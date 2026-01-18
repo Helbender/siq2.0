@@ -41,6 +41,12 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Don't try to refresh if there's no access token (user not logged in)
+    const hasToken = localStorage.getItem("token");
+    if (!hasToken) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
