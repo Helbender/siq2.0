@@ -3,9 +3,9 @@ import { AuthenticatedLayout } from "@/features/shared/layout/AuthenticatedLayou
 import { Navigate, Route } from "react-router";
 
 // Test pages
+import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { TestDashboardPage } from "@/features/test/pages/TestDashboardPage";
 import { TestFlightsPage } from "@/features/test/pages/TestFlightsPage";
-import { TestManageQualificationsPage } from "@/features/test/pages/TestManageQualificationsPage";
 import { TestQualificationsPage } from "@/features/test/pages/TestQualificationsPage";
 import { TestQualificationsTablePage } from "@/features/test/pages/TestQualificationsTablePage";
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
@@ -28,7 +28,7 @@ export const ProtectedRoutes = (
     />
     <Route
       path="/manage-qualifications"
-      element={<TestManageQualificationsPage />}
+      element={<QualificationManagementPage />}
     />
     <Route path="/users" element={<UserManagementPage />} />
   </Route>

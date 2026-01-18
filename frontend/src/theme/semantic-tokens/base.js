@@ -3,7 +3,7 @@ import { defineSemanticTokens } from "@chakra-ui/react";
 export const baseSemanticTokens = defineSemanticTokens({
   colors: {
     bg: {
-      canvas: { value: "{colors.gray.900}" },
+      canvas: { value: "{#1A202C}" },
       surface: { value: "{colors.gray.800}" },
       muted: { value: "{colors.gray.700}" },
     },

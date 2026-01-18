@@ -1,21 +1,19 @@
+import { http } from "@/api/http";
+import { useToast } from "@/utils/useToast";
 import {
   Button,
-  useDisclosure,
-  Flex,
-  Field,
-  Input,
-  Stack,
-  IconButton,
-  Select,
   Dialog,
+  Field,
+  IconButton,
+  Input,
   Portal,
+  Stack,
+  useDisclosure
 } from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { HiX } from "react-icons/hi";
-import { useState, useContext, useEffect, useMemo } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { useToast } from "@/utils/useToast";
 import { FaEdit } from "react-icons/fa";
-import { http } from "@/api/http";
 
 export function CreateQualModal({ setQualifications, edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -161,24 +159,28 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
   }, [edit, qualification]);
   return (
     <>
-      {edit ? (
+      {edit && (
         <IconButton
-          icon={<FaEdit />}
           colorPalette="yellow"
-          onClick={onOpen}
-          aria-label="Edit User"
-        />
-      ) : (
-        <Button onClick={handleModalOpen} colorPalette="green">
-          Nova Qualificação
-        </Button>
+          onClick={handleModalOpen}
+          aria-label="Edit Qualification"
+        >
+          <FaEdit />
+        </IconButton>
       )}
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="xl">
+        {!edit && (
+          <Dialog.Trigger asChild>
+            <Button onClick={handleModalOpen} colorPalette="green">Nova Qualificação</Button>
+          </Dialog.Trigger>
+        )}
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header textAlign={"center"}>Adicionar Qualificação</Dialog.Header>
+              <Dialog.Header textAlign={"center"}>
+                {edit ? "Editar Qualificação" : "Adicionar Qualificação"}
+              </Dialog.Header>
               <Dialog.CloseTrigger asChild>
                 <IconButton variant="ghost" size="sm">
                   <HiX />
@@ -202,7 +204,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
                         {...qualificacao.register("validade")}
                       />
                     </Field.Root>
-                    <Field.Root>
+                    {/* <Field.Root>
                       <Field.Label>Tipo de Tripulante</Field.Label>
                       <Select
                         placeholder="Selecione um tipo"
@@ -211,8 +213,8 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
                         {tipos &&
                           tipos.map((tipo) => <option key={tipo}>{tipo}</option>)}
                       </Select>
-                    </Field.Root>
-                    <Field.Root>
+                    </Field.Root> */}
+                    {/* <Field.Root>
                       <Field.Label>Grupo de Qualificação</Field.Label>
                       <Select
                         placeholder={
@@ -235,7 +237,7 @@ export function CreateQualModal({ setQualifications, edit, qualification }) {
                             </option>
                           ))}
                       </Select>
-                    </Field.Root>
+                    </Field.Root> */}
                   </Stack>
                 </FormProvider>
               </Dialog.Body>

@@ -42,11 +42,12 @@ export function DeleteQualModal({ qual, setQualifications }) {
   return (
     <Fragment>
       <IconButton
-        icon={<BiTrash />}
         colorPalette="red"
         onClick={onOpen}
-        aria-label="Delete User"
-      />
+        aria-label="Delete Qualification"
+      >
+        <BiTrash />
+      </IconButton>
       <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
         <Portal>
           <Dialog.Backdrop />
