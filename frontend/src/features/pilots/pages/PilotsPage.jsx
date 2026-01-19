@@ -1,4 +1,3 @@
-import { useToast } from "@/utils/useToast";
 import { Box, Grid, SegmentGroup, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { PilotCard } from "../components/PilotCard";
@@ -15,9 +14,8 @@ const TIPO_OPTIONS = [
 export function PilotsPage({ tipo: initialTipo }) {
   const [selectedTipo, setSelectedTipo] = useState(initialTipo ?? "PILOTO");
   const [selectedFuncao, setSelectedFuncao] = useState(null);
-  const toast = useToast();
 
-  const { pilotos } = usePilots(selectedTipo, toast);
+  const { pilotos } = usePilots(selectedTipo);
 
   const availableFuncoes = useMemo(
     () =>

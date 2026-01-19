@@ -1,34 +1,22 @@
-import { useEffect, useState } from "react";
-import { fetchPilotsByTipo } from "../services/pilots.api";
+import { useQuery } from "@tanstack/react-query";
+import { pilotsService } from "../services/pilots.service";
+import { useToast } from "@/utils/useToast";
 
-export function usePilots(tipo, toast) {
-  const [pilotos, setPilotos] = useState([]);
-  const [loading, setLoading] = useState(false);
+export function usePilots(tipo) {
+  const toast = useToast();
 
-  useEffect(() => {
-    if (!tipo) return;
-
-    let cancelled = false;
-    setLoading(true);
-
-    fetchPilotsByTipo(tipo)
-      .then(data => {
-        if (!cancelled) setPilotos(data);
-      })
-      .catch(() => {
-        toast({
-          title: "Erro ao carregar tripulantes",
-          status: "error",
-        });
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+  const { data: pilotos = [], isLoading: loading, error } = useQuery({
+    queryKey: ["pilots", "by-tipo", tipo],
+    queryFn: () => pilotsService.getByTipo(tipo),
+    enabled: !!tipo,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    onError: () => {
+      toast({
+        title: "Erro ao carregar tripulantes",
+        status: "error",
       });
+    },
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [tipo]);
-
-  return { pilotos, loading };
+  return { pilotos, loading, error };
 }

@@ -1,29 +1,12 @@
-import { useState, useEffect } from "react";
-import { http } from "@/api/http";
+import { useQuery } from "@tanstack/react-query";
+import { dashboardService } from "../services/dashboard.service";
 
 export function useAvailableYears() {
-  const [availableYears, setAvailableYears] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchAvailableYears = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await http.get("/dashboard/available-years");
-        const years = response.data.years;
-        setAvailableYears(years);
-      } catch (err) {
-        console.error("Error fetching available years:", err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAvailableYears();
-  }, []);
+  const { data: availableYears = [], isLoading: loading, error } = useQuery({
+    queryKey: ["dashboard", "available-years"],
+    queryFn: dashboardService.getAvailableYears,
+    staleTime: 1000 * 60 * 60, // 1 hour (years don't change often)
+  });
 
   return { availableYears, loading, error };
 }
