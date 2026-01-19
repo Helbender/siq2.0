@@ -1,22 +1,22 @@
-import {
-  Stack,
-  Card,
-  Flex,
-  CardHeader,
-  Text,
-  Heading,
-  Separator,
-  CardBody,
-  Spacer,
-  Table,
-  useBreakpointValue,
-  Box,
-} from "@chakra-ui/react";
 import { StyledText } from "@/features/shared/components/StyledText";
-import { DeleteFlightModal } from "./DeleteFlightModal";
-import { CreateFlightModal } from "./CreateFlightModal";
 import { formatDate } from "@/utils/timeCalc";
+import {
+    Box,
+    Card,
+    CardBody,
+    CardHeader,
+    Flex,
+    Heading,
+    Separator,
+    Spacer,
+    Stack,
+    Table,
+    Text,
+    useBreakpointValue,
+} from "@chakra-ui/react";
 import { InfoMed } from "./InfoMed";
+import { CreateFlightModal } from "./modals/CreateFlightModal";
+import { DeleteFlightModal } from "./modals/DeleteFlightModal";
 
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });

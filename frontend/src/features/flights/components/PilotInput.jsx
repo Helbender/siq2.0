@@ -1,15 +1,14 @@
+import { http } from "@/api/http";
 import {
+  Field,
   GridItem,
+  IconButton,
   Input,
   Select,
-  IconButton,
-  Field,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { Fragment, useEffect, useMemo } from "react";
-import { FaMinus } from "react-icons/fa";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { http } from "@/api/http";
+import { FaMinus } from "react-icons/fa";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
