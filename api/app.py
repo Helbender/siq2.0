@@ -139,7 +139,17 @@ def invalid_token_callback(error):
     print(f"[JWT] Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}")
     traceback.print_exc()
 
-    response = make_response(jsonify({"error": "Invalid token", "details": str(error)}), 422)
+    # Return 401 (Unauthorized) instead of 422 (Unprocessable Entity) for authentication failures
+    # 422 should be reserved for validation errors, not auth failures
+    status_code = 401
+    error_message = "Invalid or expired token"
+    
+    # Provide more specific error message for signature verification failures
+    if "Signature verification failed" in str(error):
+        error_message = "Token signature verification failed. Please log in again."
+        print("[JWT] Token signature verification failed - likely JWT_SECRET_KEY mismatch")
+    
+    response = make_response(jsonify({"error": error_message, "details": str(error)}), status_code)
 
     # If it's a refresh endpoint with invalid token, clear the cookie
     if is_refresh_endpoint:

@@ -1,6 +1,7 @@
-import { setLoggingOut } from "@/api/http";
+import { http, setLoggingOut } from "@/api/http";
+import { isTokenExpiringSoon } from "@/utils/jwt";
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { useLogin } from "../mutations/useLogin";
 import { useRegister } from "../mutations/useRegister";
 import { useUpdateAuthUser } from "../mutations/useUpdateAuthUser";
@@ -49,6 +50,56 @@ export function AuthProvider({ children }) {
       window.removeEventListener("auth:logout", handleLogout);
     };
   }, [queryClient]);
+
+  // Auto-refresh token before expiration
+  const refreshIntervalRef = useRef(null);
+
+  useEffect(() => {
+    const checkAndRefreshToken = async () => {
+      const token = localStorage.getItem("token");
+      
+      // Don't refresh if logging out or no token
+      if (!token || localStorage.getItem("loggingOut")) {
+        return;
+      }
+
+      // Check if token is expiring soon (within 2 minutes)
+      if (isTokenExpiringSoon(token, 120)) {
+        try {
+          console.log("[Auto-refresh] Token expiring soon, refreshing...");
+          // Use refresh token cookie (httpOnly) to get a new JWT access token
+          // The http interceptor ensures no Authorization header is sent for /auth/refresh
+          // The backend reads the refresh_token cookie and validates it
+          const res = await http.post("/auth/refresh");
+          const newToken = res.data.access_token;
+          
+          if (newToken) {
+            localStorage.setItem("token", newToken);
+            console.log("[Auto-refresh] Token refreshed successfully");
+          }
+        } catch (error) {
+          console.error("[Auto-refresh] Failed to refresh token:", error);
+          // If refresh fails, the http interceptor will handle logout
+          // Don't clear token here as the interceptor will do it
+        }
+      }
+    };
+
+    // Check token expiration every 60 seconds
+    refreshIntervalRef.current = setInterval(checkAndRefreshToken, 60000);
+
+    // Also check immediately when component mounts or user changes
+    if (user) {
+      checkAndRefreshToken();
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
+      }
+    };
+  }, [user]);
 
   const login = async (nip, password) => {
     try {
