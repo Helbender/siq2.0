@@ -23,9 +23,9 @@ export function Navbar() {
       direction="column"
       w="230px"
       h="100%"
-      bg="gray.600"
-      borderRight="1px solid"
-      borderColor="gray.700"
+      bg="gray.700"
+      // borderRight="1px solid"
+      // borderColor="gray.00"
       flexShrink={0}
     >
       {/* <VStack align="stretch" spacing={0} p={2}> */}
@@ -41,7 +41,7 @@ export function Navbar() {
             </Text>
           </Box>
         )}
-        <Separator borderWidth="1px" borderColor="gray.700" mb={2} />
+        <Separator borderWidth="1px" borderColor="teal.400" mb={2} mx={2}/>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           
@@ -54,7 +54,7 @@ export function Navbar() {
                   bg={isActive ? "teal.600" : "transparent"}
                   color={isActive ? "white" : "teal.500"}
                   _hover={{
-                    bg: isActive ? "teal.700" : "gray.700",
+                    bg: isActive ? "teal.700" : "gray.800",
                     color: "white",
                   }}
                   cursor="pointer"
@@ -72,8 +72,6 @@ export function Navbar() {
         })}
         
         <Spacer />
-        <Separator borderWidth="1px" borderColor="gray.700" mt={2} />
-        
         <NavLink to="/about">
           {({ isActive }) => (
             <Box
@@ -96,9 +94,12 @@ export function Navbar() {
             </Box>
           )}
         </NavLink>
+        <Separator borderWidth="1px" borderColor="teal.400" mt={2} mx={2}/>
+        
         
         <ChakraLink
           onClick={handleLogout}
+          m={1}
           p={2}
           borderRadius="md"
           bg="transparent"

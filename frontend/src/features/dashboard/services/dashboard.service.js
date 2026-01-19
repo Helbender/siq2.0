@@ -10,4 +10,9 @@ export const dashboardService = {
     const response = await http.get("/dashboard/available-years");
     return response.data.years;
   },
+
+  getExpiringQualifications: async () => {
+    const response = await http.get("/dashboard/expiring-qualifications");
+    return response.data.expiring_qualifications || [];
+  },
 };

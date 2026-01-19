@@ -86,7 +86,7 @@ export function FlightCard({ flight }) {
 
         <Separator my="5" />
         <Box overflowY={"auto"} height={"300px"}>
-          <Table.Root size={"sm"}>
+          <Table.Root size={"sm"} variant="simple">
             <Table.Header>
               <Table.Row>
                 {[

@@ -9,8 +9,6 @@ from datetime import timedelta
 from flask import Flask, jsonify, make_response, request
 from flask_jwt_extended import JWTManager
 
-from app.core.config import engine
-
 
 def setup_jwt(app: Flask) -> JWTManager:
     """Configure JWT for the Flask application.
@@ -23,11 +21,19 @@ def setup_jwt(app: Flask) -> JWTManager:
     """
     JWT_KEY: str = os.environ.get("JWT_KEY", "")
 
-    # Validate JWT_KEY is set
+    # Validate JWT_KEY is set and secure
     if not JWT_KEY:
         print("WARNING: JWT_KEY environment variable is not set or empty!")
         print("This will cause token signature verification to fail.")
         print("Please set JWT_KEY in your .env file.")
+        print("Run 'python scripts/generate_jwt_key.py' to generate a secure key.")
+    elif len(JWT_KEY) < 32:
+        print(f"WARNING: JWT_KEY is too short (length: {len(JWT_KEY)})!")
+        print("JWT keys should be at least 32 characters for security.")
+        print("If you changed JWT_KEY, existing tokens will be invalid.")
+        print("Users will need to log in again to get new tokens.")
+        print("Run 'python scripts/generate_jwt_key.py' to generate a secure key.")
+        print(f"JWT_KEY loaded (length: {len(JWT_KEY)}) - but it's insecure!")
     else:
         print(f"JWT_KEY loaded successfully (length: {len(JWT_KEY)})")
 
