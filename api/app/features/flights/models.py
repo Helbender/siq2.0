@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.basemodels import Base  # type: ignore
+from app.shared.models import Base  # type: ignore
 
 if TYPE_CHECKING:
     from app.features.users.models import Tripulante  # type: ignore

@@ -2,7 +2,6 @@
 
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.features.auth.schemas import (
@@ -12,7 +11,6 @@ from app.features.auth.schemas import (
     validate_request,
 )
 from app.features.auth.service import AuthService
-from app.features.users.models import Tripulante  # type: ignore
 from config import engine  # type: ignore
 
 auth_bp = Blueprint("auth", __name__)
@@ -133,30 +131,14 @@ def get_current_user():
     try:
         nip_identity = get_jwt_identity()
         
-        # Handle both string and int identity values
-        if isinstance(nip_identity, str):
-            # If it's "admin", handle specially
-            if nip_identity == "admin":
-                return jsonify({"nip": "admin", "name": "ADMIN", "admin": True}), 200
-            nip = int(nip_identity)
-        else:
-            nip = int(nip_identity)
-        
-        print(f"[auth/me] Looking for user with NIP: {nip} (type: {type(nip)})")
-        
         with Session(engine) as session:
-            stmt = select(Tripulante).where(Tripulante.nip == nip)
-            tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+            result = auth_service.get_current_user(nip_identity, session)
 
-            if tripulante is None:
-                print(f"[auth/me] User with NIP {nip} not found in database")
-                return jsonify({"error": f"User with NIP {nip} not found"}), 404
+            if "error" in result:
+                status_code = 404 if "not found" in result["error"] else 400
+                return jsonify(result), status_code
 
-            print(f"[auth/me] Found user: {tripulante.name} (NIP: {tripulante.nip})")
-            return jsonify(tripulante.to_json()), 200
-    except ValueError as e:
-        print(f"[auth/me] ValueError: {e} - Identity: {nip_identity}")
-        return jsonify({"error": f"Invalid user identity: {nip_identity}"}), 400
+            return jsonify(result), 200
     except Exception as e:
         import traceback
 

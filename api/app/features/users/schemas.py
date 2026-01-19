@@ -2,7 +2,7 @@
 
 from marshmallow import Schema, ValidationError, fields, validate, validates_schema
 
-from models.enums import StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 
 
 class UserResponseSchema(Schema):

@@ -2,7 +2,7 @@
 
 from marshmallow import Schema, ValidationError, fields, validate
 
-from models.enums import GrupoQualificacoes, TipoTripulante  # type: ignore
+from app.shared.enums import GrupoQualificacoes, TipoTripulante  # type: ignore
 
 
 class QualificationResponseSchema(Schema):

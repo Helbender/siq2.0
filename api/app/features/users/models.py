@@ -6,8 +6,8 @@ from sqlalchemy import Date, ForeignKey, String, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.basemodels import Base  # type: ignore
-from models.enums import StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.models import Base  # type: ignore
+from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 
 
 class StatusTripulanteType(TypeDecorator):

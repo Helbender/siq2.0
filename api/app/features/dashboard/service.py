@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
 from app.utils.time_utils import parse_time_to_minutes
-from models.enums import StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 
 

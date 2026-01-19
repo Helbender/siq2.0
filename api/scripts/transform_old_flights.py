@@ -33,7 +33,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
 from config import engine
-from models.enums import TipoTripulante
+from app.shared.enums import TipoTripulante
 from app.features.qualifications.models import Qualificacao
 from sqlalchemy.orm import Session
 

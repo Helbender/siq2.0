@@ -1,84 +1,118 @@
-You are working on a professional React application using:
+You are working on a production-grade fullstack application with:
+
+Frontend:
 - React + Vite
 - React Router v7 (Data Router)
 - Chakra UI v3
-- Feature-based architecture
+- TanStack React Query
 
-You MUST follow the architectural rules below at all times.
+Backend:
+- Python + Flask
+- SQLAlchemy
+- JWT authentication
+- Role-Based Access Control (RBAC)
 
-=====================================
-GLOBAL ARCHITECTURE PRINCIPLES
-=====================================
+You MUST follow the architectural rules below STRICTLY.
+
+=====================================================
+GLOBAL ARCHITECTURAL PRINCIPLES
+=====================================================
 
 1. Feature-first architecture
-- Business logic MUST live inside src/features/<feature-name>/
-- Features represent real business domains (users, flights, qualifications, etc.)
-- Features MUST NOT contain app-wide layout or routing orchestration logic
+- Business logic lives in FEATURES
+- Infrastructure and orchestration live OUTSIDE features
+- No "shared god folders"
 
-2. Clear separation of responsibilities
-- App structure/layout → src/shell
-- Reusable UI & hooks → src/common
-- Routing orchestration → src/routes
-- Business logic → src/features
+2. Clear responsibility boundaries
+Each folder has ONE job.
+Never mix responsibilities.
 
-Do NOT mix these responsibilities.
+3. Frontend and backend MUST mirror concepts
+- Feature names MUST match
+- Permissions MUST align
+- Routes and policies MUST align
 
-=====================================
+=====================================================
+FRONTEND ARCHITECTURE
+=====================================================
+
+-----------------------------------------------------
 SHELL (APP CHROME)
-=====================================
+-----------------------------------------------------
 
-The `src/shell/` folder is responsible ONLY for application structure.
+Location:
+src/shell/
 
-Allowed inside `src/shell/`:
-- Layout components (AppLayout, AuthenticatedLayout)
-- Structural UI (Header, Footer, Navbar)
-- No business logic
-- No feature-specific code
+Purpose:
+- Application structure only
+- Visual frame of the app
+
+Allowed:
+- Layout components
+- Header / Footer / Navbar
+- <Outlet /> rendering
+
+Forbidden:
+❌ Business logic
+❌ API calls
+❌ React Query
+❌ Permissions logic
+❌ Feature imports
 
 Structure:
 src/shell/
   layout/
-    AppLayout.jsx
-    AuthenticatedLayout.jsx
+    AppLayout.tsx
+    AuthenticatedLayout.tsx
   components/
-    Header.jsx
-    Footer.jsx
-    NavbarLeft.jsx
+    Header.tsx
+    Footer.tsx
+    NavbarLeft.tsx
 
 Rules:
-- Layouts MAY render <Outlet />
+- Layouts MAY render Outlet
 - Layouts MUST NOT fetch data
-- Layouts MUST NOT contain permissions or role logic
+- Layouts MUST NOT check roles or permissions
 
-=====================================
-COMMON (REUSABLE LOGIC)
-=====================================
+-----------------------------------------------------
+COMMON (REUSABLE, APP-AGNOSTIC)
+-----------------------------------------------------
 
-The `src/common/` folder contains reusable, app-agnostic logic.
+Location:
+src/common/
 
-Allowed inside `src/common/`:
-- Generic UI components
-- Reusable hooks
-- No domain-specific logic
-- No routing logic
+Purpose:
+- Reusable UI and hooks
+- No domain knowledge
+
+Allowed:
+- Generic components
+- Generic hooks
+- Styling helpers
+
+Forbidden:
+❌ Feature-specific logic
+❌ Routing
+❌ API endpoints
 
 Structure:
 src/common/
   components/
-    StandardText.jsx
-    StyledText.jsx
+    StandardText.tsx
+    StyledText.tsx
   hooks/
-    useDialogForm.js
+    useDialogForm.ts
+    useConfirm.ts
 
-Rules:
-- Components MUST be reusable across features
-- Hooks MUST NOT depend on feature state or APIs
-
-=====================================
+-----------------------------------------------------
 FEATURES (BUSINESS DOMAINS)
-=====================================
+-----------------------------------------------------
 
-Each feature owns its business logic completely.
+Location:
+src/features/<feature-name>/
+
+Purpose:
+- Own ALL logic related to a business domain
 
 Structure:
 src/features/<feature>/
@@ -87,47 +121,95 @@ src/features/<feature>/
   hooks/
   queries/
   mutations/
-  routes.js
+  routes.ts
+  permissions.ts
 
 Rules:
-- Features MUST export route configuration (not routers)
-- Features MUST NOT know about layouts
-- Features MUST NOT know about authentication or roles
-- Features MUST NOT import from src/routes
+- Features MUST export route objects (not routers)
+- Features MUST export permission definitions
+- Features MUST NOT import layouts
+- Features MUST NOT import router
 
-Example:
+Example routes export:
 export const flightsRoutes = [
-  { path: "/flights", element: <FlightsPage /> }
+  {
+    path: "/flights",
+    element: <FlightsPage />,
+    meta: { permission: "flights.read" }
+  }
 ];
 
-=====================================
+-----------------------------------------------------
 ROUTING (FIRST-CLASS SYSTEM)
-=====================================
+-----------------------------------------------------
 
-Routing orchestration MUST live in `src/routes/`.
+Location:
+src/routes/
+
+Purpose:
+- Application orchestration
+- Layout assignment
+- Access control enforcement
 
 Structure:
 src/routes/
-  router.jsx
-  public.routes.js
-  protected.routes.js
+  router.tsx
+  public.routes.ts
+  protected.routes.ts
 
 Rules:
-- `router.jsx` is the ONLY place where createBrowserRouter is called
-- Layouts are assigned ONLY in router.jsx
-- Features contribute routes via exported arrays
-- Routing decides structure; features decide content
+- createBrowserRouter MUST exist ONLY in router.tsx
+- Layouts are applied ONLY here
+- Route guards are applied ONLY here
 
-Example flow:
-- Feature exports routes
-- protected.routes.js aggregates feature routes
-- router.jsx applies layouts
+-----------------------------------------------------
+RBAC (FRONTEND)
+-----------------------------------------------------
 
-=====================================
+Rules:
+- Permissions are STRINGS (not booleans)
+- Roles are GROUPS of permissions
+- UI checks permissions, not roles
+
+Example permission:
+"flights.read"
+"flights.write"
+"users.admin"
+
+Feature permissions:
+src/features/flights/permissions.ts
+
+export const FLIGHTS_PERMISSIONS = {
+  READ: "flights.read",
+  WRITE: "flights.write",
+};
+
+Routes use permissions via meta:
+meta: { permission: FLIGHTS_PERMISSIONS.READ }
+
+Route guards check permissions globally.
+
+-----------------------------------------------------
+TANSTACK QUERY RULES
+-----------------------------------------------------
+
+Rules:
+- ALL data fetching uses React Query
+- Queries live in features/<feature>/queries
+- Mutations live in features/<feature>/mutations
+- Pages MAY call useQuery
+- Components MUST NOT call useQuery unless explicitly container components
+
+Forbidden:
+❌ API calls in components
+❌ API calls in layouts
+❌ API calls in shell
+
+-----------------------------------------------------
 ABSOLUTE IMPORT RULES
-=====================================
+-----------------------------------------------------
 
-- Use absolute imports with aliases (e.g. "@/features/...")
+- Use alias imports: "@/features/..."
 - Features MAY import from:
   - common
   - services
@@ -135,81 +217,88 @@ ABSOLUTE IMPORT RULES
 - Features MUST NOT import from:
   - shell
   - routes
+
 - shell MUST NOT import from features
 
-=====================================
-WHAT NOT TO DO
-=====================================
+=====================================================
+BACKEND ARCHITECTURE (FLASK)
+=====================================================
 
-❌ Do NOT place layouts inside features
-❌ Do NOT place routing logic inside features
-❌ Do NOT create shared "god" folders
-❌ Do NOT mix UI reuse with business logic
+-----------------------------------------------------
+CORE
+-----------------------------------------------------
+
+Location:
+api/app/core/
+
+Purpose:
+- App setup
+- Security
+- JWT
+- Config
+
+-----------------------------------------------------
+FEATURES (BACKEND)
+-----------------------------------------------------
+
+Location:
+api/app/features/<feature>/
+
+Structure:
+api/app/features/<feature>/
+  routes.py
+  service.py
+  repository.py
+  models.py
+  schemas.py
+  policies.py
+
+Rules:
+- routes.py → HTTP only
+- service.py → business logic
+- repository.py → database access ONLY
+- policies.py → permission checks ONLY
+
+Forbidden:
+❌ DB access in routes
+❌ Permission logic in routes
+❌ HTTP logic in services
+
+-----------------------------------------------------
+RBAC (BACKEND)
+-----------------------------------------------------
+
+Rules:
+- Permissions are STRING constants
+- Policies enforce permissions
+- Routes call policies
+
+Example:
+require_permission("flights.write")
+
+Frontend permissions MUST match backend permissions exactly.
+
+-----------------------------------------------------
+WHAT NOT TO DO (STRICT)
+-----------------------------------------------------
+
+❌ Do NOT create "shared" dumping grounds
 ❌ Do NOT fetch data in layouts
+❌ Do NOT check roles in components
+❌ Do NOT hardcode permissions in UI
+❌ Do NOT place routers inside features
+❌ Do NOT place business logic in UI components
 
-=====================================
-DEFAULT BEHAVIOR FOR NEW CODE
-=====================================
+=====================================================
+DEFAULT DECISION RULE
+=====================================================
 
-When creating new code:
-1. Ask: Is this business logic? → feature
-2. Ask: Is this app structure? → shell
-3. Ask: Is this reusable UI or hook? → common
-4. Ask: Is this routing orchestration? → routes
+When unsure:
+- Business logic → feature
+- App structure → shell
+- Reusable logic → common
+- Orchestration → routes
+- Data access → repository
+- Permission checks → policies
 
-If unsure, default to:
-- feature for business logic
-- common for reusable logic
-
-Follow these rules strictly.
-
-<!-- # Python/Backend Rules
-- Always use `uv add` to add packages to Python virtual environment.
-- For DB migrations, provide the command but let the user run it (e.g., `flask db migrate` or `flask db upgrade head`).
-- Follow Python 3.13+ syntax and type hints where appropriate.
-- Use Flask-SQLAlchemy for database models and queries.
-- Use Flask-JWT-Extended for authentication.
-- Keep line length to 100 characters (as per ruff config).
-- Use double quotes for strings (as per ruff config).
-- Follow the feature-based folder structure: `app/features/[feature]/[routes.py|service.py|schemas.py|models.py]`.
-- Organize code into layers: models, services, routes/controllers, schemas.
-- Keep business logic inside service classes or modules, not in routes.
-- Keep routes/controllers thin and focused on request/response.
-- Place shared utilities in `app/shared/` (permissions, pagination, errors).
-- Place general utilities in `app/utils/` (time calculations, email, etc.).
-- Place API-level endpoints (like health checks) in `app/api/`.
-- Models should be in `app/features/[feature]/models.py` for feature-specific models.
-- Use schemas for request/response validation in `app/features/[feature]/schemas.py`.
-
-# Frontend Rules
-- Use React 19+ with functional components and hooks.
-- Use Chakra UI v3 for all UI components.
-- Follow the feature-based folder structure: `features/[feature]/[components|hooks|pages]/`.
-- Use `@/` alias for imports (configured in vite.config.js).
-- Prefer named exports over default exports for components.
-- Use custom hooks for data fetching and state management.
-- Keep components small and focused on a single responsibility.
-- Use i18next for internationalization (en/pt supported).
-
-# Code Style
-- Use meaningful variable and function names.
-- Add comments for complex logic, but prefer self-documenting code.
-- Follow existing code patterns and conventions in the codebase.
-- Keep functions small and focused.
-- Use async/await for asynchronous operations.
-
-# API/Backend Routes
-- Follow RESTful conventions for API endpoints.
-- Return consistent JSON response formats.
-- Handle errors gracefully with appropriate HTTP status codes.
-- Use JWT tokens for authentication in protected routes.
-
-# Database
-- Use Flask-Migrate for all database schema changes.
-- Never modify migration files manually after they're created.
-- Use SQLAlchemy models with proper relationships and constraints.
-
-# General
-- When adding new features, maintain consistency with existing code patterns.
-- Test changes locally before committing.
-- Keep dependencies up to date but test thoroughly when updating. -->
+Follow these rules without exception.

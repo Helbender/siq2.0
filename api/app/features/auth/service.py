@@ -7,16 +7,19 @@ from typing import Any
 
 from flask import request
 from flask_jwt_extended import create_access_token, create_refresh_token
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.features.users.models import Tripulante  # type: ignore
+from app.core.config import engine
+from app.features.auth.repository import AuthRepository
 from app.utils.email import hash_code, main
-from config import engine  # type: ignore
 
 
 class AuthService:
     """Service class for authentication business logic."""
+
+    def __init__(self):
+        """Initialize auth service with repository."""
+        self.repository = AuthRepository()
 
     def authenticate_user(self, nip: str | int, password: str, session: Session) -> dict[str, Any]:
         """Authenticate a user and return token or error.
@@ -31,7 +34,7 @@ class AuthService:
         """
         # Handle admin login
         if nip == "admin" and password == "admin":
-            tripulante: Tripulante | None = session.execute(select(Tripulante)).first()  # type: ignore
+            tripulante = self.repository.find_first_user(session)
             if tripulante is None:
                 access_token = create_access_token(
                     identity="admin",
@@ -45,8 +48,7 @@ class AuthService:
             return {"message": "Can not login as admin. Db already populated"}
 
         # Handle regular user login
-        stmt = select(Tripulante).where(Tripulante.nip == int(nip))
-        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+        tripulante = self.repository.find_user_by_nip(session, int(nip))
 
         if tripulante is None:
             return {"message": f"No user with the NIP {nip}"}
@@ -77,8 +79,7 @@ class AuthService:
         Returns:
             dict with "message" and optionally "nip" on success, or error message
         """
-        stmt = select(Tripulante).where(Tripulante.email == email)
-        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+        tripulante = self.repository.find_user_by_email(session, email)
 
         if tripulante is None:
             return {"message": "User not found"}
@@ -97,8 +98,7 @@ class AuthService:
         # Original logic: if exp_timestamp > token_timestamp, token is valid
         # This seems backwards but matches original implementation
         if exp_timestamp > token_timestamp:
-            tripulante.recover = ""
-            session.commit()
+            self.repository.clear_user_recovery_token(session, tripulante)
             return {"message": "Token Valid", "nip": tripulante.nip}
 
         return {"message": "Token Expired"}
@@ -113,15 +113,13 @@ class AuthService:
         Returns:
             dict with "message" key indicating success or error
         """
-        stmt = select(Tripulante).where(Tripulante.email == email)
-        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+        tripulante = self.repository.find_user_by_email(session, email)
 
         if tripulante is None:
             return {"message": "User not found"}
 
         json_data = main(email)
-        tripulante.recover = json_data
-        session.commit()
+        self.repository.update_user_recovery_token(session, tripulante, json_data)
         return {"message": "Recovery email sent"}
 
     def update_password(self, nip: int, new_password: str, session: Session) -> dict[str, Any]:
@@ -138,15 +136,13 @@ class AuthService:
         if not new_password:
             return {"message": "Password can not be empty"}
 
-        stmt = select(Tripulante).where(Tripulante.nip == nip)
-        tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+        tripulante = self.repository.find_user_by_nip(session, nip)
 
         if tripulante is None:
             return {"message": "User not found"}
 
-        tripulante.password = hash_code(new_password)
-        tripulante.recover = ""
-        session.commit()
+        hashed_password = hash_code(new_password)
+        self.repository.update_user_password(session, tripulante, hashed_password)
         return tripulante.to_json()
 
     @staticmethod
@@ -159,6 +155,8 @@ class AuthService:
         Returns:
             tuple of (access_token, error) where error is None on success
         """
+        from sqlalchemy.orm import Session
+
         # Handle admin case
         if str(nip) == "admin":
             new_access_token = create_access_token(
@@ -168,10 +166,10 @@ class AuthService:
             return new_access_token, None
 
         with Session(engine) as session:
+            repository = AuthRepository()
             # Convert to int for database query
             nip_int = int(nip) if isinstance(nip, str) else nip
-            stmt = select(Tripulante).where(Tripulante.nip == nip_int)
-            tripulante: Tripulante | None = session.execute(stmt).scalar_one_or_none()  # type: ignore
+            tripulante = repository.find_user_by_nip(session, nip_int)
 
             if tripulante is None:
                 return None, "User not found"
@@ -184,6 +182,33 @@ class AuthService:
             )
 
             return new_access_token, None
+
+    def get_current_user(self, nip_identity: str | int, session: Session) -> dict[str, Any]:
+        """Get current authenticated user by NIP identity.
+
+        Args:
+            nip_identity: User NIP from JWT identity (can be string or int, or "admin")
+            session: Database session
+
+        Returns:
+            dict with user data on success, or error message
+        """
+        # Handle admin case
+        if isinstance(nip_identity, str) and nip_identity == "admin":
+            return {"nip": "admin", "name": "ADMIN", "admin": True}
+
+        # Convert to int for database query
+        try:
+            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+        except (ValueError, TypeError):
+            return {"error": f"Invalid user identity: {nip_identity}"}
+
+        tripulante = self.repository.find_user_by_nip(session, nip)
+
+        if tripulante is None:
+            return {"error": f"User with NIP {nip} not found"}
+
+        return tripulante.to_json()
 
     @staticmethod
     def get_refresh_token_cookie_kwargs(refresh_token: str) -> dict[str, Any]:

@@ -5,19 +5,18 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from models.enums import (
+from app.features.qualifications.models import Qualificacao  # type: ignore
+from app.features.users.models import Tripulante  # type: ignore
+from app.shared.enums import (
+    GrupoQualificacoes,
+    StatusTripulante,
+    TipoTripulante,
     get_all_crew_types,
     get_all_qualification_groups,
     get_crew_types_for_qualification_group,
     get_qualification_groups_for_crew_type,
     is_qualification_group_applicable_to_crew_type,
-    GrupoQualificacoes,
-    StatusTripulante,
-    TipoTripulante,
 )
-from app.features.users.models import Tripulante  # type: ignore
-
-from app.features.qualifications.models import Qualificacao  # type: ignore
 
 
 class QualificationService:
@@ -279,4 +278,3 @@ class QualificationService:
 
         is_applicable = is_qualification_group_applicable_to_crew_type(group_enum, crew_type_enum)
         return {"applicable": is_applicable}
-

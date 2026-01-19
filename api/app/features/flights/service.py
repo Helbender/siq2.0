@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from config import engine  # type: ignore
 from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
-from models import year_init  # type: ignore
-from models.enums import TipoTripulante  # type: ignore
+from app.shared.models import year_init  # type: ignore
+from app.shared.enums import TipoTripulante  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
 from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 

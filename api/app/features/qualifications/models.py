@@ -6,8 +6,8 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
-from models.basemodels import Base  # type: ignore
-from models.enums import GrupoQualificacoes, TipoTripulante
+from app.shared.models import Base  # type: ignore
+from app.shared.enums import GrupoQualificacoes, TipoTripulante
 
 if TYPE_CHECKING:
     from app.features.users.models import TripulanteQualificacao  # type: ignore
