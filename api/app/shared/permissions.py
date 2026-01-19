@@ -4,7 +4,12 @@ from functools import wraps
 from typing import Callable
 
 from flask import jsonify
-from flask_jwt_extended import get_jwt, verify_jwt_in_request
+from flask_jwt_extended import get_jwt, get_jwt_identity, verify_jwt_in_request
+from sqlalchemy.orm import Session
+
+from app.core.config import engine
+from app.features.auth.repository import AuthRepository
+from app.shared.enums import Role
 
 
 def admin_required(f: Callable) -> Callable:
@@ -25,4 +30,54 @@ def admin_required(f: Callable) -> Callable:
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def require_role(min_level: int):
+    """Decorator to require a minimum role level for a route.
+
+    Args:
+        min_level: Minimum role level required (e.g., 80 for UNIF, 100 for Super Admin)
+
+    Usage:
+        @app.route('/protected')
+        @require_role(80)
+        def protected_route():
+            return "Protected content"
+    """
+    def wrapper(fn: Callable) -> Callable:
+        @wraps(fn)
+        def decorated(*args, **kwargs):
+            verify_jwt_in_request()
+            nip_identity = get_jwt_identity()
+            
+            # Handle admin case
+            if isinstance(nip_identity, str) and nip_identity == "admin":
+                admin_level = Role.SUPER_ADMIN.level
+                if admin_level < min_level:
+                    return {"error": "Forbidden"}, 403
+                return fn(*args, **kwargs)
+            
+            # Get user from database
+            try:
+                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+            except (ValueError, TypeError):
+                return {"error": "Invalid user identity"}, 401
+            
+            repository = AuthRepository()
+            with Session(engine) as session:
+                current_user = repository.find_user_by_nip(session, nip)
+                
+                if current_user is None:
+                    return {"error": "User not found"}, 404
+                
+                # Get role level from role relationship if exists, otherwise use role_level field
+                user_role_level = current_user.role.level if current_user.role else current_user.role_level
+                
+                if user_role_level < min_level:
+                    return {"error": "Forbidden"}, 403
+                
+                return fn(*args, **kwargs)
+        
+        return decorated
+    return wrapper
 

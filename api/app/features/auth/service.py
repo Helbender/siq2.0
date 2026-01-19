@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import engine
 from app.features.auth.repository import AuthRepository
+from app.shared.enums import Role
 from app.utils.email import hash_code, main
 
 
@@ -38,7 +39,11 @@ class AuthService:
             if tripulante is None:
                 access_token = create_access_token(
                     identity="admin",
-                    additional_claims={"admin": True, "name": "ADMIN"},
+                    additional_claims={
+                        "admin": True,
+                        "name": "ADMIN",
+                        "roleLevel": Role.SUPER_ADMIN.level,
+                    },
                 )
                 refresh_token = create_refresh_token(identity="admin")
                 return {
@@ -58,9 +63,15 @@ class AuthService:
 
         # Ensure identity is consistently a string for JWT
         nip_str = str(nip)
+        # Get roleLevel from role relationship if exists, otherwise use role_level field
+        role_level = tripulante.role.level if tripulante.role else tripulante.role_level
         access_token = create_access_token(
             identity=nip_str,
-            additional_claims={"admin": tripulante.admin, "name": tripulante.name},
+            additional_claims={
+                "admin": tripulante.admin,
+                "name": tripulante.name,
+                "roleLevel": role_level,
+            },
         )
         refresh_token = create_refresh_token(identity=nip_str)
         return {
@@ -161,7 +172,11 @@ class AuthService:
         if str(nip) == "admin":
             new_access_token = create_access_token(
                 identity="admin",
-                additional_claims={"admin": True, "name": "ADMIN"},
+                additional_claims={
+                    "admin": True,
+                    "name": "ADMIN",
+                    "roleLevel": Role.SUPER_ADMIN.level,
+                },
             )
             return new_access_token, None
 
@@ -176,9 +191,15 @@ class AuthService:
 
             # Always use string for JWT identity for consistency
             nip_str = str(nip_int)
+            # Get roleLevel from role relationship if exists, otherwise use role_level field
+            role_level = tripulante.role.level if tripulante.role else tripulante.role_level
             new_access_token = create_access_token(
                 identity=nip_str,
-                additional_claims={"admin": tripulante.admin, "name": tripulante.name},
+                additional_claims={
+                    "admin": tripulante.admin,
+                    "name": tripulante.name,
+                    "roleLevel": role_level,
+                },
             )
 
             return new_access_token, None
@@ -195,7 +216,12 @@ class AuthService:
         """
         # Handle admin case
         if isinstance(nip_identity, str) and nip_identity == "admin":
-            return {"nip": "admin", "name": "ADMIN", "admin": True}
+            return {
+                "nip": "admin",
+                "name": "ADMIN",
+                "admin": True,
+                "roleLevel": Role.SUPER_ADMIN.level,
+            }
 
         # Convert to int for database query
         try:

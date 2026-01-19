@@ -65,6 +65,21 @@ class StatusTripulante(Enum):
     FORA = "Fora"
 
 
+class Role(Enum):
+    """User roles with associated access levels."""
+
+    SUPER_ADMIN = 100
+    UNIF = 80
+    FLYERS = 60
+    USER = 40
+    READONLY = 20
+
+    @property
+    def level(self) -> int:
+        """Get the numeric level for this role."""
+        return self.value
+
+
 # Mapping qualification groups to applicable crew types
 QUALIFICATION_GROUP_TO_CREW_TYPES = {
     # Pilot qualifications

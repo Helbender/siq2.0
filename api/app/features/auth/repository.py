@@ -1,7 +1,7 @@
 """Authentication repository - database access only."""
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.features.users.models import Tripulante  # type: ignore
 
@@ -20,8 +20,8 @@ class AuthRepository:
         Returns:
             Tripulante instance or None if not found
         """
-        stmt = select(Tripulante).where(Tripulante.nip == nip)
-        return session.execute(stmt).scalar_one_or_none()  # type: ignore
+        stmt = select(Tripulante).options(joinedload(Tripulante.role)).where(Tripulante.nip == nip)
+        return session.execute(stmt).unique().scalar_one_or_none()  # type: ignore
 
     @staticmethod
     def find_user_by_email(session: Session, email: str) -> Tripulante | None:
@@ -34,8 +34,8 @@ class AuthRepository:
         Returns:
             Tripulante instance or None if not found
         """
-        stmt = select(Tripulante).where(Tripulante.email == email)
-        return session.execute(stmt).scalar_one_or_none()  # type: ignore
+        stmt = select(Tripulante).options(joinedload(Tripulante.role)).where(Tripulante.email == email)
+        return session.execute(stmt).unique().scalar_one_or_none()  # type: ignore
 
     @staticmethod
     def find_first_user(session: Session) -> Tripulante | None:

@@ -2,12 +2,12 @@ from datetime import date, timedelta  # noqa: TCH003
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, String, TypeDecorator
+from sqlalchemy import Date, ForeignKey, Integer, String, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
 from app.shared.models import Base  # type: ignore
-from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.enums import Role, StatusTripulante, TipoTripulante  # type: ignore
 
 
 class StatusTripulanteType(TypeDecorator):
@@ -41,6 +41,7 @@ class StatusTripulanteType(TypeDecorator):
 if TYPE_CHECKING:
     from app.features.flights.models import FlightPilots  # type: ignore
     from app.features.qualifications.models import Qualificacao  # type: ignore
+    from app.shared.rbac_models import Role as RoleModel  # type: ignore
 
 
 class Tripulante(Base):
@@ -52,6 +53,8 @@ class Tripulante(Base):
     position: Mapped[str] = mapped_column(String(5))
     email: Mapped[str] = mapped_column(String(50))
     admin: Mapped[bool] = mapped_column(default=False)
+    role_level: Mapped[int] = mapped_column(Integer, default=Role.USER.level, nullable=False)
+    role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), nullable=True)
     recover: Mapped[str] = mapped_column(String(500), default="")
     squadron: Mapped[str] = mapped_column(String(30), default="")
     password: Mapped[str] = mapped_column(String(150))
@@ -68,6 +71,7 @@ class Tripulante(Base):
     flight_pilots: Mapped[list["FlightPilots"]] = relationship(
         back_populates="tripulante", cascade="all, delete-orphan"
     )
+    role: Mapped["RoleModel | None"] = relationship("Role", back_populates="users")
 
     def to_json(self):
         response = {}
@@ -80,6 +84,11 @@ class Tripulante(Base):
                 response[col_name] = value.value
             else:
                 response[col_name] = value
+        # Add camelCase roleLevel for frontend consistency with JWT claims
+        # Use role.level if role relationship exists, otherwise fall back to role_level
+        response["roleLevel"] = self.role.level if self.role else self.role_level
+        if self.role:
+            response["role"] = self.role.to_json()
         # Sort qualificacoes by grupo and nome for consistent ordering
         sorted_quals = sorted(
             self.qualificacoes,

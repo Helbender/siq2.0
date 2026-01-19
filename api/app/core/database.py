@@ -13,6 +13,7 @@ def setup_database():
         from app.features.flights.models import Flight, FlightPilots  # noqa: F401
         from app.features.qualifications.models import Qualificacao  # noqa: F401
         from app.features.users.models import Tripulante, TripulanteQualificacao  # noqa: F401
+        from app.shared.rbac_models import Permission, Role  # noqa: F401
 
         # Create all tables
         Base.metadata.create_all(bind=engine)
