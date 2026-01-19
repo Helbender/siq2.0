@@ -1,5 +1,5 @@
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { StyledText } from "@/features/shared/components/StyledText";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { StyledText } from "@/common/components/StyledText";
 import { formatDate } from "@/utils/timeCalc";
 import {
   Center,

@@ -1,4 +1,4 @@
-import { useDialogForm } from "@/features/shared/hooks/useDialogForm";
+import { useDialogForm } from "@/common/hooks/useDialogForm";
 import { useToast } from "@/utils/useToast";
 import {
   Box,

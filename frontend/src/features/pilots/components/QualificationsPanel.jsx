@@ -1,14 +1,14 @@
 import { HStack, Text } from "@chakra-ui/react";
+import { useMemo } from "react";
 
 export function QualificationsPanel(props) {
   const validade = props.qualification.validade_info[2] / 6;
-  function colorFormatter(days) {
-    let color = "";
-    if (days < 0) return (color = "red.600");
-    if (days < validade) return (color = "yellow");
-    // eslint-disable-next-line no-unused-vars
-    else return (color = "green");
-  }
+  const bg = useMemo(() => {
+  const days = props.qualification.validade_info[0];
+  if (days < 0) return "red.600";
+  if (days < validade) return "yellow";
+  return "green";
+}, [props.qualification.validade_info, validade]);
   return (
     <HStack gap={0} h="100%">
       <Text
@@ -20,7 +20,7 @@ export function QualificationsPanel(props) {
         h="100%"
         // w={"52px"}
         px={2}
-        bg={colorFormatter(props.qualification.validade_info[0])}
+        bg={bg}
         borderTopLeftRadius={props.borderTopLeftRadius}
         borderTopRightRadius={props.borderTopRightRadius}
         borderBottomLeftRadius={props.borderBottomLeftRadius}

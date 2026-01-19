@@ -13,7 +13,7 @@ const system = createSystem(defaultConfig, {
     recipes: {
       text: {
         base: {
-          color: "text.primary",
+          color: "text.default",
         },
       },
     },

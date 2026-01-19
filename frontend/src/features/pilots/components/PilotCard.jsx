@@ -9,8 +9,9 @@ import { GroupedQualifications } from "./GroupedQualifications";
 export function PilotCard({ user }) {
   return (
     <Card.Root
-      bg="bg.surface"
+      bg="bg.cardSubtle"
       boxShadow={"xl"}
+      border="none"
       // maxW={"1000px"}
       // minW="550px"
     >

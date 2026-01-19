@@ -1,9 +1,8 @@
-import { http } from "@/api/http";
 import { useToast } from "@/utils/useToast";
 import { Box, Grid, SegmentGroup, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { PilotCard } from "../components/PilotCard";
+import { usePilots } from "../hooks/usePilots";
 
 const TIPO_OPTIONS = [
   { value: "PILOTO", label: "Piloto" },
@@ -14,78 +13,32 @@ const TIPO_OPTIONS = [
 ];
 
 export function PilotsPage({ tipo: initialTipo }) {
-  const [selectedTipo, setSelectedTipo] = useState(initialTipo || "PILOTO");
+  const [selectedTipo, setSelectedTipo] = useState(initialTipo ?? "PILOTO");
   const [selectedFuncao, setSelectedFuncao] = useState(null);
-  const [availableFuncoes, setAvailableFuncoes] = useState([]);
-  const [filteredCrew, setFilteredCrew] = useState([]);
-
-  const [pilotos, setPilotos] = useState([]);
-  const location = useLocation();
   const toast = useToast();
 
-  const getSavedPilots = async () => {
-    if (!selectedTipo) return;
-    
-    toast({
-      title: "A carregar Tripulantes",
-      description: "Em processo.",
-      status: "loading",
-      duration: 5000,
-      isClosable: true,
-      position: "bottom",
-    });
-    try {
-      const tipoForApi = selectedTipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES");
-      const res = await http.get(
-        `/v2/tripulantes/qualificacoes/${tipoForApi}`,
-      );
-      toast.closeAll();
-      toast({
-        title: "Tripulantes Carregados",
-        description: `${res.data.length} Tripulantes carregados com sucesso.`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setPilotos(res.data || []);
-      const funcoes = [
-        ...new Set(res.data.map((qual) => qual.position).filter(Boolean)),
-      ].sort();
-      setAvailableFuncoes(funcoes);
-      // Reset selected função when tipo changes, or select first if available
-      if (funcoes.length > 0) {
-        setSelectedFuncao(funcoes[0]);
-      } else {
-        setSelectedFuncao(null);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.closeAll();
-    }
-  };
-  useEffect(() => {
-    getSavedPilots();
-  }, [location, selectedTipo]);
+  const { pilotos } = usePilots(selectedTipo, toast);
 
-  // Filter crew by selected função
-  useEffect(() => {
-    let results = pilotos;
+  const availableFuncoes = useMemo(
+    () =>
+      [...new Set(pilotos.map(p => p.position).filter(Boolean))].sort(),
+    [pilotos]
+  );
 
-    // Filter by selected função
-    if (selectedFuncao) {
-      results = results.filter((pilot) => pilot.position === selectedFuncao);
-    }
-
-    setFilteredCrew(results);
-  }, [pilotos, selectedFuncao]);
-
-  // Create função options for SegmentGroup
   const funcaoOptions = useMemo(() => {
     return availableFuncoes.map((funcao) => ({
       value: funcao,
       label: funcao,
     }));
+  }, [availableFuncoes]);
+
+  const filteredCrew = useMemo(() => {
+    if (!selectedFuncao) return pilotos;
+    return pilotos.filter(p => p.position === selectedFuncao);
+  }, [pilotos, selectedFuncao]);
+
+  useEffect(() => {
+    setSelectedFuncao(availableFuncoes[0] ?? null);
   }, [availableFuncoes]);
 
   return (

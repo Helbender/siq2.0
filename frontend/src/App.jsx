@@ -1,20 +1,14 @@
 import { ColorModeProvider } from "@/components/ui/color-mode";
 import { AuthProvider } from "@/features/auth/contexts/AuthContext";
-import { ProtectedRoutes } from "@/features/shared/routes/ProtectedRoutes";
-import { PublicRoutes } from "@/features/shared/routes/PublicRoutes";
+import { router } from "@/routes/router";
 import React from "react";
-import { Navigate, Route, Routes } from "react-router";
+import { RouterProvider } from "react-router";
 
 function App() {
   return (
     <AuthProvider>
-      <ColorModeProvider forcedTheme="dark">
-      <Routes>
-        {PublicRoutes}
-        {ProtectedRoutes}
-        {/* Redirect unknown routes to login */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+      <ColorModeProvider forcedTheme="dark" enableSystem={false}>
+        <RouterProvider router={router} />
       </ColorModeProvider>
     </AuthProvider>
   );

@@ -1,18 +1,18 @@
-import { StyledText } from "@/features/shared/components/StyledText";
+import { StyledText } from "@/common/components/StyledText";
 import { formatDate } from "@/utils/timeCalc";
 import {
-    Box,
-    Card,
-    CardBody,
-    CardHeader,
-    Flex,
-    Heading,
-    Separator,
-    Spacer,
-    Stack,
-    Table,
-    Text,
-    useBreakpointValue,
+  Box,
+  Card,
+  CardBody,
+  CardHeader,
+  Flex,
+  Heading,
+  Separator,
+  Spacer,
+  Stack,
+  Table,
+  Text,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { InfoMed } from "./InfoMed";
 import { CreateFlightModal } from "./modals/CreateFlightModal";

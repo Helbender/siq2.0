@@ -1,5 +1,5 @@
 import { Text, Box, Stack, Heading, Button } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export function AboutPage() {
   const navigate = useNavigate();

@@ -18,15 +18,17 @@ import { BiEdit } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import { HiX } from "react-icons/hi";
 
+import { PilotInput } from "@/features/flights/components/PilotInput";
+import { useUsersQuery } from "@/features/users/queries/useUsersQuery";
 import { useToast } from "@/utils/useToast";
 import { useCreateFlight } from "../../hooks/useCreateFlight";
 import { flightDefaults } from "../../mappers/flightDefaults";
-import { PilotInput } from "../pilots/PilotInput";
 
 export function CreateFlightModal({ flight }) {
   const isEdit = Boolean(flight);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutateAsync, isLoading } = useCreateFlight();
+  const { data: pilotos = [] } = useUsersQuery();
   const toast = useToast();
 
   const methods = useForm({
@@ -130,6 +132,7 @@ export function CreateFlightModal({ flight }) {
                         <PilotInput
                           key={field.id}
                           index={index}
+                          pilotos={pilotos}
                           member={field}
                           remove={remove}
                         />

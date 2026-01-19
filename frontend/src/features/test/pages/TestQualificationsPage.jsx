@@ -1,5 +1,5 @@
 import { Box, Text } from "@chakra-ui/react";
-import { FeatureBasePage } from "@/features/shared/pages/FeatureBasePage";
+import { FeatureBasePage } from "@/common/components/FeatureBasePage";
 
 export function TestQualificationsPage() {
   return (

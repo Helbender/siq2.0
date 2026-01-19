@@ -38,12 +38,12 @@ Allowed inside `src/shell/`:
 Structure:
 src/shell/
   layout/
-    AppLayout.tsx
-    AuthenticatedLayout.tsx
+    AppLayout.jsx
+    AuthenticatedLayout.jsx
   components/
-    Header.tsx
-    Footer.tsx
-    NavbarLeft.tsx
+    Header.jsx
+    Footer.jsx
+    NavbarLeft.jsx
 
 Rules:
 - Layouts MAY render <Outlet />
@@ -65,10 +65,10 @@ Allowed inside `src/common/`:
 Structure:
 src/common/
   components/
-    StandardText.tsx
-    StyledText.tsx
+    StandardText.jsx
+    StyledText.jsx
   hooks/
-    useDialogForm.ts
+    useDialogForm.js
 
 Rules:
 - Components MUST be reusable across features
@@ -87,7 +87,7 @@ src/features/<feature>/
   hooks/
   queries/
   mutations/
-  routes.ts
+  routes.js
 
 Rules:
 - Features MUST export route configuration (not routers)
@@ -108,20 +108,20 @@ Routing orchestration MUST live in `src/routes/`.
 
 Structure:
 src/routes/
-  router.tsx
-  public.routes.ts
-  protected.routes.ts
+  router.jsx
+  public.routes.js
+  protected.routes.js
 
 Rules:
-- `router.tsx` is the ONLY place where createBrowserRouter is called
-- Layouts are assigned ONLY in router.tsx
+- `router.jsx` is the ONLY place where createBrowserRouter is called
+- Layouts are assigned ONLY in router.jsx
 - Features contribute routes via exported arrays
 - Routing decides structure; features decide content
 
 Example flow:
 - Feature exports routes
-- protected.routes.ts aggregates feature routes
-- router.tsx applies layouts
+- protected.routes.js aggregates feature routes
+- router.jsx applies layouts
 
 =====================================
 ABSOLUTE IMPORT RULES

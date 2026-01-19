@@ -1,4 +1,4 @@
-import { FeatureBasePage } from "@/features/shared/pages/FeatureBasePage";
+import { FeatureBasePage } from "@/common/components/FeatureBasePage";
 import { Tabs } from "@chakra-ui/react";
 import { PilotsPage } from "./PilotsPage";
 import { QualificationTablePage } from "./QualificationTablePage";
