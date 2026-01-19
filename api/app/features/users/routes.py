@@ -3,11 +3,10 @@
 import json
 
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import verify_jwt_in_request
 from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
-
+from app.core.config import engine
+from app.features.users.policies import require_authenticated
 from app.features.users.schemas import (
     UserCreateSchema,
     UserUpdateSchema,
@@ -226,7 +225,10 @@ def modify_user(nip: int) -> tuple[Response, int]:
             message:
               type: string
     """
-    verify_jwt_in_request()
+    # Check authentication
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
 
     if request.method == "DELETE":
         with Session(engine) as session:
@@ -302,7 +304,10 @@ def add_users() -> tuple[Response, int]:
             error:
               type: string
     """
-    verify_jwt_in_request()
+    # Check authentication
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
 
     if "file" not in request.files:
         return jsonify({"error": "Nenhum ficheiro enviado"}), 400

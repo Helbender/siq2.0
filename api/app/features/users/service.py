@@ -3,19 +3,21 @@
 import json
 from typing import Any
 
-from sqlalchemy import delete, exc, select
-from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
-from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 from app.features.users.models import Tripulante  # type: ignore
-
+from app.features.users.repository import UserRepository
+from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 from app.utils.email import hash_code
+from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
 
 
 class UserService:
     """Service class for user business logic."""
+
+    def __init__(self):
+        """Initialize user service with repository."""
+        self.repository = UserRepository()
 
     def get_all_users(self, session: Session) -> list[dict]:
         """Get all users/tripulantes from database.
@@ -26,7 +28,7 @@ class UserService:
         Returns:
             List of user dictionaries
         """
-        tripulantes_obj = session.execute(select(Tripulante)).scalars().all()
+        tripulantes_obj = self.repository.find_all(session)
 
         tripulantes: list[dict] = [
             {
@@ -71,13 +73,10 @@ class UserService:
             status=status,
         )
 
-        try:
-            session.add(user)
-            session.commit()
-            return {"id": user.nip}
-        except exc.IntegrityError as e:
-            session.rollback()
-            return {"message": str(e.orig)}
+        created_user, error = self.repository.create(session, user)
+        if error:
+            return {"message": error}
+        return {"id": created_user.nip}
 
     def delete_user(self, nip: int, session: Session) -> dict[str, Any]:
         """Delete a user/tripulante.
@@ -89,10 +88,9 @@ class UserService:
         Returns:
             dict with "deleted_id" on success, or error message
         """
-        result = session.execute(delete(Tripulante).where(Tripulante.nip == nip))
+        deleted = self.repository.delete_by_nip(session, nip)
 
-        if result.rowcount == 1:
-            session.commit()
+        if deleted:
             return {"deleted_id": str(nip)}
 
         return {"message": "Failed to delete"}
@@ -108,9 +106,12 @@ class UserService:
         Returns:
             dict with user data on success, or error message
         """
-        try:
-            modified_user = session.execute(select(Tripulante).where(Tripulante.nip == nip)).scalar_one()
+        modified_user = self.repository.find_by_nip(session, nip)
 
+        if modified_user is None:
+            return {"message": f"User with NIP {nip} not found"}
+
+        try:
             for key, value in user_data.items():
                 if key == "qualification":
                     continue
@@ -122,11 +123,9 @@ class UserService:
                     value = StatusTripulante(value)
                 setattr(modified_user, key, value)
 
-            session.commit()
+            self.repository.update(session, modified_user)
             return modified_user.to_json()
-        except NoResultFound:
-            return {"message": f"User with NIP {nip} not found"}
-        except Exception as e:
+        except Exception:
             session.rollback()
             return {"message": "You can not change the NIP. Create a new user instead."}
 
@@ -140,11 +139,7 @@ class UserService:
         Returns:
             dict with success message
         """
-        def check_integrity():
-            try:
-                session.commit()
-            except IntegrityError as e:
-                session.rollback()
+        users: list[Tripulante] = []
 
         for item in users_data:
             user = Tripulante()
@@ -161,11 +156,10 @@ class UserService:
             if not hasattr(user, "status") or user.status is None:
                 user.status = StatusTripulante.PRESENTE
 
-            session.add(user)
-            check_integrity()
+            users.append(user)
 
-        session.commit()
-        return {"message": "Users added successfully"}
+        result = self.repository.bulk_create(session, users)
+        return {"message": "Users added successfully", **result}
 
     def backup_users(self, session: Session) -> dict[str, Any]:
         """Create backup of all users and upload to Google Drive.
@@ -176,7 +170,7 @@ class UserService:
         Returns:
             dict with success message
         """
-        users_list = session.execute(select(Tripulante)).scalars()
+        users_list = self.repository.find_all(session)
 
         user_base: list = []
         for user in users_list:
