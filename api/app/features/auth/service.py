@@ -10,10 +10,9 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
 from app.features.users.models import Tripulante  # type: ignore
-
 from app.utils.email import hash_code, main
+from config import engine  # type: ignore
 
 
 class AuthService:
@@ -201,10 +200,7 @@ class AuthService:
             "value": refresh_token,
             "httponly": True,
             "samesite": "Lax",
-            "secure": request.is_secure
-            if not os.environ.get("FLASK_ENV") == "development"
-            else False,
+            "secure": request.is_secure if not os.environ.get("FLASK_ENV") == "development" else False,
             "max_age": int(timedelta(days=30).total_seconds()),
             "path": "/api/auth",
         }
-

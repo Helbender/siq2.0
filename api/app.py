@@ -24,6 +24,13 @@ JWT_KEY: str = os.environ.get("JWT_KEY", "")
 # APPLY_CORS: bool = bool(os.environ.get("APPLY_CORS", True))
 APPLY_CORS: bool = os.environ.get("APPLY_CORS", "true").lower() in ("1", "true", "yes")
 
+# Validate JWT_KEY is set
+if not JWT_KEY:
+    print("WARNING: JWT_KEY environment variable is not set or empty!")
+    print("This will cause token signature verification to fail.")
+    print("Please set JWT_KEY in your .env file.")
+else:
+    print(f"JWT_KEY loaded successfully (length: {len(JWT_KEY)})")
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = JWT_KEY
@@ -79,6 +86,8 @@ def expired_token_callback(jwt_header, jwt_payload):
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
+    import base64
+    import json
     import traceback
 
     from flask import make_response
@@ -91,12 +100,41 @@ def invalid_token_callback(error):
     print(f"[JWT] Error type: {type(error)}")
     print(f"[JWT] Request path: {request.path}")
     print(f"[JWT] Is refresh endpoint: {is_refresh_endpoint}")
+    print(f"[JWT] JWT_SECRET_KEY configured: {bool(app.config.get('JWT_SECRET_KEY'))}")
+    print(f"[JWT] JWT_SECRET_KEY length: {len(app.config.get('JWT_SECRET_KEY', ''))}")
 
     if is_refresh_endpoint:
         print(f"[JWT] Refresh endpoint - cookies received: {list(cookies.keys())}")
-        print(
-            f"[JWT] Refresh token cookie value: {cookies.get('refresh_token', 'NOT FOUND')[:50] if cookies.get('refresh_token') else 'NOT FOUND'}"
-        )
+        refresh_token = cookies.get("refresh_token", "NOT FOUND")
+        if refresh_token != "NOT FOUND":
+            print(f"[JWT] Refresh token cookie length: {len(refresh_token)}")
+            print(f"[JWT] Refresh token cookie value (first 100 chars): {refresh_token[:100]}")
+            # Check if token has proper JWT structure (3 parts separated by dots)
+            token_parts = refresh_token.split(".")
+            print(f"[JWT] Refresh token parts count: {len(token_parts)}")
+            if len(token_parts) != 3:
+                print(f"[JWT] WARNING: Token appears corrupted - expected 3 parts, got {len(token_parts)}")
+            else:
+                # Try to decode header and payload (without verification) to inspect token
+                try:
+                    # Decode header (add padding if needed)
+                    header_padded = token_parts[0] + "=" * (4 - len(token_parts[0]) % 4)
+                    header_decoded = base64.urlsafe_b64decode(header_padded)
+                    header_json = json.loads(header_decoded)
+                    print(f"[JWT] Token header: {header_json}")
+                    
+                    # Decode payload (add padding if needed)
+                    payload_padded = token_parts[1] + "=" * (4 - len(token_parts[1]) % 4)
+                    payload_decoded = base64.urlsafe_b64decode(payload_padded)
+                    payload_json = json.loads(payload_decoded)
+                    print(f"[JWT] Token payload (identity): {payload_json.get('sub', 'N/A')}")
+                    print(f"[JWT] Token payload (exp): {payload_json.get('exp', 'N/A')}")
+                    print(f"[JWT] Token payload (type): {payload_json.get('type', 'N/A')}")
+                except Exception as decode_error:
+                    print(f"[JWT] Could not decode token parts: {decode_error}")
+        else:
+            print("[JWT] Refresh token cookie NOT FOUND")
+        print(f"[JWT] Cookie header: {request.headers.get('Cookie', 'NOT FOUND')[:200]}")
 
     print(f"[JWT] Authorization header: {auth_header[:50] if len(auth_header) > 50 else auth_header}")
     traceback.print_exc()
@@ -112,6 +150,7 @@ def invalid_token_callback(error):
             path="/api/auth",
             httponly=True,
             samesite="Lax",
+            secure=app.config.get("JWT_COOKIE_SECURE", False),
         )
         print("[JWT] Cleared invalid refresh token cookie")
 

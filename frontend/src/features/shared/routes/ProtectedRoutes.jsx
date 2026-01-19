@@ -3,10 +3,10 @@ import { AuthenticatedLayout } from "@/features/shared/layout/AuthenticatedLayou
 import { Navigate, Route } from "react-router";
 
 // Test pages
+import { CrewQualifications } from "@/features/pilots/pages/CrewQualifications";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { TestDashboardPage } from "@/features/test/pages/TestDashboardPage";
 import { TestFlightsPage } from "@/features/test/pages/TestFlightsPage";
-import { TestQualificationsPage } from "@/features/test/pages/TestQualificationsPage";
 import { TestQualificationsTablePage } from "@/features/test/pages/TestQualificationsTablePage";
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 
@@ -21,7 +21,7 @@ export const ProtectedRoutes = (
     <Route index element={<Navigate to="/dashboard" replace />} />
     <Route path="/dashboard" element={<TestDashboardPage />} />
     <Route path="/flights" element={<TestFlightsPage />} />
-    <Route path="/qualifications" element={<TestQualificationsPage />} />
+    <Route path="/crew-qualifications" element={<CrewQualifications />} />
     <Route
       path="/qualifications-table"
       element={<TestQualificationsTablePage />}
