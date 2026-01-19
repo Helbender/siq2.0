@@ -7,17 +7,14 @@ from threading import Thread
 from typing import Any
 
 from dotenv import load_dotenv
-from sqlalchemy import exc, func, or_, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import exc
+from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
-from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
-from app.shared.models import year_init  # type: ignore
-from app.shared.enums import TipoTripulante  # type: ignore
-from app.features.qualifications.models import Qualificacao  # type: ignore
-from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
-
+from app.core.config import engine
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
+from app.features.flights.repository import FlightRepository
+from app.shared.enums import TipoTripulante  # type: ignore
+from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
 from app.utils.time_utils import parse_time_to_minutes
 
 # Load environment variables
@@ -56,6 +53,10 @@ def coerce_qualification_id(value: Any) -> str | None:
 class FlightService:
     """Service class for flight business logic."""
 
+    def __init__(self):
+        """Initialize flight service with repository."""
+        self.repository = FlightRepository()
+
     def get_all_flights(self, session: Session) -> list[dict]:
         """Get all flights from database with qualification cache.
 
@@ -66,17 +67,10 @@ class FlightService:
             List of flight dictionaries
         """
         # Pre-load all qualifications into a cache for efficient lookups
-        all_qualifications = session.execute(select(Qualificacao)).scalars().all()
+        all_qualifications = self.repository.find_all_qualifications(session)
         qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
 
-        stmt = (
-            select(Flight)
-            .order_by(Flight.date.desc())
-            .options(
-                joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
-            )
-        )
-        flights_obj = session.execute(stmt).unique().scalars()
+        flights_obj = self.repository.find_all_with_pilots(session)
 
         flights = [row.to_json(qual_cache) for row in flights_obj]
         return flights
@@ -115,7 +109,7 @@ class FlightService:
             med_arrival=flight_data.get("medArrival", "__:__"),
         )
 
-        session.add(flight)
+        self.repository.create(session, flight)
 
         if "flight_pilots" not in flight_data:
             return {"message": "At least one pilot is required"}
@@ -126,12 +120,12 @@ class FlightService:
                 continue
 
         try:
-            session.flush()
+            self.repository.flush(session)
         except exc.IntegrityError as e:
-            session.rollback()
+            self.repository.rollback(session)
             return {"message": str(e.orig)}
 
-        session.commit()
+        self.repository.commit(session)
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
@@ -152,7 +146,9 @@ class FlightService:
         Returns:
             dict with "message" key on success, or error message
         """
-        flight: Flight = session.execute(select(Flight).where(Flight.fid == flight_id)).scalar_one()
+        flight = self.repository.find_by_id(session, flight_id)
+        if flight is None:
+            return {"message": "Flight not found"}
 
         flight.airtask = flight_data.get("airtask", "")
         flight.date = datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
@@ -189,7 +185,7 @@ class FlightService:
             if result is None:
                 continue
 
-        session.commit()
+        self.repository.commit(session)
         session.refresh(flight)
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
@@ -221,10 +217,9 @@ class FlightService:
             self._update_qualifications_on_delete(flight_id, session, pilot)
 
         # Commit the updates
-        session.commit()
+        self.repository.commit(session)
         # Now delete the flight
-        session.delete(flight_to_delete)
-        session.commit()
+        self.repository.delete(session, flight_to_delete)
         return {"deleted_id": f"Flight {flight_id}"}
 
     def reprocess_all_qualifications(self, session: Session) -> dict[str, Any]:
@@ -242,14 +237,7 @@ class FlightService:
         print("\nLoading flights and pre-caching data...")
 
         # Pre-load all flights ordered by date with pilots
-        stmt = (
-            select(Flight)
-            .order_by(Flight.date.asc())
-            .options(
-                joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
-            )
-        )
-        all_flights = session.execute(stmt).unique().scalars().all()
+        all_flights = self.repository.find_all_ordered_by_date_asc(session)
 
         total_flights = len(all_flights)
         processed = 0
@@ -257,7 +245,7 @@ class FlightService:
 
         # Pre-load all Qualificacao records into cache
         print("Pre-loading qualifications cache...")
-        all_qualifications = session.execute(select(Qualificacao)).scalars().all()
+        all_qualifications = self.repository.find_all_qualifications(session)
         qual_cache_by_name: dict[tuple[str, TipoTripulante], Qualificacao] = {}
         qual_cache_by_id: dict[int, Qualificacao] = {}
         for qual in all_qualifications:
@@ -276,12 +264,8 @@ class FlightService:
 
         pq_cache: dict[tuple[int, int], TripulanteQualificacao] = {}
         if all_pilot_ids:
-            all_pq_records = (
-                session.execute(
-                    select(TripulanteQualificacao).where(TripulanteQualificacao.tripulante_id.in_(all_pilot_ids))
-                )
-                .scalars()
-                .all()
+            all_pq_records = self.repository.find_tripulante_qualificacoes_by_pilot_ids(
+                session, list(all_pilot_ids)
             )
             for pq in all_pq_records:
                 pq_cache[(pq.tripulante_id, pq.qualificacao_id)] = pq
@@ -340,15 +324,15 @@ class FlightService:
                 processed += 1
                 if processed % 50 == 0:
                     print(f"\rProcessed: {processed}/{total_flights}", end="", flush=True)
-                    session.commit()
+                    self.repository.commit(session)
 
             except Exception as e:
                 errors.append(f"Error processing flight {flight.fid}: {str(e)}")
-                session.rollback()
+                self.repository.rollback(session)
                 continue
 
         # Final commit
-        session.commit()
+        self.repository.commit(session)
         print(f"\nReprocess completed: {processed}/{total_flights} flights processed successfully")
         print(f"Total qualification updates made: {updates_made}")
         end_time = time.perf_counter()
@@ -376,27 +360,17 @@ class FlightService:
         tripulante: FlightPilots,
     ) -> None:
         """Update qualifications when a flight is deleted."""
-        tripulante_quals = (
-            session.execute(
-                select(TripulanteQualificacao).where(TripulanteQualificacao.tripulante_id == tripulante.pilot_id)
-            )
-            .scalars()
-            .all()
+        tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(
+            session, tripulante.pilot_id
         )
 
         for pq in tripulante_quals:
-            qual_fields = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
-            qual_conditions = [getattr(FlightPilots, field) == str(pq.qualificacao.id) for field in qual_fields]
-            last_date = session.execute(
-                select(func.max(Flight.date))
-                .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
-                .where(FlightPilots.pilot_id == tripulante.pilot_id)
-                .where(Flight.fid != flight_id)
-                .where(or_(*qual_conditions))
-            ).scalar_one_or_none()
+            last_date = self.repository.find_max_flight_date_for_qualification(
+                session, tripulante.pilot_id, pq.qualificacao_id, flight_id
+            )
 
-            pq.data_ultima_validacao = last_date if last_date else date(year_init, 1, 1)
-            session.add(pq)
+            pq.data_ultima_validacao = last_date
+            self.repository.update_tripulante_qualificacao(session, pq)
 
     def _add_crew_and_pilots(
         self,
@@ -407,7 +381,7 @@ class FlightService:
         auto_commit: bool = False,
     ) -> FlightPilots | None:
         """Add crew/pilot to flight and update qualifications."""
-        pilot_obj: Tripulante | None = session.get(Tripulante, pilot["nip"])  # type: ignore
+        pilot_obj = self.repository.find_tripulante_by_nip(session, pilot["nip"])
 
         if pilot_obj is None:
             pilot_name = pilot.get("name", "Unknown")
@@ -439,7 +413,7 @@ class FlightService:
                 raise ValueError(f"FlightPilots record not found for pilot {pilot['nip']} in flight {flight.fid}")
         else:
             i: int = 0
-            qual_list = session.scalars(select(Qualificacao).where(Qualificacao.tipo_aplicavel == pilot_obj.tipo)).all()
+            qual_list = self.repository.find_qualifications_by_tipo(session, pilot_obj.tipo)
 
             excluded_names = {"ATR", "ATN", "precapp", "nprecapp"}
             qual_list = [q for q in qual_list if q.nome not in excluded_names]
@@ -458,7 +432,7 @@ class FlightService:
                         i += 1
 
             if flight.fid is None:
-                session.flush()
+                self.repository.flush(session)
 
             flight_pilot = FlightPilots(
                 flight_id=flight.fid,
@@ -492,9 +466,9 @@ class FlightService:
         pilot_obj.flight_pilots.append(flight_pilot)
         flight.flight_pilots.append(flight_pilot)
         if auto_commit:
-            session.commit()
+            self.repository.commit(session)
         else:
-            session.flush()
+            self.repository.flush(session)
         return flight_pilot
 
     def _update_tripulante_qualificacao_optimized(
@@ -537,19 +511,21 @@ class FlightService:
         pq = pq_cache.get(cache_key)
 
         if not pq:
+            from app.features.users.models import TripulanteQualificacao  # type: ignore
+
             pq = TripulanteQualificacao(
                 tripulante_id=pilot_obj.nip,
                 qualificacao_id=qual.id,
                 data_ultima_validacao=flight.date,
             )
-            session.add(pq)
+            self.repository.create_tripulante_qualificacao(session, pq)
             pq_cache[cache_key] = pq
             return 1
         else:
             nova_data = flight.date
             if pq.data_ultima_validacao is None or pq.data_ultima_validacao < nova_data:
                 pq.data_ultima_validacao = nova_data
-                session.add(pq)
+                self.repository.update_tripulante_qualificacao(session, pq)
                 return 1
 
         return 0
@@ -571,12 +547,9 @@ class FlightService:
 
             if isinstance(qual_id, str) and qual_id.strip() and not qual_id.isdigit():
                 qual_name_from_value = qual_id.strip()
-                qual = session.scalars(
-                    select(Qualificacao).where(
-                        Qualificacao.nome == qual_name_from_value,
-                        Qualificacao.tipo_aplicavel == pilot_obj.tipo,
-                    )
-                ).first()
+                qual = self.repository.find_qualification_by_nome_and_tipo(
+                    session, qual_name_from_value, pilot_obj.tipo
+                )
                 if qual:
                     qual_id = qual.id
                 else:
@@ -592,12 +565,9 @@ class FlightService:
                     break
 
             if qual_id is None:
-                qual = session.scalars(
-                    select(Qualificacao).where(
-                        Qualificacao.nome == qual_name,
-                        Qualificacao.tipo_aplicavel == pilot_obj.tipo,
-                    )
-                ).first()
+                qual = self.repository.find_qualification_by_nome_and_tipo(
+                    session, qual_name, pilot_obj.tipo
+                )
                 if qual:
                     qual_id = qual.id
                 else:
@@ -619,25 +589,22 @@ class FlightService:
             )
             return
 
-        pq = session.scalars(
-            select(TripulanteQualificacao).where(
-                TripulanteQualificacao.tripulante_id == pilot_obj.nip,
-                TripulanteQualificacao.qualificacao_id == qual_id,
-            )
-        ).first()
+        pq = self.repository.find_tripulante_qualificacao(
+            session, pilot_obj.nip, qual_id
+        )
         if not pq:
+            from app.features.users.models import TripulanteQualificacao  # type: ignore
+
             pq = TripulanteQualificacao(
                 tripulante_id=pilot_obj.nip,
                 qualificacao_id=qual_id,
                 data_ultima_validacao=flight.date,
             )
-            session.add(pq)
-            session.flush()
+            self.repository.create_tripulante_qualificacao(session, pq)
         else:
             nova_data = flight.date
 
             if pq.data_ultima_validacao is None or pq.data_ultima_validacao < nova_data:
                 pq.data_ultima_validacao = nova_data
-                session.add(pq)
-                session.flush()
+                self.repository.update_tripulante_qualificacao(session, pq)
 

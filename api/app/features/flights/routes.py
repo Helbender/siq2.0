@@ -1,16 +1,16 @@
 """Flights routes - thin request/response handlers."""
 
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import verify_jwt_in_request
 from sqlalchemy.orm import Session
 
+from app.core.config import engine
+from app.features.flights.policies import require_authenticated
 from app.features.flights.schemas import (
     FlightCreateSchema,
     FlightUpdateSchema,
     validate_request,
 )
 from app.features.flights.service import FlightService
-from config import engine  # type: ignore
 
 flights_bp = Blueprint("flights", __name__)
 flight_service = FlightService()
@@ -314,7 +314,11 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
               type: string
     """
     if request.method == "PATCH":
-        verify_jwt_in_request()
+        # Check authentication
+        auth_error = require_authenticated()
+        if auth_error:
+            return auth_error
+
         flight_data: dict | None = request.get_json()
         if flight_data is None:
             return jsonify({"message": "Request body must be JSON"}), 400
@@ -333,7 +337,10 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             return jsonify(result), 400
 
     if request.method == "DELETE":
-        verify_jwt_in_request()
+        # Check authentication
+        auth_error = require_authenticated()
+        if auth_error:
+            return auth_error
 
         with Session(engine, autoflush=False) as session:
             result = flight_service.delete_flight(flight_id, session)
@@ -377,7 +384,10 @@ def reprocess_all_qualifications() -> tuple[Response, int]:
               items:
                 type: object
     """
-    verify_jwt_in_request()
+    # Check authentication
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
 
     with Session(engine, autoflush=False) as session:
         result = flight_service.reprocess_all_qualifications(session)
