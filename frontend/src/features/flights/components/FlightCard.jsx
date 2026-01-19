@@ -3,8 +3,6 @@ import { formatDate } from "@/utils/timeCalc";
 import {
   Box,
   Card,
-  CardBody,
-  CardHeader,
   Flex,
   Heading,
   Separator,
@@ -12,7 +10,7 @@ import {
   Stack,
   Table,
   Text,
-  useBreakpointValue,
+  useBreakpointValue
 } from "@chakra-ui/react";
 import { InfoMed } from "./InfoMed";
 import { CreateFlightModal } from "./modals/CreateFlightModal";
@@ -21,8 +19,8 @@ import { DeleteFlightModal } from "./modals/DeleteFlightModal";
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   return (
-    <Card boxShadow={"lg"} bg="bg.card-muted">
-      <CardHeader>
+    <Card.Root boxShadow={"lg"} bg="#2D3748">
+      <Card.Header>
         <Flex align={"center"}>
           {isColumn ? (
             <Box>
@@ -41,8 +39,8 @@ export function FlightCard({ flight }) {
           {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>
         <Separator />
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <Flex alignItems={"top"} gap={2} overflowX={"auto"}>
           <Stack>
             <Text>{`${flight.flightType} / ${flight.flightAction}`}</Text>
@@ -87,7 +85,7 @@ export function FlightCard({ flight }) {
         </Flex>
 
         <Separator my="5" />
-        <Box overflowY={"auto"} maxHeight={"300px"}>
+        <Box overflowY={"auto"} height={"300px"}>
           <Table.Root size={"sm"}>
             <Table.Header>
               <Table.Row>
@@ -133,7 +131,7 @@ export function FlightCard({ flight }) {
             </Table.Body>
           </Table.Root>
         </Box>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   );
 }
