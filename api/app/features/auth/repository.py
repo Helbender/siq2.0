@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.features.users.models import Tripulante  # type: ignore
 
-
 class AuthRepository:
     """Repository for authentication database operations."""
 

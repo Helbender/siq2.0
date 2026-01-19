@@ -19,7 +19,7 @@ CREW_USER: list = ["OC", "OCI", "OCA", "CT", "CTA", "CTI", "OPV", "OPVI", "OPVA"
 
 # Define connection string
 connection_string = os.environ.get("DB_URL", "sqlite:///database.db")
-print(f"\nConnection string: {connection_string}")
+# print(f"\nConnection string: {connection_string}")
 
 # Create the SQLAlchemy engine with improved configuration
 engine = create_engine(

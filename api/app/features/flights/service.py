@@ -2,7 +2,7 @@
 
 import os
 import time
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from threading import Thread
 from typing import Any
 
@@ -10,12 +10,12 @@ from dotenv import load_dotenv
 from sqlalchemy import exc
 from sqlalchemy.orm import Session
 
-from app.core.config import engine
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
 from app.features.flights.repository import FlightRepository
+from app.features.qualifications.models import Qualificacao  # type: ignore
+from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 from app.shared.enums import TipoTripulante  # type: ignore
 from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
-from app.utils.time_utils import parse_time_to_minutes
 
 # Load environment variables
 load_dotenv(dotenv_path="./.env")
@@ -264,9 +264,7 @@ class FlightService:
 
         pq_cache: dict[tuple[int, int], TripulanteQualificacao] = {}
         if all_pilot_ids:
-            all_pq_records = self.repository.find_tripulante_qualificacoes_by_pilot_ids(
-                session, list(all_pilot_ids)
-            )
+            all_pq_records = self.repository.find_tripulante_qualificacoes_by_pilot_ids(session, list(all_pilot_ids))
             for pq in all_pq_records:
                 pq_cache[(pq.tripulante_id, pq.qualificacao_id)] = pq
 
@@ -360,9 +358,7 @@ class FlightService:
         tripulante: FlightPilots,
     ) -> None:
         """Update qualifications when a flight is deleted."""
-        tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(
-            session, tripulante.pilot_id
-        )
+        tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(session, tripulante.pilot_id)
 
         for pq in tripulante_quals:
             last_date = self.repository.find_max_flight_date_for_qualification(
@@ -565,9 +561,7 @@ class FlightService:
                     break
 
             if qual_id is None:
-                qual = self.repository.find_qualification_by_nome_and_tipo(
-                    session, qual_name, pilot_obj.tipo
-                )
+                qual = self.repository.find_qualification_by_nome_and_tipo(session, qual_name, pilot_obj.tipo)
                 if qual:
                     qual_id = qual.id
                 else:
@@ -589,9 +583,7 @@ class FlightService:
             )
             return
 
-        pq = self.repository.find_tripulante_qualificacao(
-            session, pilot_obj.nip, qual_id
-        )
+        pq = self.repository.find_tripulante_qualificacao(session, pilot_obj.nip, qual_id)
         if not pq:
             from app.features.users.models import TripulanteQualificacao  # type: ignore
 
@@ -607,4 +599,3 @@ class FlightService:
             if pq.data_ultima_validacao is None or pq.data_ultima_validacao < nova_data:
                 pq.data_ultima_validacao = nova_data
                 self.repository.update_tripulante_qualificacao(session, pq)
-

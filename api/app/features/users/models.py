@@ -6,8 +6,8 @@ from sqlalchemy import Date, ForeignKey, Integer, String, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
-from app.shared.models import Base  # type: ignore
 from app.shared.enums import Role, StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.models import Base  # type: ignore
 
 
 class StatusTripulanteType(TypeDecorator):
@@ -53,7 +53,7 @@ class Tripulante(Base):
     position: Mapped[str] = mapped_column(String(5))
     email: Mapped[str] = mapped_column(String(50))
     admin: Mapped[bool] = mapped_column(default=False)
-    role_level: Mapped[int] = mapped_column(Integer, default=Role.USER.level, nullable=False)
+    role_level: Mapped[int | None] = mapped_column(Integer, default=Role.USER.level, nullable=True)
     role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), nullable=True)
     recover: Mapped[str] = mapped_column(String(500), default="")
     squadron: Mapped[str] = mapped_column(String(30), default="")
@@ -86,7 +86,10 @@ class Tripulante(Base):
                 response[col_name] = value
         # Add camelCase roleLevel for frontend consistency with JWT claims
         # Use role.level if role relationship exists, otherwise fall back to role_level
-        response["roleLevel"] = self.role.level if self.role else self.role_level
+        role_level_value = (
+            self.role.level if self.role else (self.role_level if self.role_level is not None else Role.USER.level)
+        )
+        response["roleLevel"] = role_level_value
         if self.role:
             response["role"] = self.role.to_json()
         # Sort qualificacoes by grupo and nome for consistent ordering
