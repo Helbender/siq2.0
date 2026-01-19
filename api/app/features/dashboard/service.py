@@ -3,17 +3,19 @@
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import extract, func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from app.features.flights.models import Flight, FlightPilots  # type: ignore
-from app.utils.time_utils import parse_time_to_minutes
+from app.features.dashboard.repository import DashboardRepository
 from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
-from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
+from app.utils.time_utils import parse_time_to_minutes
 
 
 class DashboardService:
     """Service class for dashboard business logic."""
+
+    def __init__(self):
+        """Initialize dashboard service with repository."""
+        self.repository = DashboardRepository()
 
     def get_flight_statistics(self, year: int | None, session: Session) -> dict[str, Any]:
         """Get flight statistics for dashboard.
@@ -29,21 +31,10 @@ class DashboardService:
             year = datetime.now(UTC).year
 
         # Get total flights count for the selected year
-        total_flights = (
-            session.execute(select(func.count(Flight.fid)).where(extract("year", Flight.date) == year)).scalar() or 0
-        )
+        total_flights = self.repository.count_flights_by_year(session, year)
 
         # Get all flights for the selected year with pilots loaded
-        all_flights = (
-            session.execute(
-                select(Flight)
-                .where(extract("year", Flight.date) == year)
-                .options(joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante))
-            )
-            .unique()
-            .scalars()
-            .all()
-        )
+        all_flights = self.repository.find_flights_by_year_with_pilots(session, year)
 
         # Calculate hours by flight_type
         hours_by_type: dict[str, int] = {}  # type -> total minutes
@@ -120,7 +111,7 @@ class DashboardService:
                 # Find the pilot ID with maximum hours for this type
                 top_pilot_id = max(hours_dict, key=lambda pid: hours_dict[pid])
                 top_pilot_minutes = hours_dict[top_pilot_id]
-                top_pilot_obj = session.get(Tripulante, top_pilot_id)
+                top_pilot_obj = self.repository.find_tripulante_by_id(session, top_pilot_id)
                 if top_pilot_obj:
                     top_pilots_by_type[crew_type.value] = {
                         "nip": top_pilot_obj.nip,
@@ -156,18 +147,7 @@ class DashboardService:
         Returns:
             List of years (integers)
         """
-        years = (
-            session.execute(
-                select(extract("year", Flight.date).label("year"))
-                .distinct()
-                .order_by(extract("year", Flight.date).desc())
-            )
-            .scalars()
-            .all()
-        )
-        # Convert to list of integers
-        years_list = [int(year) for year in years if year is not None]
-        return years_list
+        return self.repository.find_available_years(session)
 
     def get_expiring_qualifications(self, session: Session, limit: int = 10) -> list[dict[str, Any]]:
         """Get top qualifications with lowest remaining days across all crew members.
@@ -180,18 +160,9 @@ class DashboardService:
             List of qualification dictionaries sorted by remaining days (lowest first)
         """
         # Get all TripulanteQualificacao records with related data, filtering by status Presente
-        from sqlalchemy.orm import joinedload
-
-        stmt = (
-            select(TripulanteQualificacao)
-            .join(Tripulante)
-            .where(Tripulante.status == StatusTripulante.PRESENTE.value)
-            .options(
-                joinedload(TripulanteQualificacao.tripulante),
-                joinedload(TripulanteQualificacao.qualificacao),
-            )
+        all_qualifications = self.repository.find_all_tripulante_qualificacoes_with_presente_status(
+            session
         )
-        all_qualifications = session.execute(stmt).unique().scalars().all()
 
         # Calculate remaining days for each qualification
         today = date.today()

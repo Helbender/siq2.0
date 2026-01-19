@@ -4,6 +4,7 @@ from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
 from sqlalchemy.orm import Session
 
+from app.core.config import engine
 from app.features.auth.schemas import (
     LoginRequestSchema,
     PasswordUpdateRequestSchema,
@@ -11,7 +12,6 @@ from app.features.auth.schemas import (
     validate_request,
 )
 from app.features.auth.service import AuthService
-from config import engine  # type: ignore
 
 auth_bp = Blueprint("auth", __name__)
 auth_service = AuthService()

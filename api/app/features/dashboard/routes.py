@@ -3,8 +3,7 @@
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
-
+from app.core.config import engine
 from app.features.dashboard.service import DashboardService
 
 dashboard_bp = Blueprint("dashboard", __name__)
