@@ -1,4 +1,169 @@
-# Python/Backend Rules
+You are working on a professional React application using:
+- React + Vite
+- React Router v7 (Data Router)
+- Chakra UI v3
+- Feature-based architecture
+
+You MUST follow the architectural rules below at all times.
+
+=====================================
+GLOBAL ARCHITECTURE PRINCIPLES
+=====================================
+
+1. Feature-first architecture
+- Business logic MUST live inside src/features/<feature-name>/
+- Features represent real business domains (users, flights, qualifications, etc.)
+- Features MUST NOT contain app-wide layout or routing orchestration logic
+
+2. Clear separation of responsibilities
+- App structure/layout → src/shell
+- Reusable UI & hooks → src/common
+- Routing orchestration → src/routes
+- Business logic → src/features
+
+Do NOT mix these responsibilities.
+
+=====================================
+SHELL (APP CHROME)
+=====================================
+
+The `src/shell/` folder is responsible ONLY for application structure.
+
+Allowed inside `src/shell/`:
+- Layout components (AppLayout, AuthenticatedLayout)
+- Structural UI (Header, Footer, Navbar)
+- No business logic
+- No feature-specific code
+
+Structure:
+src/shell/
+  layout/
+    AppLayout.tsx
+    AuthenticatedLayout.tsx
+  components/
+    Header.tsx
+    Footer.tsx
+    NavbarLeft.tsx
+
+Rules:
+- Layouts MAY render <Outlet />
+- Layouts MUST NOT fetch data
+- Layouts MUST NOT contain permissions or role logic
+
+=====================================
+COMMON (REUSABLE LOGIC)
+=====================================
+
+The `src/common/` folder contains reusable, app-agnostic logic.
+
+Allowed inside `src/common/`:
+- Generic UI components
+- Reusable hooks
+- No domain-specific logic
+- No routing logic
+
+Structure:
+src/common/
+  components/
+    StandardText.tsx
+    StyledText.tsx
+  hooks/
+    useDialogForm.ts
+
+Rules:
+- Components MUST be reusable across features
+- Hooks MUST NOT depend on feature state or APIs
+
+=====================================
+FEATURES (BUSINESS DOMAINS)
+=====================================
+
+Each feature owns its business logic completely.
+
+Structure:
+src/features/<feature>/
+  components/
+  pages/
+  hooks/
+  queries/
+  mutations/
+  routes.ts
+
+Rules:
+- Features MUST export route configuration (not routers)
+- Features MUST NOT know about layouts
+- Features MUST NOT know about authentication or roles
+- Features MUST NOT import from src/routes
+
+Example:
+export const flightsRoutes = [
+  { path: "/flights", element: <FlightsPage /> }
+];
+
+=====================================
+ROUTING (FIRST-CLASS SYSTEM)
+=====================================
+
+Routing orchestration MUST live in `src/routes/`.
+
+Structure:
+src/routes/
+  router.tsx
+  public.routes.ts
+  protected.routes.ts
+
+Rules:
+- `router.tsx` is the ONLY place where createBrowserRouter is called
+- Layouts are assigned ONLY in router.tsx
+- Features contribute routes via exported arrays
+- Routing decides structure; features decide content
+
+Example flow:
+- Feature exports routes
+- protected.routes.ts aggregates feature routes
+- router.tsx applies layouts
+
+=====================================
+ABSOLUTE IMPORT RULES
+=====================================
+
+- Use absolute imports with aliases (e.g. "@/features/...")
+- Features MAY import from:
+  - common
+  - services
+  - lib
+- Features MUST NOT import from:
+  - shell
+  - routes
+- shell MUST NOT import from features
+
+=====================================
+WHAT NOT TO DO
+=====================================
+
+❌ Do NOT place layouts inside features
+❌ Do NOT place routing logic inside features
+❌ Do NOT create shared "god" folders
+❌ Do NOT mix UI reuse with business logic
+❌ Do NOT fetch data in layouts
+
+=====================================
+DEFAULT BEHAVIOR FOR NEW CODE
+=====================================
+
+When creating new code:
+1. Ask: Is this business logic? → feature
+2. Ask: Is this app structure? → shell
+3. Ask: Is this reusable UI or hook? → common
+4. Ask: Is this routing orchestration? → routes
+
+If unsure, default to:
+- feature for business logic
+- common for reusable logic
+
+Follow these rules strictly.
+
+<!-- # Python/Backend Rules
 - Always use `uv add` to add packages to Python virtual environment.
 - For DB migrations, provide the command but let the user run it (e.g., `flask db migrate` or `flask db upgrade head`).
 - Follow Python 3.13+ syntax and type hints where appropriate.
@@ -47,4 +212,4 @@
 # General
 - When adding new features, maintain consistency with existing code patterns.
 - Test changes locally before committing.
-- Keep dependencies up to date but test thoroughly when updating.
+- Keep dependencies up to date but test thoroughly when updating. -->
