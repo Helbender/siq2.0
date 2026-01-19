@@ -1,11 +1,10 @@
 """Qualifications routes - thin request/response handlers."""
 
 from flask import Blueprint, Response, jsonify, request
-from flask_jwt_extended import verify_jwt_in_request
 from sqlalchemy.orm import Session
 
-from config import engine  # type: ignore
-
+from app.core.config import engine
+from app.features.qualifications.policies import require_authenticated
 from app.features.qualifications.schemas import (
     CheckApplicabilityRequestSchema,
     QualificationCreateSchema,
@@ -53,7 +52,11 @@ def listar_qualificacoes() -> tuple[Response, int]:
               grupo:
                 type: string
     """
-    verify_jwt_in_request()
+    # Check authentication
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
     with Session(engine) as session:
         qualifications = qualification_service.get_all_qualifications(session)
         return jsonify(qualifications), 200

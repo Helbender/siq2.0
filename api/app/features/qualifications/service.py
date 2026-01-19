@@ -2,14 +2,12 @@
 
 from typing import Any
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.features.qualifications.models import Qualificacao  # type: ignore
-from app.features.users.models import Tripulante  # type: ignore
+from app.features.qualifications.repository import QualificationRepository
 from app.shared.enums import (
     GrupoQualificacoes,
-    StatusTripulante,
     TipoTripulante,
     get_all_crew_types,
     get_all_qualification_groups,
@@ -22,6 +20,10 @@ from app.shared.enums import (
 class QualificationService:
     """Service class for qualification business logic."""
 
+    def __init__(self):
+        """Initialize qualification service with repository."""
+        self.repository = QualificationRepository()
+
     def get_all_qualifications(self, session: Session) -> list[dict]:
         """Get all qualifications from database.
 
@@ -31,8 +33,7 @@ class QualificationService:
         Returns:
             List of qualification dictionaries
         """
-        stmt = select(Qualificacao).order_by(Qualificacao.grupo, Qualificacao.nome)
-        qualificacoes = session.execute(stmt).scalars().all()
+        qualificacoes = self.repository.find_all(session)
 
         result = [
             {
@@ -74,9 +75,8 @@ class QualificationService:
             grupo=grupo_enum,
         )
 
-        session.add(qualification)
-        session.commit()
-        return {"id": qualification.id}
+        created_qualification = self.repository.create(session, qualification)
+        return {"id": created_qualification.id}
 
     def get_qualification(self, qualification_id: int, session: Session) -> dict[str, Any] | None:
         """Get a qualification by ID.
@@ -88,8 +88,7 @@ class QualificationService:
         Returns:
             Qualification dictionary or None if not found
         """
-        stmt = select(Qualificacao).where(Qualificacao.id == qualification_id)
-        qualification = session.execute(stmt).scalar_one_or_none()
+        qualification = self.repository.find_by_id(session, qualification_id)
         if not qualification:
             return None
 
@@ -112,8 +111,7 @@ class QualificationService:
         Returns:
             dict with "id" key on success, or error message
         """
-        stmt = select(Qualificacao).where(Qualificacao.id == qualification_id)
-        qualification = session.execute(stmt).scalar_one_or_none()
+        qualification = self.repository.find_by_id(session, qualification_id)
 
         if not qualification:
             return {"error": "Qualificação não encontrada"}
@@ -135,7 +133,7 @@ class QualificationService:
             except ValueError:
                 return {"error": f"Grupo de Qualificação inválido: {qualification_data['grupo']}"}
 
-        session.commit()
+        self.repository.update(session, qualification)
         return {"id": qualification.id}
 
     def delete_qualification(self, qualification_id: int, session: Session) -> dict[str, Any]:
@@ -148,14 +146,12 @@ class QualificationService:
         Returns:
             dict with success message, or error message
         """
-        stmt = select(Qualificacao).where(Qualificacao.id == qualification_id)
-        qualification = session.execute(stmt).scalar_one_or_none()
+        qualification = self.repository.find_by_id(session, qualification_id)
 
         if not qualification:
             return {"error": "Qualificação não encontrada"}
 
-        session.delete(qualification)
-        session.commit()
+        self.repository.delete(session, qualification)
         return {"mensagem": "Qualificação apagada com sucesso."}
 
     def get_qualifications_for_tripulante_type(self, tipo: str, session: Session) -> list[dict]:
@@ -168,13 +164,7 @@ class QualificationService:
         Returns:
             List of tripulante dictionaries with qualifications
         """
-        stmt = (
-            select(Tripulante)
-            .where(Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value)
-            .order_by(Tripulante.nip, Tripulante.rank)
-        )
-        tripulantes = session.execute(stmt).scalars().all()
-
+        tripulantes = self.repository.find_tripulantes_by_type(session, tipo)
         return [t.to_json() for t in tripulantes]
 
     def get_qualifications_for_tripulante_nip(self, nip: int, session: Session) -> dict[str, Any]:
@@ -187,14 +177,12 @@ class QualificationService:
         Returns:
             dict with qualification list, or error message
         """
-        stmt = select(Tripulante).where(Tripulante.nip == nip)
-        tripulante = session.execute(stmt).scalar_one_or_none()
+        tripulante = self.repository.find_tripulante_by_nip(session, nip)
 
         if not tripulante:
             return {"error": "Tripulante não encontrado"}
 
-        stmt2 = select(Qualificacao).where(Qualificacao.tipo_aplicavel == tripulante.tipo)
-        qualificacoes = session.execute(stmt2).scalars().all()
+        qualificacoes = self.repository.find_by_tipo_aplicavel(session, tripulante.tipo)
         return {"qualifications": [{"id": q.id, "nome": q.nome} for q in qualificacoes]}
 
     def get_lists(self) -> dict[str, Any]:
