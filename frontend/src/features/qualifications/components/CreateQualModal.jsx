@@ -38,6 +38,7 @@ export function CreateQualModal({ edit, qualification }) {
   const [tipos, setTipos] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const [allGrupos, setAllGrupos] = useState([]);
+  const [dataFetched, setDataFetched] = useState(false);
   const toast = useToast();
   const qualificacao = useForm(
     qualification || {
@@ -109,26 +110,31 @@ export function CreateQualModal({ edit, qualification }) {
     }
   };
 
+  // Fetch data only when modal opens, not on component mount
   useEffect(() => {
     isMountedRef.current = true;
-    const fetchData = async () => {
-      try {
-        const res = await http.get("/v2/listas");
-        if (isMountedRef.current) {
-          setTipos(res.data.tipos);
-          // Also fetch all qualification groups
-          await fetchAllQualificationGroups();
+    
+    if (isOpen && !dataFetched) {
+      const fetchData = async () => {
+        try {
+          const res = await http.get("/v2/listas");
+          if (isMountedRef.current) {
+            setTipos(res.data.tipos);
+            setDataFetched(true);
+            // Also fetch all qualification groups
+            await fetchAllQualificationGroups();
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
+      };
+      fetchData();
+    }
 
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [isOpen, dataFetched]);
 
   // Watch for crew type changes and update qualification groups
   useEffect(() => {
@@ -143,9 +149,9 @@ export function CreateQualModal({ edit, qualification }) {
     return () => subscription.unsubscribe();
   }, [qualificacao]);
 
-  // Populate form fields if in edit mode and qualification is provided
+  // Populate form fields if in edit mode and qualification is provided (only when modal opens)
   useEffect(() => {
-    if (edit && qualification) {
+    if (isOpen && edit && qualification) {
       qualificacao.reset({
         nome: qualification.nome || "",
         validade: qualification.validade || "",
@@ -157,7 +163,7 @@ export function CreateQualModal({ edit, qualification }) {
         fetchQualificationGroups(qualification.tipo_aplicavel);
       }
     }
-  }, [edit, qualification]);
+  }, [isOpen, edit, qualification]);
   return (
     <>
       {edit && (

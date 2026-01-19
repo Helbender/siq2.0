@@ -1,19 +1,28 @@
-import React, { useContext, useState, useEffect, useMemo } from "react";
-import {
-  Box,
-  Table,
-  Stack,
-  Flex,
-  Text,
-  Spacer,
-} from "@chakra-ui/react";
-import { AuthContext } from "@/features/auth/contexts/AuthContext";
-import { useLocation } from "react-router-dom";
 import { http } from "@/api/http";
 import { QualificationGroupFilter } from "@/features/qualifications/components/QualificationGroupFilter";
 import { useToast } from "@/utils/useToast";
+import {
+  Box,
+  Flex,
+  SegmentGroup,
+  Spacer,
+  Stack,
+  Table,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-export function QualificationTablePage({ tipo }) {
+const TIPO_OPTIONS = [
+  { value: "PILOTO", label: "Piloto" },
+  { value: "OPERADOR CABINE", label: "Operador Cabine" },
+  { value: "CONTROLADOR TATICO", label: "Controlador Tático" },
+  { value: "OPERADOR VIGILANCIA", label: "Operador Vigilância" },
+  { value: "OPERAÇÕES", label: "Operações" },
+];
+
+export function QualificationTablePage({ tipo: initialTipo }) {
+  const [selectedTipo, setSelectedTipo] = useState(initialTipo || "PILOTO");
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
   const [filteredCrew, setFilteredCrew] = useState([]);
@@ -21,11 +30,12 @@ export function QualificationTablePage({ tipo }) {
   const [sortBy, setSortBy] = useState(null); // { qualName: string, direction: 'asc' | 'desc' }
   const [visibleGroups, setVisibleGroups] = useState([]);
   const [availableGroups, setAvailableGroups] = useState([]);
-  const { token } = useContext(AuthContext);
   const location = useLocation();
   const toast = useToast();
 
   const getSavedCrew = async () => {
+    if (!selectedTipo) return;
+    
     toast({
       title: "A carregar Tripulantes",
       description: "Em processo.",
@@ -35,8 +45,9 @@ export function QualificationTablePage({ tipo }) {
       position: "bottom",
     });
     try {
+      const tipoForApi = selectedTipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES");
       const res = await http.get(
-        `/v2/tripulantes/qualificacoes/${tipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES")}`,
+        `/v2/tripulantes/qualificacoes/${tipoForApi}`,
       );
       toast.closeAll();
       toast({
@@ -55,12 +66,13 @@ export function QualificationTablePage({ tipo }) {
       setSelectedTypes(types); // Select all types by default
     } catch (error) {
       console.log(error);
+      toast.closeAll();
     }
   };
 
   useEffect(() => {
     getSavedCrew();
-  }, [location, tipo]);
+  }, [location, selectedTipo]);
 
   // Filter crew by selected types
   useEffect(() => {
@@ -204,6 +216,26 @@ export function QualificationTablePage({ tipo }) {
 
   return (
     <Stack m={4} pb={10}>
+      <Box ml={4} mb={6}>
+        <Text fontWeight="bold" mb={3} fontSize="md" color="text.secondary">
+          Tipo de Tripulante
+        </Text>
+        <SegmentGroup.Root
+          value={selectedTipo}
+          onValueChange={(details) => setSelectedTipo(details.value)}
+          size="md"
+          css={{
+            "--segment-indicator-bg": "colors.teal.500",
+            "& [data-selected]": {
+              bg: "teal.500",
+              color: "white",
+            },
+          }}
+        >
+          <SegmentGroup.Items items={TIPO_OPTIONS} />
+          <SegmentGroup.Indicator />
+        </SegmentGroup.Root>
+      </Box>
       <Flex ml={4} mb={6} gap={4} direction={{ base: "column", md: "row" }}>
         <Box alignSelf={"flex-start"}>
           <QualificationGroupFilter

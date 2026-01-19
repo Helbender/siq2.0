@@ -1,23 +1,20 @@
 import {
   Card,
-  Text,
-  CardBody,
-  CardHeader,
-  Heading,
-  Flex,
   Circle,
+  Flex,
+  Heading
 } from "@chakra-ui/react";
 import { GroupedQualifications } from "./GroupedQualifications";
 
 export function PilotCard({ user }) {
   return (
-    <Card
-      bg="bg.card-strong"
+    <Card.Root
+      bg="bg.surface"
       boxShadow={"xl"}
       // maxW={"1000px"}
       // minW="550px"
     >
-      <CardHeader>
+      <Card.Header>
         <Flex gap={4}>
           <Flex flex={"1"} flexDirection={"row"} align="center" gap={"5"}>
             <Circle
@@ -38,10 +35,10 @@ export function PilotCard({ user }) {
           </Flex>
           <Flex align={"center"} gap={2}></Flex>
         </Flex>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <GroupedQualifications qualificacoes={user.qualificacoes} />
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   );
 }
