@@ -1,5 +1,6 @@
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useCrewTypes } from "@/common/CrewTypesProvider";
+import { getRoleOptionsForUser } from "@/common/roles";
 import {
   Button,
   Dialog,
@@ -211,6 +212,32 @@ export function CreateUserModal({
                       <NativeSelect.Indicator />
                     </NativeSelect.Root>
                   </Field.Root>
+                  {currentUser?.admin || currentUser?.roleLevel || currentUser?.role?.level ? (
+                    <Field.Root>
+                      <Field.Label>Role</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          bg="bg.surface"
+                          value={formData.roleLevel}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              roleLevel: parseInt(e.target.value, 10),
+                            })
+                          }
+                        >
+                          {getRoleOptionsForUser(
+                            currentUser?.roleLevel || currentUser?.role?.level
+                          ).map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Field.Root>
+                  ) : null}
                 </HStack>
                 <Button
                   type="submit"

@@ -33,6 +33,8 @@ class UserCreateSchema(Schema):
         validate=validate.OneOf([s.value for s in StatusTripulante]),
         metadata={"description": "User status"},
     )
+    roleLevel = fields.Int(allow_none=True, metadata={"description": "User role level (numeric)"})
+    role_id = fields.Int(allow_none=True, metadata={"description": "User role ID (foreign key to roles table)"})
 
     @validates_schema
     def validate_tipo(self, data, **kwargs):
@@ -68,6 +70,8 @@ class UserUpdateSchema(Schema):
         validate=validate.OneOf([s.value for s in StatusTripulante]),
         metadata={"description": "User status"},
     )
+    roleLevel = fields.Int(allow_none=True, metadata={"description": "User role level (numeric)"})
+    role_id = fields.Int(allow_none=True, metadata={"description": "User role ID (foreign key to roles table)"})
 
     @validates_schema
     def validate_tipo(self, data, **kwargs):

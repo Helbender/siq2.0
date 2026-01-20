@@ -1,3 +1,5 @@
+import { canModifyUser, getRoleName, Role } from "@/common/roles";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useSendEmail } from "@/utils/useSendEmail";
 import { useToast } from "@/utils/useToast";
 import {
@@ -8,11 +10,14 @@ import {
 import { BiTrash } from "react-icons/bi";
 import { FaEdit } from "react-icons/fa";
 import { IoIosCheckmark, IoIosClose } from "react-icons/io";
-import { IoCheckmarkCircleSharp, IoCloseCircleSharp } from "react-icons/io5";
 
 export function UsersTable({ users, onEdit, onDelete }) {
+  const { user: currentUser } = useAuth();
   const sendEmail = useSendEmail();
   const toast = useToast();
+  
+  const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
+  const currentUserNip = currentUser?.nip;
   return (
     <Table.Root mt={4} overflowX="auto" variant="simple"  >
       <Table.Header border="none" >
@@ -23,7 +28,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
           <Table.ColumnHeader color="black">Função</Table.ColumnHeader>
           <Table.ColumnHeader color="black">Tipo</Table.ColumnHeader>
           <Table.ColumnHeader color="black">Status</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Admin</Table.ColumnHeader>
+          <Table.ColumnHeader color="black">Role</Table.ColumnHeader>
           <Table.ColumnHeader color="black">Ações</Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
@@ -43,11 +48,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
               )}
             </Table.Cell>
             <Table.Cell>
-              {user.admin ? (
-                <IoCheckmarkCircleSharp size={"30px"} color="green" />
-              ) : (
-                <IoCloseCircleSharp size={"30px"} color="red" />
-              )}
+              {getRoleName(user.roleLevel || user.role?.level)}
             </Table.Cell>
             <Table.Cell>
               <HStack spacing={2} align="center">
@@ -68,21 +69,47 @@ export function UsersTable({ users, onEdit, onDelete }) {
                 >
                   <FaMailBulk />
                 </IconButton> */}
-                <IconButton
-                  colorPalette="yellow"
-                  onClick={() => onEdit(user)}
-                  aria-label="Edit User"
-                >
-                  <FaEdit />
-                </IconButton>
-                {/* <InsertInitQual user={user} /> */}
-                <IconButton
-                  colorPalette="red"
-                  onClick={() => onDelete(user)}
-                  aria-label="Delete User"
-                >
-                  <BiTrash />
-                </IconButton>
+                {canModifyUser(
+                  currentUserRoleLevel,
+                  user.roleLevel || user.role?.level,
+                  currentUserNip,
+                  user.nip
+                ) ? (
+                  <>
+                    <IconButton
+                      colorPalette="yellow"
+                      onClick={() => onEdit(user)}
+                      aria-label="Edit User"
+                    >
+                      <FaEdit />
+                    </IconButton>
+                    {/* <InsertInitQual user={user} /> */}
+                    <IconButton
+                      colorPalette="red"
+                      onClick={() => onDelete(user)}
+                      aria-label="Delete User"
+                    >
+                      <BiTrash />
+                    </IconButton>
+                  </>
+                ) : (
+                  <>
+                    <IconButton
+                      colorPalette="yellow"
+                      disabled
+                      aria-label="Edit User (disabled)"
+                    >
+                      <FaEdit />
+                    </IconButton>
+                    <IconButton
+                      colorPalette="red"
+                      disabled
+                      aria-label="Delete User (disabled)"
+                    >
+                      <BiTrash />
+                    </IconButton>
+                  </>
+                )}
               </HStack>
             </Table.Cell>
           </Table.Row>

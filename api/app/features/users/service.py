@@ -30,8 +30,9 @@ class UserService:
         """
         tripulantes_obj = self.repository.find_all(session)
 
-        tripulantes: list[dict] = [
-            {
+        tripulantes: list[dict] = []
+        for t in tripulantes_obj:
+            user_dict = {
                 "nip": t.nip,
                 "name": t.name,
                 "tipo": t.tipo.value,
@@ -41,8 +42,15 @@ class UserService:
                 "admin": t.admin,
                 "status": t.status.value,
             }
-            for t in tripulantes_obj
-        ]
+            # Add role information if available
+            role_level_value = (
+                t.role.level if t.role else (t.role_level if t.role_level is not None else None)
+            )
+            if role_level_value is not None:
+                user_dict["roleLevel"] = role_level_value
+            if t.role:
+                user_dict["role"] = t.role.to_json()
+            tripulantes.append(user_dict)
         return tripulantes
 
     def create_user(self, user_data: dict, session: Session) -> dict[str, Any]:
@@ -121,6 +129,10 @@ class UserService:
                 if key == "status" and isinstance(value, str):
                     # Normalize status string to enum
                     value = StatusTripulante(value)
+                if key == "roleLevel":
+                    # Map roleLevel to role_level field
+                    modified_user.role_level = value
+                    continue
                 setattr(modified_user, key, value)
 
             self.repository.update(session, modified_user)

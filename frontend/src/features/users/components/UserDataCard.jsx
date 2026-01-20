@@ -1,3 +1,5 @@
+import { canModifyUser, getRoleName, Role } from "@/common/roles";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { StyledText } from "@/common/components/StyledText";
 import { useSendEmail } from "@/utils/useSendEmail";
 import { useToast } from "@/utils/useToast";
@@ -25,8 +27,18 @@ const colors = {
 };
 
 export function UserDataCard({ user }) {
+  const { user: currentUser } = useAuth();
   const toast = useToast();
   const sendEmail = useSendEmail();
+  
+  const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
+  const currentUserNip = currentUser?.nip;
+  const canModify = canModifyUser(
+    currentUserRoleLevel,
+    user.roleLevel || user.role?.level,
+    currentUserNip,
+    user.nip
+  );
   return (
     <Card.Root bg="bg.cardSubtle" boxShadow={"xl"}>
       <Card.Header>
@@ -56,6 +68,10 @@ export function UserDataCard({ user }) {
             text={`Status:  ${user.status || "Presente"}`}
           />
           <StyledText
+            query={"Role:"}
+            text={`Role:  ${getRoleName(user.roleLevel || user.role?.level)}`}
+          />
+          <StyledText
             query={"Admin:"}
             text={`Admin:  ${user.admin ? "Sim" : "Não"}`}
           />
@@ -64,8 +80,12 @@ export function UserDataCard({ user }) {
       <Card.Footer>
         <Flex gap={5}>
           <Spacer />
-          <CreateUserModal edit={true} user={user} />
-          <InsertInitQual user={user} />
+          {canModify && (
+            <>
+              <CreateUserModal edit={true} user={user} />
+              <InsertInitQual user={user} />
+            </>
+          )}
 
           <IconButton
             icon={<FaMailBulk />}
@@ -83,7 +103,7 @@ export function UserDataCard({ user }) {
             }}
             aria-label="Email User"
           />
-          <CreateUserModal isDelete={true} user={user} />
+          {canModify && <CreateUserModal isDelete={true} user={user} />}
         </Flex>
       </Card.Footer>
     </Card.Root>

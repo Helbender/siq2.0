@@ -1,3 +1,5 @@
+import { Role } from "@/common/roles";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useDialogForm } from "@/common/hooks/useDialogForm";
 import { useToast } from "@/utils/useToast";
 import {
@@ -22,6 +24,7 @@ import { useUpdateUser } from "../mutations/useUpdateUser";
 import { useDeleteUser } from "../mutations/useDeleteUser";
 
 export function UserManagementPage() {
+  const { user: currentUser } = useAuth();
   const {
     filteredUsers,
     searchTerm,
@@ -34,6 +37,9 @@ export function UserManagementPage() {
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
+  
+  const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
+  const canCreateUsers = currentUserRoleLevel !== Role.READONLY;
 
   const handleSubmit = async (userNip, formData) => {
     try {
@@ -93,7 +99,9 @@ export function UserManagementPage() {
   return (
     <Container maxW="90%" py={6} mb={35}>
       <HStack mb={10} align={"center"}>
-        <Button onClick={(e) => {e.preventDefault(); dialog.openCreate()}} colorPalette="green">Novo Utilizador</Button>
+        {canCreateUsers && (
+          <Button onClick={(e) => {e.preventDefault(); dialog.openCreate()}} colorPalette="green">Novo Utilizador</Button>
+        )}
         <CreateUserModal
           isOpen={dialog.isOpen}
           onClose={dialog.close}

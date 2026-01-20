@@ -1,4 +1,5 @@
 import { TipoTripulanteDefault } from "@/common/enums";
+import { Role } from "@/common/roles";
 import { useEffect, useState } from "react";
 
 export function useUserForm(editingUser) {
@@ -12,6 +13,7 @@ export function useUserForm(editingUser) {
     squadron: "502 - Elefantes",
     tipo: TipoTripulanteDefault.PILOTO,
     status: "Presente",
+    roleLevel: Role.USER,
   });
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export function useUserForm(editingUser) {
         squadron: "502 - Elefantes",
         tipo: TipoTripulanteDefault.PILOTO,
         status: "Presente",
+        roleLevel: Role.USER,
       });
       return;
     }
@@ -40,6 +43,7 @@ export function useUserForm(editingUser) {
       squadron: editingUser.squadron || "502 - Elefantes",
       tipo: editingUser.tipo || TipoTripulanteDefault.PILOTO,
       status: editingUser.status || "Presente",
+      roleLevel: editingUser.roleLevel || editingUser.role?.level || Role.USER,
     });
   }, [editingUser]);
 
