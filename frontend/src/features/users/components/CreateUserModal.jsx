@@ -1,4 +1,5 @@
 import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { useCrewTypes } from "@/common/CrewTypesProvider";
 import {
   Button,
   Dialog,
@@ -20,6 +21,7 @@ export function CreateUserModal({
   onSubmit,
 }) {
   const { user: currentUser } = useAuth();
+  const { TipoTripulante, crewTypeToApiFormat } = useCrewTypes();
   const { formData, setFormData } = useUserForm(editingUser);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -174,15 +176,21 @@ export function CreateUserModal({
                           setFormData({ ...formData, tipo: e.target.value })
                         }
                       >
-                        <option value="PILOTO">PILOTO</option>
-                        <option value="OPERADOR_CABINE">OPERADOR CABINE</option>
-                        <option value="CONTROLADOR_TATICO">
-                          CONTROLADOR TÁTICO
+                        <option value={crewTypeToApiFormat(TipoTripulante.PILOTO)}>
+                          {TipoTripulante.PILOTO}
                         </option>
-                        <option value="OPERADOR_VIGILANCIA">
-                          OPERADOR VIGILÂNCIA
+                        <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_CABINE)}>
+                          {TipoTripulante.OPERADOR_CABINE}
                         </option>
-                        <option value="OPERACOES">OPERAÇÕES</option>
+                        <option value={crewTypeToApiFormat(TipoTripulante.CONTROLADOR_TATICO)}>
+                          {TipoTripulante.CONTROLADOR_TATICO}
+                        </option>
+                        <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_VIGILANCIA)}>
+                          {TipoTripulante.OPERADOR_VIGILANCIA}
+                        </option>
+                        <option value={crewTypeToApiFormat(TipoTripulante.OPERACOES)}>
+                          {TipoTripulante.OPERACOES}
+                        </option>
                       </NativeSelect.Field>
                       <NativeSelect.Indicator />
                     </NativeSelect.Root>

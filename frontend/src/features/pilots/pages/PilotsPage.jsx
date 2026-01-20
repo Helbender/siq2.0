@@ -1,18 +1,12 @@
 import { Box, Grid, SegmentGroup, Stack, Text } from "@chakra-ui/react";
+import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { useEffect, useMemo, useState } from "react";
 import { PilotCard } from "../components/PilotCard";
 import { usePilots } from "../hooks/usePilots";
 
-const TIPO_OPTIONS = [
-  { value: "PILOTO", label: "Piloto" },
-  { value: "OPERADOR CABINE", label: "Operador Cabine" },
-  { value: "CONTROLADOR TATICO", label: "Controlador Tático" },
-  { value: "OPERADOR VIGILANCIA", label: "Operador Vigilância" },
-  { value: "OPERAÇÕES", label: "Operações" },
-];
-
 export function PilotsPage({ tipo: initialTipo }) {
-  const [selectedTipo, setSelectedTipo] = useState(initialTipo ?? "PILOTO");
+  const { TipoTripulante, getCrewTypeOptions } = useCrewTypes();
+  const [selectedTipo, setSelectedTipo] = useState(initialTipo ?? TipoTripulante.PILOTO);
   const [selectedFuncao, setSelectedFuncao] = useState(null);
 
   const { pilotos } = usePilots(selectedTipo);
@@ -57,7 +51,7 @@ export function PilotsPage({ tipo: initialTipo }) {
             },
           }}
         >
-          <SegmentGroup.Items items={TIPO_OPTIONS} />
+          <SegmentGroup.Items items={getCrewTypeOptions()} />
           <SegmentGroup.Indicator />
         </SegmentGroup.Root>
       </Box>

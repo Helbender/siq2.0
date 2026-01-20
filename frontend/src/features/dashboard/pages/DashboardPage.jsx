@@ -6,8 +6,6 @@ import {
   Heading,
   SimpleGrid,
   Skeleton,
-  SkeletonCircle,
-  SkeletonText,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -29,25 +27,102 @@ function getTomorrow() {
 
 function LoadingSkeleton() {
   return (
-    <Box p={6} ml={"60px"}>
+    <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg="bg.canvas">
       <Heading mb={6} textAlign={"center"}>
         Dashboard (A carregar estatísticas...)
       </Heading>
-      <Flex justifyContent="center" alignItems="center" mb={6}>
-        <Skeleton width="300px" height="30px" mb={6} />
+
+      {/* Sun Times and Year Selector Skeleton */}
+      <Flex justifyContent="space-between" alignItems="center" mb={2}>
+        <Skeleton width="120px" height="80px" borderRadius="md" />
+        <Skeleton width="200px" height="40px" borderRadius="md" />
+        <Skeleton width="120px" height="80px" borderRadius="md" />
       </Flex>
-      <SimpleGrid columns={{ base: 1, md: 5 }} spacing={4} mb={6}>
+      <Skeleton width="200px" height="20px" ml="auto" mb={4} />
+
+      {/* Summary Statistics Skeleton */}
+      <SimpleGrid columns={{ base: 1, md: 5 }} gap={4} mb={6}>
         {[...Array(5)].map((_, i) => (
-          <Box key={i} padding="6" boxShadow="lg">
-            <SkeletonCircle size="5" />
-            <SkeletonText mt="4" noOfLines={3} spacing="4" skeletonHeight="1" />
+          <Box
+            key={i}
+            bg="bg.cardSubtle"
+            p={4}
+            borderRadius="lg"
+            boxShadow="md"
+          >
+            <Skeleton height="16px" width="60px" mb={2} />
+            <Skeleton height="32px" width="80px" />
           </Box>
         ))}
       </SimpleGrid>
+
+      {/* Pie Charts Skeleton */}
       <Flex direction={{ base: "column", lg: "row" }} gap={6} mb={6}>
-        <Skeleton w="100%" height={"450px"} mb={6} />
-        <Skeleton w="100%" height={"450px"} mb={6} />
+        <Box
+          flex={1}
+          bg="bg.cardSubtle"
+          p={4}
+          borderRadius="lg"
+          boxShadow="md"
+          h="450px"
+        >
+          <Skeleton height="24px" width="200px" mx="auto" mb={4} />
+          <Skeleton height="350px" width="100%" borderRadius="md" />
+        </Box>
+        <Box
+          flex={1}
+          bg="bg.cardSubtle"
+          p={4}
+          borderRadius="lg"
+          boxShadow="md"
+          h="450px"
+        >
+          <Skeleton height="24px" width="200px" mx="auto" mb={4} />
+          <Skeleton height="350px" width="100%" borderRadius="md" />
+        </Box>
       </Flex>
+
+      {/* Top Pilots Section Skeleton */}
+      <Box mb={6}>
+        <Skeleton height="24px" width="300px" mx="auto" mb={4} />
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
+          {[...Array(4)].map((_, i) => (
+            <Box
+              key={i}
+              bg="bg.cardSubtle"
+              p={4}
+              borderRadius="lg"
+              boxShadow="md"
+            >
+              <Skeleton height="20px" width="150px" mx="auto" mb={2} />
+              <Skeleton height="24px" width="120px" mx="auto" mb={2} />
+              <Skeleton height="28px" width="80px" mx="auto" />
+            </Box>
+          ))}
+        </SimpleGrid>
+      </Box>
+
+      {/* Expiring Qualifications Table Skeleton */}
+      <Box mb={6}>
+        <Skeleton height="24px" width="400px" mx="auto" mb={4} />
+        <Box bg="bg.surface" p={4} borderRadius="lg" boxShadow="md">
+          <Skeleton height="40px" width="100%" mb={2} />
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} height="60px" width="100%" mb={2} />
+          ))}
+        </Box>
+      </Box>
+
+      {/* Status Indicator Skeleton */}
+      <Box
+        bg="bg.card"
+        p={3}
+        borderRadius="lg"
+        boxShadow="md"
+        textAlign="center"
+      >
+        <Skeleton height="20px" width="300px" mx="auto" />
+      </Box>
     </Box>
   );
 }

@@ -1,15 +1,10 @@
-import { Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { formatHours } from "@/utils/timeCalc";
-
-const PILOT_TYPES = [
-  "PILOTO",
-  "OPERADOR CABINE",
-  "CONTROLADOR TATICO",
-  "OPERADOR VIGILANCIA",
-  "OPERAÇÕES",
-];
+import { Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 
 export function TopPilotsSection({ topPilotsByType, selectedYear }) {
+  const { getAllCrewTypes } = useCrewTypes();
+
   if (Object.keys(topPilotsByType).length === 0) {
     return null;
   }
@@ -20,7 +15,7 @@ export function TopPilotsSection({ topPilotsByType, selectedYear }) {
         Tripulantes com Mais Horas de Voo ({selectedYear})
       </Heading>
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
-        {PILOT_TYPES.filter((tipo) => topPilotsByType[tipo])
+        {getAllCrewTypes().filter((tipo) => topPilotsByType[tipo])
           .map((tipo) => {
             const pilot = topPilotsByType[tipo];
             if (!pilot) return null;

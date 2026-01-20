@@ -1,3 +1,4 @@
+import { TipoTripulanteDefault } from "@/common/enums";
 import { useEffect, useState } from "react";
 
 export function useUserForm(editingUser) {
@@ -9,7 +10,7 @@ export function useUserForm(editingUser) {
     position: "Default",
     admin: false,
     squadron: "502 - Elefantes",
-    tipo: "PILOTO",
+    tipo: TipoTripulanteDefault.PILOTO,
     status: "Presente",
   });
 
@@ -23,7 +24,7 @@ export function useUserForm(editingUser) {
         position: "Default",
         admin: false,
         squadron: "502 - Elefantes",
-        tipo: "PILOTO",
+        tipo: TipoTripulanteDefault.PILOTO,
         status: "Presente",
       });
       return;
@@ -37,7 +38,7 @@ export function useUserForm(editingUser) {
       position: editingUser.position || "Default",
       admin: editingUser.admin || false,
       squadron: editingUser.squadron || "502 - Elefantes",
-      tipo: editingUser.tipo || "PILOTO",
+      tipo: editingUser.tipo || TipoTripulanteDefault.PILOTO,
       status: editingUser.status || "Presente",
     });
   }, [editingUser]);

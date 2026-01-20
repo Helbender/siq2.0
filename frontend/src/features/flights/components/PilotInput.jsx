@@ -1,4 +1,5 @@
 import { http } from "@/api/http";
+import { useCrewTypes } from "@/common/CrewTypesProvider";
 import {
   Field,
   GridItem,
@@ -12,27 +13,8 @@ import { FaMinus } from "react-icons/fa";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
-// Map position to tipo for API calls (matching TipoTripulante enum values)
-const positionToTipo = (position) => {
-  const mapping = {
-    "PI": "PILOTO",
-    "PC": "PILOTO",
-    "P": "PILOTO",
-    "CP": "PILOTO",
-    "OCI": "OPERADOR CABINE",
-    "OC": "OPERADOR CABINE",
-    "OCA": "OPERADOR CABINE",
-    "CTI": "CONTROLADOR TATICO",
-    "CT": "CONTROLADOR TATICO",
-    "CTA": "CONTROLADOR TATICO",
-    "OPVI": "OPERADOR VIGILANCIA",
-    "OPV": "OPERADOR VIGILANCIA",
-    "OPVA": "OPERADOR VIGILANCIA",
-  };
-  return mapping[position] || null;
-};
-
 export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
+  const { positionToCrewType } = useCrewTypes();
   const [qualP, setQualP] = useState([]);
   const { register, setValue, getValues, control } = useFormContext();
   
@@ -47,8 +29,8 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   // Get tipo from position for qualifications fetching
   const tipo = useMemo(() => {
     const pos = position || member.position;
-    return pos ? positionToTipo(pos) : null;
-  }, [position, member.position]);
+    return pos ? positionToCrewType(pos) : null;
+  }, [position, member.position, positionToCrewType]);
 
   // Lista de pilotos filtrada consoante a posição selecionada
   const pilotosFiltrados = useMemo(() => {

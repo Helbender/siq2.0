@@ -7,6 +7,8 @@ import { useRegister } from "../mutations/useRegister";
 import { useUpdateAuthUser } from "../mutations/useUpdateAuthUser";
 import { authQueryKeys, useAuthQuery } from "../queries/useAuthQuery";
 
+const CREW_TYPES_QUERY_KEY = ["qualifications", "crew-types"];
+
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
@@ -121,6 +123,8 @@ export function AuthProvider({ children }) {
   const login = async (nip, password) => {
     try {
       const result = await loginMutation.mutateAsync({ nip, password });
+      // Fetch crew types after successful login
+      queryClient.invalidateQueries({ queryKey: CREW_TYPES_QUERY_KEY });
       return { success: true };
     } catch (e) {
       console.error("Login error:", e);

@@ -1,4 +1,5 @@
 import { http } from "@/api/http";
+import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { useToast } from "@/utils/useToast";
 import {
     Box,
@@ -10,16 +11,9 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 
-const TIPO_OPTIONS = [
-  { value: "PILOTO", label: "Piloto" },
-  { value: "OPERADOR CABINE", label: "Operador Cabine" },
-  { value: "CONTROLADOR TATICO", label: "Controlador Tático" },
-  { value: "OPERADOR VIGILANCIA", label: "Operador Vigilância" },
-  { value: "OPERAÇÕES", label: "Operações" },
-];
-
 export function QualificationTablePage({ tipo: initialTipo }) {
-  const [selectedTipo, setSelectedTipo] = useState(initialTipo || "PILOTO");
+  const { TipoTripulante, getCrewTypeOptions, crewTypeToApiFormat } = useCrewTypes();
+  const [selectedTipo, setSelectedTipo] = useState(initialTipo || TipoTripulante.PILOTO);
   const [selectedFuncao, setSelectedFuncao] = useState(null);
   const [availableTypes, setAvailableTypes] = useState([]);
   const [filteredCrew, setFilteredCrew] = useState([]);
@@ -41,7 +35,7 @@ export function QualificationTablePage({ tipo: initialTipo }) {
       position: "bottom",
     });
     try {
-      const tipoForApi = selectedTipo.replace(" ", "_").replace("OPERAÇÕES", "OPERACOES");
+      const tipoForApi = crewTypeToApiFormat(selectedTipo);
       const res = await http.get(
         `/v2/tripulantes/qualificacoes/${tipoForApi}`,
       );
@@ -220,7 +214,7 @@ export function QualificationTablePage({ tipo: initialTipo }) {
             },
           }}
         >
-          <SegmentGroup.Items items={TIPO_OPTIONS} />
+          <SegmentGroup.Items items={getCrewTypeOptions()} />
           <SegmentGroup.Indicator />
         </SegmentGroup.Root>
       </Box>
