@@ -4,45 +4,56 @@ import {
   GridItem,
   IconButton,
   Input,
-  Select,
+  NativeSelect,
 } from "@chakra-ui/react";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { FaMinus } from "react-icons/fa";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
+// Map position to tipo for API calls (matching TipoTripulante enum values)
+const positionToTipo = (position) => {
+  const mapping = {
+    "PI": "PILOTO",
+    "PC": "PILOTO",
+    "P": "PILOTO",
+    "CP": "PILOTO",
+    "OCI": "OPERADOR CABINE",
+    "OC": "OPERADOR CABINE",
+    "OCA": "OPERADOR CABINE",
+    "CTI": "CONTROLADOR TATICO",
+    "CT": "CONTROLADOR TATICO",
+    "CTA": "CONTROLADOR TATICO",
+    "OPVI": "OPERADOR VIGILANCIA",
+    "OPV": "OPERADOR VIGILANCIA",
+    "OPVA": "OPERADOR VIGILANCIA",
+  };
+  return mapping[position] || null;
+};
+
 export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   const [qualP, setQualP] = useState([]);
   const { register, setValue, getValues, control } = useFormContext();
+  
+  // Watch the position, name, and NIP values from the form to ensure reactivity
+  const position = useWatch({ control, name: `flight_pilots.${index}.position` });
+  const name = useWatch({ control, name: `flight_pilots.${index}.name` });
+  const nip = useWatch({ control, name: `flight_pilots.${index}.nip` });
+  
+  // Track previous position to detect changes
+  const prevPositionRef = useRef(position || member.position);
 
-  useEffect(() => {
-    const fetchQualifications = async () => {
-      if (!member.nip) {
-        setQualP([]);
-        return;
-      } else {
-        try {
-          console.log("Fetching Data");
-          const response = await http.get(
-            `/v2/qualificacoeslist/${member.nip}`,
-          );
-          console.log("Data Fetched");
-          setQualP(response.data);
-          console.log(response.data);
-        } catch (error) {
-          console.error("Error fetching qualifications:", error);
-          setQualP([]);
-        }
-      }
-    };
-
-    fetchQualifications();
-  }, [member.nip]);
+  // Get tipo from position for qualifications fetching
+  const tipo = useMemo(() => {
+    const pos = position || member.position;
+    return pos ? positionToTipo(pos) : null;
+  }, [position, member.position]);
 
   // Lista de pilotos filtrada consoante a posição selecionada
   const pilotosFiltrados = useMemo(() => {
-    const pos = member.position;
+    const pos = position || member.position;
+    if (!pos) return [];
     return pilotos.filter((crew) => {
       if (pos === "PC") return ["PI", "PC"].includes(crew.position);
       if (pos === "P") return ["PI", "PC", "P"].includes(crew.position);
@@ -51,13 +62,65 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       if (pos === "OPV") return ["OPVI", "OPV"].includes(crew.position);
       return crew.position === pos;
     });
-  }, [pilotos, member.position]);
+  }, [pilotos, position, member.position]);
+
+  // Fetch qualifications by tipo (memoized based on position)
+  useEffect(() => {
+    const fetchQualifications = async () => {
+      if (!tipo) {
+        setQualP([]);
+        return;
+      }
+
+      try {
+        console.log("Fetching qualifications by tipo:", tipo);
+        // Fetch all qualifications and filter by tipo_aplicavel
+        const response = await http.get("/v2/qualificacoes");
+        console.log("All qualifications:", response.data);
+        console.log("Looking for tipo_aplicavel:", tipo);
+        
+        // Filter qualifications by tipo_aplicavel
+        const filteredQuals = (response.data || []).filter(
+          (qual) => qual.tipo_aplicavel === tipo
+        );
+        console.log("Filtered qualifications:", filteredQuals);
+        setQualP(filteredQuals);
+      } catch (error) {
+        console.error("Error fetching qualifications by tipo:", error);
+        setQualP([]);
+      }
+    };
+
+    fetchQualifications();
+  }, [tipo]);
+
+  // Clear name and NIP when position changes
+  useEffect(() => {
+    const currentPosition = position || member.position;
+    const previousPosition = prevPositionRef.current;
+    
+    // If position actually changed (skip initial render)
+    if (prevPositionRef.current !== undefined && currentPosition !== previousPosition) {
+      setValue(`flight_pilots.${index}.name`, "");
+      setValue(`flight_pilots.${index}.nip`, "");
+    }
+    
+    // Update the ref for next comparison
+    prevPositionRef.current = currentPosition;
+  }, [position, member.position, setValue, index]);
 
   // Atualiza automaticamente o NIP quando muda o nome
   useEffect(() => {
-    const piloto = pilotos.find((p) => p.name === member.name);
+    const currentName = name || member.name;
+    if (!currentName) {
+      setValue(`flight_pilots.${index}.nip`, "");
+      return;
+    }
+    // Search in filtered pilots first, then fallback to all pilots
+    const piloto = pilotosFiltrados.find((p) => p.name === currentName) 
+      || pilotos.find((p) => p.name === currentName);
     setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
-  }, [member.name, pilotos, setValue, index]);
+  }, [name, member.name, pilotos, pilotosFiltrados, setValue, index]);
 
   // Ensure qualification values are preserved when options load
   useEffect(() => {
@@ -87,47 +150,57 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
     <Fragment>
       <GridItem alignContent={"center"} alignItems={"center"}>
         <Field.Root alignContent={"center"} alignItems={"center"}>
-          <Select
-            minW={"100px"}
-            nome="posição"
-            placeholder=" "
-            type="text"
-            {...register(`flight_pilots.${index}.position`)}
-            textAlign={"center"}
-            alignSelf={"center"}
-          >
-            <option value="PI">PI</option>
-            <option value="PC">PC</option>
-            <option value="P">P</option>
-            <option value="CP">CP</option>
-            <option value="OCI">OCI</option>
-            <option value="OC">OC</option>
-            <option value="OCA">OCA</option>
-            <option value="CT">CT</option>
-            <option value="CTI">CTI</option>
-            <option value="CTA">CTA</option>
-            <option value="OPV">OPV</option>
-            <option value="OPVI">OPVI</option>
-            <option value="OPVA">OPVA</option>
-          </Select>
+          <NativeSelect.Root minW={"100px"}>
+            <NativeSelect.Field
+              nome="posição"
+              placeholder=" "
+              type="text"
+              {...register(`flight_pilots.${index}.position`)}
+              textAlign={"center"}
+              alignSelf={"center"}
+              border="1px solid"
+              borderColor="border.subtle"
+            >
+              <option value="PI">PI</option>
+              <option value="PC">PC</option>
+              <option value="P">P</option>
+              <option value="CP">CP</option>
+              <option value="OCI">OCI</option>
+              <option value="OC">OC</option>
+              <option value="OCA">OCA</option>
+              <option value="CT">CT</option>
+              <option value="CTI">CTI</option>
+              <option value="CTA">CTA</option>
+              <option value="OPV">OPV</option>
+              <option value="OPVI">OPVI</option>
+              <option value="OPVA">OPVA</option>
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
         </Field.Root>
       </GridItem>
       <GridItem mx={1} w={"200px"}>
         <Field.Root>
-          <Select
-            nome="nome"
-            textAlign={"center"}
-            type="text"
-            placeholder="Selecione"
-            isDisabled={!member.position}
-            {...register(`flight_pilots.${index}.name`)}
-          >
-            {pilotosFiltrados.map((crew) => (
-              <option key={crew.name} value={crew.name}>
-                {crew.name}
-              </option>
-            ))}
-          </Select>
+          <NativeSelect.Root>
+            <NativeSelect.Field
+              nome="nome"
+              textAlign={"center"}
+              type="text"
+              placeholder="Selecione"
+              disabled={!(position || member.position)}
+              {...register(`flight_pilots.${index}.name`)}
+              border="1px solid"
+              borderColor="border.subtle"
+              _placeholder={{ color: "text.muted" }}
+            >
+              {pilotosFiltrados.map((crew) => (
+                <option key={crew.name} value={crew.name}>
+                  {crew.name}
+                </option>
+              ))}
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
         </Field.Root>
       </GridItem>
       <GridItem bg={"whiteAlpha.100"} w={"80px"}>
@@ -136,8 +209,11 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             p={0}
             display="inline-block"
             textAlign={"center"}
-            isReadOnly
+            readOnly
             {...register(`flight_pilots.${index}.nip`)}
+            border="1px solid"
+            borderColor="border.subtle"
+            _placeholder={{ color: "text.muted" }}
           ></Input>
         </Field.Root>
       </GridItem>
@@ -161,6 +237,9 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                     }
                     textAlign={"center"}
                     {...register(`flight_pilots.${index}.${campo}`)}
+                    border="1px solid"
+                    borderColor="border.subtle"
+                    _placeholder={{ color: "text.muted" }}
                   />
                 </Field.Root>
               </GridItem>
@@ -180,28 +259,34 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                 name={qualFieldName}
                 control={control}
                 render={({ field }) => (
-                  <Select
-                    {...field}
-                    placeholder=" "
-                    value={field.value ? String(field.value) : ""}
-                    onChange={(event) =>
-                      field.onChange(event.target.value || "")
-                    }
-                  >
-                    {qualP &&
-                      qualP
-                        .filter(
-                          (qual) =>
-                            !HIDDEN_QUALIFICATIONS.includes(
-                              (qual.nome || "").toUpperCase(),
-                            ),
-                        )
-                        .map((qual) => (
-                          <option key={qual.id} value={qual.id}>
-                            {qual.nome}
-                          </option>
-                        ))}
-                  </Select>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field
+                      {...field}
+                      placeholder=" "
+                      value={field.value ? String(field.value) : ""}
+                      onChange={(event) =>
+                        field.onChange(event.target.value || "")
+                      }
+                      border="1px solid"
+                      borderColor="border.subtle"
+                      _placeholder={{ color: "text.muted" }}
+                    >
+                      {qualP &&
+                        qualP
+                          .filter(
+                            (qual) =>
+                              !HIDDEN_QUALIFICATIONS.includes(
+                                (qual.nome || "").toUpperCase(),
+                              ),
+                          )
+                          .map((qual) => (
+                            <option key={qual.id} value={qual.id}>
+                              {qual.nome}
+                            </option>
+                          ))}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
                 )}
               />
             </Field.Root>
@@ -210,13 +295,16 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       })}
       <GridItem justifyContent={"flex-end"} display={"flex"}>
         <IconButton
-          icon={<FaMinus />}
           colorPalette="red"
           onClick={() => remove(index)}
           aria-label="Edit User"
           maxW={"50%"}
-        />
+        >
+          <FaMinus />
+        </IconButton>
       </GridItem>
     </Fragment>
   );
 });
+
+PilotInput.displayName = "PilotInput";

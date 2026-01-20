@@ -18,7 +18,7 @@ export const baseSemanticTokens = defineSemanticTokens({
     },
 
     border: {
-      subtle: { value: "{colors.gray.800}" },
+      subtle: { value: "{colors.gray.700}" },
       focus: { value: "{colors.blue.300}" },
     },
 

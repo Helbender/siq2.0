@@ -247,7 +247,7 @@ class AuthService:
             dict with cookie kwargs for setting refresh token
         """
         return {
-            "key": "refresh_token",
+            "key": "siq2_refresh_token",  # Unique name to avoid conflicts with other apps
             "value": refresh_token,
             "httponly": True,
             "samesite": "Lax",

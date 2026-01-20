@@ -36,6 +36,8 @@ def setup_jwt(app: Flask) -> JWTManager:
         print(f"JWT_KEY loaded (length: {len(JWT_KEY)}) - but it's insecure!")
     else:
         print(f"JWT_KEY loaded successfully (length: {len(JWT_KEY)})")
+        # Log first and last 10 chars for verification (without exposing full key)
+        print(f"JWT_KEY fingerprint: {JWT_KEY[:10]}...{JWT_KEY[-10:]}")
 
     app.config["JWT_SECRET_KEY"] = JWT_KEY
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
@@ -46,7 +48,7 @@ def setup_jwt(app: Flask) -> JWTManager:
     app.config["JWT_HEADER_TYPE"] = "Bearer"
     # Refresh tokens will be read from cookies
     app.config["JWT_REFRESH_TOKEN_LOCATION"] = ["cookies"]
-    app.config["JWT_REFRESH_COOKIE_NAME"] = "refresh_token"
+    app.config["JWT_REFRESH_COOKIE_NAME"] = "siq2_refresh_token"  # Unique name to avoid conflicts with other apps
     app.config["JWT_REFRESH_COOKIE_PATH"] = "/api/auth"
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
     app.config["JWT_CSRF_IN_COOKIES"] = False
@@ -88,7 +90,11 @@ def _register_jwt_error_handlers(jwt: JWTManager, app: Flask) -> None:
 
         if is_refresh_endpoint:
             print(f"[JWT] Refresh endpoint - cookies received: {list(cookies.keys())}")
-            refresh_token = cookies.get("refresh_token", "NOT FOUND")
+            refresh_token = cookies.get("siq2_refresh_token", "NOT FOUND")
+            current_key = app.config.get("JWT_SECRET_KEY", "")
+            print(f"[JWT] Current JWT_SECRET_KEY (first 20 chars): {current_key[:20] if current_key else 'EMPTY'}...")
+            print(f"[JWT] Current JWT_SECRET_KEY (last 20 chars): ...{current_key[-20:] if current_key else 'EMPTY'}")
+            
             if refresh_token != "NOT FOUND":
                 print(f"[JWT] Refresh token cookie length: {len(refresh_token)}")
                 print(f"[JWT] Refresh token cookie value (first 100 chars): {refresh_token[:100]}")
@@ -113,6 +119,7 @@ def _register_jwt_error_handlers(jwt: JWTManager, app: Flask) -> None:
                         print(f"[JWT] Token payload (identity): {payload_json.get('sub', 'N/A')}")
                         print(f"[JWT] Token payload (exp): {payload_json.get('exp', 'N/A')}")
                         print(f"[JWT] Token payload (type): {payload_json.get('type', 'N/A')}")
+                        print(f"[JWT] Token payload (iat - issued at): {payload_json.get('iat', 'N/A')}")
                     except Exception as decode_error:
                         print(f"[JWT] Could not decode token parts: {decode_error}")
             else:
@@ -136,7 +143,7 @@ def _register_jwt_error_handlers(jwt: JWTManager, app: Flask) -> None:
         # If it's a refresh endpoint with invalid token, clear the cookie
         if is_refresh_endpoint:
             response.set_cookie(
-                "refresh_token",
+                "siq2_refresh_token",
                 "",
                 expires=0,
                 path="/api/auth",

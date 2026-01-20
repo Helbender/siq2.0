@@ -51,10 +51,17 @@ export function AuthProvider({ children }) {
     };
   }, [queryClient]);
 
-  // Auto-refresh token before expiration
+  // Auto-refresh token before expiration (can be disabled via localStorage)
   const refreshIntervalRef = useRef(null);
 
   useEffect(() => {
+    // Check if auto-refresh is disabled
+    const autoRefreshDisabled = localStorage.getItem("disableAutoRefresh") === "true";
+    if (autoRefreshDisabled) {
+      console.log("[Auto-refresh] Auto-refresh is disabled");
+      return;
+    }
+
     const checkAndRefreshToken = async () => {
       const token = localStorage.getItem("token");
       
@@ -79,8 +86,18 @@ export function AuthProvider({ children }) {
           }
         } catch (error) {
           console.error("[Auto-refresh] Failed to refresh token:", error);
-          // If refresh fails, the http interceptor will handle logout
-          // Don't clear token here as the interceptor will do it
+          // If refresh fails with 401 (invalid signature, expired, etc.), stop auto-refresh
+          if (error.response?.status === 401) {
+            console.log("[Auto-refresh] Refresh token invalid, stopping auto-refresh");
+            localStorage.removeItem("token");
+            queryClient.setQueryData(authQueryKeys.me(), null);
+            // Clear the interval to stop retrying
+            if (refreshIntervalRef.current) {
+              clearInterval(refreshIntervalRef.current);
+              refreshIntervalRef.current = null;
+            }
+          }
+          // The http interceptor will also handle logout for other cases
         }
       }
     };

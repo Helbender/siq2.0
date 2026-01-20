@@ -1,16 +1,16 @@
 import {
+  Alert,
   Box,
+  Button,
+  Field,
+  Heading,
   Input,
   Stack,
-  Heading,
-  Button,
-  Alert,
-  Field,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLogin } from "../mutations/useLogin";
 import { HealthCard } from "../components/HealthCard";
+import { useLogin } from "../mutations/useLogin";
 
 export function LoginPage() {
   const [nip, setNip] = useState("");
@@ -55,7 +55,7 @@ export function LoginPage() {
       <HealthCard />
       <form onSubmit={handleSubmit}>
         <Stack>
-          <Heading mb={"25px"} textAlign="center" color="white">
+          <Heading mb={"25px"} textAlign="center" color="white" as={"h1"} fontSize={"4xl"}>
             Esquadra 502
           </Heading>
           {error && (
@@ -67,14 +67,17 @@ export function LoginPage() {
               </Alert.Content>
             </Alert.Root>
           )}
-          <Field.Root>
+          <Field.Root textAlign={"center"}>
             <Field.Label textAlign={"center"}>NIP</Field.Label>
             <Input
               bg="gray.700"
-              type="number"
+              type="text"
               value={nip}
               name="nip"
               placeholder="NIP"
+              borderRadius={"md"}
+              _hover={{borderColor:"teal.500"}}
+              // _focus={{borderColor:"teal.500",border:"2px solid"}}
               onChange={(e) => setNip(e.target.value)}
             />
           </Field.Root>
@@ -86,6 +89,8 @@ export function LoginPage() {
               value={password}
               name="password"
               placeholder="Password"
+              _hover={{borderColor:"teal.500"}}
+
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field.Root>
@@ -105,8 +110,11 @@ export function LoginPage() {
             type="submit"
             isLoading={loginMutation.isPending}
             isDisabled={loginMutation.isPending}
+            colorPalette={"teal"}
           >
-            Login
+            <b>
+              Login
+              </b>
           </Button>
         </Stack>
       </form>

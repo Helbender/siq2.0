@@ -1,5 +1,7 @@
 """Authentication routes - thin request/response handlers."""
 
+import os
+
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
 from sqlalchemy.orm import Session
@@ -108,9 +110,7 @@ def create_token() -> tuple[Response | dict[str, str], int]:
             if "access_token" in result:
                 response = jsonify(result)
                 # Set refresh token in httpOnly cookie
-                cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(
-                    result["refresh_token"]
-                )
+                cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(result["refresh_token"])
                 response.set_cookie(**cookie_kwargs)
                 return response, 201
 
@@ -130,7 +130,7 @@ def get_current_user():
     """Get current authenticated user."""
     try:
         nip_identity = get_jwt_identity()
-        
+
         with Session(engine) as session:
             result = auth_service.get_current_user(nip_identity, session)
 
@@ -175,6 +175,27 @@ def logout() -> tuple[Response, int]:
     """Clear the login token on server side."""
     response = jsonify({"msg": "logout sucessful"})
     unset_jwt_cookies(response)
+    return response, 200
+
+
+@auth_bp.route("/clear-refresh-token", methods=["POST"])
+def clear_refresh_token() -> tuple[Response, int]:
+    """Manually clear the refresh token cookie.
+    
+    This endpoint allows you to clear the refresh token cookie without logging out.
+    Useful for testing or forcing a re-login.
+    """
+    response = jsonify({"msg": "Refresh token cleared successfully"})
+    # Clear the siq2_refresh_token cookie by setting it to empty with expires=0
+    response.set_cookie(
+        "siq2_refresh_token",
+        "",
+        expires=0,
+        path="/api/auth",
+        httponly=True,
+        samesite="Lax",
+        secure=os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true",
+    )
     return response, 200
 
 

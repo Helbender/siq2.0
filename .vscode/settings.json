@@ -7,21 +7,20 @@
     "editor.formatOnSave": true
   },
     "[python]": {
-      "editor.formatOnSave": true,
-      "editor.defaultFormatter": "charliermarsh.ruff",
-      "editor.codeActionsOnSave": {
-          "source.fixAll": "explicit",
-          "source.organizeImports": "explicit",
-    }
-    }
-  ,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        }
+    },
     "eslint.enable": true,
-    "eslint.useFlatConfig":true,
+    "eslint.useFlatConfig": true,
     // "eslint.options": {"overrideConfigFile":"./frontend/eslint.config.js"},
-    "eslint.validate": ["javascript","javascriptreact","html"],
+    "eslint.validate": ["javascript", "javascriptreact", "html"],
     "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": "explicit",
-        },
+        "source.fixAll.eslint": "explicit"
+    },
     "ruff.lineLength": 120,
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
     "editor.formatOnType": false, // required
@@ -34,13 +33,15 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit",
             "source.organizeImports": "explicit"
         }
     },
     "[javascriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit",
             "source.organizeImports": "explicit"
         }
     },

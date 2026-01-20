@@ -47,6 +47,16 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Don't try to refresh if the failed request WAS a refresh request
+    // This prevents infinite loops when refresh token is invalid
+    const isRefreshCall = originalRequest.url && originalRequest.url.includes("/auth/refresh");
+    if (isRefreshCall) {
+      // Refresh failed - clear token and logout
+      localStorage.removeItem("token");
+      window.dispatchEvent(new Event("auth:logout"));
+      return Promise.reject(error);
+    }
+
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }

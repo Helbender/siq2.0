@@ -30,10 +30,10 @@ padding:"0",
       p:"2",
       m:"0",
     },
-    content: {
-      padding: "2",
-      bg: "bg.surface",
-      color: "text.secondary",
-    },
+    // content: {
+    //   padding: "2",
+    //   // bg: "bg.surface",
+    //   color: "text.secondary",
+    // },
   },
 });

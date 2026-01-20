@@ -14,7 +14,7 @@ export function Footer() {
       textAlign="center"
       boxShadow="lg"
       flexShrink={0}
-      h="60px"
+      h="45px"
     >
       <Spacer />
 

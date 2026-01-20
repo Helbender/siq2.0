@@ -1,4 +1,4 @@
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Box, Flex, Heading, Image } from "@chakra-ui/react";
 
 export function Header() {
 
@@ -14,15 +14,14 @@ export function Header() {
       position="relative"
     >
       <Flex align="center" justify="space-between">
-        {/* Menu Button on the Left */}
-        {/* <IconButton
-          icon={<FaBars />}
-          variant="outline"
-          color="white"
-          onClick={onOpen}
-          aria-label="Open Menu"
-          mr={4} // Adds margin to the right of the button
-        /> */}
+        {/* Logo Image on the Left */}
+        <Image
+          src="/Esquadra_502.png"
+          alt="Esquadra 502 Logo"
+          boxSize="60px"
+          objectFit="contain"
+          mr={4}
+        />
 
         {/* Centered Heading */}
         <Flex flex="1" justify="center">
@@ -32,7 +31,7 @@ export function Header() {
             textAlign={"center"}
             // onClick={() => navigate("/")}
           >
-            Sistema Integrado de Qualificações
+            Sistema Integrado de Qualificações 2.0
           </Heading>
         </Flex>
         {/* Right Side Button Theme */}

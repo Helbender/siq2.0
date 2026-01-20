@@ -5,6 +5,7 @@ import {
   Card,
   Flex,
   Heading,
+  IconButton,
   Separator,
   Spacer,
   Stack,
@@ -12,6 +13,7 @@ import {
   Text,
   useBreakpointValue
 } from "@chakra-ui/react";
+import { BiEdit } from "react-icons/bi";
 import { InfoMed } from "./InfoMed";
 import { CreateFlightModal } from "./modals/CreateFlightModal";
 import { DeleteFlightModal } from "./modals/DeleteFlightModal";
@@ -31,8 +33,18 @@ export function FlightCard({ flight }) {
             <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
           )}
           <Spacer />
-          <CreateFlightModal flight={flight} />
-
+          <CreateFlightModal 
+            flight={flight}
+            trigger={
+              <IconButton
+                colorPalette="yellow"
+                variant="ghost"
+                aria-label="Editar voo"
+              >
+                <BiEdit />
+              </IconButton>
+            }
+          />
           <Heading as="h3">{flight.ATD}</Heading>
           <DeleteFlightModal flight={flight} />
           <Spacer />

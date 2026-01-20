@@ -7,7 +7,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { BiTrash } from "react-icons/bi";
-import { HiX } from "react-icons/hi";
 import { useDeleteFlight } from "../../hooks/useDeleteFlight";
 
 export function DeleteFlightModal({ flight }) {
@@ -25,26 +24,36 @@ export function DeleteFlightModal({ flight }) {
   };
 
   return (
-    <>
-      <IconButton
-        variant="ghost"
-        colorPalette="red"
-        onClick={onOpen}
-        icon={<BiTrash />}
-      />
-
-      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+    <Dialog.Root 
+      open={isOpen} 
+      onOpenChange={({ open }) => {
+        if (open) {
+          onOpen();
+        } else {
+          onClose();
+        }
+      }}
+    >
+      <Dialog.Trigger asChild>
+        <IconButton
+          variant="ghost"
+          colorPalette="red"
+          aria-label="Apagar voo"
+        >
+          <BiTrash />
+        </IconButton>
+      </Dialog.Trigger>
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
+            <Dialog.Content bg="bg.surface">
               <Dialog.Header>Apagar voo</Dialog.Header>
 
-              <Dialog.CloseTrigger asChild>
+              {/* <Dialog.CloseTrigger asChild>
                 <IconButton variant="ghost" size="sm">
                   <HiX />
                 </IconButton>
-              </Dialog.CloseTrigger>
+              </Dialog.CloseTrigger> */}
 
               <Dialog.Body>
                 Tens a certeza que queres apagar o voo{" "}
@@ -52,9 +61,11 @@ export function DeleteFlightModal({ flight }) {
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button onClick={onClose} variant="ghost">
-                  Cancelar
-                </Button>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="ghost">
+                    Cancelar
+                  </Button>
+                </Dialog.ActionTrigger>
                 <Button
                   colorPalette="red"
                   onClick={handleDelete}
@@ -67,6 +78,5 @@ export function DeleteFlightModal({ flight }) {
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
-    </>
   );
 }

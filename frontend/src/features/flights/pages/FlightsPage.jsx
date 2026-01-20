@@ -8,14 +8,13 @@ import {
   Input,
   Spacer,
   Spinner,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { List } from "react-window";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/modals/CreateFlightModal";
 import { useFlights } from "../hooks/useFlights";
-
 function Row({ index, style, flights }) {
   const flight = flights[index];
   if (!flight) return null;
@@ -70,14 +69,20 @@ export function FlightsPage() {
       </Center>
     );
   }
-
   return (
     <VStack mt={10}>
       <Flex w="80%" maxW="1000px" align="center">
         <StyledText query="Voos:" text={`Voos: ${filteredFlights.length}`} />
         <Spacer />
-        {user?.admin && <CreateFlightModal />}
+        <CreateFlightModal />
+        <Spacer />
         <Input
+        borderRadius={"md"}
+        border="1px solid"
+        borderColor="border.subtle"
+        bg="gray.700"
+        _hover={{borderColor:"teal.500"}}
+        _focus={{borderColor:"teal.500",border:"1px solid"}}
           maxW="150px"
           placeholder="Procurar…"
           onChange={(e) => setSearch(e.target.value)}

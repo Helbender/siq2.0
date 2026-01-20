@@ -52,12 +52,12 @@ export function CreateUserModal({
           
           <Dialog.Body>
             <form onSubmit={handleSubmit}>
-              <VStack spacing={4}>
+              <VStack gap={4}>
                 <Flex flexDirection={"row"} gap={"4"} width="100%">
                   <Field.Root flex="1">
                     <Field.Label>Posto</Field.Label>
                     <Input
-                      bg="bg.surface"
+                      bg="bg.canvas"
                       value={formData.rank}
                       placeholder="Posto"
                       onChange={(e) =>
@@ -68,7 +68,7 @@ export function CreateUserModal({
                   <Field.Root flex="1">
                     <Field.Label>NIP</Field.Label>
                     <Input
-                      bg="bg.surface"
+                      bg="bg.canvas"
                       value={formData.nip}
                       placeholder="NIP"
                       onChange={(e) =>
