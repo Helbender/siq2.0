@@ -16,7 +16,7 @@ import { FaPlus } from "react-icons/fa";
 
 import { useUsersQuery } from "@/features/users/queries/useUsersQuery";
 import { getTimeDiff } from "@/utils/timeCalc";
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import { Field, Flex, Input, NativeSelect } from "@chakra-ui/react";
 import { useCreateFlight } from "../../hooks/useCreateFlight";
 import { flightDefaults } from "../../mappers/flightDefaults";
@@ -27,7 +27,6 @@ export function CreateFlightModal({ flight, trigger }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutateAsync, isLoading } = useCreateFlight();
   const { data: pilotos = [] } = useUsersQuery();
-  const toast = useToast();
 
   const methods = useForm({
     defaultValues: flight ?? flightDefaults,
@@ -107,16 +106,16 @@ export function CreateFlightModal({ flight, trigger }) {
         payload: data,
       });
 
-      toast({
+      toaster.create({
         title: isEdit ? "Voo atualizado" : "Voo criado",
-        status: "success",
+        type: "success",
       });
 
       onClose();
     } catch {
-      toast({
+      toaster.create({
         title: "Erro ao guardar voo",
-        status: "error",
+        type: "error",
       });
     }
   };

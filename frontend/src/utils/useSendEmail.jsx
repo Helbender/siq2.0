@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useToast } from "./useToast";
+import { toaster } from "./toaster";
 
 /**
  * Custom hook to send an email and handle the response.
@@ -8,7 +8,6 @@ import { useToast } from "./useToast";
  * @returns {Function} sendEmail - The function to send an email.
  */
 export const useSendEmail = () => {
-  const toast = useToast();
   const [setLoading] = useState(true);
 
   /**
@@ -23,25 +22,25 @@ export const useSendEmail = () => {
     try {
       const response = await axios.post(endpoint, { email });
       console.log("Email sent response:", response); // Log response for debugging
-      toast({
+      toaster.create({
         title: "Email sent.",
         description: "Please check your email.",
-        status: "success",
+        type: "success",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
     } catch (error) {
       console.error("Error sending email:", error); // Log error for debugging
-      toast({
+      toaster.create({
         title: "Error.",
         description:
           error.response?.data?.message ||
           "Failed to send the recovery email. Please try again.",
-        status: "error",
+        type: "error",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
     } finally {
       setLoading(false);

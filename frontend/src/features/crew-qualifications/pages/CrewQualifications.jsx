@@ -64,19 +64,20 @@ export function CrewQualifications({ tipo }) {
         onValueChange={(d) => setActiveTab(d.value)}
         css={{
         "--tabs-indicator-bg": "colors.teal.500",
-        "--tabs-indicator-shadow": "shadows.xs",
+        "--tabs-indicator-shadow": "shadows.lg",
+        "--tabs-trigger-radius": "radii.full",
         }}
       >
      
         <VStack gap={4} mb={6}>
           <Tabs.List>
-            <Tabs.Indicator />
-            <Tabs.Trigger value="Individuais">
+            <Tabs.Trigger value="Individuais" color="text.primary" _selected={{ bg: "transparent",  fontWeight:"bold", fontSize:"md"}}>
               Individuais
             </Tabs.Trigger>
-            <Tabs.Trigger value="Planeamento">
+            <Tabs.Trigger value="Planeamento" color="text.primary" _selected={{ bg: "transparent", fontWeight:"bold", fontSize:"md"}}>
               Planeamento
             </Tabs.Trigger>
+            <Tabs.Indicator />
           </Tabs.List>
 
           {/* Tipo de Tripulante Filter */}

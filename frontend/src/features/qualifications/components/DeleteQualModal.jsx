@@ -1,4 +1,4 @@
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import {
     Button,
     Dialog,
@@ -14,30 +14,29 @@ import { useDeleteQualification } from "../mutations/useDeleteQualification";
 
 export function DeleteQualModal({ qual }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
   const deleteQualification = useDeleteQualification();
 
   const deleteQual = async () => {
     try {
       await deleteQualification.mutateAsync(qual.id);
-      toast({
+      toaster.create({
         title: "Sucesso!",
         description: "Qualificação excluída com sucesso.",
-        status: "success",
+        type: "success",
         duration: 3000,
-        isClosable: true,
+        closable: true,
       });
       onClose();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         "Ocorreu um erro ao excluir a qualificação.";
-      toast({
+      toaster.create({
         title: "Erro!",
         description: errorMessage,
-        status: "error",
+        type: "error",
         duration: 3000,
-        isClosable: true,
+        closable: true,
       });
     }
   };

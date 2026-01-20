@@ -1,4 +1,4 @@
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import {
   Button,
   Dialog,
@@ -12,13 +12,12 @@ import { useDeleteFlight } from "../../hooks/useDeleteFlight";
 export function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutateAsync, isLoading } = useDeleteFlight();
-  const toast = useToast();
 
   const handleDelete = async () => {
     await mutateAsync(flight.id);
-    toast({
+    toaster.create({
       title: "Voo apagado",
-      status: "success",
+      type: "success",
     });
     onClose();
   };

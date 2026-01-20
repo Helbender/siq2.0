@@ -1,5 +1,5 @@
 import { http } from "@/api/http";
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import {
     Button,
     Dialog,
@@ -39,7 +39,6 @@ export function CreateQualModal({ edit, qualification }) {
   const [grupos, setGrupos] = useState([]);
   const [allGrupos, setAllGrupos] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
-  const toast = useToast();
   const qualificacao = useForm(
     qualification || {
       nome: "",
@@ -59,19 +58,19 @@ export function CreateQualModal({ edit, qualification }) {
           qualificationId: qualification.id,
           qualificationData: formData,
         });
-        toast({
+        toaster.create({
           title: "Qualificação atualizada com sucesso",
-          status: "success",
+          type: "success",
         });
       } else {
         await createQualification.mutateAsync(formData);
-        toast({ title: "Qualificação criada com sucesso", status: "success" });
+        toaster.create({ title: "Qualificação criada com sucesso", type: "success" });
       }
       onClose();
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Erro a salvar a Qualificação";
-      toast({ title: errorMessage, status: "error" });
+      toaster.create({ title: errorMessage, type: "error" });
       console.error("Erro a salvar a Qualificação:", error);
     }
   };

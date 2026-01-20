@@ -1,6 +1,6 @@
 import { Can } from "@/common/components/Can";
 import { Role } from "@/common/roles";
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import {
   Box,
   Button,
@@ -21,7 +21,6 @@ import { useReprocessFlights } from "../mutations/useReprocessFlights";
 import { useQualificationsQuery } from "../queries/useQualificationsQuery";
 
 export function QualificationManagementPage() {
-  const toast = useToast();
   const { data: qualifications = [], isLoading } = useQualificationsQuery();
   const reprocessFlights = useReprocessFlights();
 
@@ -38,24 +37,24 @@ export function QualificationManagementPage() {
   } = useQualificationFilters(qualifications);
 
   const handleReprocessAllFlights = async () => {
-    toast({
+    const loadingToast = toaster.create({
       title: "A reprocessar voos",
       description: "Por favor aguarde...",
-      status: "info",
-      duration: 10000,
-      isClosable: true,
+      type: "loading",
+      duration: null,
+      closable: true,
     });
 
     try {
       const res = await reprocessFlights.mutateAsync();
-      toast.closeAll();
-      toast({ title: "Sucesso!", description: res.message, status: "success" });
+      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
+      toaster.create({ title: "Sucesso!", description: res.message, type: "success" });
     } catch (error) {
-      toast.closeAll();
-      toast({
+      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
+      toaster.create({
         title: "Erro",
         description: error.response?.data?.message || "Erro ao reprocessar",
-        status: "error",
+        type: "error",
       });
     }
   };

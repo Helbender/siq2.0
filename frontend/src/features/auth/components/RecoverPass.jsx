@@ -6,14 +6,13 @@ import {
   Button,
   Field,
 } from "@chakra-ui/react";
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http } from "@/api/http";
 
 export function RecoverPass() {
   const [email, setEmail] = useState("");
-  const toast = useToast();
   const navigate = useNavigate();
   const goBack = () => navigate("/");
 
@@ -21,27 +20,27 @@ export function RecoverPass() {
     try {
       const response = await http.post(`/api/recover/${email}`);
       console.log("Email sent response:", response); // Log response for debugging
-      toast({
+      toaster.create({
         title: "Email sent.",
         description: "Please check your email.",
-        status: "success",
+        type: "success",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
       navigate("/");
     } catch (error) {
       console.error("Error sending email:", error); // Log error for debugging
 
-      toast({
+      toaster.create({
         title: "Error.",
         description:
           error.response?.data?.message ||
           "Failed to send the recovery email. Please try again.",
-        status: "error",
+        type: "error",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
     }
   };

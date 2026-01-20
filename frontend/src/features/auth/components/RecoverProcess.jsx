@@ -6,7 +6,7 @@ import {
   Button,
   Field,
 } from "@chakra-ui/react";
-import { useToast } from "@/utils/useToast";
+import { toaster } from "@/utils/toaster";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
@@ -20,7 +20,6 @@ export function RecoverProcess() {
   const [nip, setNip] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const toast = useToast(); // Initialize the toast hook
 
   const checkToken = async () => {
     try {
