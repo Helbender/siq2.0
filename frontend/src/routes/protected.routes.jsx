@@ -11,6 +11,7 @@ import { QualificationManagementPage } from "@/features/qualifications/pages/Qua
 import { AboutPage } from "@/features/shared/pages/AboutPage";
 import { TestQualificationsTablePage } from "@/features/test/pages/TestQualificationsTablePage";
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
+import { DatabaseManagementPage } from "@/features/db-management/index";
 export const protectedRoutes = {
   element: (
     <RequireAuth>
@@ -32,6 +33,7 @@ export const protectedRoutes = {
       element: <QualificationManagementPage />,
     },
     { path: "/users", element: <UserManagementPage /> },
+    { path: "/db-management", element: <DatabaseManagementPage /> },
     { path: "/about", element: <AboutPage /> },
   ],
 };

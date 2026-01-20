@@ -3,6 +3,8 @@ import io
 import json
 import logging
 import os.path
+import threading
+import time
 
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
@@ -13,6 +15,9 @@ from googleapiclient.discovery import build  # type:ignore
 from googleapiclient.http import MediaIoBaseUpload  # type:ignore
 
 from app.utils.pdf import combinar_template_e_conteudo, gerar_pdf_conteudo_em_memoria  # type: ignore
+
+# Lock for folder creation to prevent race conditions
+_folder_creation_lock = threading.Lock()
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
@@ -192,29 +197,45 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
     Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.
     Se não existir, cria a pasta.
     Retorna o ID da pasta encontrada ou criada.
+    
+    Uses thread lock to prevent race conditions when multiple threads try to create the same folder.
     """
-    # 1) Tenta achar a pasta por nome dentro de parent_id
-    query = (
-        f"name = '{folder_name}' "
-        f"and mimeType = 'application/vnd.google-apps.folder' "
-        f"and '{parent_id}' in parents "
-        f"and trashed = false"
-    )
-    response = service.files().list(q=query, fields="files(id, name)").execute()
-    files = response.get("files", [])
+    # Use lock to prevent race conditions
+    with _folder_creation_lock:
+        # Escape single quotes in folder_name for the query
+        escaped_folder_name = folder_name.replace("'", "\\'")
+        
+        # 1) Tenta achar a pasta por nome dentro de parent_id
+        query = (
+            f"name = '{escaped_folder_name}' "
+            f"and mimeType = 'application/vnd.google-apps.folder' "
+            f"and '{parent_id}' in parents "
+            f"and trashed = false"
+        )
+        response = service.files().list(q=query, fields="files(id, name)").execute()
+        files = response.get("files", [])
 
-    if files:
-        # Retorna o primeiro ID encontrado
-        return files[0]["id"]
-    else:
-        # 2) Se não encontrou, cria a pasta
-        folder_metadata = {
-            "name": folder_name,
-            "parents": [parent_id],
-            "mimeType": "application/vnd.google-apps.folder",
-        }
-        folder = service.files().create(body=folder_metadata, fields="id").execute()
-        return folder.get("id")
+        if files:
+            # Retorna o primeiro ID encontrado
+            return files[0]["id"]
+        else:
+            # 2) Se não encontrou, cria a pasta
+            try:
+                folder_metadata = {
+                    "name": folder_name,
+                    "parents": [parent_id],
+                    "mimeType": "application/vnd.google-apps.folder",
+                }
+                folder = service.files().create(body=folder_metadata, fields="id").execute()
+                return folder.get("id")
+            except Exception as e:
+                # If creation fails (e.g., duplicate created by another thread), check again
+                response = service.files().list(q=query, fields="files(id, name)").execute()
+                files = response.get("files", [])
+                if files:
+                    return files[0]["id"]
+                # If still not found, re-raise the exception
+                raise e
 
 
 def tarefa_enviar_para_drive(dados: dict, nome_arquivo_drive: str, nome_pdf: str) -> None:

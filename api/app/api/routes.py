@@ -5,6 +5,7 @@ from flask import Blueprint
 from app.api.health import health_bp  # type: ignore
 from app.features.auth.routes import auth_bp  # type: ignore
 from app.features.dashboard.routes import dashboard_bp  # type: ignore
+from app.features.db_management.routes import db_management_bp  # type: ignore
 from app.features.flights.routes import flights_bp  # type: ignore
 from app.features.qualifications.routes import qualifications_bp  # type: ignore
 from app.features.users.routes import users_bp  # type: ignore
@@ -29,5 +30,8 @@ api.register_blueprint(qualifications_bp, url_prefix="/v2")
 
 # Register dashboard blueprint
 api.register_blueprint(dashboard_bp, url_prefix="/dashboard")
+
+# Register database management blueprint (SUPER_ADMIN only)
+api.register_blueprint(db_management_bp, url_prefix="/db-management")
 
 
