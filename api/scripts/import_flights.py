@@ -31,9 +31,9 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
 from app.features.flights.models import Flight
 from app.features.flights.service import FlightService
+from config import engine
 
 # Old format boolean qualification fields (should not be present in new format)
 OLD_PILOT_QUAL_FIELDS = {

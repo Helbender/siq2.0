@@ -15,22 +15,6 @@ export function QualificationTablePage({ pilotos = [], loading }) {
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [availableGroups, setAvailableGroups] = useState([]);
 
-  if (loading) {
-    return (
-      <Center py="10">
-        <Spinner size="lg" />
-      </Center>
-    );
-  }
-
-  if (!pilotos || !pilotos.length) {
-    return (
-      <Center py="10">
-        <Text opacity={0.6}>Sem dados</Text>
-      </Center>
-    );
-  }
-
   // Get all unique qualifications from all crew members with their groups
   const allQualifications = useMemo(() => {
     const qualMap = new Map(); // Map of qualName -> { nome, grupo }
@@ -133,6 +117,23 @@ export function QualificationTablePage({ pilotos = [], loading }) {
 
     return sorted;
   }, [pilotos, sortBy]);
+
+  // Early returns after all hooks
+  if (loading) {
+    return (
+      <Center py="10">
+        <Spinner size="lg" />
+      </Center>
+    );
+  }
+
+  if (!pilotos || !pilotos.length) {
+    return (
+      <Center py="10">
+        <Text opacity={0.6}>Sem dados</Text>
+      </Center>
+    );
+  }
 
   // Handle column header click for sorting
   const handleSort = (qualName) => {

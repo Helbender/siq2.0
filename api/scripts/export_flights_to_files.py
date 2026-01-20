@@ -24,10 +24,11 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
 from app.features.flights.models import Flight
 from app.features.qualifications.models import Qualificacao
 from app.features.users.models import Tripulante  # noqa: F401 - Required for SQLAlchemy relationship resolution
+from app.shared.rbac_models import Role  # noqa: F401 - Required for SQLAlchemy relationship resolution
+from config import engine
 
 
 def export_flights_to_files(output_folder: str, session: Session, as_json: bool = False) -> tuple[int, int]:
