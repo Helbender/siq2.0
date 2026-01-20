@@ -49,34 +49,39 @@ def require_role(min_level: int):
         def decorated(*args, **kwargs):
             verify_jwt_in_request()
             nip_identity = get_jwt_identity()
+            claims = get_jwt()
             
             # Handle admin case
             if isinstance(nip_identity, str) and nip_identity == "admin":
                 admin_level = Role.SUPER_ADMIN.level
                 if admin_level < min_level:
-                    return {"error": "Forbidden"}, 403
+                    return jsonify({"error": "Forbidden"}), 403
                 return fn(*args, **kwargs)
             
-            # Get user from database
-            try:
-                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
-            except (ValueError, TypeError):
-                return {"error": "Invalid user identity"}, 401
+            # Try to get role level from JWT claims first (faster)
+            user_role_level = claims.get("roleLevel")
             
-            repository = AuthRepository()
-            with Session(engine) as session:
-                current_user = repository.find_user_by_nip(session, nip)
+            # If not in claims, get from database
+            if user_role_level is None:
+                try:
+                    nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+                except (ValueError, TypeError):
+                    return jsonify({"error": "Invalid user identity"}), 403
                 
-                if current_user is None:
-                    return {"error": "User not found"}, 404
-                
-                # Get role level from role relationship if exists, otherwise use role_level field
-                user_role_level = current_user.role.level if current_user.role else current_user.role_level
-                
-                if user_role_level < min_level:
-                    return {"error": "Forbidden"}, 403
-                
-                return fn(*args, **kwargs)
+                repository = AuthRepository()
+                with Session(engine) as session:
+                    current_user = repository.find_user_by_nip(session, nip)
+                    
+                    if current_user is None:
+                        return jsonify({"error": "User not found"}), 403
+                    
+                    # Get role level from role relationship if exists, otherwise use role_level field
+                    user_role_level = current_user.role.level if current_user.role else current_user.role_level
+            
+            if user_role_level is None or user_role_level < min_level:
+                return jsonify({"error": "Forbidden"}), 403
+            
+            return fn(*args, **kwargs)
         
         return decorated
     return wrapper

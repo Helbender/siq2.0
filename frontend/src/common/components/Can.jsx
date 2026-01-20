@@ -6,16 +6,17 @@ import { useAuth } from "@/features/auth/contexts/AuthContext";
  * @param {Object} props
  * @param {number} props.minLevel - Minimum role level required to render children
  * @param {React.ReactNode} props.children - Children to render if user has sufficient level
- * @returns {React.ReactNode|null} Children if authorized, null otherwise
+ * @param {React.ReactNode} props.fallback - Optional fallback to render if user doesn't have permission
+ * @returns {React.ReactNode|null} Children if authorized, fallback or null otherwise
  */
-export function Can({ minLevel, children }) {
+export function Can({ minLevel, children, fallback = null }) {
   const { user } = useAuth();
   
-  // Default to lowest level (20 - readonly) if roleLevel is not set
-  const userRoleLevel = user?.roleLevel ?? 20;
+  // Get role level from user object (supports both roleLevel and role.level)
+  const userRoleLevel = user?.roleLevel || user?.role?.level;
   
-  if (!user || userRoleLevel < minLevel) {
-    return null;
+  if (!user || !userRoleLevel || userRoleLevel < minLevel) {
+    return fallback;
   }
   
   return children;

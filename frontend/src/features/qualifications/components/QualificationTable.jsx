@@ -1,3 +1,5 @@
+import { Can } from "@/common/components/Can";
+import { Role } from "@/common/roles";
 import { HStack, Table } from "@chakra-ui/react";
 import { CreateQualModal } from "./CreateQualModal";
 import { DeleteQualModal } from "./DeleteQualModal";
@@ -25,8 +27,12 @@ export function QualificationTable({ qualifications }) {
             <Table.Cell>{qual.grupo}</Table.Cell>
             <Table.Cell>
               <HStack spacing={2} align="center">
-                <CreateQualModal qualification={qual} edit={true} />
-                <DeleteQualModal qual={qual} />
+                <Can minLevel={Role.UNIF}>
+                  <CreateQualModal qualification={qual} edit={true} />
+                </Can>
+                <Can minLevel={Role.UNIF}>
+                  <DeleteQualModal qual={qual} />
+                </Can>
               </HStack>
             </Table.Cell>
           </Table.Row>

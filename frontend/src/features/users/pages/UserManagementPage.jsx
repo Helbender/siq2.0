@@ -1,6 +1,7 @@
 import { Role } from "@/common/roles";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useDialogForm } from "@/common/hooks/useDialogForm";
+import { Can } from "@/common/components/Can";
 import { useToast } from "@/utils/useToast";
 import {
   Box,
@@ -162,7 +163,9 @@ export function UserManagementPage() {
           ))}
         </Grid>
       )}
-      <FileUpload />
+      <Can minLevel={Role.UNIF}>
+        <FileUpload />
+      </Can>
     </Container>
   );
 }

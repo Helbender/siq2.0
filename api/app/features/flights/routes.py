@@ -11,6 +11,8 @@ from app.features.flights.schemas import (
     validate_request,
 )
 from app.features.flights.service import FlightService
+from app.shared.enums import Role
+from app.shared.permissions import require_role
 
 flights_bp = Blueprint("flights", __name__)
 flight_service = FlightService()
@@ -173,6 +175,42 @@ def retrieve_flights() -> tuple[Response, int]:
               type: string
     """
     if request.method == "GET":
+        # Check authentication and require READONLY level (20) or above for viewing
+        auth_error = require_authenticated()
+        if auth_error:
+            return auth_error
+
+        # Check role level for viewing flights
+        from flask_jwt_extended import get_jwt, get_jwt_identity
+
+        from app.features.auth.repository import AuthRepository
+
+        nip_identity = get_jwt_identity()
+        claims = get_jwt()
+
+        # Handle admin case
+        if isinstance(nip_identity, str) and nip_identity == "admin":
+            user_role_level = Role.SUPER_ADMIN.level
+        else:
+            try:
+                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+            except (ValueError, TypeError):
+                return jsonify({"error": "Invalid user identity"}), 401
+
+            # Get role level from JWT claims first
+            user_role_level = claims.get("roleLevel")
+            if user_role_level is None:
+                # Fallback to database
+                repository = AuthRepository()
+                with Session(engine) as session:
+                    current_user = repository.find_user_by_nip(session, nip)
+                    if current_user is None:
+                        return jsonify({"error": "User not found"}), 404
+                    user_role_level = current_user.role.level if current_user.role else current_user.role_level
+
+        if user_role_level is None or user_role_level < Role.READONLY.level:
+            return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
+
         try:
             with Session(engine) as session:
                 flights = flight_service.get_all_flights(session)
@@ -180,11 +218,47 @@ def retrieve_flights() -> tuple[Response, int]:
         except Exception as e:
             print(f"Error in GET /flights: {e}")
             import traceback
+
             traceback.print_exc()
             return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
     # POST - Create new flight
-    # verify_jwt_in_request()  # Commented out in original
+    # Require FLYERS level (60) or above for creating flights
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
+    # Check role level for creating flights
+    from flask_jwt_extended import get_jwt, get_jwt_identity
+
+    from app.features.auth.repository import AuthRepository
+
+    nip_identity = get_jwt_identity()
+    claims = get_jwt()
+
+    # Handle admin case
+    if isinstance(nip_identity, str) and nip_identity == "admin":
+        user_role_level = Role.SUPER_ADMIN.level
+    else:
+        try:
+            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid user identity"}), 401
+
+        # Get role level from JWT claims first
+        user_role_level = claims.get("roleLevel")
+        if user_role_level is None:
+            # Fallback to database
+            repository = AuthRepository()
+            with Session(engine) as session:
+                current_user = repository.find_user_by_nip(session, nip)
+                if current_user is None:
+                    return jsonify({"error": "User not found"}), 404
+                user_role_level = current_user.role.level if current_user.role else current_user.role_level
+
+    if user_role_level is None or user_role_level < Role.USER.level:
+        return jsonify({"error": "Forbidden - USER level or above required"}), 403
+
     flight_data: dict | None = request.get_json()
     if flight_data is None:
         return jsonify({"message": "Request body must be JSON"}), 400
@@ -204,6 +278,7 @@ def retrieve_flights() -> tuple[Response, int]:
 
 
 @flights_bp.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
+@require_role(Role.FLYERS.level)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
     """Handle DELETE and PATCH requests for a specific flight.
 

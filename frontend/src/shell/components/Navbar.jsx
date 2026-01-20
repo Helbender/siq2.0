@@ -18,6 +18,20 @@ export function Navbar() {
     navigate("/login");
   };
 
+  const userRoleLevel = user?.roleLevel || user?.role?.level;
+
+  // Filter navigation items based on user role level
+  const filteredNavItems = NAV_ITEMS.filter((item) => {
+    // If item requires a minimum level, check user's role
+    if (item.minLevel !== undefined) {
+      // Only show if user is loaded and has sufficient role level
+      if (!userRoleLevel || userRoleLevel < item.minLevel) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   return (
     <Flex
       direction="column"
@@ -42,7 +56,7 @@ export function Navbar() {
           </Box>
         )}
         <Separator borderWidth="1px" borderColor="teal.400" mb={2} mx={2}/>
-        {NAV_ITEMS.map((item) => {
+        {filteredNavItems.map((item) => {
           const Icon = item.icon;
           
           return (

@@ -12,6 +12,8 @@ from app.features.qualifications.schemas import (
     validate_request,
 )
 from app.features.qualifications.service import QualificationService
+from app.shared.enums import Role
+from app.shared.permissions import require_role
 
 qualifications_bp = Blueprint("qualifications", __name__)
 qualification_service = QualificationService()
@@ -63,6 +65,7 @@ def listar_qualificacoes() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualificacoes", methods=["POST"])
+@require_role(Role.UNIF.level)
 def criar_qualificacao() -> tuple[Response, int]:
     """Create a new qualification.
 
@@ -137,6 +140,7 @@ def criar_qualificacao() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualificacoes/<int:qualification_id>", methods=["PATCH", "DELETE"])
+@require_role(Role.UNIF.level)
 def modify_qualification(qualification_id: int) -> tuple[Response, int]:
     """Update or delete a qualification.
 

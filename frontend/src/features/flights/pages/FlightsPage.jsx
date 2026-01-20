@@ -1,3 +1,5 @@
+import { Can } from "@/common/components/Can";
+import { Role } from "@/common/roles";
 import { StyledText } from "@/common/components/StyledText";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { formatDate } from "@/utils/timeCalc";
@@ -8,6 +10,7 @@ import {
   Input,
   Spacer,
   Spinner,
+  Text,
   VStack
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -70,37 +73,55 @@ export function FlightsPage() {
     );
   }
   return (
-    <VStack mt={10}>
-      <Flex w="80%" maxW="1000px" align="center">
-        <StyledText query="Voos:" text={`Voos: ${filteredFlights.length}`} />
-        <Spacer />
-        <CreateFlightModal />
-        <Spacer />
-        <Input
-        borderRadius={"md"}
-        border="1px solid"
-        borderColor="border.subtle"
-        bg="gray.700"
-        _hover={{borderColor:"teal.500"}}
-        _focus={{borderColor:"teal.500",border:"1px solid"}}
-          maxW="150px"
-          placeholder="Procurar…"
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </Flex>
-
-      <Box ref={containerRef} w="80%" h="calc(100vh - 200px)">
-        {filteredFlights.length > 0 && listHeight > 0 && (
-          <List
-            height={listHeight}
-            rowCount={filteredFlights.length}
-            rowHeight={650}
-            rowComponent={Row}
-            rowProps={{ flights: filteredFlights }}
-            style={{ width: "100%", height: "100%" }}
+    <Can
+      minLevel={Role.READONLY}
+      fallback={
+        <Center h="80vh">
+          <VStack>
+            <Text fontSize="xl" fontWeight="bold" color="text.secondary">
+              Acesso Negado
+            </Text>
+            <Text mt={2} color="text.muted">
+              Você precisa ter nível READONLY ou superior para visualizar voos.
+            </Text>
+          </VStack>
+        </Center>
+      }
+    >
+      <VStack mt={10}>
+        <Flex w="80%" maxW="1000px" align="center">
+          <StyledText query="Voos:" text={`Voos: ${filteredFlights.length}`} />
+          <Spacer />
+          <Can minLevel={Role.FLYERS}>
+            <CreateFlightModal />
+          </Can>
+          <Spacer />
+          <Input
+            borderRadius={"md"}
+            border="1px solid"
+            borderColor="border.subtle"
+            bg="gray.700"
+            _hover={{borderColor:"teal.500"}}
+            _focus={{borderColor:"teal.500",border:"1px solid"}}
+            maxW="150px"
+            placeholder="Procurar…"
+            onChange={(e) => setSearch(e.target.value)}
           />
-        )}
-      </Box>
-    </VStack>
+        </Flex>
+
+        <Box ref={containerRef} w="80%" h="calc(100vh - 200px)">
+          {filteredFlights.length > 0 && listHeight > 0 && (
+            <List
+              height={listHeight}
+              rowCount={filteredFlights.length}
+              rowHeight={650}
+              rowComponent={Row}
+              rowProps={{ flights: filteredFlights }}
+              style={{ width: "100%", height: "100%" }}
+            />
+          )}
+        </Box>
+      </VStack>
+    </Can>
   );
 }

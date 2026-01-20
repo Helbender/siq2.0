@@ -1,3 +1,5 @@
+import { Can } from "@/common/components/Can";
+import { Role } from "@/common/roles";
 import { StyledText } from "@/common/components/StyledText";
 import { formatDate } from "@/utils/timeCalc";
 import {
@@ -33,20 +35,24 @@ export function FlightCard({ flight }) {
             <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
           )}
           <Spacer />
-          <CreateFlightModal 
-            flight={flight}
-            trigger={
-              <IconButton
-                colorPalette="yellow"
-                variant="ghost"
-                aria-label="Editar voo"
-              >
-                <BiEdit />
-              </IconButton>
-            }
-          />
+          <Can minLevel={Role.FLYERS}>
+            <CreateFlightModal 
+              flight={flight}
+              trigger={
+                <IconButton
+                  colorPalette="yellow"
+                  variant="ghost"
+                  aria-label="Editar voo"
+                >
+                  <BiEdit />
+                </IconButton>
+              }
+            />
+          </Can>
           <Heading as="h3">{flight.ATD}</Heading>
-          <DeleteFlightModal flight={flight} />
+          <Can minLevel={Role.FLYERS}>
+            <DeleteFlightModal flight={flight} />
+          </Can>
           <Spacer />
           {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>

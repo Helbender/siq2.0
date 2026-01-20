@@ -1,11 +1,15 @@
+import { Can } from "@/common/components/Can";
+import { Role } from "@/common/roles";
 import { useToast } from "@/utils/useToast";
 import {
+  Box,
   Button,
   Container,
   Flex,
   HStack,
   Input,
   Spacer,
+  Text,
 } from "@chakra-ui/react";
 import { BiRefresh } from "react-icons/bi";
 
@@ -57,48 +61,68 @@ export function QualificationManagementPage() {
   };
 
   return (
-    <Container maxW="90%" py={6} mb={35}>
-      <HStack mb={10}>
-        <CreateQualModal />
-        <Spacer />
+    <Can
+      minLevel={Role.UNIF}
+      fallback={
+        <Container maxW="90%" py={6} mb={35}>
+          <Box textAlign="center" py={10}>
+            <Text fontSize="xl" fontWeight="bold" color="text.secondary">
+              Acesso Negado
+            </Text>
+            <Text mt={2} color="text.muted">
+              Você precisa ter nível UNIF ou superior para acessar esta página.
+            </Text>
+          </Box>
+        </Container>
+      }
+    >
+      <Container maxW="90%" py={6} mb={35}>
+        <HStack mb={10}>
+          <Can minLevel={Role.UNIF}>
+            <CreateQualModal />
+          </Can>
+          <Spacer />
 
-        <Button
-          leftIcon={<BiRefresh />}
-          colorPalette="blue"
-          onClick={handleReprocessAllFlights}
-          isLoading={reprocessFlights.isPending}
-          loadingText="A processar..."
-        >
-          Reprocessar Todas
-        </Button>
+          <Can minLevel={Role.UNIF}>
+            <Button
+              leftIcon={<BiRefresh />}
+              colorPalette="blue"
+              onClick={handleReprocessAllFlights}
+              isLoading={reprocessFlights.isPending}
+              loadingText="A processar..."
+            >
+              Reprocessar Todas
+            </Button>
+          </Can>
 
-        <Input
-          placeholder="Search..."
-          maxW={200}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </HStack>
+          <Input
+            placeholder="Search..."
+            maxW={200}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </HStack>
 
-      <Flex mb={6} gap={4} direction={{ base: "column", md: "row" }}>
-        <SegmentFilter
-          title="Filtrar por Grupo"
-          options={availableGroups}
-          value={group}
-          onChange={setGroup}
-        />
+        <Flex mb={6} gap={4} direction={{ base: "column", md: "row" }}>
+          <SegmentFilter
+            title="Filtrar por Grupo"
+            options={availableGroups}
+            value={group}
+            onChange={setGroup}
+          />
 
-        <Spacer />
+          <Spacer />
 
-        <SegmentFilter
-          title="Filtrar por Posição"
-          options={allTypes}
-          value={type}
-          onChange={setType}
-        />
-      </Flex>
+          <SegmentFilter
+            title="Filtrar por Posição"
+            options={allTypes}
+            value={type}
+            onChange={setType}
+          />
+        </Flex>
 
-      <QualificationTable qualifications={filtered} />
-    </Container>
+        <QualificationTable qualifications={filtered} />
+      </Container>
+    </Can>
   );
 }
