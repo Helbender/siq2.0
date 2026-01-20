@@ -3,7 +3,7 @@ import { AuthenticatedLayout } from "@/features/shared/layout/AuthenticatedLayou
 import { Navigate, Route } from "react-router";
 
 // Test pages
-import { CrewQualifications } from "@/features/pilots/pages/CrewQualifications";
+import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQualifications";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { TestDashboardPage } from "@/features/test/pages/TestDashboardPage";
 import { TestFlightsPage } from "@/features/test/pages/TestFlightsPage";

@@ -1,90 +1,40 @@
-import { http } from "@/api/http";
-import { useCrewTypes } from "@/common/CrewTypesProvider";
-import { useToast } from "@/utils/useToast";
 import {
-    Box,
-    Flex,
-    SegmentGroup,
-    Stack,
-    Table,
-    Text,
+  Box,
+  Center,
+  Checkbox,
+  Flex,
+  Spinner,
+  Stack,
+  Table,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 
-export function QualificationTablePage({ tipo: initialTipo }) {
-  const { TipoTripulante, getCrewTypeOptions, crewTypeToApiFormat } = useCrewTypes();
-  const [selectedTipo, setSelectedTipo] = useState(initialTipo || TipoTripulante.PILOTO);
-  const [selectedFuncao, setSelectedFuncao] = useState(null);
-  const [availableTypes, setAvailableTypes] = useState([]);
-  const [filteredCrew, setFilteredCrew] = useState([]);
-  const [crew, setCrew] = useState([]);
+export function QualificationTablePage({ pilotos = [], loading }) {
   const [sortBy, setSortBy] = useState(null); // { qualName: string, direction: 'asc' | 'desc' }
-  const [visibleGroup, setVisibleGroup] = useState(null);
+  const [selectedGroups, setSelectedGroups] = useState([]);
   const [availableGroups, setAvailableGroups] = useState([]);
-  const toast = useToast();
 
-  const getSavedCrew = async () => {
-    if (!selectedTipo) return;
-    
-    toast({
-      title: "A carregar Tripulantes",
-      description: "Em processo.",
-      status: "loading",
-      duration: 5000,
-      isClosable: true,
-      position: "bottom",
-    });
-    try {
-      const tipoForApi = crewTypeToApiFormat(selectedTipo);
-      const res = await http.get(
-        `/v2/tripulantes/qualificacoes/${tipoForApi}`,
-      );
-      toast.closeAll();
-      toast({
-        title: "Tripulantes Carregados",
-        description: `${res.data.length} Tripulantes carregados com sucesso.`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setCrew(res.data || []);
-      const types = [
-        ...new Set(res.data.map((qual) => qual.position).filter(Boolean)),
-      ].sort();
-      setAvailableTypes(types);
-      // Select first type by default
-      if (types.length > 0) {
-        setSelectedFuncao(types[0]);
-      } else {
-        setSelectedFuncao(null);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.closeAll();
-    }
-  };
+  if (loading) {
+    return (
+      <Center py="10">
+        <Spinner size="lg" />
+      </Center>
+    );
+  }
 
-  useEffect(() => {
-    getSavedCrew();
-  }, [selectedTipo]);
-
-  // Filter crew by selected função
-  useEffect(() => {
-    let results = crew;
-
-    // Filter by selected função
-    if (selectedFuncao) {
-      results = results.filter((member) => member.position === selectedFuncao);
-    }
-
-    setFilteredCrew(results);
-  }, [crew, selectedFuncao]);
+  if (!pilotos || !pilotos.length) {
+    return (
+      <Center py="10">
+        <Text opacity={0.6}>Sem dados</Text>
+      </Center>
+    );
+  }
 
   // Get all unique qualifications from all crew members with their groups
   const allQualifications = useMemo(() => {
     const qualMap = new Map(); // Map of qualName -> { nome, grupo }
-    filteredCrew.forEach((member) => {
+    pilotos.forEach((member) => {
       if (member.qualificacoes) {
         member.qualificacoes.forEach((qual) => {
           if (!qualMap.has(qual.nome)) {
@@ -102,7 +52,7 @@ export function QualificationTablePage({ tipo: initialTipo }) {
       if (grupoCompare !== 0) return grupoCompare;
       return a.nome.localeCompare(b.nome);
     });
-  }, [filteredCrew]);
+  }, [pilotos]);
 
   // Group qualifications by grupo
   const qualificationsByGroup = useMemo(() => {
@@ -117,24 +67,26 @@ export function QualificationTablePage({ tipo: initialTipo }) {
     return grouped;
   }, [allQualifications]);
 
-  // Initialize visible groups when qualificationsByGroup changes
+  // Initialize selected groups when qualificationsByGroup changes
   useEffect(() => {
     const groups = Object.keys(qualificationsByGroup).sort();
     setAvailableGroups(groups);
-    // Set first group as visible by default if not already set
-    if (groups.length > 0 && !visibleGroup) {
-      setVisibleGroup(groups[0]);
+    // Select all groups by default if none selected
+    if (groups.length > 0 && selectedGroups.length === 0) {
+      setSelectedGroups(groups);
     }
-  }, [qualificationsByGroup, visibleGroup]);
+  }, [qualificationsByGroup, selectedGroups.length]);
 
-  // Filter qualifications by visible group
+  // Filter qualifications by selected groups
   const visibleQualificationsByGroup = useMemo(() => {
     const filtered = {};
-    if (visibleGroup && qualificationsByGroup[visibleGroup]) {
-      filtered[visibleGroup] = qualificationsByGroup[visibleGroup];
-    }
+    selectedGroups.forEach((group) => {
+      if (qualificationsByGroup[group]) {
+        filtered[group] = qualificationsByGroup[group];
+      }
+    });
     return filtered;
-  }, [qualificationsByGroup, visibleGroup]);
+  }, [qualificationsByGroup, selectedGroups]);
 
   // Get total count of visible qualifications for colspan calculation
   const visibleQualificationsCount = useMemo(() => {
@@ -161,9 +113,9 @@ export function QualificationTablePage({ tipo: initialTipo }) {
 
   // Sort crew by qualification
   const sortedCrew = useMemo(() => {
-    if (!sortBy) return filteredCrew;
+    if (!sortBy) return pilotos;
 
-    const sorted = [...filteredCrew].sort((a, b) => {
+    const sorted = [...pilotos].sort((a, b) => {
       const daysA = getDaysLeft(a, sortBy.qualName);
       const daysB = getDaysLeft(b, sortBy.qualName);
 
@@ -180,7 +132,7 @@ export function QualificationTablePage({ tipo: initialTipo }) {
     });
 
     return sorted;
-  }, [filteredCrew, sortBy]);
+  }, [pilotos, sortBy]);
 
   // Handle column header click for sorting
   const handleSort = (qualName) => {
@@ -196,80 +148,75 @@ export function QualificationTablePage({ tipo: initialTipo }) {
     }
   };
 
+  const handleToggleGroup = (group) => {
+    if (selectedGroups.includes(group)) {
+      setSelectedGroups(selectedGroups.filter((g) => g !== group));
+    } else {
+      setSelectedGroups([...selectedGroups, group]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedGroups.length === availableGroups.length) {
+      setSelectedGroups([]);
+    } else {
+      setSelectedGroups([...availableGroups]);
+    }
+  };
+
+  const allSelected = availableGroups.length > 0 && selectedGroups.length === availableGroups.length;
+  const isIndeterminate = selectedGroups.length > 0 && !allSelected;
+
   return (
     <Stack m={4} pb={10}>
-      <Box ml={4} mb={6}>
-        <Text fontWeight="bold" mb={3} fontSize="md" color="text.secondary">
-          Tipo de Tripulante
-        </Text>
-        <SegmentGroup.Root
-          value={selectedTipo}
-          onValueChange={(details) => setSelectedTipo(details.value)}
-          size="md"
-          css={{
-            "--segment-indicator-bg": "colors.teal.500",
-            "& [data-selected]": {
-              bg: "teal.500",
-              color: "white",
-            },
-          }}
-        >
-          <SegmentGroup.Items items={getCrewTypeOptions()} />
-          <SegmentGroup.Indicator />
-        </SegmentGroup.Root>
-      </Box>
-      {availableTypes.length > 0 && (
-        <Box ml={4} mb={6}>
-          <Text fontWeight="bold" mb={3} fontSize="md" color="text.secondary">
-            Função
-          </Text>
-          <SegmentGroup.Root
-            value={selectedFuncao || ""}
-            onValueChange={(details) => setSelectedFuncao(details.value)}
-            size="md"
-            css={{
-              "--segment-indicator-bg": "colors.teal.500",
-              "& [data-selected]": {
-                bg: "teal.500",
-                color: "white",
-              },
-            }}
-          >
-            <SegmentGroup.Items
-              items={availableTypes.map((type) => ({
-                value: type,
-                label: type,
-              }))}
-            />
-            <SegmentGroup.Indicator />
-          </SegmentGroup.Root>
-        </Box>
-      )}
+      {/* Qualification Group Filter */}
       {availableGroups.length > 0 && (
         <Box ml={4} mb={6}>
           <Text fontWeight="bold" mb={3} fontSize="md" color="text.secondary">
             Tipo
           </Text>
-          <SegmentGroup.Root
-            value={visibleGroup || ""}
-            onValueChange={(details) => setVisibleGroup(details.value)}
-            size="md"
-            css={{
-              "--segment-indicator-bg": "colors.teal.500",
-              "& [data-selected]": {
-                bg: "teal.500",
-                color: "white",
-              },
-            }}
+          <Box
+            p={4}
+            bg="bg.cardSubtle"
+            borderRadius="md"
+            border="1px solid"
+            borderColor="border.muted"
+            boxShadow="sm"
+            maxW="fit-content"
           >
-            <SegmentGroup.Items
-              items={availableGroups.map((group) => ({
-                value: group,
-                label: group,
-              }))}
-            />
-            <SegmentGroup.Indicator />
-          </SegmentGroup.Root>
+            <Flex gap={4} direction="row" wrap="wrap">
+              <Checkbox.Root
+                checked={allSelected}
+                {...(isIndeterminate && { indeterminate: true })}
+                onCheckedChange={handleSelectAll}
+                colorPalette="teal"
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control>
+                  <Checkbox.Indicator />
+                </Checkbox.Control>
+                <Checkbox.Label>
+                  <Text fontSize="sm">Todos</Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+              {availableGroups.map((group) => (
+                <Checkbox.Root
+                  key={group}
+                  checked={selectedGroups.includes(group)}
+                  onCheckedChange={() => handleToggleGroup(group)}
+                  colorPalette="teal"
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Label>
+                    <Text fontSize="sm">{group}</Text>
+                  </Checkbox.Label>
+                </Checkbox.Root>
+              ))}
+            </Flex>
+          </Box>
         </Box>
       )}
 
@@ -291,7 +238,8 @@ export function QualificationTablePage({ tipo: initialTipo }) {
                 left="0px"
                 bg="bg.muted"
                 zIndex={3}
-                minW="20px"
+                w="fit-content"
+                whiteSpace="nowrap"
                 borderRight="1px solid"
                 borderColor="border.muted"
               >
@@ -301,9 +249,11 @@ export function QualificationTablePage({ tipo: initialTipo }) {
                 rowSpan={2}
                 fontSize={"lg"}
                 position="sticky"
-                left="30px"
+                left="80px"
                 bg="bg.muted"
                 zIndex={3}
+                w="fit-content"
+                maxW="200px"
                 borderRight="1px solid"
                 borderColor="border.muted"
               >
@@ -383,6 +333,8 @@ export function QualificationTablePage({ tipo: initialTipo }) {
                     left="0px"
                     bg="bg.card"
                     zIndex={1}
+                    w="fit-content"
+                    whiteSpace="nowrap"
                     borderRight="1px solid"
                     borderColor="border.muted"
                   >
@@ -390,12 +342,13 @@ export function QualificationTablePage({ tipo: initialTipo }) {
                   </Table.Cell>
                   <Table.Cell
                     position="sticky"
-                    left="30px"
+                    left="80px"
                     bg="bg.card"
                     zIndex={1}
+                    w="fit-content"
+                    maxW="200px"
                     borderRight="1px solid"
                     borderColor="border.muted"
-                    width="200px"
                     isTruncated
                   >
                     {member.name?.trim() || member.name}

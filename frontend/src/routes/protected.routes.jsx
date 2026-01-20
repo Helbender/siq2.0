@@ -6,7 +6,7 @@ import { Navigate } from "react-router";
 // Feature routes
 import { DashboardPage } from "@/features/dashboard/index";
 import { FlightsPage } from "@/features/flights/index";
-import { CrewQualifications } from "@/features/pilots/pages/CrewQualifications";
+import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQualifications";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { AboutPage } from "@/features/shared/pages/AboutPage";
 import { TestQualificationsTablePage } from "@/features/test/pages/TestQualificationsTablePage";

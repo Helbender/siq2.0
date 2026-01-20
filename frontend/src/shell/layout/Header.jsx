@@ -138,7 +138,7 @@ export function Header() {
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
-                          navigate("/piloto");
+                          navigate("/crew-qualifications");
                           onClose();
                         }}
                         aria-label="Qualificações"
@@ -153,7 +153,7 @@ export function Header() {
                         color="teal.500"
                         fontSize="lg"
                         onClick={() => {
-                          navigate("/piloto-table");
+                          navigate("/crew-qualifications");
                           onClose();
                         }}
                         aria-label="Tabela de Qualificações"

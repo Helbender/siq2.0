@@ -31,11 +31,15 @@ export function useToast() {
     
     const placement = placementMap[position] || "bottom-end";
     
+    // For loading toasts, don't set duration (null means no auto-dismiss)
+    // For other toasts, use provided duration or default 5000ms
+    const toastDuration = type === "loading" ? null : (duration || 5000);
+    
     const toastResult = toaster.create({
       title,
       description,
       type,
-      duration: duration || 5000,
+      duration: toastDuration,
       closable: isClosable !== false,
       placement,
     });
@@ -44,11 +48,11 @@ export function useToast() {
     if (toastResult && toastResult.id) {
       activeToastIds.add(toastResult.id);
       
-      // Remove from tracking when toast is dismissed (if duration is set)
-      if (duration && duration > 0) {
+      // Remove from tracking when toast is dismissed (if duration is set and > 0)
+      if (toastDuration && toastDuration > 0) {
         setTimeout(() => {
           activeToastIds.delete(toastResult.id);
-        }, duration);
+        }, toastDuration);
       }
     }
     
