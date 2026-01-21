@@ -11,7 +11,10 @@ export function useDeleteUser() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
+      queryClient.invalidateQueries({ 
+        queryKey: usersQueryKeys.all,
+        refetchType: 'active'
+      });
     },
   });
 }

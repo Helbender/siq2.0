@@ -74,12 +74,29 @@ class UserUpdateSchema(Schema):
     def preprocess_data(self, data, **kwargs):
         """Pre-process data to convert empty strings to None for optional fields."""
         if isinstance(data, dict):
+            # Remove nip if present (shouldn't be in update requests)
+            processed_data = data.copy()
+            if "nip" in processed_data:
+                del processed_data["nip"]
+            
             # Convert empty strings to None for optional fields that allow_none=True
             optional_fields = ["rank", "position", "email", "roleLevel", "role_id"]
-            processed_data = data.copy()
             for field in optional_fields:
                 if field in processed_data and processed_data[field] == "":
                     processed_data[field] = None
+            
+            # Handle empty name string - if name is empty, remove it (don't update)
+            if "name" in processed_data and processed_data["name"] == "":
+                del processed_data["name"]
+            
+            # Handle empty status string - if status is empty, remove it (don't update)
+            if "status" in processed_data and processed_data["status"] == "":
+                del processed_data["status"]
+            
+            # Handle empty tipo string - if tipo is empty, remove it (don't update)
+            if "tipo" in processed_data and processed_data["tipo"] == "":
+                del processed_data["tipo"]
+            
             return processed_data
         return data
 

@@ -11,7 +11,11 @@ export function useUpdateUser() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
+      // Invalidate and refetch users query
+      queryClient.invalidateQueries({ 
+        queryKey: usersQueryKeys.all,
+        refetchType: 'active' // Force refetch even if data is considered fresh
+      });
     },
   });
 }

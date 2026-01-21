@@ -130,10 +130,24 @@ class UserService:
                 if key == "roleLevel":
                     # Map roleLevel to role_level field
                     modified_user.role_level = value
+                    # Try to find matching role by level and update role_id
+                    # If no matching role found, role_id will remain None and role_level will be used
+                    from sqlalchemy import select
+                    from app.shared.rbac_models import Role as RoleModel
+                    matching_role = session.scalars(
+                        select(RoleModel).where(RoleModel.level == value)
+                    ).first()
+                    if matching_role:
+                        modified_user.role_id = matching_role.id
+                    else:
+                        # Clear role_id if no matching role found, so role_level takes precedence
+                        modified_user.role_id = None
                     continue
                 setattr(modified_user, key, value)
 
             self.repository.update(session, modified_user)
+            # Refresh the user to reload relationships (especially role)
+            session.refresh(modified_user)
             return modified_user.to_json()
         except Exception:
             session.rollback()
