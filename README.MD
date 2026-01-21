@@ -87,10 +87,10 @@ python -c "from app import app, setup_database; setup_database()"
 5. Executar API:
 ```bash
 # Desenvolvimento
-python app.py
+python wsgi.py
 
 # Produção com Gunicorn
-gunicorn -w 4 -b 0.0.0.0:5051 app:application
+gunicorn -w 4 -b 0.0.0.0:5051 wsgi:app
 ```
 
 ### Configuração do Frontend

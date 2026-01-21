@@ -13,4 +13,4 @@ COPY . ./
 
 EXPOSE 5051
 # CMD ["gunicorn", "-b", ":5051", "app:app"]
-CMD ["python", "app.py"]
+CMD ["python", "wsgi.py"]

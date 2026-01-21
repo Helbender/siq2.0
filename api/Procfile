@@ -1,0 +1,1 @@
+web: gunicorn -b :5051 wsgi:app
