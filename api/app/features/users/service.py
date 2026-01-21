@@ -39,7 +39,6 @@ class UserService:
                 "rank": t.rank,
                 "position": t.position,
                 "email": t.email,
-                "admin": t.admin,
                 "status": t.status.value,
             }
             # Add role information if available
@@ -75,7 +74,6 @@ class UserService:
             rank=user_data.get("rank"),
             position=user_data.get("position"),
             email=user_data.get("email"),
-            admin=bool(user_data.get("admin", False)),
             password=hash_code(str(12345)),
             tipo=tipo,
             status=status,

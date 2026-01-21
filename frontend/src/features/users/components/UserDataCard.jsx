@@ -58,20 +58,12 @@ export function UserDataCard({ user }) {
           <StyledText query={"NIP:"} text={`NIP:  ${user.nip}`} />
           <StyledText query={"Email:"} text={`Email:  ${user.email}`} />
           <StyledText
-            query={"Esquadra:"}
-            text={`Esquadra:  ${user.squadron}`}
-          />
-          <StyledText
             query={"Status:"}
             text={`Status:  ${user.status || "Presente"}`}
           />
           <StyledText
             query={"Role:"}
             text={`Role:  ${getRoleName(user.roleLevel || user.role?.level)}`}
-          />
-          <StyledText
-            query={"Admin:"}
-            text={`Admin:  ${user.admin ? "Sim" : "Não"}`}
           />
         </VStack>
       </Card.Body>

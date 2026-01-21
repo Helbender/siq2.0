@@ -52,7 +52,6 @@ class Tripulante(Base):
     rank: Mapped[str] = mapped_column(String(5))
     position: Mapped[str] = mapped_column(String(5))
     email: Mapped[str] = mapped_column(String(50))
-    admin: Mapped[bool] = mapped_column(default=False)
     role_level: Mapped[int | None] = mapped_column(Integer, default=Role.USER.level, nullable=True)
     role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), nullable=True)
     recover: Mapped[str] = mapped_column(String(500), default="")
@@ -77,7 +76,7 @@ class Tripulante(Base):
         response = {}
         for column in self.__table__.columns:
             col_name = column.name
-            if col_name in ["recover", "password"]:
+            if col_name in ["recover", "password", "admin", "squadron"]:
                 continue
             value = getattr(self, col_name)
             if isinstance(value, Enum):

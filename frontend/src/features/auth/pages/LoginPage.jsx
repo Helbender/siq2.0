@@ -7,8 +7,8 @@ import {
   Input,
   Stack,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { HealthCard } from "../components/HealthCard";
 import { useLogin } from "../mutations/useLogin";
 
@@ -18,6 +18,18 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const loginMutation = useLogin();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reset form state when navigating to login page
+  useEffect(() => {
+    if (location.pathname === "/login") {
+      setNip("");
+      setPassword("");
+      setError("");
+      // Reset mutation state to clear any previous errors
+      loginMutation.reset();
+    }
+  }, [location.pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

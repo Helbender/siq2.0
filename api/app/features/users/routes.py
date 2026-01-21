@@ -77,10 +77,6 @@ def retrieve_user() -> tuple[Response, int]:
               format: email
               description: User email address
               example: "joao.silva@example.com"
-            admin:
-              type: boolean
-              description: Whether user has admin privileges
-              default: false
             status:
               type: string
               description: User status
@@ -105,8 +101,6 @@ def retrieve_user() -> tuple[Response, int]:
                 type: string
               email:
                 type: string
-              admin:
-                type: boolean
               status:
                 type: string
       201:
@@ -219,8 +213,6 @@ def modify_user(nip: int) -> tuple[Response, int]:
             email:
               type: string
               format: email
-            admin:
-              type: boolean
             status:
               type: string
     security:

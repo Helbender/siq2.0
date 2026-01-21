@@ -24,14 +24,14 @@ def require_authenticated() -> tuple[dict, int] | None:
 
 
 def require_admin() -> tuple[dict, int] | None:
-    """Require user to have admin privileges.
+    """Require user to have admin privileges (SUPER_ADMIN role level).
 
     Returns:
         None if admin, or (error_response, status_code) if not
     """
     verify_jwt_in_request()
-    claims = get_jwt()
-    if not claims.get("admin", False):
+    role_level = get_current_user_role_level()
+    if role_level is None or role_level < Role.SUPER_ADMIN.level:
         return jsonify({"message": "Admin access required"}), 403
     return None
 

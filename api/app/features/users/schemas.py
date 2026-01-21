@@ -1,6 +1,6 @@
 """Marshmallow schemas for users request/response validation."""
 
-from marshmallow import Schema, ValidationError, fields, validate, validates_schema
+from marshmallow import Schema, ValidationError, fields, pre_load, validate, validates_schema
 
 from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 
@@ -14,7 +14,6 @@ class UserResponseSchema(Schema):
     rank = fields.Str(allow_none=True, metadata={"description": "User rank"})
     position = fields.Str(allow_none=True, metadata={"description": "User position"})
     email = fields.Email(allow_none=True, metadata={"description": "User email"})
-    admin = fields.Bool(metadata={"description": "Whether user is admin"})
     status = fields.Str(metadata={"description": "User status"})
 
 
@@ -27,7 +26,6 @@ class UserCreateSchema(Schema):
     rank = fields.Str(allow_none=True, metadata={"description": "User rank"})
     position = fields.Str(allow_none=True, metadata={"description": "User position"})
     email = fields.Email(allow_none=True, metadata={"description": "User email"})
-    admin = fields.Bool(load_default=False, metadata={"description": "Whether user is admin"})
     status = fields.Str(
         load_default="Presente",
         validate=validate.OneOf([s.value for s in StatusTripulante]),
@@ -65,13 +63,25 @@ class UserUpdateSchema(Schema):
     rank = fields.Str(allow_none=True, metadata={"description": "User rank"})
     position = fields.Str(allow_none=True, metadata={"description": "User position"})
     email = fields.Email(allow_none=True, metadata={"description": "User email"})
-    admin = fields.Bool(metadata={"description": "Whether user is admin"})
     status = fields.Str(
         validate=validate.OneOf([s.value for s in StatusTripulante]),
         metadata={"description": "User status"},
     )
     roleLevel = fields.Int(allow_none=True, metadata={"description": "User role level (numeric)"})
     role_id = fields.Int(allow_none=True, metadata={"description": "User role ID (foreign key to roles table)"})
+
+    @pre_load
+    def preprocess_data(self, data, **kwargs):
+        """Pre-process data to convert empty strings to None for optional fields."""
+        if isinstance(data, dict):
+            # Convert empty strings to None for optional fields that allow_none=True
+            optional_fields = ["rank", "position", "email", "roleLevel", "role_id"]
+            processed_data = data.copy()
+            for field in optional_fields:
+                if field in processed_data and processed_data[field] == "":
+                    processed_data[field] = None
+            return processed_data
+        return data
 
     @validates_schema
     def validate_tipo(self, data, **kwargs):

@@ -40,7 +40,6 @@ class AuthService:
                 access_token = create_access_token(
                     identity="admin",
                     additional_claims={
-                        "admin": True,
                         "name": "ADMIN",
                         "roleLevel": Role.SUPER_ADMIN.level,
                     },
@@ -68,7 +67,6 @@ class AuthService:
         access_token = create_access_token(
             identity=nip_str,
             additional_claims={
-                "admin": tripulante.admin,
                 "name": tripulante.name,
                 "roleLevel": role_level,
             },
@@ -173,7 +171,6 @@ class AuthService:
             new_access_token = create_access_token(
                 identity="admin",
                 additional_claims={
-                    "admin": True,
                     "name": "ADMIN",
                     "roleLevel": Role.SUPER_ADMIN.level,
                 },
@@ -219,7 +216,6 @@ class AuthService:
             return {
                 "nip": "admin",
                 "name": "ADMIN",
-                "admin": True,
                 "roleLevel": Role.SUPER_ADMIN.level,
             }
 

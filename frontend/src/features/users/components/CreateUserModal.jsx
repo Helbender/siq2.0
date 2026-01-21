@@ -9,7 +9,6 @@ import {
   HStack,
   Input,
   NativeSelect,
-  Switch,
   VStack
 } from "@chakra-ui/react";
 import { useState } from "react";
@@ -135,38 +134,6 @@ export function CreateUserModal({
                   />
                 </Field.Root>
                 <HStack width="100%">
-                  {currentUser?.admin ? (
-                    <Field.Root align={"center"}>
-                      <Field.Label textAlign={"center"}>Admin</Field.Label>
-                      <Switch.Root
-                        checked={formData.admin}
-                        onCheckedChange={(details) =>
-                          setFormData({
-                            ...formData,
-                            admin: details.checked,
-                          })
-                        }
-                      >
-                        <Switch.HiddenInput />
-                        <Switch.Control>
-                          <Switch.Thumb />
-                        </Switch.Control>
-                        <Switch.Label />
-                      </Switch.Root>
-                    </Field.Root>
-                  ) : null}
-                  <Field.Root hidden={true}>
-                    <Field.Label>Esquadra</Field.Label>
-                    <Input
-                      bg="bg.surface"
-                      value={formData.squadron}
-                      type="text"
-                      placeholder="Esquadra"
-                      onChange={(e) =>
-                        setFormData({ ...formData, squadron: e.target.value })
-                      }
-                    />
-                  </Field.Root>
                   <Field.Root>
                     <Field.Label>Grupo</Field.Label>
                     <NativeSelect.Root>
@@ -212,7 +179,7 @@ export function CreateUserModal({
                       <NativeSelect.Indicator />
                     </NativeSelect.Root>
                   </Field.Root>
-                  {currentUser?.admin || currentUser?.roleLevel || currentUser?.role?.level ? (
+                  {currentUser?.roleLevel || currentUser?.role?.level ? (
                     <Field.Root>
                       <Field.Label>Role</Field.Label>
                       <NativeSelect.Root>

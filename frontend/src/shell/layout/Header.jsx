@@ -87,9 +87,6 @@ export function Header() {
                         >
                           {User.name}
                         </Heading>
-                        <Heading size="sm" mt="0" color={"teal.700"}>
-                          {User.admin ? "Admin" : ""}
-                        </Heading>
                       </Box>
                       <Spacer />
                       <Image
@@ -164,57 +161,21 @@ export function Header() {
                         </Flex>
                       </ChakraLink>
 
-                      {User.admin ? (
-                        <ChakraLink
-                          p={2}
-                          color="teal.500"
-                          fontSize="lg"
-                          onClick={() => {
-                            navigate("/qualificacoes");
-                            onClose();
-                          }}
-                        >
-                          <Flex align="center">
-                            <FaTools />
+                      <ChakraLink
+                        p={2}
+                        color="teal.500"
+                        fontSize="lg"
+                        onClick={() => {
+                          navigate("/users");
+                          onClose();
+                        }}
+                      >
+                        <Flex align="center">
+                          <FaUsers />
 
-                            <Box ml={2}>Gerir Qualificações</Box>
-                          </Flex>
-                        </ChakraLink>
-                      ) : null}
-
-                      {User.admin ? (
-                        <ChakraLink
-                          p={2}
-                          color="teal.500"
-                          fontSize="lg"
-                          onClick={() => {
-                            navigate("/users");
-                            onClose();
-                          }}
-                        >
-                          <Flex align="center">
-                            <FaUsers />
-
-                            <Box ml={2}>Utilizadores</Box>
-                          </Flex>
-                        </ChakraLink>
-                      ) : (
-                        <ChakraLink
-                          p={2}
-                          color="teal.500"
-                          fontSize="lg"
-                          onClick={() => {
-                            navigate("/users");
-                            onClose();
-                          }}
-                        >
-                          <Flex align="center">
-                            <FaUsers />
-
-                            <Box ml={2}>Utilizador</Box>
-                          </Flex>
-                        </ChakraLink>
-                      )}
+                          <Box ml={2}>Utilizador</Box>
+                        </Flex>
+                      </ChakraLink>
 
                       <Spacer />
                       <ChakraLink

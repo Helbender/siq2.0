@@ -13,7 +13,7 @@ from app.shared.enums import Role
 
 
 def admin_required(f: Callable) -> Callable:
-    """Decorator to require admin privileges for a route.
+    """Decorator to require admin privileges for a route (SUPER_ADMIN role level).
 
     Usage:
         @app.route('/admin-only')
@@ -24,9 +24,37 @@ def admin_required(f: Callable) -> Callable:
     @wraps(f)
     def decorated_function(*args, **kwargs):
         verify_jwt_in_request()
+        nip_identity = get_jwt_identity()
         claims = get_jwt()
-        if not claims.get("admin", False):
+        
+        # Handle admin case
+        if isinstance(nip_identity, str) and nip_identity == "admin":
+            # Admin identity has SUPER_ADMIN level, so allow access
+            return f(*args, **kwargs)
+        
+        # Try to get role level from JWT claims first (faster)
+        user_role_level = claims.get("roleLevel")
+        
+        # If not in claims, get from database
+        if user_role_level is None:
+            try:
+                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+            except (ValueError, TypeError):
+                return jsonify({"message": "Admin access required"}), 403
+            
+            repository = AuthRepository()
+            with Session(engine) as session:
+                current_user = repository.find_user_by_nip(session, nip)
+                
+                if current_user is None:
+                    return jsonify({"message": "Admin access required"}), 403
+                
+                # Get role level from role relationship if exists, otherwise use role_level field
+                user_role_level = current_user.role.level if current_user.role else current_user.role_level
+        
+        if user_role_level is None or user_role_level < Role.SUPER_ADMIN.level:
             return jsonify({"message": "Admin access required"}), 403
+        
         return f(*args, **kwargs)
 
     return decorated_function
