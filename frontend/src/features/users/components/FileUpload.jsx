@@ -11,12 +11,10 @@ import {
   Field,
 } from "@chakra-ui/react";
 import { http } from "@/api/http";
-import { useToast } from "@/utils/useToast";
 import { FiUploadCloud } from "react-icons/fi";
 
 export function FileUpload() {
   const [file, setFile] = useState(null);
-  const toast = useToast();
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);

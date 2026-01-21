@@ -19,13 +19,11 @@ import {
 import { HiX } from "react-icons/hi";
 import { useForm } from "react-hook-form";
 import { http } from "@/api/http";
-import { useToast } from "@/utils/useToast";
 
 const today = new Date();
 
 export function InsertInitQual(props) {
   const [qualList, setQualList] = useState([]);
-  const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {

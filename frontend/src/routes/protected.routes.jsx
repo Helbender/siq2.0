@@ -4,14 +4,13 @@ import { AuthenticatedLayout } from "@/shell/layout/AuthenticatedLayout";
 import { Navigate } from "react-router";
 
 // Feature routes
-import { DashboardPage } from "@/features/dashboard/index";
-import { FlightsPage } from "@/features/flights/index";
+import { AboutPage } from "@/common/pages/AboutPage";
 import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQualifications";
-import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
-import { AboutPage } from "@/features/shared/pages/AboutPage";
-import { TestQualificationsTablePage } from "@/features/test/pages/TestQualificationsTablePage";
-import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
+import { DashboardPage } from "@/features/dashboard/index";
 import { DatabaseManagementPage } from "@/features/db-management/index";
+import { FlightsPage } from "@/features/flights/index";
+import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
+import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 export const protectedRoutes = {
   element: (
     <RequireAuth>
@@ -24,10 +23,6 @@ export const protectedRoutes = {
     { path: "/dashboard", element: <DashboardPage /> },
     { path: "/flights", element: <FlightsPage /> },
     { path: "/crew-qualifications", element: <CrewQualifications /> },
-    {
-      path: "/qualifications-table",
-      element: <TestQualificationsTablePage />,
-    },
     {
       path: "/manage-qualifications",
       element: <QualificationManagementPage />,

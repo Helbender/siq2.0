@@ -2,7 +2,6 @@ import { Role } from "@/common/roles";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useDialogForm } from "@/common/hooks/useDialogForm";
 import { Can } from "@/common/components/Can";
-import { useToast } from "@/utils/useToast";
 import {
   Box,
   Button,
@@ -33,7 +32,6 @@ export function UserManagementPage() {
     loading,
   } = useUsers();
   const dialog = useDialogForm();
-  const toast = useToast();
   const displayAsTable = useBreakpointValue({ base: false, xl: true });
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();

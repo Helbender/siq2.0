@@ -12,13 +12,11 @@ import { FaCloud } from "react-icons/fa";
 import { DeleteYearModal } from "./DeleteYearModal";
 import { useDialogForm } from "@/common/hooks/useDialogForm";
 import { useRebackupFlightsByYear } from "../mutations/useRebackupFlightsByYear";
-import { useToast } from "@/utils/useToast";
 import { toaster } from "@/components/ui/toaster";
 
 export function YearStatsTable({ data, isLoading, error }) {
   const deleteDialog = useDialogForm();
   const rebackupFlightsByYear = useRebackupFlightsByYear();
-  const toast = useToast();
   const [backingUpYear, setBackingUpYear] = useState(null);
 
   const handleRebackupYear = async (year) => {

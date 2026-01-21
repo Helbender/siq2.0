@@ -1,7 +1,6 @@
 import { canModifyUser, getRoleName, Role } from "@/common/roles";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useSendEmail } from "@/utils/useSendEmail";
-import { useToast } from "@/utils/useToast";
 import {
   HStack,
   IconButton,
@@ -14,7 +13,6 @@ import { IoIosCheckmark, IoIosClose } from "react-icons/io";
 export function UsersTable({ users, onEdit, onDelete }) {
   const { user: currentUser } = useAuth();
   const sendEmail = useSendEmail();
-  const toast = useToast();
   
   const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
   const currentUserNip = currentUser?.nip;

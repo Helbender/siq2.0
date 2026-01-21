@@ -2,7 +2,6 @@ import { Can } from "@/common/components/Can";
 import { Role } from "@/common/roles";
 import { toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
-import { useToast } from "@/utils/useToast";
 import {
   Alert,
   Box,
@@ -26,7 +25,6 @@ export function DatabaseManagementPage() {
   const { user } = useAuth();
   const userRoleLevel = user?.roleLevel || user?.role?.level;
   const hasAccess = userRoleLevel >= Role.SUPER_ADMIN;
-  const toast = useToast();
   
   // Only fetch data if user has SUPER_ADMIN access
   const { data, isLoading, error } = useFlightsByYear({
