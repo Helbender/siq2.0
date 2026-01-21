@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// Use environment variable for API URL, fallback to /api for development proxy
+const apiUrl = import.meta.env.VITE_API_URL || "/api";
+
 export const http = axios.create({
-  baseURL: "/api",
+  baseURL: apiUrl,
   withCredentials: true, // REQUIRED for refresh cookies
 });
 
