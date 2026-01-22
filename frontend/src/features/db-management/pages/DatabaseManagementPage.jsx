@@ -8,17 +8,21 @@ import {
   Button,
   Card,
   Container,
+  Field,
   Heading,
   HStack,
+  Input,
   Separator,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { FaCloud, FaDownload } from "react-icons/fa";
+import { useState, useRef } from "react";
+import { FaCloud, FaDownload, FaUpload } from "react-icons/fa";
 import { YearStatsTable } from "../components/YearStatsTable";
 import { useFlightsByYear } from "../hooks/useFlightsByYear";
 import { useExportQualifications } from "../mutations/useExportQualifications";
 import { useExportUsers } from "../mutations/useExportUsers";
+import { useImportQualifications } from "../mutations/useImportQualifications";
 import { useRebackupFlights } from "../mutations/useRebackupFlights";
 
 export function DatabaseManagementPage() {
@@ -34,15 +38,18 @@ export function DatabaseManagementPage() {
   const rebackupFlights = useRebackupFlights();
   const exportQualifications = useExportQualifications();
   const exportUsers = useExportUsers();
+  const importQualifications = useImportQualifications();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleRebackupFlights = async () => {
     // Show loading toast
-    const loadingToast = toast({
+    const loadingToast = toaster.create({
       title: "Starting backup...",
       description: "Processing flights and preparing for upload to Google Drive",
-      status: "info",
-      duration: null, // Keep it open until we close it
-      isClosable: false,
+      type: "info",
+      duration: null,
+      closable: false,
     });
 
     try {
@@ -51,10 +58,10 @@ export function DatabaseManagementPage() {
       if (loadingToast?.id) {
         toaster.dismiss(loadingToast.id);
       }
-      toast({
+      toaster.create({
         title: "Backup started",
         description: result.message,
-        status: "success",
+        type: "success",
         duration: 5000,
       });
     } catch (error) {
@@ -62,10 +69,10 @@ export function DatabaseManagementPage() {
       if (loadingToast?.id) {
         toaster.dismiss(loadingToast.id);
       }
-      toast({
+      toaster.create({
         title: "Error starting backup",
         description: error.response?.data?.error || error.message,
-        status: "error",
+        type: "error",
         duration: 5000,
       });
     }
@@ -74,16 +81,18 @@ export function DatabaseManagementPage() {
   const handleExportQualifications = async () => {
     try {
       await exportQualifications.mutateAsync();
-      toast({
+      toaster.create({
         title: "Backup downloaded",
         description: "Qualifications backup file downloaded successfully",
-        status: "success",
+        type: "success",
+        duration: 5000,
       });
     } catch (error) {
-      toast({
+      toaster.create({
         title: "Error downloading backup",
         description: error.response?.data?.error || error.message,
-        status: "error",
+        type: "error",
+        duration: 5000,
       });
     }
   };
@@ -91,16 +100,58 @@ export function DatabaseManagementPage() {
   const handleExportUsers = async () => {
     try {
       await exportUsers.mutateAsync();
-      toast({
+      toaster.create({
         title: "Backup downloaded",
         description: "Users backup file downloaded successfully",
-        status: "success",
+        type: "success",
+        duration: 5000,
       });
     } catch (error) {
-      toast({
+      toaster.create({
         title: "Error downloading backup",
         description: error.response?.data?.error || error.message,
-        status: "error",
+        type: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleUploadQualifications = async () => {
+    if (!selectedFile) {
+      toaster.create({
+        title: "No file selected",
+        description: "Please select a qualifications backup file first",
+        type: "error",
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      const result = await importQualifications.mutateAsync(selectedFile);
+      toaster.create({
+        title: "Import completed",
+        description: result.message || "Qualifications imported successfully",
+        type: "success",
+        duration: 5000,
+      });
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      toaster.create({
+        title: "Error importing qualifications",
+        description: error.response?.data?.error || error.message,
+        type: "error",
+        duration: 5000,
       });
     }
   };
@@ -175,6 +226,46 @@ export function DatabaseManagementPage() {
                       Download Users Backup
                     </Button>
                   </HStack>
+                </Box>
+
+                <Separator />
+
+                <Box>
+                  <Text mb={2} fontWeight="semibold">
+                    Upload Qualifications Backup
+                  </Text>
+                  <Text fontSize="sm" color="gray.500" mb={3}>
+                    Upload a JSON backup file to restore qualifications. Existing qualifications will be updated, new ones will be created.
+                  </Text>
+                  <VStack spacing={3} align="stretch">
+                    <Field.Root>
+                      <Field.Label htmlFor="qualifications-upload">
+                        Select Qualifications Backup File
+                      </Field.Label>
+                      <Input
+                        id="qualifications-upload"
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        onChange={handleFileChange}
+                      />
+                      {selectedFile && (
+                        <Text fontSize="sm" color="gray.500" mt={1}>
+                          Selected: {selectedFile.name}
+                        </Text>
+                      )}
+                    </Field.Root>
+                    <Button
+                      leftIcon={<FaUpload />}
+                      onClick={handleUploadQualifications}
+                      isLoading={importQualifications.isPending}
+                      loadingText="Uploading..."
+                      colorPalette="green"
+                      disabled={importQualifications.isPending || !selectedFile}
+                    >
+                      Upload Qualifications Backup
+                    </Button>
+                  </VStack>
                 </Box>
               </VStack>
             </Card.Body>

@@ -52,4 +52,15 @@ export const dbManagementService = {
     window.URL.revokeObjectURL(url);
     return { message: "Users backup downloaded" };
   },
+
+  uploadQualifications: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await http.post("/db-management/import/qualifications", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return data;
+  },
 };

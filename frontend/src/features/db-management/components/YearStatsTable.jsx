@@ -22,12 +22,12 @@ export function YearStatsTable({ data, isLoading, error }) {
   const handleRebackupYear = async (year) => {
     setBackingUpYear(year);
     // Show loading toast
-    const loadingToast = toast({
+    const loadingToast = toaster.create({
       title: `Starting backup for ${year}...`,
       description: "Processing flights and preparing for upload to Google Drive",
-      status: "info",
+      type: "loading",
       duration: null, // Keep it open until we close it
-      isClosable: false,
+      closable: false,
     });
 
     try {
@@ -36,10 +36,10 @@ export function YearStatsTable({ data, isLoading, error }) {
       if (loadingToast?.id) {
         toaster.dismiss(loadingToast.id);
       }
-      toast({
+      toaster.create({
         title: "Backup started",
         description: result.message,
-        status: "success",
+        type: "success",
         duration: 5000,
       });
       // Reset button state - work continues in background
@@ -49,10 +49,10 @@ export function YearStatsTable({ data, isLoading, error }) {
       if (loadingToast?.id) {
         toaster.dismiss(loadingToast.id);
       }
-      toast({
+      toaster.create({
         title: "Error starting backup",
         description: error.response?.data?.error || error.message,
-        status: "error",
+        type: "error",
         duration: 5000,
       });
       // Reset button state on error too

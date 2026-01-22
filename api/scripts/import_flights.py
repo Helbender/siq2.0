@@ -16,10 +16,15 @@ import argparse
 import base64
 import json
 import os
+import random
 import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 # Add the api/ directory to Python path to import local modules
@@ -59,6 +64,70 @@ OLD_CREW_QUAL_FIELDS = {
     "bskit",
     "paras",
 }
+
+# Lock for thread-safe printing from workers
+_print_lock = threading.Lock()
+
+# PostgreSQL deadlock error code
+PG_DEADLOCK_CODE = "40P01"
+
+# Max retries per file when deadlock is detected
+DEADLOCK_RETRIES = 5
+
+# Fixed number of worker threads
+NUM_WORKERS = 8
+
+
+def _is_deadlock(exc: BaseException) -> bool:
+    """True if the exception is a PostgreSQL deadlock (or similar DB deadlock)."""
+    if not isinstance(exc, OperationalError) or exc.orig is None:
+        return False
+    return getattr(exc.orig, "pgcode", None) == PG_DEADLOCK_CODE
+
+
+def _log(worker_label: str, msg: str) -> None:
+    """Thread-safe print with [worker] prefix."""
+    with _print_lock:
+        print(f"[{worker_label}] " + msg)
+
+
+def _sort_key_from_filename(filename: str) -> tuple[str, str]:
+    """(date_str, time_str) from filename for sorting. e.g. '1M 50A0034 07Apr2025 13:09 16709.1m'."""
+    parts = filename.split()
+    if len(parts) >= 4:
+        return (parts[2], parts[3])
+    return ("", "")
+
+
+def collect_all_files(root_folder: str) -> list[tuple[str, str]]:
+    """Walk folder, collect (file_path, filename) for each file.
+    Sorted by (date, time) from filename for deterministic order.
+    """
+    items: list[tuple[str, str, str, str]] = []
+    for dirpath, _, filenames in os.walk(root_folder):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            date_str, time_str = _sort_key_from_filename(filename)
+            items.append((file_path, filename, date_str, time_str))
+    items.sort(key=lambda x: (x[2], x[3]))
+    return [(fp, fn) for fp, fn, _, _ in items]
+
+
+def chunk_list(lst: list, n: int) -> list[list]:
+    """Split list into exactly n chunks. Earlier chunks may have one extra element."""
+    if n <= 0:
+        return [lst] if lst else []
+    size = len(lst)
+    if size == 0:
+        return []
+    base, remainder = divmod(size, n)
+    chunks = []
+    start = 0
+    for i in range(n):
+        length = base + (1 if i < remainder else 0)
+        chunks.append(lst[start : start + length])
+        start += length
+    return chunks
 
 
 def check_duplicate_flight(session: Session, airtask: str, date, departure_time: str, tailnumber: int) -> Flight | None:
@@ -116,240 +185,196 @@ def validate_new_format(flight_data: dict, filename: str) -> tuple[bool, str | N
     return True, None
 
 
-def import_flights_from_folder(root_folder: str, db: Session, batch_size: int = 50, skip_duplicates: bool = False):
-    flight_service = FlightService()
-    """Import flights from all files in the given folder.
-
-    Args:
-        root_folder: Path to folder containing flight data files
-        db: Database session to use for imports
-        batch_size: Number of flights to process before committing (default: 50)
-        skip_duplicates: If True, skip duplicate flights instead of updating them (default: False)
-    """
-    flights_processed = 0
-    errors = []
-
-    for dirpath, _, filenames in os.walk(root_folder):
-        print(f"Processing directory: {dirpath}")
-        for filename in filenames:
-            print(f"\nProcessing file: {filename}")
-            file_path = os.path.join(dirpath, filename)
-            with open(file_path) as content_dict:
-                content = content_dict.read().strip()
-                # Example: parse file name and content
-                try:
-                    decoded_bytes = base64.b64decode(content)
-                    decoded_str = decoded_bytes.decode("utf-8")
-                    try:
-                        content_raw = json.loads(decoded_str)
-                    except json.JSONDecodeError:
-                        # If not valid JSON, fallback to a dict with raw string
-                        content_raw = {"raw": decoded_str}
-                except Exception as e:
-                    print(f"Error decoding base64: {e}")
-                    errors.append(f"{filename}: Error decoding base64 - {e}")
-                    continue
-
-                flight_data = content_raw
-                parts = filename.split()
-                if len(parts) < 5:
-                    print(f"⚠️  Skipping malformed filename: {filename}")
-                    errors.append(f"{filename}: Malformed filename")
-                    continue
-
-                # Validate new format
-                is_valid, validation_error = validate_new_format(flight_data, filename)
-                if not is_valid:
-                    print(f"❌ {validation_error}")
-                    errors.append(f"{filename}: {validation_error}")
-                    continue
-
-                try:
-                    # Try to create flight object
-                    try:
-                        flight = Flight(
-                            airtask=flight_data["airtask"],
-                            date=datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
-                            origin=flight_data.get("origin", ""),
-                            destination=flight_data.get("destination", ""),
-                            departure_time=flight_data.get("ATD", ""),
-                            arrival_time=flight_data.get("ATA", ""),
-                            flight_type=flight_data.get("flightType", ""),
-                            flight_action=flight_data.get("flightAction", ""),
-                            tailnumber=int(flight_data.get("tailNumber", 0)),
-                            total_time=flight_data.get("ATE", ""),
-                            atr=flight_data.get("totalLandings", 0),
-                            passengers=flight_data.get("passengers", 0),
-                            doe=flight_data.get("doe", 0),
-                            cargo=flight_data.get("cargo", 0),
-                            number_of_crew=flight_data.get("numberOfCrew", 0),
-                            orm=flight_data.get("orm", 0),
-                            fuel=flight_data.get("fuel", 0),
-                            activation_first=flight_data.get("activationFirst", "__:__"),
-                            activation_last=flight_data.get("activationLast", "__:__"),
-                            ready_ac=flight_data.get("readyAC", "__:__"),
-                            med_arrival=flight_data.get("medArrival", "__:__"),
-                        )
-                    except ValueError:
-                        flight = Flight(
-                            airtask=flight_data["airtask"],
-                            date=datetime.strptime(flight_data["date"], "%d-%b-%Y").replace(tzinfo=UTC).date(),
-                            origin=flight_data.get("origin", ""),
-                            destination=flight_data.get("destination", ""),
-                            departure_time=flight_data.get("ATD", ""),
-                            arrival_time=flight_data.get("ATA", ""),
-                            flight_type=flight_data.get("flightType", ""),
-                            flight_action=flight_data.get("flightAction", ""),
-                            tailnumber=int(flight_data.get("tailNumber", 0)),
-                            total_time=flight_data.get("ATE", ""),
-                            atr=flight_data.get("totalLandings", 0),
-                            passengers=flight_data.get("passengers", 0),
-                            doe=flight_data.get("doe", 0),
-                            cargo=flight_data.get("cargo", 0),
-                            number_of_crew=flight_data.get("numberOfCrew", 0),
-                            orm=flight_data.get("orm", 0),
-                            fuel=flight_data.get("fuel", 0),
-                            activation_first=flight_data.get("activationFirst", "__:__"),
-                            activation_last=flight_data.get("activationLast", "__:__"),
-                            ready_ac=flight_data.get("readyAC", "__:__"),
-                            med_arrival=flight_data.get("medArrival", "__:__"),
-                        )
-
-                    # Check for duplicate flight using the same session
-                    existing_flight = check_duplicate_flight(
-                        db, flight.airtask, flight.date, flight.departure_time, flight.tailnumber
-                    )
-
-                    if existing_flight:
-                        if skip_duplicates:
-                            print(f"⚠️  Duplicate found - skipping flight: {flight.airtask} on {flight.date}")
-                            continue  # Skip this flight and move to the next one
-
-                        print(f"Duplicate found - updating existing flight: {flight.airtask} on {flight.date}")
-
-                        # Update existing flight with new data
-                        existing_flight.airtask = flight.airtask
-                        existing_flight.date = flight.date
-                        existing_flight.origin = flight.origin
-                        existing_flight.destination = flight.destination
-                        existing_flight.departure_time = flight.departure_time
-                        existing_flight.arrival_time = flight.arrival_time
-                        existing_flight.flight_type = flight.flight_type
-                        existing_flight.flight_action = flight.flight_action
-                        existing_flight.tailnumber = flight.tailnumber
-                        existing_flight.total_time = flight.total_time
-                        existing_flight.atr = flight.atr
-                        existing_flight.passengers = flight.passengers
-                        existing_flight.doe = flight.doe
-                        existing_flight.cargo = flight.cargo
-                        existing_flight.number_of_crew = flight.number_of_crew
-                        existing_flight.orm = flight.orm
-                        existing_flight.fuel = flight.fuel
-                        existing_flight.activation_first = flight.activation_first
-                        existing_flight.activation_last = flight.activation_last
-                        existing_flight.ready_ac = flight.ready_ac
-                        existing_flight.med_arrival = flight.med_arrival
-
-                        # Clear existing pilots and add new ones
-                        existing_flight.flight_pilots.clear()
-
-                        try:
-                            flight_data["flight_pilots"]
-                        except KeyError:
-                            print(f"⚠️  At least one pilot is required for {flight.airtask} on {flight.date}")
-                            errors.append(f"{filename}: At least one pilot is required")
-                            continue
-
-                        for pilot in flight_data["flight_pilots"]:
-                            # Ensure pilot data has required fields for new format
-                            if "nip" not in pilot:
-                                print(f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
-                                errors.append(f"{filename}: Pilot/crew without NIP")
-                                continue
-
-                            result = flight_service._add_crew_and_pilots(
-                                db,
-                                existing_flight,
-                                pilot,
-                                edit=False,  # Not editing, creating new
-                                auto_commit=False,  # Don't commit - we'll commit in batches
-                            )
-                            if result is None:
-                                # Pilot not found, but continue with other pilots
-                                continue
-
-                        # Don't commit here - commit in batches
-                        print(f"Updated flight: {existing_flight.airtask} on {existing_flight.date}")
-                    else:
-                        print(f"New flight - creating: {flight.airtask} on {flight.date}")
-                        db.add(flight)
-                        # Flush to get the flight ID before adding pilots
-                        db.flush()
-
-                        try:
-                            flight_data["flight_pilots"]
-                        except KeyError:
-                            print(f"⚠️  At least one pilot is required for {flight.airtask} on {flight.date}")
-                            errors.append(f"{filename}: At least one pilot is required")
-                            db.rollback()  # Rollback the flight addition
-                            continue
-
-                        for pilot_data in flight_data["flight_pilots"]:
-                            # Ensure pilot data has required fields for new format
-                            if "nip" not in pilot_data:
-                                print(f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
-                                errors.append(f"{filename}: Pilot/crew without NIP")
-                                continue
-
-                            result = flight_service._add_crew_and_pilots(
-                                db,
-                                flight,
-                                pilot_data,
-                                edit=False,  # Not editing, creating new
-                                auto_commit=False,  # Don't commit - we'll commit in batches
-                            )
-                            if result is None:
-                                # Pilot not found, but continue with other pilots
-                                continue
-
-                        print(f"Created new flight: {flight.airtask} on {flight.date}")
-
-                    flights_processed += 1
-
-                    # Commit in batches to minimize DB calls while maintaining safety
-                    if flights_processed % batch_size == 0:
-                        try:
-                            db.commit()
-                            print(f"✅ Committed batch: {flights_processed} flights processed so far")
-                        except Exception as e:
-                            db.rollback()
-                            print(f"❌ Error committing batch: {e}")
-                            errors.append(f"Batch commit error at flight {flights_processed}: {e}")
-                            raise
-
-                except Exception as e:
-                    print(f"❌ Error processing {filename}: {e}")
-                    errors.append(f"{filename}: {e}")
-                    db.rollback()  # Rollback the current flight if there was an error
-                    continue
-
-    # Final commit for remaining flights
+def _build_flight_from_data(flight_data: dict) -> Flight:
+    """Build a Flight model from decoded flight data. Tries %Y-%m-%d then %d-%b-%Y for date."""
     try:
+        date = datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+    except ValueError:
+        date = datetime.strptime(flight_data["date"], "%d-%b-%Y").replace(tzinfo=UTC).date()
+    return Flight(
+        airtask=flight_data["airtask"],
+        date=date,
+        origin=flight_data.get("origin", ""),
+        destination=flight_data.get("destination", ""),
+        departure_time=flight_data.get("ATD", ""),
+        arrival_time=flight_data.get("ATA", ""),
+        flight_type=flight_data.get("flightType", ""),
+        flight_action=flight_data.get("flightAction", ""),
+        tailnumber=int(flight_data.get("tailNumber", 0)),
+        total_time=flight_data.get("ATE", ""),
+        atr=flight_data.get("totalLandings", 0),
+        passengers=flight_data.get("passengers", 0),
+        doe=flight_data.get("doe", 0),
+        cargo=flight_data.get("cargo", 0),
+        number_of_crew=flight_data.get("numberOfCrew", 0),
+        orm=flight_data.get("orm", 0),
+        fuel=flight_data.get("fuel", 0),
+        activation_first=flight_data.get("activationFirst", "__:__"),
+        activation_last=flight_data.get("activationLast", "__:__"),
+        ready_ac=flight_data.get("readyAC", "__:__"),
+        med_arrival=flight_data.get("medArrival", "__:__"),
+    )
+
+
+def process_one_file(
+    session: Session,
+    flight_service: FlightService,
+    file_path: str,
+    filename: str,
+    skip_duplicates: bool,
+    worker_label: str,
+) -> tuple[int, str | None]:
+    """Process a single flight file. Returns (1, None) on success, (0, None) on skip, (0, error_msg) on error."""
+    with open(file_path) as f:
+        content = f.read().strip()
+    try:
+        decoded_bytes = base64.b64decode(content)
+        decoded_str = decoded_bytes.decode("utf-8")
+        try:
+            content_raw = json.loads(decoded_str)
+        except json.JSONDecodeError:
+            content_raw = {"raw": decoded_str}
+    except Exception as e:
+        _log(worker_label, f"Error decoding base64: {e}")
+        return 0, f"{filename}: Error decoding base64 - {e}"
+
+    flight_data = content_raw
+    parts = filename.split()
+    if len(parts) < 5:
+        _log(worker_label, f"⚠️  Skipping malformed filename: {filename}")
+        return 0, f"{filename}: Malformed filename"
+
+    is_valid, validation_error = validate_new_format(flight_data, filename)
+    if not is_valid:
+        _log(worker_label, f"❌ {validation_error}")
+        return 0, f"{filename}: {validation_error}"
+
+    try:
+        flight = _build_flight_from_data(flight_data)
+    except (ValueError, KeyError) as e:
+        _log(worker_label, f"❌ Error parsing flight data: {e}")
+        return 0, f"{filename}: {e}"
+
+    existing_flight = check_duplicate_flight(
+        session, flight.airtask, flight.date, flight.departure_time, flight.tailnumber
+    )
+
+    if existing_flight:
+        if skip_duplicates:
+            _log(worker_label, f"⚠️  Duplicate found - skipping flight: {flight.airtask} on {flight.date}")
+            return 0, None
+        _log(worker_label, f"Duplicate found - updating existing flight: {flight.airtask} on {flight.date}")
+        existing_flight.airtask = flight.airtask
+        existing_flight.date = flight.date
+        existing_flight.origin = flight.origin
+        existing_flight.destination = flight.destination
+        existing_flight.departure_time = flight.departure_time
+        existing_flight.arrival_time = flight.arrival_time
+        existing_flight.flight_type = flight.flight_type
+        existing_flight.flight_action = flight.flight_action
+        existing_flight.tailnumber = flight.tailnumber
+        existing_flight.total_time = flight.total_time
+        existing_flight.atr = flight.atr
+        existing_flight.passengers = flight.passengers
+        existing_flight.doe = flight.doe
+        existing_flight.cargo = flight.cargo
+        existing_flight.number_of_crew = flight.number_of_crew
+        existing_flight.orm = flight.orm
+        existing_flight.fuel = flight.fuel
+        existing_flight.activation_first = flight.activation_first
+        existing_flight.activation_last = flight.activation_last
+        existing_flight.ready_ac = flight.ready_ac
+        existing_flight.med_arrival = flight.med_arrival
+        existing_flight.flight_pilots.clear()
+
+        if "flight_pilots" not in flight_data:
+            _log(worker_label, f"⚠️  At least one pilot is required for {flight.airtask} on {flight.date}")
+            return 0, f"{filename}: At least one pilot is required"
+
+        for pilot in flight_data["flight_pilots"]:
+            if "nip" not in pilot:
+                _log(worker_label, f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
+                return 0, f"{filename}: Pilot/crew without NIP"
+            result = flight_service._add_crew_and_pilots(session, existing_flight, pilot, edit=False, auto_commit=False)
+            if result is None:
+                continue
+
+        _log(worker_label, f"Updated flight: {existing_flight.airtask} on {existing_flight.date}")
+        return 1, None
+
+    _log(worker_label, f"New flight - creating: {flight.airtask} on {flight.date}")
+    session.add(flight)
+    session.flush()
+
+    if "flight_pilots" not in flight_data:
+        _log(worker_label, f"⚠️  At least one pilot is required for {flight.airtask} on {flight.date}")
+        session.rollback()
+        return 0, f"{filename}: At least one pilot is required"
+
+    for pilot_data in flight_data["flight_pilots"]:
+        if "nip" not in pilot_data:
+            _log(worker_label, f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
+            return 0, f"{filename}: Pilot/crew without NIP"
+        result = flight_service._add_crew_and_pilots(session, flight, pilot_data, edit=False, auto_commit=False)
+        if result is None:
+            continue
+
+    _log(worker_label, f"Created new flight: {flight.airtask} on {flight.date}")
+    return 1, None
+
+
+def process_chunk(
+    worker_id: int,
+    file_list: list[tuple[str, str]],
+    skip_duplicates: bool,
+    batch_size: int,
+    session_factory: sessionmaker,
+) -> tuple[int, list[str]]:
+    """Process a chunk of files in a single worker. Uses its own DB session.
+    Returns (flights_processed, errors).
+    """
+    worker_label = f"W{worker_id + 1}"
+    flight_service = FlightService()
+    db = session_factory()
+    flights_processed = 0
+    errors: list[str] = []
+    try:
+        _log(worker_label, f"Processing {len(file_list)} file(s)")
+        for file_path, filename in file_list:
+            _log(worker_label, f"Processing file: {filename}")
+            for attempt in range(DEADLOCK_RETRIES):
+                try:
+                    n, err = process_one_file(db, flight_service, file_path, filename, skip_duplicates, worker_label)
+                    if err:
+                        errors.append(err)
+                    flights_processed += n
+                    if n > 0 and flights_processed % batch_size == 0:
+                        db.commit()
+                        _log(worker_label, f"✅ Committed batch: {flights_processed} flights so far")
+                    break
+                except Exception as e:
+                    db.rollback()
+                    if _is_deadlock(e) and attempt < DEADLOCK_RETRIES - 1:
+                        delay = 0.1 * (2**attempt) + random.uniform(0, 0.2)
+                        _log(
+                            worker_label,
+                            f"⚠️  Deadlock on {filename}, retry {attempt + 1}/{DEADLOCK_RETRIES} in {delay:.1f}s...",
+                        )
+                        time.sleep(delay)
+                    else:
+                        _log(worker_label, f"❌ Error processing {filename}: {e}")
+                        errors.append(f"{filename}: {e}")
+                        break
         db.commit()
-        print(f"✅ Final commit: {flights_processed} total flights processed")
+        _log(worker_label, f"✅ Done: {flights_processed} flights processed")
     except Exception as e:
         db.rollback()
-        print(f"❌ Error in final commit: {e}")
-        errors.append(f"Final commit error: {e}")
+        _log(worker_label, f"❌ Fatal error: {e}")
+        errors.append(f"[{worker_label}] {e}")
         raise
-
-    # Print summary
-    if errors:
-        print(f"\n⚠️  {len(errors)} errors encountered:")
-        for error in errors[:10]:  # Show first 10 errors
-            print(f"  - {error}")
-        if len(errors) > 10:
-            print(f"  ... and {len(errors) - 10} more errors")
+    finally:
+        db.close()
+    return flights_processed, errors
 
 
 def main():
@@ -396,24 +421,64 @@ first to convert them to the new format.
         print("⚠️  Mode: Skipping duplicates (--skip-duplicates flag set)")
     else:
         print("ℹ️  Mode: Updating duplicates (default behavior)")
+    print(f"🔀 Workers: {NUM_WORKERS} (multithreaded)")
     print(f"📅 Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("-" * 60)
 
-    session_local = sessionmaker(bind=engine)
-    db = session_local()
+    all_files = collect_all_files(folder_path)
+    if not all_files:
+        print("❌ No flight files found.")
+        sys.exit(1)
+
+    chunks = chunk_list(all_files, NUM_WORKERS)
+    total_files = len(all_files)
+    print(f"📁 Found {total_files} file(s), split across {len(chunks)} worker(s)")
+    print("-" * 60)
+
+    session_factory = sessionmaker(bind=engine)
+    batch_size = 50
+    skip_duplicates = args.skip_duplicates
+    all_errors: list[str] = []
+    total_processed = 0
 
     try:
-        import_flights_from_folder(folder_path, db, skip_duplicates=args.skip_duplicates)
+        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as ex:
+            futures = {
+                ex.submit(
+                    process_chunk,
+                    i,
+                    chunk,
+                    skip_duplicates,
+                    batch_size,
+                    session_factory,
+                ): i
+                for i, chunk in enumerate(chunks)
+            }
+            for fut in as_completed(futures):
+                worker_id = futures[fut]
+                worker_label = f"W{worker_id + 1}"
+                try:
+                    processed, errors = fut.result()
+                    total_processed += processed
+                    all_errors.extend(errors)
+                except Exception as e:
+                    print(f"❌ Worker [{worker_label}] failed: {e}")
+                    all_errors.append(f"[{worker_label}] Fatal: {e}")
+                    raise
+
         print("\n" + "=" * 60)
-        print("✅ Import completed successfully!")
+        print(f"✅ Import completed: {total_processed} flight(s) processed")
         print(f"📅 Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        if all_errors:
+            print(f"\n⚠️  {len(all_errors)} error(s) encountered:")
+            for err in all_errors[:10]:
+                print(f"  - {err}")
+            if len(all_errors) > 10:
+                print(f"  ... and {len(all_errors) - 10} more")
         print("=" * 60)
-    except Exception as e:
-        print(f"\n❌ Fatal error during import: {e}")
-        db.rollback()
+    except Exception:
+        print("\n❌ Import failed.")
         raise
-    finally:
-        db.close()
 
 
 if __name__ == "__main__":

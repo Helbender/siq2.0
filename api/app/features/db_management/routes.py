@@ -4,7 +4,7 @@ import json
 import traceback
 from io import BytesIO
 
-from flask import Blueprint, Response, jsonify, send_file
+from flask import Blueprint, Response, jsonify, request, send_file
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
@@ -338,5 +338,88 @@ def export_users() -> tuple[Response, int]:
             ), 200
     except Exception as e:
         print(f"Error in GET /db-management/export/users: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+
+@db_management_bp.route("/import/qualifications", methods=["POST"], strict_slashes=False)
+@require_role(Role.SUPER_ADMIN.level)
+def import_qualifications() -> tuple[Response, int]:
+    """Import qualifications from JSON backup file.
+
+    ---
+    tags:
+      - Database Management
+    summary: Upload qualifications backup
+    description: Import qualifications from a JSON backup file
+    security:
+      - Bearer: []
+    consumes:
+      - multipart/form-data
+    parameters:
+      - in: formData
+        name: file
+        type: file
+        required: true
+        description: JSON file containing qualifications backup
+    responses:
+      200:
+        description: Import completed successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            created:
+              type: integer
+            updated:
+              type: integer
+            errors:
+              type: integer
+            error_details:
+              type: array
+              items:
+                type: string
+      400:
+        description: Bad request - invalid file or format
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+      403:
+        description: Forbidden - Super Admin access required
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+    """
+    try:
+        if "file" not in request.files:
+            return jsonify({"error": "No file provided"}), 400
+
+        file = request.files["file"]
+        if file.filename == "":
+            return jsonify({"error": "No file selected"}), 400
+
+        # Read and parse JSON file
+        try:
+            file_content = file.read()
+            qualifications_data = json.loads(file_content.decode("utf-8"))
+        except json.JSONDecodeError as e:
+            return jsonify({"error": f"Invalid JSON file: {str(e)}"}), 400
+        except Exception as e:
+            return jsonify({"error": f"Error reading file: {str(e)}"}), 400
+
+        if not isinstance(qualifications_data, list):
+            return jsonify({"error": "JSON file must contain an array of qualifications"}), 400
+
+        with Session(engine) as session:
+            result = db_management_service.import_qualifications(qualifications_data, session)
+            return jsonify(result), 200
+
+    except Exception as e:
+        print(f"Error in POST /db-management/import/qualifications: {e}")
         traceback.print_exc()
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500

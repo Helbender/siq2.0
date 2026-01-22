@@ -1,6 +1,5 @@
 """Users service containing business logic for user operations."""
 
-import json
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -42,9 +41,7 @@ class UserService:
                 "status": t.status.value,
             }
             # Add role information if available
-            role_level_value = (
-                t.role.level if t.role else (t.role_level if t.role_level is not None else None)
-            )
+            role_level_value = t.role.level if t.role else (t.role_level if t.role_level is not None else None)
             if role_level_value is not None:
                 user_dict["roleLevel"] = role_level_value
             if t.role:
@@ -133,10 +130,10 @@ class UserService:
                     # Try to find matching role by level and update role_id
                     # If no matching role found, role_id will remain None and role_level will be used
                     from sqlalchemy import select
+
                     from app.shared.rbac_models import Role as RoleModel
-                    matching_role = session.scalars(
-                        select(RoleModel).where(RoleModel.level == value)
-                    ).first()
+
+                    matching_role = session.scalars(select(RoleModel).where(RoleModel.level == value)).first()
                     if matching_role:
                         modified_user.role_id = matching_role.id
                     else:
@@ -154,27 +151,73 @@ class UserService:
             return {"message": "You can not change the NIP. Create a new user instead."}
 
     def bulk_create_users(self, users_data: list[dict], session: Session) -> dict[str, Any]:
-        """Create multiple users from a list of user data.
+        """Create multiple users from backup-format data (add_users route).
 
-        Args:
-            users_data: List of user data dictionaries
-            session: Database session
-
-        Returns:
-            dict with success message
+        Expects each item to have only: nip, name, tipo, rank, position, email, status, roleLevel.
+        qualificacoes, role, role_level, role_id and any other keys are ignored.
         """
         users: list[Tripulante] = []
+        backup_fields = {"nip", "name", "tipo", "rank", "position", "email", "status", "roleLevel"}
 
         for item in users_data:
             user = Tripulante()
             for key, value in item.items():
-                if key == "qualificacoes":
+                if key not in backup_fields:
                     continue
+
                 if key == "tipo":
-                    value = value.upper().replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
-                if key == "status":
-                    value = StatusTripulante(value) if value else StatusTripulante.PRESENTE
-                setattr(user, key, value)
+                    if isinstance(value, str):
+                        tipo_found = None
+                        value_upper = value.upper()
+                        for tipo_enum in TipoTripulante:
+                            if tipo_enum.value.upper() == value_upper:
+                                tipo_found = tipo_enum
+                                break
+                        if tipo_found is None:
+                            normalized = (
+                                value_upper.replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
+                            )
+                            try:
+                                tipo_found = TipoTripulante[normalized]
+                            except KeyError:
+                                for tipo_enum in TipoTripulante:
+                                    nv = (
+                                        tipo_enum.value.upper()
+                                        .replace(" ", "_")
+                                        .replace("Ç", "C")
+                                        .replace("Ã", "A")
+                                        .replace("Õ", "O")
+                                    )
+                                    if nv == normalized:
+                                        tipo_found = tipo_enum
+                                        break
+                        if tipo_found is None:
+                            raise ValueError(f"Invalid tipo value: {value}")
+                        value = tipo_found
+                    elif not isinstance(value, TipoTripulante):
+                        value = TipoTripulante(value)
+                    setattr(user, key, value)
+
+                elif key == "status":
+                    if isinstance(value, str):
+                        value = StatusTripulante(value) if value else StatusTripulante.PRESENTE
+                    elif not isinstance(value, StatusTripulante):
+                        value = StatusTripulante(value) if value else StatusTripulante.PRESENTE
+                    setattr(user, key, value)
+
+                elif key == "roleLevel":
+                    user.role_level = value
+                    if value is not None:
+                        from sqlalchemy import select
+
+                        from app.shared.rbac_models import Role as RoleModel
+
+                        matching_role = session.scalars(select(RoleModel).where(RoleModel.level == value)).first()
+                        if matching_role:
+                            user.role_id = matching_role.id
+
+                else:
+                    setattr(user, key, value)
 
             user.password = hash_code("12345")
             if not hasattr(user, "status") or user.status is None:
@@ -198,8 +241,7 @@ class UserService:
 
         user_base: list = []
         for user in users_list:
-            user_base.append(user.to_json())
+            user_base.append(user.to_backup_json())
 
         enviar_json_para_pasta(dados=user_base, nome_arquivo="user_base.json", id_pasta=ID_PASTA_VOO)
         return {"message": "Backup feito com sucesso!"}
-

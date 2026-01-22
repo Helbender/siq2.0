@@ -9,6 +9,9 @@ from sqlalchemy.types import Enum as SQLEnum
 from app.shared.enums import Role, StatusTripulante, TipoTripulante  # type: ignore
 from app.shared.models import Base  # type: ignore
 
+# Import Role model at runtime for SQLAlchemy relationship resolution
+from app.shared.rbac_models import Role as RoleModel
+
 
 class StatusTripulanteType(TypeDecorator):
     """Custom type decorator for StatusTripulante enum to handle value-based matching."""
@@ -70,13 +73,16 @@ class Tripulante(Base):
     flight_pilots: Mapped[list["FlightPilots"]] = relationship(
         back_populates="tripulante", cascade="all, delete-orphan"
     )
-    role: Mapped["RoleModel | None"] = relationship("Role", back_populates="users")
+    role: Mapped["RoleModel | None"] = relationship(RoleModel, back_populates="users")
 
     def to_json(self):
         response = {}
         for column in self.__table__.columns:
             col_name = column.name
             if col_name in ["recover", "password", "admin", "squadron"]:
+                continue
+            # Skip role_level if role relationship exists (roleLevel is the source of truth)
+            if col_name == "role_level" and self.role:
                 continue
             value = getattr(self, col_name)
             if isinstance(value, Enum):
@@ -98,6 +104,23 @@ class Tripulante(Base):
         )
         response["qualificacoes"] = [q.to_json() for q in sorted_quals]
         return response
+
+    def to_backup_json(self):
+        """Minimal user representation for backup/add_users: no qualificacoes, no role object, roleLevel only."""
+        role_level_value = (
+            self.role.level if self.role else (self.role_level if self.role_level is not None else Role.USER.level)
+        )
+        out = {
+            "nip": self.nip,
+            "name": self.name,
+            "tipo": self.tipo.value,
+            "rank": self.rank,
+            "position": self.position,
+            "email": self.email,
+            "status": self.status.value,
+            "roleLevel": role_level_value,
+        }
+        return out
 
 
 class TripulanteQualificacao(Base):

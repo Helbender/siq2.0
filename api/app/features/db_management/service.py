@@ -346,4 +346,105 @@ class DatabaseManagementService:
         """
         users = self.repository.get_all_users(session)
 
-        return [user.to_json() for user in users]
+        return [user.to_backup_json() for user in users]
+
+    def import_qualifications(self, qualifications_data: list[dict[str, Any]], session: Session) -> dict[str, Any]:
+        """Import qualifications from JSON backup.
+
+        Args:
+            qualifications_data: List of qualification dictionaries from backup
+            session: Database session
+
+        Returns:
+            dict with import results
+        """
+        from app.features.qualifications.models import Qualificacao
+        from app.features.qualifications.repository import QualificationRepository
+        from app.shared.enums import GrupoQualificacoes, TipoTripulante
+
+        qual_repository = QualificationRepository()
+        created_count = 0
+        updated_count = 0
+        error_count = 0
+        errors = []
+
+        for qual_data in qualifications_data:
+            try:
+                # Validate required fields
+                if "nome" not in qual_data or "grupo" not in qual_data or "validade" not in qual_data or "tipo_aplicavel" not in qual_data:
+                    error_count += 1
+                    errors.append(f"Missing required fields for qualification: {qual_data.get('nome', 'unknown')}")
+                    continue
+
+                # Convert enum values
+                try:
+                    grupo_enum = GrupoQualificacoes(qual_data["grupo"])
+                    tipo_enum = TipoTripulante(qual_data["tipo_aplicavel"])
+                except ValueError as e:
+                    error_count += 1
+                    errors.append(f"Invalid enum value for {qual_data.get('nome', 'unknown')}: {str(e)}")
+                    continue
+
+                # Check if qualification exists (prioritize ID if provided)
+                qualification = None
+                backup_id = qual_data.get("id")
+                
+                if backup_id is not None:
+                    # First, try to find by ID (respect ID from backup)
+                    qualification = qual_repository.find_by_id(session, backup_id)
+                    
+                    if qualification:
+                        # Update existing qualification found by ID
+                        qualification.nome = qual_data["nome"]
+                        qualification.grupo = grupo_enum
+                        qualification.validade = qual_data["validade"]
+                        qualification.tipo_aplicavel = tipo_enum
+                        qual_repository.update(session, qualification)
+                        updated_count += 1
+                    else:
+                        # ID provided but doesn't exist - create new with that ID
+                        new_qual = Qualificacao(
+                            id=backup_id,
+                            nome=qual_data["nome"],
+                            grupo=grupo_enum,
+                            validade=qual_data["validade"],
+                            tipo_aplicavel=tipo_enum,
+                        )
+                        qual_repository.create(session, new_qual)
+                        created_count += 1
+                else:
+                    # No ID provided - fall back to name-based matching
+                    all_quals = qual_repository.find_all(session)
+                    qualification = next((q for q in all_quals if q.nome == qual_data["nome"]), None)
+                    
+                    if qualification:
+                        # Update existing qualification found by name
+                        qualification.nome = qual_data["nome"]
+                        qualification.grupo = grupo_enum
+                        qualification.validade = qual_data["validade"]
+                        qualification.tipo_aplicavel = tipo_enum
+                        qual_repository.update(session, qualification)
+                        updated_count += 1
+                    else:
+                        # Create new qualification without ID (auto-generated)
+                        new_qual = Qualificacao(
+                            nome=qual_data["nome"],
+                            grupo=grupo_enum,
+                            validade=qual_data["validade"],
+                            tipo_aplicavel=tipo_enum,
+                        )
+                        qual_repository.create(session, new_qual)
+                        created_count += 1
+
+            except Exception as e:
+                error_count += 1
+                errors.append(f"Error processing qualification {qual_data.get('nome', 'unknown')}: {str(e)}")
+                traceback.print_exc()
+
+        return {
+            "message": f"Import completed: {created_count} created, {updated_count} updated, {error_count} errors",
+            "created": created_count,
+            "updated": updated_count,
+            "errors": error_count,
+            "error_details": errors[:10],  # Limit error details to first 10
+        }

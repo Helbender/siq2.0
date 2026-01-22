@@ -8,18 +8,28 @@ from alembic import context
 
 load_dotenv(dotenv_path="./.env")
 
-# Use the same connection string as config.py
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
+# Prioritize DB_URL environment variable (simpler for local development)
+DB_URL = os.environ.get("DB_URL", "")
 
-# Use PostgreSQL connection string (same as config.py)
-DB_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
-# Fallback to DB_URL env var if connection string components are not available
-if not all([USER, PASSWORD, HOST, PORT, DBNAME]):
-    DB_URL = os.environ.get("DB_URL", "")
+# Fallback: Build connection string from individual components if DB_URL is not set
+if not DB_URL:
+    USER = os.getenv("user")
+    PASSWORD = os.getenv("password")
+    HOST = os.getenv("host")
+    PORT = os.getenv("port")
+    DBNAME = os.getenv("dbname")
+    
+    # Build PostgreSQL connection string
+    if all([USER, PASSWORD, HOST, PORT, DBNAME]):
+        # Use SSL for production, disable for local development
+        sslmode = os.getenv("DB_SSLMODE", "disable")
+        DB_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode={sslmode}"
+    else:
+        # Final fallback to SQLite for local development
+        DB_URL = "sqlite:///database.db"
+
+if not DB_URL:
+    raise ValueError("Database connection string not configured. Set DB_URL or individual DB connection parameters.")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -39,7 +49,7 @@ from app.features.qualifications.models import Qualificacao  # noqa: E402, F401
 # Import all models to ensure they're registered with Base.metadata
 from app.features.users.models import Tripulante, TripulanteQualificacao  # noqa: E402, F401
 from app.shared.models import Base  # noqa: E402
-from app.shared.rbac_models import Permission, Role, RolePermission  # noqa: E402, F401
+from app.shared.rbac_models import Permission, Role, role_permissions  # noqa: E402, F401
 
 target_metadata = Base.metadata
 # target_metadata = None

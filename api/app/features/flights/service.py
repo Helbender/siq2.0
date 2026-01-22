@@ -7,7 +7,7 @@ from threading import Thread
 from typing import Any
 
 from dotenv import load_dotenv
-from sqlalchemy import exc
+from sqlalchemy import exc, select
 from sqlalchemy.orm import Session
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
