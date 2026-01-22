@@ -1,7 +1,8 @@
-import { Role } from "@/common/roles";
-import { useAuth } from "@/features/auth/contexts/AuthContext";
-import { useDialogForm } from "@/common/hooks/useDialogForm";
 import { Can } from "@/common/components/Can";
+import { useDialogForm } from "@/common/hooks/useDialogForm";
+import { Role } from "@/common/roles";
+import { toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import {
   Box,
   Button,
@@ -20,8 +21,8 @@ import { UserDataCard } from "../components/UserDataCard";
 import { UsersTable } from "../components/UsersTable";
 import { useUsers } from "../hooks/useUsers";
 import { useCreateUser } from "../mutations/useCreateUser";
-import { useUpdateUser } from "../mutations/useUpdateUser";
 import { useDeleteUser } from "../mutations/useDeleteUser";
+import { useUpdateUser } from "../mutations/useUpdateUser";
 
 export function UserManagementPage() {
   const { user: currentUser } = useAuth();
@@ -41,22 +42,47 @@ export function UserManagementPage() {
   const canCreateUsers = currentUserRoleLevel !== Role.READONLY;
 
   const handleSubmit = async (userNip, formData) => {
+    let loadingToast = null;
+    
     try {
       if (userNip) {
+        // Show loading toast for updates
+        loadingToast = toaster.create({
+          title: "A atualizar utilizador",
+          description: "Por favor aguarde...",
+          type: "info",
+          duration: null,
+          closable: false,
+        });
+        
         await updateUser.mutateAsync({ userId: userNip, userData: formData });
-        toast({ title: "User updated successfully", status: "success" });
+        
+        // Close all toasts (including loading) and show success
+        toaster.dismiss();
+        toaster.create({
+          title: "Utilizador atualizado com sucesso",
+          type: "success",
+        });
       } else {
         await createUser.mutateAsync(formData);
-        toast({ title: "User created successfully", status: "success" });
+        // Close all existing toasts before showing success
+        toaster.dismiss();
+        toaster.create({
+          title: "Utilizador criado com sucesso",
+          type: "success",
+        });
       }
       dialog.close();
     } catch (error) {
+      // Close all toasts (including loading) if it exists
+      toaster.dismiss();
+      
       const errorMessage =
         error.response?.data?.message || error.response?.data?.error || "An error occurred";
-      toast({
-        title: userNip ? "Error updating user" : "Error creating user",
+      toaster.create({
+        title: userNip ? "Erro ao atualizar utilizador" : "Erro ao criar utilizador",
         description: errorMessage,
-        status: "error",
+        type: "error",
       });
       throw error;
     }
@@ -67,19 +93,19 @@ export function UserManagementPage() {
     try {
       const res = await deleteUser.mutateAsync(user.nip);
       if (res?.deleted_id) {
-        toast({
+        toaster.create({
           title: "Utilizador apagado com sucesso",
           description: `Utilizador com o nip ${res.deleted_id} apagado`,
-          status: "info",
+          type: "info",
         });
       }
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.response?.data?.error || "An error occurred";
-      toast({
-        title: "Error deleting user",
+      toaster.create({
+        title: "Erro ao apagar utilizador",
         description: errorMessage,
-        status: "error",
+        type: "error",
       });
     }
   };
@@ -106,6 +132,7 @@ export function UserManagementPage() {
           onClose={dialog.close}
           editingUser={dialog.editing}
           onSubmit={handleSubmit}
+          isSubmitting={updateUser.isPending || createUser.isPending}
         />
         <Spacer />
         <Text>Nº de Utilizadores: {filteredUsers.length}</Text>

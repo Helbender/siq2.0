@@ -11,7 +11,6 @@ import {
   NativeSelect,
   VStack
 } from "@chakra-ui/react";
-import { useState } from "react";
 import { useUserForm } from "../hooks/useUserForm";
 
 export function CreateUserModal({
@@ -19,22 +18,19 @@ export function CreateUserModal({
   onClose,
   editingUser,
   onSubmit,
+  isSubmitting = false,
 }) {
   const { user: currentUser } = useAuth();
   const { TipoTripulante, crewTypeToApiFormat } = useCrewTypes();
   const { formData, setFormData } = useUserForm(editingUser);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setIsSubmitting(true);
     try {
       await onSubmit(editingUser?.nip ?? null, formData);
       onClose();
     } catch (error) {
       // Error handling is done in the parent component
-    } finally {
-      setIsSubmitting(false);
     }
   }
   return (
@@ -206,15 +202,27 @@ export function CreateUserModal({
                     </Field.Root>
                   ) : null}
                 </HStack>
-                <Button
-                  type="submit"
-                  width="full"
-                  variant="solid"
-                  colorPalette="success"
-                  isLoading={isSubmitting}
-                >
-                  {editingUser ? "Guardar" : "Criar"}
-                </Button>
+                <HStack width="100%" gap={2}>
+                  <Button
+                    type="button"
+                    flex="1"
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={isSubmitting}
+                  >
+                    Fechar
+                  </Button>
+                  <Button
+                    type="submit"
+                    flex="1"
+                    variant="solid"
+                    colorPalette="success"
+                    isLoading={isSubmitting}
+                    disabled={isSubmitting}
+                  >
+                    {editingUser ? "Guardar" : "Criar"}
+                  </Button>
+                </HStack>
               </VStack>
             </form>
           </Dialog.Body>

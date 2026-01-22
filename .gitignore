@@ -11,3 +11,7 @@ TODO
 .mypy_cache
 /db
 *.db
+
+
+
+database/

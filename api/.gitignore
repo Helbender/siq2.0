@@ -6,6 +6,7 @@ __pycache__/
 
 # alembic
 .env
+.env.production
 record.log
 credentials.json
 token.json
@@ -13,3 +14,4 @@ user_base.json
 Modelos
 *.1m
 New1M
+

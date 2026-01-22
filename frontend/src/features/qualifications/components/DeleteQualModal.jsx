@@ -42,14 +42,24 @@ export function DeleteQualModal({ qual }) {
   };
   return (
     <Fragment>
-      <IconButton
-        colorPalette="red"
-        onClick={onOpen}
-        aria-label="Delete Qualification"
+      <Dialog.Root 
+        open={isOpen} 
+        onOpenChange={({ open }) => {
+          if (open) {
+            onOpen();
+          } else {
+            onClose();
+          }
+        }}
       >
-        <BiTrash />
-      </IconButton>
-      <Dialog.Root open={isOpen} onOpenChange={(e) => !e.open && onClose()}>
+        <Dialog.Trigger asChild>
+          <IconButton
+            colorPalette="red"
+            aria-label="Delete Qualification"
+          >
+            <BiTrash />
+          </IconButton>
+        </Dialog.Trigger>
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -69,7 +79,11 @@ export function DeleteQualModal({ qual }) {
                 <Button colorPalette="red" onClick={deleteQual}>
                   Excluir
                 </Button>
-                <Button onClick={() => onClose()}>Cancelar</Button>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="ghost">
+                    Cancelar
+                  </Button>
+                </Dialog.ActionTrigger>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
