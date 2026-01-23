@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 
 from app.core.config import engine
 from app.features.auth.schemas import (
+    ForgotPasswordRequestSchema,
     LoginRequestSchema,
-    PasswordUpdateRequestSchema,
-    RecoveryRequestSchema,
+    ResetPasswordRequestSchema,
     validate_request,
 )
 from app.features.auth.service import AuthService
@@ -20,8 +20,8 @@ auth_service = AuthService()
 
 # Schema instances
 login_schema = LoginRequestSchema()
-recovery_schema = RecoveryRequestSchema()
-password_update_schema = PasswordUpdateRequestSchema()
+forgot_password_schema = ForgotPasswordRequestSchema()
+reset_password_schema = ResetPasswordRequestSchema()
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -199,63 +199,162 @@ def clear_refresh_token() -> tuple[Response, int]:
     return response, 200
 
 
-@auth_bp.route("/recovery", methods=["POST"])
-def recover_process() -> tuple[Response, int]:
-    """Validate password recovery token."""
-    recovery_data: dict | None = request.get_json()
-    if recovery_data is None:
-        return jsonify({"message": "Request body must be JSON"}), 400
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password() -> tuple[Response, int]:
+    """Initiate password reset by sending reset email.
 
-    validated_data, errors = validate_request(recovery_schema, recovery_data)
-    if errors:
-        # Format Marshmallow validation errors for user-friendly response
-        error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
-        return jsonify({"message": error_message}), 400
+    ---
+    tags:
+      - Authentication
+    summary: Forgot password
+    description: Send password reset email to user
+    parameters:
+      - in: body
+        name: body
+        description: Email address
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
+              description: User email address
+              example: "user@example.com"
+    responses:
+      200:
+        description: Reset email sent successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Email enviado"
+      400:
+        description: Validation error
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      404:
+        description: User not found
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "User not found"
+    """
+    try:
+        request_data: dict | None = request.get_json()
+        if request_data is None:
+            return jsonify({"message": "Request body must be JSON"}), 400
 
-    with Session(engine) as session:
-        result = auth_service.validate_recovery_token(
-            validated_data["email"],
-            validated_data["token"],
-            session,
-        )
+        validated_data, errors = validate_request(forgot_password_schema, request_data)
+        if errors:
+            error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
+            return jsonify({"message": error_message}), 400
 
-        if "nip" in result:
-            return jsonify(result), 200
+        with Session(engine) as session:
+            user = auth_service.repository.find_user_by_email(session, validated_data["email"])
 
-        status_code = 403 if "already was used" in result.get("message", "") else 408
-        return jsonify(result), status_code
+            if user is None:
+                # Don't reveal if email exists or not for security
+                return jsonify({"message": "Email enviado"}), 200
 
+            token = auth_service.create_reset_token(user, session)
+            auth_service.send_reset_password_email(user, token)
 
-@auth_bp.route("/recover/<email>", methods=["POST"])
-def recover_pass(email: str) -> tuple[Response, int]:
-    """Initiate password recovery by sending recovery email."""
-    with Session(engine) as session:
-        result = auth_service.initiate_password_recovery(email, session)
+            return jsonify({"message": "Email enviado"}), 200
+    except Exception as e:
+        import traceback
 
-        if "Recovery email sent" in result.get("message", ""):
-            return jsonify(result), 200
-
-        return jsonify(result), 404
+        print(f"[auth/forgot-password] Error: {e}")
+        traceback.print_exc()
+        return jsonify({"message": "Internal server error"}), 500
 
 
-@auth_bp.route("/storenewpass/<nip>", methods=["PATCH"])
-def store_new_password(nip: int) -> tuple[Response, int]:
-    """Update user password."""
-    user_data: dict | None = request.get_json()
-    if user_data is None:
-        return jsonify({"message": "Request body must be JSON"}), 400
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password() -> tuple[Response, int]:
+    """Reset password using reset token.
 
-    validated_data, errors = validate_request(password_update_schema, user_data)
-    if errors:
-        # Format Marshmallow validation errors for user-friendly response
-        error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
-        return jsonify({"message": error_message}), 400
+    ---
+    tags:
+      - Authentication
+    summary: Reset password
+    description: Reset user password using a valid reset token
+    parameters:
+      - in: body
+        name: body
+        description: Reset token and new password
+        required: true
+        schema:
+          type: object
+          required:
+            - token
+            - password
+          properties:
+            token:
+              type: string
+              description: Password reset token
+              example: "abc123..."
+            password:
+              type: string
+              description: New password
+              example: "newpassword123"
+    responses:
+      200:
+        description: Password reset successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Password atualizada com sucesso"
+      400:
+        description: Validation error or empty password
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      404:
+        description: Invalid or expired token
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Invalid token"
+    """
+    try:
+        request_data: dict | None = request.get_json()
+        if request_data is None:
+            return jsonify({"message": "Request body must be JSON"}), 400
 
-    with Session(engine) as session:
-        result = auth_service.update_password(nip, validated_data["password"], session)
+        validated_data, errors = validate_request(reset_password_schema, request_data)
+        if errors:
+            error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
+            return jsonify({"message": error_message}), 400
 
-        if "message" in result:
-            status_code = 403 if "can not be empty" in result["message"] else 404
+        with Session(engine) as session:
+            result = auth_service.reset_password(
+                token=validated_data["token"],
+                new_password=validated_data["password"],
+                session=session,
+            )
+
+            if "Password updated successfully" in result.get("message", ""):
+                return jsonify({"message": "Password atualizada com sucesso"}), 200
+
+            status_code = 400 if "can not be empty" in result.get("message", "") else 404
             return jsonify(result), status_code
+    except Exception as e:
+        import traceback
 
-        return jsonify(result), 200
+        print(f"[auth/reset-password] Error: {e}")
+        traceback.print_exc()
+        return jsonify({"message": "Internal server error"}), 500

@@ -1,8 +1,7 @@
 """Authentication service containing business logic for auth operations."""
 
-import json
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
 from flask import request
@@ -12,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import engine
 from app.features.auth.repository import AuthRepository
 from app.shared.enums import Role
-from app.utils.email import hash_code, main
+from app.utils.email import hash_code, send_email
 
 
 class AuthService:
@@ -77,83 +76,6 @@ class AuthService:
             "refresh_token": refresh_token,
         }
 
-    def validate_recovery_token(self, email: str, token: str, session: Session) -> dict[str, Any]:
-        """Validate a password recovery token.
-
-        Args:
-            email: User email
-            token: Recovery token
-            session: Database session
-
-        Returns:
-            dict with "message" and optionally "nip" on success, or error message
-        """
-        tripulante = self.repository.find_user_by_email(session, email)
-
-        if tripulante is None:
-            return {"message": "User not found"}
-
-        try:
-            recover_data = json.loads(tripulante.recover)
-        except json.JSONDecodeError:
-            return {"message": "Token already was used"}
-
-        if token != recover_data["token"]:
-            return {"message": "Invalid token"}
-
-        now = datetime.now(UTC)
-        token_timestamp = datetime.fromisoformat(recover_data["timestamp"])
-        exp_timestamp = now + timedelta(hours=12)
-        # Original logic: if exp_timestamp > token_timestamp, token is valid
-        # This seems backwards but matches original implementation
-        if exp_timestamp > token_timestamp:
-            self.repository.clear_user_recovery_token(session, tripulante)
-            return {"message": "Token Valid", "nip": tripulante.nip}
-
-        return {"message": "Token Expired"}
-
-    def initiate_password_recovery(self, email: str, session: Session) -> dict[str, Any]:
-        """Initiate password recovery process by sending recovery email.
-
-        Args:
-            email: User email
-            session: Database session
-
-        Returns:
-            dict with "message" key indicating success or error
-        """
-        tripulante = self.repository.find_user_by_email(session, email)
-
-        if tripulante is None:
-            return {"message": "User not found"}
-
-        json_data = main(email)
-        self.repository.update_user_recovery_token(session, tripulante, json_data)
-        return {"message": "Recovery email sent"}
-
-    def update_password(self, nip: int, new_password: str, session: Session) -> dict[str, Any]:
-        """Update user password.
-
-        Args:
-            nip: User NIP
-            new_password: New password (plain text)
-            session: Database session
-
-        Returns:
-            dict with user data on success, or error message
-        """
-        if not new_password:
-            return {"message": "Password can not be empty"}
-
-        tripulante = self.repository.find_user_by_nip(session, nip)
-
-        if tripulante is None:
-            return {"message": "User not found"}
-
-        hashed_password = hash_code(new_password)
-        self.repository.update_user_password(session, tripulante, hashed_password)
-        return tripulante.to_json()
-
     @staticmethod
     def refresh_access_token(nip: str | int) -> tuple[str | None, str | None]:
         """Generate a new access token for a user.
@@ -193,7 +115,6 @@ class AuthService:
             new_access_token = create_access_token(
                 identity=nip_str,
                 additional_claims={
-                    "admin": tripulante.admin,
                     "name": tripulante.name,
                     "roleLevel": role_level,
                 },
@@ -251,3 +172,88 @@ class AuthService:
             "max_age": int(timedelta(days=30).total_seconds()),
             "path": "/api/auth",
         }
+
+    def create_reset_token(self, user, session: Session) -> str:
+        """Create a password reset token for a user.
+
+        Args:
+            user: Tripulante instance
+            session: Database session
+
+        Returns:
+            Reset token string
+        """
+        import json
+        import secrets
+        from datetime import UTC, datetime
+
+        token = secrets.token_urlsafe(32)
+        # Store token in user's recover field (can be refactored to use a separate table)
+        token_data = {
+            "token": token,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        self.repository.update_user_recovery_token(session, user, json.dumps(token_data))
+        return token
+
+    def reset_password(self, token: str, new_password: str, session: Session) -> dict[str, Any]:
+        """Reset user password using a reset token.
+
+        Args:
+            token: Reset token
+            new_password: New password (plain text)
+            session: Database session
+
+        Returns:
+            dict with success message or error message
+        """
+        import json
+        from datetime import UTC, datetime, timedelta
+
+        from sqlalchemy import select
+
+        from app.features.users.models import Tripulante  # type: ignore
+
+        if not new_password:
+            return {"message": "Password can not be empty"}
+
+        # Find user by token (this is a simple implementation - can be optimized)
+
+        stmt = select(Tripulante).where(Tripulante.recover != "")
+        users = session.execute(stmt).scalars().all()
+
+        for user in users:
+            try:
+                recover_data = json.loads(user.recover)
+                if recover_data.get("token") == token:
+                    # Check if token is expired (24 hours)
+                    token_timestamp = datetime.fromisoformat(recover_data["timestamp"])
+                    if datetime.now(UTC) - token_timestamp > timedelta(hours=24):
+                        return {"message": "Token expired"}
+
+                    # Update password
+                    hashed_password = hash_code(new_password)
+                    self.repository.update_user_password(session, user, hashed_password)
+                    return {"message": "Password updated successfully"}
+            except (json.JSONDecodeError, KeyError, ValueError):
+                continue
+
+        return {"message": "Invalid token"}
+
+    @staticmethod
+    def send_reset_password_email(user, token: str) -> None:
+        """Send password reset email to user.
+
+        Args:
+            user: Tripulante instance with email attribute
+            token: Reset token
+        """
+        frontend_url = os.environ.get("FRONTEND_URL", "https://siq-react-vite.onrender.com")
+        reset_link = f"{frontend_url}/reset-password?token={token}"
+
+        send_email(
+            subject="Reset da password",
+            recipients=user.email,
+            body=f"Usa este link: {reset_link}",
+            html=f"<p>Usa este link:</p><a href='{reset_link}'>{reset_link}</a>",
+        )

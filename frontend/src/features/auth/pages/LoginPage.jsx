@@ -5,6 +5,7 @@ import {
   Field,
   Heading,
   Input,
+  Link,
   Stack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
@@ -106,17 +107,18 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field.Root>
-          {/* <Link
+          <Link
             mt={4}
             color="teal.500"
             fontWeight="bold"
-            onClick={() => navigate("/recover-password")}
-            aria-label="Recover Password"
-            width={["80%", "60%", "100%"]} // Adjust link width for small screens and larger screens
+            onClick={() => navigate("/forgot-password")}
+            aria-label="Forgot Password"
             textAlign="center"
+            cursor="pointer"
+            _hover={{ textDecoration: "underline" }}
           >
-            Recover Password
-          </Link> */}
+            Esqueceu-se da password?
+          </Link>
           <Button
             mt="10"
             type="submit"

@@ -12,3 +12,9 @@ export const fetchMe = () => http.get("/auth/me").then((res) => res.data);
 
 export const updateUserRequest = (data) =>
   http.put("/auth/update", data).then((res) => res.data);
+
+export const forgotPasswordRequest = (email) =>
+  http.post("/auth/forgot-password", { email }).then((res) => res.data);
+
+export const resetPasswordRequest = (token, password) =>
+  http.post("/auth/reset-password", { token, password }).then((res) => res.data);

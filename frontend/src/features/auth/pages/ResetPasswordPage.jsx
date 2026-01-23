@@ -1,49 +1,40 @@
+import { toaster } from "@/utils/toaster";
 import {
   Box,
-  Input,
-  Stack,
-  Heading,
   Button,
   Field,
+  Flex,
+  Heading,
+  Input,
+  Stack,
 } from "@chakra-ui/react";
-import { toaster } from "@/utils/toaster";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
-import { http } from "@/api/http";
+import { resetPasswordRequest } from "../services/api";
 
-export function RecoverProcess() {
+export function ResetPasswordPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
-  let params = useParams();
-  // console.log("RPROCESS " + params.token);
-  const [nip, setNip] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const checkToken = async () => {
-    try {
-      const response = await http.post("/api/recovery", {
-        token: params.token,
-        email: params.email,
-      });
-      setNip(response.data.nip);
-      console.log(response.data);
-    } catch (error) {
-      toast({
-        title: error.response.data.message,
-        description: "You need to reset the password again",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "top",
-      });
-      console.log(error.response.data);
-    }
-  };
   useEffect(() => {
-    checkToken();
-  }, []);
+    if (!token) {
+      toaster.create({
+        title: "Invalid link",
+        description: "No reset token found. Please request a new password reset.",
+        type: "error",
+        duration: 5000,
+        closable: true,
+        placement: "top",
+      });
+      navigate("/forgot-password");
+    }
+  }, [token, navigate]);
   const handleChangeNewPassword = (event) => {
     setNewPassword(event.target.value);
   };
@@ -55,73 +46,79 @@ export function RecoverProcess() {
   const setnewpass = async (event) => {
     event.preventDefault();
 
+    if (!token) {
+      toaster.create({
+        title: "Invalid token",
+        description: "No reset token found. Please request a new password reset.",
+        type: "error",
+        duration: 5000,
+        closable: true,
+        placement: "top",
+      });
+      navigate("/forgot-password");
+      return;
+    }
+
     // Check if passwords match
     if (newPassword !== confirmPassword) {
-      toast({
+      toaster.create({
         title: "Passwords do not match.",
         description:
           "Please ensure that the new password and confirmation match.",
-        status: "error",
+        type: "error",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
       return;
     }
+
     if (newPassword === "") {
-      toast({
-        title: "Password vazia",
-        description: "Please use a non empty password",
-        status: "error",
+      toaster.create({
+        title: "Password required",
+        description: "Please enter a non-empty password",
+        type: "error",
         duration: 5000,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
+      return;
     }
-    const loadingToast = toast({
-      title: "Processing request...",
-      description: "Please wait while we process your request.",
-      status: "loading",
-      isClosable: true,
-    });
+
+    setIsLoading(true);
 
     try {
-      // Update the API endpoint and payload
-      const response = await http.patch(`/api/storenewpass/${nip}`, {
-        password: newPassword,
-      });
-      console.log(response);
-
-      toast.close(loadingToast);
-
-      toast({
+      await resetPasswordRequest(token, newPassword);
+      toaster.create({
         title: "Password updated.",
-        description: "Your password has been updated successfully.",
-        status: "success",
+        description: "Your password has been updated successfully. You can now login.",
+        type: "success",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
-      navigate("/");
+      navigate("/login");
     } catch (error) {
-      toast.close(loadingToast);
-
-      toast({
+      console.error("Error resetting password:", error);
+      toaster.create({
         title: "Error.",
-        description: "Failed to update the password. Please try again.",
-        status: "error",
+        description:
+          error.response?.data?.message ||
+          "Failed to update the password. Please try again.",
+        type: "error",
         duration: 5000,
-        isClosable: true,
-        position: "top",
+        closable: true,
+        placement: "top",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Box
+    <Flex
       w="100vw"
-      h="70vh"
-      display="flex"
-      flexDirection="column"
+      flex ="1"
       justifyContent="center"
       alignItems="center"
       p={2}
@@ -138,7 +135,7 @@ export function RecoverProcess() {
         >
           {" "}
           {/* Responsive font size */}
-          Sistema Integrado de Qualificações
+          Recuperação de Password
         </Heading>
       </Box>
       <Stack
@@ -149,12 +146,13 @@ export function RecoverProcess() {
         alignItems="center" // Center the Stack items horizontally
       >
         <Field.Root mt={4}>
-          <Field.Label textAlign="center">New Password</Field.Label>
+          <Field.Label textAlign="center">Nova Password</Field.Label>
           <Input
+            bg="gray.700"
             type="password"
             value={newPassword}
             name="newPassword"
-            placeholder="New Password"
+            placeholder="Nova Password"
             onChange={handleChangeNewPassword}
             aria-label="New Password"
             width={["80%", "60%", "100%"]} // Adjust input width for small screens and larger screens
@@ -163,12 +161,13 @@ export function RecoverProcess() {
         </Field.Root>
 
         <Field.Root mt={4}>
-          <Field.Label textAlign="center">Confirm Password</Field.Label>
+          <Field.Label textAlign="center">Confirmar Password</Field.Label>
           <Input
+            bg="gray.700"
             type="password"
             value={confirmPassword}
             name="confirmPassword"
-            placeholder="Confirm Password"
+            placeholder="Confirmar Password"
             onChange={handleChangeConfirmPassword}
             aria-label="Confirm Password"
             width={["80%", "60%", "100%"]} // Adjust input width for small screens and larger screens
@@ -180,11 +179,13 @@ export function RecoverProcess() {
           mt={6}
           colorPalette="teal"
           onClick={setnewpass}
-          aria-label="Recover"
+          isLoading={isLoading}
+          isDisabled={isLoading || !token}
+          aria-label="Reset da password"
           width={["80%", "60%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button
         >
-          Save
+          Reset da password
         </Button>
       </Stack>
       <Box
@@ -195,6 +196,6 @@ export function RecoverProcess() {
         py="3"
         alignItems={"center"}
       ></Box>
-    </Box>
+    </Flex>
   );
 }

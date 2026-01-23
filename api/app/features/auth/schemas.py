@@ -44,7 +44,20 @@ class PasswordUpdateResponseSchema(Schema):
     # If successful, returns user JSON object (dict-like structure)
 
 
-def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | None]:
+class ForgotPasswordRequestSchema(Schema):
+    """Schema for forgot password request validation."""
+
+    email = fields.Email(required=True, metadata={"description": "User email address"})
+
+
+class ResetPasswordRequestSchema(Schema):
+    """Schema for reset password request validation."""
+
+    token = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "Reset token"})
+    password = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "New password"})
+
+
+def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict[str, list[str]] | None]:
     """Validate request data against a schema.
 
     Args:
@@ -60,4 +73,12 @@ def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | No
         validated = schema.load(data)
         return validated, None
     except ValidationError as err:
-        return None, err.messages
+        # Convert ValidationError.messages to dict[str, list[str]] format
+        errors: dict[str, list[str]] = {}
+        if isinstance(err.messages, dict):
+            for key, value in err.messages.items():
+                if isinstance(value, list):
+                    errors[key] = [str(v) for v in value]
+                else:
+                    errors[key] = [str(value)]
+        return None, errors

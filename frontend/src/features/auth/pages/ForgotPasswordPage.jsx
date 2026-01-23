@@ -1,34 +1,45 @@
+import { toaster } from "@/utils/toaster";
 import {
-  Box,
-  Input,
-  Stack,
-  Heading,
   Button,
   Field,
+  Flex,
+  Heading,
+  Input,
+  Stack
 } from "@chakra-ui/react";
-import { toaster } from "@/utils/toaster";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { http } from "@/api/http";
+import { forgotPasswordRequest } from "../services/api";
 
-export function RecoverPass() {
+export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
-  const goBack = () => navigate("/");
+  const goBack = () => navigate("/login");
 
   const sendEmail = async () => {
+    if (!email) {
+      toaster.create({
+        title: "Email required",
+        description: "Please enter your email address.",
+        type: "error",
+        duration: 5000,
+        closable: true,
+        placement: "top",
+      });
+      return;
+    }
+
     try {
-      const response = await http.post(`/api/recover/${email}`);
-      console.log("Email sent response:", response); // Log response for debugging
+      await forgotPasswordRequest(email);
       toaster.create({
         title: "Email sent.",
-        description: "Please check your email.",
+        description: "Please check your email for password reset instructions.",
         type: "success",
         duration: 5000,
         closable: true,
         placement: "top",
       });
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("Error sending email:", error); // Log error for debugging
 
@@ -49,20 +60,22 @@ export function RecoverPass() {
     setEmail(event.target.value);
   }
   return (
-    <Box
-      w={"100vw"}
-      h={"70vh"}
-      display={"flex"}
-      justifyContent={"center"}
+    <Flex
+      flex="1"
+      w="100vw"
+      h="100vh"
+      justifyContent="center"
       alignItems={"center"}
     >
       <Stack mb={{ base: "10", md: "25" }} textAlign={"center"}>
         <Heading textAlign={"center"} my={10} fontSize={["xl", "2xl", "3xl"]}>
-          Sistema Integrado de Qualificações
+          Recuperação de Password
         </Heading>
         <Field.Root mx="auto">
           <Field.Label textAlign={"center"}>Email</Field.Label>
           <Input
+          bg="gray.700"
+
             type="email"
             value={email}
             name="email"
@@ -87,13 +100,14 @@ export function RecoverPass() {
           Recover
         </Button>
         <Button
+        colorPalette="blue"
           onClick={goBack}
           width={["60%", "80%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button
         >
-          Go Back
+          Voltar a página anterior
         </Button>
       </Stack>
-    </Box>
+    </Flex>
   );
 }
