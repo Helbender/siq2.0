@@ -4,7 +4,6 @@ import os
 from datetime import timedelta
 from typing import Any
 
-from flask import request
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.orm import Session
 
@@ -157,18 +156,23 @@ class AuthService:
     def get_refresh_token_cookie_kwargs(refresh_token: str) -> dict[str, Any]:
         """Get cookie kwargs for refresh token.
 
-        Args:
-            refresh_token: Refresh token string
-
-        Returns:
-            dict with cookie kwargs for setting refresh token
+        Uses JWT_COOKIE_SECURE and JWT_COOKIE_SAMESITE from env. For cross-origin
+        (e.g. frontend and API on different Render subdomains), set
+        JWT_COOKIE_SECURE=true and JWT_COOKIE_SAMESITE=None.
         """
+        secure = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
+        samesite_raw = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
+        if samesite_raw.lower() == "none":
+            samesite = "None"
+            secure = True  # required when SameSite=None
+        else:
+            samesite = "Lax"
         return {
-            "key": "siq2_refresh_token",  # Unique name to avoid conflicts with other apps
+            "key": "siq2_refresh_token",
             "value": refresh_token,
             "httponly": True,
-            "samesite": "Lax",
-            "secure": request.is_secure if not os.environ.get("FLASK_ENV") == "development" else False,
+            "samesite": samesite,
+            "secure": secure,
             "max_age": int(timedelta(days=30).total_seconds()),
             "path": "/api/auth",
         }

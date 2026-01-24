@@ -7,24 +7,64 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { useDeleteYear } from "../mutations/useDeleteYear";
+import { toaster } from "@/utils/toaster";
 
 export function DeleteYearModal({ isOpen, onClose, year, flightCount }) {
   const deleteYear = useDeleteYear();
 
   const handleDelete = async () => {
+    // Show loading toast for pending delete - stays open until API responds
+    const pendingToast = toaster.create({
+      title: `Deleting year ${year}...`,
+      description: `Deleting ${flightCount} flight${flightCount !== 1 ? "s" : ""} and associated records. This may take a moment.`,
+      type: "loading",
+      duration: null, // Keep it open until we close it
+      closable: false,
+    });
+
+    const dismissPendingToast = () => {
+      try {
+        // Try multiple ways to dismiss the toast
+        if (pendingToast?.id) {
+          toaster.dismiss(pendingToast.id);
+        } else if (pendingToast) {
+          toaster.dismiss(pendingToast);
+        } else {
+          // Last resort: dismiss all toasts
+          toaster.dismiss();
+        }
+      } catch (e) {
+        // If all else fails, dismiss all
+        toaster.dismiss();
+      }
+    };
+
     try {
       const result = await deleteYear.mutateAsync(year);
-      toast({
+      // Close pending toast and show success
+      dismissPendingToast();
+      toaster.create({
         title: "Year deleted successfully",
-        description: result.message,
-        status: "success",
+        description: result.message || `All flights for year ${year} have been deleted.`,
+        type: "success",
+        duration: 3000,
+        closable: true,
       });
       onClose();
     } catch (error) {
-      toast({
+      // Close pending toast and show error
+      dismissPendingToast();
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "An error occurred while deleting the year.";
+      toaster.create({
         title: "Error deleting year",
-        description: error.response?.data?.error || error.message,
-        status: "error",
+        description: errorMessage,
+        type: "error",
+        duration: 3000,
+        closable: true,
       });
     }
   };

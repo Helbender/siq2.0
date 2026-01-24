@@ -303,18 +303,23 @@ def process_one_file(
         return 1, None
 
     _log(worker_label, f"New flight - creating: {flight.airtask} on {flight.date}")
-    session.add(flight)
-    session.flush()
 
-    if "flight_pilots" not in flight_data:
+    # Validate pilots before adding flight to session
+    if "flight_pilots" not in flight_data or not flight_data["flight_pilots"]:
         _log(worker_label, f"⚠️  At least one pilot is required for {flight.airtask} on {flight.date}")
-        session.rollback()
         return 0, f"{filename}: At least one pilot is required"
 
+    # Check all pilots have NIP before starting transaction
     for pilot_data in flight_data["flight_pilots"]:
         if "nip" not in pilot_data:
             _log(worker_label, f"⚠️  Skipping pilot/crew without NIP in flight {flight.airtask} on {flight.date}")
             return 0, f"{filename}: Pilot/crew without NIP"
+
+    # Now add flight to session and process pilots
+    session.add(flight)
+    session.flush()
+
+    for pilot_data in flight_data["flight_pilots"]:
         result = flight_service._add_crew_and_pilots(session, flight, pilot_data, edit=False, auto_commit=False)
         if result is None:
             continue
@@ -340,20 +345,31 @@ def process_chunk(
     errors: list[str] = []
     try:
         _log(worker_label, f"Processing {len(file_list)} file(s)")
+        files_processed_count = 0
         for file_path, filename in file_list:
-            _log(worker_label, f"Processing file: {filename}")
+            files_processed_count += 1
+            _log(worker_label, f"Processing file {files_processed_count}/{len(file_list)}: {filename}")
+            file_success = False
             for attempt in range(DEADLOCK_RETRIES):
                 try:
+                    # Ensure session is clean before processing each file
+                    db.rollback()  # Rollback any previous uncommitted changes
                     n, err = process_one_file(db, flight_service, file_path, filename, skip_duplicates, worker_label)
                     if err:
                         errors.append(err)
-                    flights_processed += n
-                    if n > 0 and flights_processed % batch_size == 0:
+                    if n > 0:
+                        flights_processed += n
+                        # Commit immediately after each successful file to avoid losing progress
                         db.commit()
-                        _log(worker_label, f"✅ Committed batch: {flights_processed} flights so far")
+                        file_success = True
+                        if flights_processed % batch_size == 0:
+                            _log(worker_label, f"✅ Committed batch: {flights_processed} flights so far")
+                    else:
+                        # File was skipped (duplicate) or had validation error - no commit needed
+                        file_success = True
                     break
                 except Exception as e:
-                    db.rollback()
+                    db.rollback()  # Always rollback on exception
                     if _is_deadlock(e) and attempt < DEADLOCK_RETRIES - 1:
                         delay = 0.1 * (2**attempt) + random.uniform(0, 0.2)
                         _log(
@@ -364,9 +380,19 @@ def process_chunk(
                     else:
                         _log(worker_label, f"❌ Error processing {filename}: {e}")
                         errors.append(f"{filename}: {e}")
+                        file_success = True  # Mark as processed (even though failed) to continue
                         break
-        db.commit()
-        _log(worker_label, f"✅ Done: {flights_processed} flights processed")
+
+            if not file_success:
+                _log(worker_label, f"⚠️  File {filename} was not processed after {DEADLOCK_RETRIES} attempts")
+                errors.append(f"{filename}: Failed after {DEADLOCK_RETRIES} attempts")
+
+        # Final commit for any remaining uncommitted changes
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+        _log(worker_label, f"✅ Done: {flights_processed} flights processed from {files_processed_count} file(s)")
     except Exception as e:
         db.rollback()
         _log(worker_label, f"❌ Fatal error: {e}")

@@ -53,10 +53,16 @@ def setup_jwt(app: Flask) -> JWTManager:
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False
     app.config["JWT_CSRF_IN_COOKIES"] = False
     app.config["JWT_CSRF_CHECK_FORM"] = False
-    # Cookie settings
+    # Cookie settings. For cross-origin (e.g. frontend on render.com, API on another subdomain),
+    # set JWT_COOKIE_SECURE=true and JWT_COOKIE_SAMESITE=None so the refresh cookie is sent.
     app.config["JWT_COOKIE_SECURE"] = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
     app.config["JWT_COOKIE_HTTPONLY"] = True
-    app.config["JWT_COOKIE_SAMESITE"] = "Lax"
+    samesite = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
+    if samesite.lower() == "none":
+        app.config["JWT_COOKIE_SAMESITE"] = "None"
+        app.config["JWT_COOKIE_SECURE"] = True  # required when SameSite=None
+    else:
+        app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 
     jwt = JWTManager(app)
     _register_jwt_error_handlers(jwt, app)
@@ -148,7 +154,7 @@ def _register_jwt_error_handlers(jwt: JWTManager, app: Flask) -> None:
                 expires=0,
                 path="/api/auth",
                 httponly=True,
-                samesite="Lax",
+                samesite=app.config.get("JWT_COOKIE_SAMESITE", "Lax"),
                 secure=app.config.get("JWT_COOKIE_SECURE", False),
             )
             print("[JWT] Cleared invalid refresh token cookie")

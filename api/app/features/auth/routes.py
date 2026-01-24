@@ -186,15 +186,19 @@ def clear_refresh_token() -> tuple[Response, int]:
     Useful for testing or forcing a re-login.
     """
     response = jsonify({"msg": "Refresh token cleared successfully"})
-    # Clear the siq2_refresh_token cookie by setting it to empty with expires=0
+    secure = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
+    samesite_raw = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
+    samesite = "None" if samesite_raw.lower() == "none" else "Lax"
+    if samesite == "None":
+        secure = True
     response.set_cookie(
         "siq2_refresh_token",
         "",
         expires=0,
         path="/api/auth",
         httponly=True,
-        samesite="Lax",
-        secure=os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true",
+        samesite=samesite,
+        secure=secure,
     )
     return response, 200
 

@@ -60,6 +60,31 @@ class DatabaseManagementRepository:
         return list(session.execute(stmt).unique().scalars().all())
 
     @staticmethod
+    def get_flights_for_year_month(session: Session, year: int, month: int) -> list[Flight]:
+        """Get all flights for a specific year and month with pilots loaded.
+
+        Args:
+            session: Database session
+            year: Year to filter by
+            month: Month to filter by (1-12)
+
+        Returns:
+            List of Flight instances for the specified year and month
+        """
+        stmt = (
+            select(Flight)
+            .where(
+                func.extract("year", Flight.date) == year,
+                func.extract("month", Flight.date) == month
+            )
+            .options(
+                joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
+            )
+            .order_by(Flight.date.desc())
+        )
+        return list(session.execute(stmt).unique().scalars().all())
+
+    @staticmethod
     def get_all_flights(session: Session) -> list[Flight]:
         """Get all flights with pilots loaded.
 
