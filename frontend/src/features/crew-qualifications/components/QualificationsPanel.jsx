@@ -15,12 +15,12 @@ export function QualificationsPanel(props) {
         align={"center"}
         alignContent={"center"}
         fontSize={14}
-        color="text.primary"
         py={1}
         h="100%"
         // w={"52px"}
         px={2}
         bg={bg}
+        color={bg === "red.600" ? "white" : "black"}
         borderTopLeftRadius={props.borderTopLeftRadius}
         borderTopRightRadius={props.borderTopRightRadius}
         borderBottomLeftRadius={props.borderBottomLeftRadius}

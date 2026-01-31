@@ -35,11 +35,11 @@ export function DaysLeftColumn({ qualification, dates }) {
       <Separator mt={2} mb={1} />
       {days.map((a, i) => {
         return (
-          <Text key={i} bg={colorFormatter(a)} color="text.primary">
+          <Text key={i} bg={colorFormatter(a)} color={colorFormatter(a) === "red" ? "white" : "black"}>
             {a}
-          </Text>
-        );
-      })}
-    </Box>
-  );
+        </Text>
+      );
+    })}
+  </Box>
+);
 }

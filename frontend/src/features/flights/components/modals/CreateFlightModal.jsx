@@ -166,6 +166,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Airtask</Field.Label>
                             <Input 
+                              bg="bg.canvas"
                               border="1px solid"
                               borderColor="border.subtle"
                               _placeholder={{ color: "text.muted" }}
@@ -184,6 +185,7 @@ export function CreateFlightModal({ flight, trigger }) {
                             <NativeSelect.Root>
                               <NativeSelect.Field 
                                 {...methods.register("flightType")}
+                                bg="bg.canvas"
                                 border="1px solid"
                                 borderColor="border.subtle"
                                 placeholder=""
@@ -217,6 +219,7 @@ export function CreateFlightModal({ flight, trigger }) {
                             <NativeSelect.Root>
                               <NativeSelect.Field 
                                 {...methods.register("flightAction")}
+                                bg="bg.canvas"
                                 border="1px solid"
                                 borderColor="border.subtle"
                                 placeholder=""
@@ -239,6 +242,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>Data</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="date"
                             {...methods.register("date")}
                             border="1px solid"
@@ -250,6 +254,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>ATD</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="time"
                             {...methods.register("ATD")}
                             border="1px solid"
@@ -261,6 +266,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>ATA</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="time"
                             {...methods.register("ATA")}
                             border="1px solid"
@@ -272,6 +278,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>TOTAL</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="time"
                             {...methods.register("ATE")}
                             border="1px solid"
@@ -287,6 +294,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>Origem</Field.Label>
                           <Input
                             {...originRegister}
+                            bg="bg.canvas"
                             border="1px solid"
                             borderColor="border.subtle"
                             _placeholder={{ color: "text.muted" }}
@@ -306,6 +314,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>Destino</Field.Label>
                           <Input
                             {...destinationRegister}
+                            bg="bg.canvas"
                             border="1px solid"
                             borderColor="border.subtle"
                             _placeholder={{ color: "text.muted" }}
@@ -339,6 +348,7 @@ export function CreateFlightModal({ flight, trigger }) {
                                 {...methods.register("tailNumber", {
                                   setValueAs: (value) => value ? parseInt(value) : 0
                                 })}
+                                bg="bg.canvas"
                                 border="1px solid"
                                 borderColor="border.subtle"
                                 placeholder=""
@@ -363,6 +373,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Aterragens</Field.Label>
                             <Input
+                              bg="bg.canvas"
                               type="number"
                               {...methods.register("totalLandings", {
                                 valueAsNumber: true,
@@ -378,7 +389,8 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Nº Tripulantes</Field.Label>
                             <Input
-                              type="number"
+                              bg="bg.canvas"
+                                  type="number"
                               {...methods.register("numberOfCrew", {
                                 valueAsNumber: true
                               })}
@@ -393,6 +405,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>PAX</Field.Label>
                             <Input
+                              bg="bg.canvas"
                               type="number"
                               {...methods.register("passengers", {
                                 valueAsNumber: true,
@@ -413,6 +426,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>Doentes</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="number"
                             {...methods.register("doe", {
                               valueAsNumber: true,
@@ -428,6 +442,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>Carga</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="number"
                             {...methods.register("cargo", {
                               valueAsNumber: true,
@@ -443,6 +458,7 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>ORM</Field.Label>
                           <Input
+                            bg="bg.canvas"
                             type="number"
                             {...methods.register("orm", {
                               valueAsNumber: true,
@@ -459,7 +475,8 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>FUEL</Field.Label>
                           <Input
-                            type="number"
+                            bg="bg.canvas"
+                              type="number"
                             {...methods.register("fuel", {
                               valueAsNumber: true,
                               min: { value: 0, message: "Mínimo 0" }

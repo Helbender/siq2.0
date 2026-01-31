@@ -1,6 +1,6 @@
-import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { getRoleOptionsForUser } from "@/common/roles";
+import { useAuth } from "@/features/auth/contexts/AuthContext";
 import {
   Button,
   Dialog,
@@ -80,7 +80,7 @@ export function CreateUserModal({
                     <Field.Label>Função</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.surface"
+                        bg="bg.canvas"
                         value={formData.position}
                         onChange={(e) =>
                           setFormData({ ...formData, position: e.target.value })
@@ -109,7 +109,8 @@ export function CreateUserModal({
                 <Field.Root width="100%">
                   <Field.Label>Nome</Field.Label>
                   <Input
-                    bg="bg.surface"
+                      bg="bg.canvas"
+
                     value={formData.name}
                     placeholder="Primeiro e Último Nome"
                     onChange={(e) =>
@@ -120,7 +121,7 @@ export function CreateUserModal({
                 <Field.Root width="100%">
                   <Field.Label>Email</Field.Label>
                   <Input
-                    bg="bg.surface"
+                    bg="bg.canvas"
                     value={formData.email}
                     type="email"
                     placeholder="Email"
@@ -134,7 +135,7 @@ export function CreateUserModal({
                     <Field.Label>Grupo</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.surface"
+                        bg="bg.canvas"
                         value={formData.tipo}
                         onChange={(e) =>
                           setFormData({ ...formData, tipo: e.target.value })
@@ -163,7 +164,7 @@ export function CreateUserModal({
                     <Field.Label>Status</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.surface"
+                        bg="bg.canvas"
                         value={formData.status}
                         onChange={(e) =>
                           setFormData({ ...formData, status: e.target.value })
@@ -180,7 +181,7 @@ export function CreateUserModal({
                       <Field.Label>Role</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          bg="bg.surface"
+                          bg="bg.canvas"
                           value={formData.roleLevel}
                           onChange={(e) =>
                             setFormData({
@@ -206,7 +207,7 @@ export function CreateUserModal({
                   <Button
                     type="button"
                     flex="1"
-                    variant="outline"
+                    variant="subtle"
                     onClick={onClose}
                     disabled={isSubmitting}
                   >

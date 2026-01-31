@@ -369,11 +369,11 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                                 ? "bold"
                                 : "normal"
                             }
-                            color={
-                              daysLeft !== null && daysLeft < 10
-                                ? "text.primary"
-                                : "text.primary"
-                            }
+                            color={getColorForDays(daysLeft) === "red.600" ? "white" : "black"}
+                              // daysLeft !== null && daysLeft < 10
+                              //   ? "text.primary"
+                              //   : "text.primary"
+                            
                             borderRight="1px solid"
                             borderColor="border.muted"
                             borderRightWidth={

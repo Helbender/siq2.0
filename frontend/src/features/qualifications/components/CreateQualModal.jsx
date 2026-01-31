@@ -274,7 +274,7 @@ export function CreateQualModal({ edit, qualification }) {
             onClose();
           }
         }} 
-        size="xl"
+        // size="xl"
       >
         {edit ? (
           <Dialog.Trigger asChild>
@@ -304,10 +304,11 @@ export function CreateQualModal({ edit, qualification }) {
               </Dialog.CloseTrigger>
               <Dialog.Body>
                 <FormProvider>
-                  <Stack spacing={4}>
+                  <Stack gap={4}>
                     <Field.Root>
                       <Field.Label>Nome da Qualificação</Field.Label>
                       <Input
+                        bg="bg.canvas"
                         placeholder="Nome da Qualificação"
                         value={qualificacao.watch("nome") || ""}
                         onChange={(e) => qualificacao.setValue("nome", e.target.value)}
@@ -316,6 +317,7 @@ export function CreateQualModal({ edit, qualification }) {
                     <Field.Root>
                       <Field.Label>Validade</Field.Label>
                       <Input
+                        bg="bg.canvas"
                         type="number"
                         placeholder="Validade em dias"
                         value={qualificacao.watch("validade") || ""}
@@ -326,7 +328,7 @@ export function CreateQualModal({ edit, qualification }) {
                       <Field.Label>Tipo de Tripulante</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          bg="bg.surface"
+                          bg="bg.canvas"
                           placeholder={isLoadingCrewTypes ? "Carregando..." : "Selecione um tipo"}
                           value={qualificacao.watch("tipo_aplicavel") || ""}
                           onChange={(e) => {
@@ -362,7 +364,7 @@ export function CreateQualModal({ edit, qualification }) {
                       <Field.Label>Grupo de Qualificação</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          bg="bg.surface"
+                          bg="bg.canvas"
                           placeholder={
                             tipoAplicavel
                               ? grupos.length > 0
@@ -406,11 +408,11 @@ export function CreateQualModal({ edit, qualification }) {
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button colorPalette="blue" mr={3} onClick={handleSubmit}>
+                <Button colorPalette="success" mr={3} onClick={handleSubmit}>
                   {edit ? "Guardar Alterações" : "Salvar"}
                 </Button>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="ghost">
+                  <Button variant="subtle">
                     Cancelar
                   </Button>
                 </Dialog.ActionTrigger>
