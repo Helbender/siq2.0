@@ -1,11 +1,11 @@
 import { http } from "@/api/http";
 import { useCrewTypes } from "@/common/CrewTypesProvider";
 import {
-  Field,
-  GridItem,
-  IconButton,
-  Input,
-  NativeSelect,
+    Field,
+    GridItem,
+    IconButton,
+    Input,
+    NativeSelect,
 } from "@chakra-ui/react";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
@@ -140,8 +140,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
               {...register(`flight_pilots.${index}.position`)}
               textAlign={"center"}
               alignSelf={"center"}
-              border="1px solid"
-              borderColor="border.subtle"
             >
               <option value="PI">PI</option>
               <option value="PC">PC</option>
@@ -171,9 +169,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
               placeholder="Selecione"
               disabled={!(position || member.position)}
               {...register(`flight_pilots.${index}.name`)}
-              border="1px solid"
-              borderColor="border.subtle"
-              _placeholder={{ color: "text.muted" }}
             >
               {pilotosFiltrados.map((crew) => (
                 <option key={crew.name} value={crew.name}>
@@ -192,10 +187,8 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             display="inline-block"
             textAlign={"center"}
             readOnly
+            variant="readOnly"
             {...register(`flight_pilots.${index}.nip`)}
-            border="1px solid"
-            borderColor="border.subtle"
-            _placeholder={{ color: "text.muted" }}
           ></Input>
         </Field.Root>
       </GridItem>
@@ -219,9 +212,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                     }
                     textAlign={"center"}
                     {...register(`flight_pilots.${index}.${campo}`)}
-                    border="1px solid"
-                    borderColor="border.subtle"
-                    _placeholder={{ color: "text.muted" }}
                   />
                 </Field.Root>
               </GridItem>
@@ -249,9 +239,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                       onChange={(event) =>
                         field.onChange(event.target.value || "")
                       }
-                      border="1px solid"
-                      borderColor="border.subtle"
-                      _placeholder={{ color: "text.muted" }}
                     >
                       {qualP &&
                         qualP

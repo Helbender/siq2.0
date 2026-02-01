@@ -34,6 +34,8 @@ strict = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 ignore_missing_imports = true
+# So scripts in scripts/ can resolve `app` and `config`; Mypy doesn't run sys.path code
+mypy_path = "."
 
 [tool.ruff]
 line-length = 120

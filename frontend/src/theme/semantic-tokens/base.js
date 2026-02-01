@@ -7,6 +7,7 @@ export const baseSemanticTokens = defineSemanticTokens({
       surface: { value: "{colors.gray.800}" },
       muted: { value: "{colors.gray.600}" },
       cardSubtle: { value: "{colors.gray.700}" },
+      disabled: { value: "{colors.whiteAlpha.300}" },
     },
 
     text: {
@@ -18,7 +19,8 @@ export const baseSemanticTokens = defineSemanticTokens({
     },
 
     border: {
-      subtle: { value: "{colors.gray.700}" },
+      subtle: { value: "{colors.gray.600}" },
+      strong: { value: "{colors.gray.700}" },
       focus: { value: "{colors.blue.300}" },
     },
 

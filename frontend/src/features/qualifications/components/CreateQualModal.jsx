@@ -2,15 +2,15 @@ import { http } from "@/api/http";
 import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { toaster } from "@/utils/toaster";
 import {
-  Button,
-  Dialog,
-  Field,
-  IconButton,
-  Input,
-  NativeSelect,
-  Portal,
-  Stack,
-  useDisclosure
+    Button,
+    Dialog,
+    Field,
+    IconButton,
+    Input,
+    NativeSelect,
+    Portal,
+    Stack,
+    useDisclosure
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
@@ -308,7 +308,6 @@ export function CreateQualModal({ edit, qualification }) {
                     <Field.Root>
                       <Field.Label>Nome da Qualificação</Field.Label>
                       <Input
-                        bg="bg.canvas"
                         placeholder="Nome da Qualificação"
                         value={qualificacao.watch("nome") || ""}
                         onChange={(e) => qualificacao.setValue("nome", e.target.value)}
@@ -317,7 +316,6 @@ export function CreateQualModal({ edit, qualification }) {
                     <Field.Root>
                       <Field.Label>Validade</Field.Label>
                       <Input
-                        bg="bg.canvas"
                         type="number"
                         placeholder="Validade em dias"
                         value={qualificacao.watch("validade") || ""}
@@ -328,7 +326,6 @@ export function CreateQualModal({ edit, qualification }) {
                       <Field.Label>Tipo de Tripulante</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          bg="bg.canvas"
                           placeholder={isLoadingCrewTypes ? "Carregando..." : "Selecione um tipo"}
                           value={qualificacao.watch("tipo_aplicavel") || ""}
                           onChange={(e) => {
@@ -364,7 +361,6 @@ export function CreateQualModal({ edit, qualification }) {
                       <Field.Label>Grupo de Qualificação</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          bg="bg.canvas"
                           placeholder={
                             tipoAplicavel
                               ? grupos.length > 0

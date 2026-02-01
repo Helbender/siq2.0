@@ -2,11 +2,12 @@ import { createSystem, defaultConfig } from "@chakra-ui/react";
 import { colors } from "./colors";
 import { dialogRecipe } from "./recipes/dialog";
 import { inputRecipe } from "./recipes/input";
+import { nativeSelectRecipe } from "./recipes/nativeselect";
 import { tableRecipe } from "./recipes/table";
 import { baseSemanticTokens } from "./semantic-tokens/base";
 const system = createSystem(defaultConfig, {
   theme: {
-    tokens: {colors},
+    tokens: { colors },
     semanticTokens: {
       colors: {
         ...baseSemanticTokens.colors,
@@ -23,6 +24,7 @@ const system = createSystem(defaultConfig, {
     slotRecipes: {
       table: tableRecipe,
       dialog: dialogRecipe,
+      nativeSelect: nativeSelectRecipe,
     },
   },
 });

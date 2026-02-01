@@ -32,6 +32,7 @@ export const dialogRecipe = defineSlotRecipe({
       textAlign: "center",
     },
     header: {
+      color: "text.inverted",
       bg: "teal.300",
       fontWeight: "bold",
       fontSize: "lg",

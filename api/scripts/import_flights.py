@@ -23,8 +23,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 
+# Add the api/ directory to Python path BEFORE any local imports
+api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(api_dir)
+
 # Load environment variables from api/.env
 from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
+
 from sqlalchemy import select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
@@ -32,14 +39,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.features.flights.models import Flight
 from app.features.flights.service import FlightService
 from config import engine
-
-# Add the api/ directory to Python path to import local modules
-api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(api_dir)
-
-
-load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
-
 
 # Old format boolean qualification fields (should not be present in new format)
 OLD_PILOT_QUAL_FIELDS = {

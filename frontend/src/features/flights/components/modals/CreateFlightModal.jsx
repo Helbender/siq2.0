@@ -146,7 +146,7 @@ export function CreateFlightModal({ flight, trigger }) {
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.surface">
+            <Dialog.Content bg="bg.cardSubtle">
               <Dialog.Header>
                 {isEdit ? "Editar voo" : "Criar voo"}
               </Dialog.Header>
@@ -159,17 +159,13 @@ export function CreateFlightModal({ flight, trigger }) {
                   <Dialog.Body>
                     <Stack>
                       <Flex gap={"5"}
-                      direction={{ base: "column", lg: "row" }}
+                      direction={{ base: "column", md: "row" }}
                       alignItems="center"
                       justifyContent="space-between">
 <Flex gap={2}>
                           <Field.Root>
                             <Field.Label>Airtask</Field.Label>
-                            <Input 
-                              bg="bg.canvas"
-                              border="1px solid"
-                              borderColor="border.subtle"
-                              _placeholder={{ color: "text.muted" }}
+                            <Input
                               placeholder="00A0000"
                                {...methods.register("airtask", {
                           required: "Campo obrigatório",
@@ -183,13 +179,9 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Modalidade</Field.Label>
                             <NativeSelect.Root>
-                              <NativeSelect.Field 
+                              <NativeSelect.Field
                                 {...methods.register("flightType")}
-                                bg="bg.canvas"
-                                border="1px solid"
-                                borderColor="border.subtle"
                                 placeholder=""
-                                _placeholder={{ color: "text.muted" }}
                               >
                                   <option value="ADEM">ADEM</option>
                         <option value="ADROP">ADROP</option>
@@ -217,13 +209,9 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Ação</Field.Label>
                             <NativeSelect.Root>
-                              <NativeSelect.Field 
+                              <NativeSelect.Field
                                 {...methods.register("flightAction")}
-                                bg="bg.canvas"
-                                border="1px solid"
-                                borderColor="border.subtle"
                                 placeholder=""
-                                _placeholder={{ color: "text.muted" }}
                               >
                                 <option value="OPER">OPER</option>
                                 <option value="MNT">MNT</option>
@@ -238,54 +226,35 @@ export function CreateFlightModal({ flight, trigger }) {
  
 </Flex>
 
-                      <Flex gap={2} direction={{ base: "column", lg: "row" }}>
+                      <Flex gap={2} direction={{ base: "column", md: "row" }}>
                         <Field.Root>
                           <Field.Label>Data</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="date"
                             {...methods.register("date")}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                           />
                         </Field.Root>
 
                         <Field.Root>
                           <Field.Label>ATD</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="time"
                             {...methods.register("ATD")}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                           />
                         </Field.Root>
 
                         <Field.Root>
                           <Field.Label>ATA</Field.Label>
-                          <Input
-                            bg="bg.canvas"
-                            type="time"
-                            {...methods.register("ATA")}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
-                          />
+                          <Input type="time" {...methods.register("ATA")} />
                         </Field.Root>
 
                         <Field.Root>
                           <Field.Label>TOTAL</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="time"
                             {...methods.register("ATE")}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             readOnly
-                            bg="bg.muted"
+                            variant="readOnly"
                           />
                         </Field.Root>
                       </Flex>
@@ -294,10 +263,6 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>Origem</Field.Label>
                           <Input
                             {...originRegister}
-                            bg="bg.canvas"
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="XXXX"
                             maxLength={4}
                             textAlign="center"
@@ -314,10 +279,6 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>Destino</Field.Label>
                           <Input
                             {...destinationRegister}
-                            bg="bg.canvas"
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="XXXX"
                             maxLength={4}
                             textAlign="center"
@@ -336,10 +297,10 @@ export function CreateFlightModal({ flight, trigger }) {
 <Flex
                   mt="5"
                   gap={"5"}
-                  direction={{ base: "column", lg: "row" }}
+                  direction={{ base: "column", md: "row" }}
                 >
                         <Flex gap={2}
-                        direction={{ base: "column", lg: "row" }}
+                        direction={{ base: "column", md: "row" }}
                         >
                           <Field.Root>
                             <Field.Label>Nº Cauda</Field.Label>
@@ -348,11 +309,7 @@ export function CreateFlightModal({ flight, trigger }) {
                                 {...methods.register("tailNumber", {
                                   setValueAs: (value) => value ? parseInt(value) : 0
                                 })}
-                                bg="bg.canvas"
-                                border="1px solid"
-                                borderColor="border.subtle"
                                 placeholder=""
-                                _placeholder={{ color: "text.muted" }}
                               >
                                 <option value="16701">16701</option>
                                 <option value="16702">16702</option>
@@ -373,15 +330,11 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Aterragens</Field.Label>
                             <Input
-                              bg="bg.canvas"
                               type="number"
                               {...methods.register("totalLandings", {
                                 valueAsNumber: true,
                                 min: { value: 0, message: "Mínimo 0" }
                               })}
-                              border="1px solid"
-                              borderColor="border.subtle"
-                              _placeholder={{ color: "text.muted" }}
                               placeholder="0"
                               textAlign="center"
                             />
@@ -389,31 +342,23 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Root>
                             <Field.Label>Nº Tripulantes</Field.Label>
                             <Input
-                              bg="bg.canvas"
-                                  type="number"
+                              type="number"
                               {...methods.register("numberOfCrew", {
                                 valueAsNumber: true
                               })}
-                              border="1px solid"
-                              borderColor="border.subtle"
-                              _placeholder={{ color: "text.muted" }}
                               readOnly
-                              bg="bg.muted"
+                              variant="readOnly"
                               textAlign="center"
                             />
                           </Field.Root>
                           <Field.Root>
                             <Field.Label>PAX</Field.Label>
                             <Input
-                              bg="bg.canvas"
                               type="number"
                               {...methods.register("passengers", {
                                 valueAsNumber: true,
                                 min: { value: 0, message: "Mínimo 0" }
                               })}
-                              border="1px solid"
-                              borderColor="border.subtle"
-                              _placeholder={{ color: "text.muted" }}
                               placeholder="0"
                               textAlign="center"
                             />
@@ -421,20 +366,16 @@ export function CreateFlightModal({ flight, trigger }) {
                         </Flex>
                         <Spacer />
                   <Flex gap={2}
-                  direction={{ base: "column", lg: "row" }}
+                  direction={{ base: "column", md: "row" }}
                   >
                         <Field.Root>
                           <Field.Label>Doentes</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="number"
                             {...methods.register("doe", {
                               valueAsNumber: true,
                               min: { value: 0, message: "Mínimo 0" }
                             })}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="0"
                             textAlign="center"
                           />
@@ -442,15 +383,11 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>Carga</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="number"
                             {...methods.register("cargo", {
                               valueAsNumber: true,
                               min: { value: 0, message: "Mínimo 0" }
                             })}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="0"
                             textAlign="center"
                           />
@@ -458,15 +395,11 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>ORM</Field.Label>
                           <Input
-                            bg="bg.canvas"
                             type="number"
                             {...methods.register("orm", {
                               valueAsNumber: true,
                               min: { value: 0, message: "Mínimo 0" }
                             })}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="0"
                             textAlign="center"
                           />
@@ -475,15 +408,11 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Field.Root>
                           <Field.Label>FUEL</Field.Label>
                           <Input
-                            bg="bg.canvas"
-                              type="number"
+                            type="number"
                             {...methods.register("fuel", {
                               valueAsNumber: true,
                               min: { value: 0, message: "Mínimo 0" }
                             })}
-                            border="1px solid"
-                            borderColor="border.subtle"
-                            _placeholder={{ color: "text.muted" }}
                             placeholder="Kg"
                             textAlign="right"
                           />
@@ -561,15 +490,17 @@ export function CreateFlightModal({ flight, trigger }) {
                       >
                         Adicionar Tripulante
                       </Button>
+               
                     </Stack>
                   </Dialog.Body>
                 </form>
 
                 <Dialog.Footer>
                   <Dialog.ActionTrigger asChild>
-                    <Button variant="ghost">
+                    <Button variant="subtle" colorPalette="gray">
                       Cancelar
                     </Button>
+                   
                   </Dialog.ActionTrigger>
                   <Button
                     onClick={handleSubmit(onSubmit)}

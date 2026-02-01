@@ -2,14 +2,14 @@ import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { getRoleOptionsForUser } from "@/common/roles";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import {
-  Button,
-  Dialog,
-  Field,
-  Flex,
-  HStack,
-  Input,
-  NativeSelect,
-  VStack
+    Button,
+    Dialog,
+    Field,
+    Flex,
+    HStack,
+    Input,
+    NativeSelect,
+    VStack
 } from "@chakra-ui/react";
 import { useUserForm } from "../hooks/useUserForm";
 
@@ -55,7 +55,6 @@ export function CreateUserModal({
                   <Field.Root flex="1">
                     <Field.Label>Posto</Field.Label>
                     <Input
-                      bg="bg.canvas"
                       value={formData.rank}
                       placeholder="Posto"
                       onChange={(e) =>
@@ -66,7 +65,6 @@ export function CreateUserModal({
                   <Field.Root flex="1">
                     <Field.Label>NIP</Field.Label>
                     <Input
-                      bg="bg.canvas"
                       value={formData.nip}
                       placeholder="NIP"
                       onChange={(e) =>
@@ -74,13 +72,13 @@ export function CreateUserModal({
                       }
                       readOnly={!!editingUser}
                       disabled={!!editingUser}
+                      variant={editingUser ? "readOnly" : undefined}
                     />
                   </Field.Root>
                   <Field.Root flex="1">
                     <Field.Label>Função</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.canvas"
                         value={formData.position}
                         onChange={(e) =>
                           setFormData({ ...formData, position: e.target.value })
@@ -109,9 +107,7 @@ export function CreateUserModal({
                 <Field.Root width="100%">
                   <Field.Label>Nome</Field.Label>
                   <Input
-                      bg="bg.canvas"
-
-                    value={formData.name}
+                      value={formData.name}
                     placeholder="Primeiro e Último Nome"
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
@@ -121,7 +117,6 @@ export function CreateUserModal({
                 <Field.Root width="100%">
                   <Field.Label>Email</Field.Label>
                   <Input
-                    bg="bg.canvas"
                     value={formData.email}
                     type="email"
                     placeholder="Email"
@@ -135,7 +130,6 @@ export function CreateUserModal({
                     <Field.Label>Grupo</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.canvas"
                         value={formData.tipo}
                         onChange={(e) =>
                           setFormData({ ...formData, tipo: e.target.value })
@@ -164,7 +158,6 @@ export function CreateUserModal({
                     <Field.Label>Status</Field.Label>
                     <NativeSelect.Root>
                       <NativeSelect.Field
-                        bg="bg.canvas"
                         value={formData.status}
                         onChange={(e) =>
                           setFormData({ ...formData, status: e.target.value })
@@ -180,9 +173,8 @@ export function CreateUserModal({
                     <Field.Root>
                       <Field.Label>Role</Field.Label>
                       <NativeSelect.Root>
-                        <NativeSelect.Field
-                          bg="bg.canvas"
-                          value={formData.roleLevel}
+<NativeSelect.Field
+                        value={formData.roleLevel}
                           onChange={(e) =>
                             setFormData({
                               ...formData,

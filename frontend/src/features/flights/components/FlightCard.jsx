@@ -1,6 +1,6 @@
 import { Can } from "@/common/components/Can";
-import { Role } from "@/common/roles";
 import { StyledText } from "@/common/components/StyledText";
+import { Role } from "@/common/roles";
 import { formatDate } from "@/utils/timeCalc";
 import {
   Box,
@@ -23,7 +23,7 @@ import { DeleteFlightModal } from "./modals/DeleteFlightModal";
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   return (
-    <Card.Root boxShadow={"lg"} bg="#2D3748">
+    <Card.Root boxShadow={"lg"} bg="bg.cardSubtle">
       <Card.Header>
         <Flex align={"center"}>
           {isColumn ? (
