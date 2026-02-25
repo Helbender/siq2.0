@@ -388,13 +388,13 @@ class FlightService:
             return None
 
         if edit:
-            flight_pilot: FlightPilots | None = session.execute(
+            flight_pilot = session.execute(
                 select(FlightPilots)
                 .where(FlightPilots.flight_id == flight.fid)
                 .where(FlightPilots.pilot_id == pilot["nip"]),
             ).scalar_one_or_none()
             if flight_pilot is not None:
-                flight_pilot.position = pilot["position"]
+                flight_pilot.position = pilot.get("position") or ""
                 flight_pilot.day_landings = safe_int_or_none(pilot.get("ATR"))
                 flight_pilot.night_landings = safe_int_or_none(pilot.get("ATN"))
                 flight_pilot.prec_app = safe_int_or_none(pilot.get("precapp"))
@@ -406,7 +406,22 @@ class FlightService:
                 flight_pilot.qual5 = pilot.get("QUAL5")
                 flight_pilot.qual6 = pilot.get("QUAL6")
             else:
-                raise ValueError(f"FlightPilots record not found for pilot {pilot['nip']} in flight {flight.fid}")
+                # Piloto novo na lista deste voo (adicionado na edição): criar registo
+                flight_pilot = FlightPilots(
+                    flight_id=flight.fid,
+                    pilot_id=pilot["nip"],
+                    position=pilot.get("position") or "",
+                    day_landings=safe_int_or_none(pilot.get("ATR")),
+                    night_landings=safe_int_or_none(pilot.get("ATN")),
+                    prec_app=safe_int_or_none(pilot.get("precapp")),
+                    nprec_app=safe_int_or_none(pilot.get("nprecapp")),
+                    qual1=pilot.get("QUAL1"),
+                    qual2=pilot.get("QUAL2"),
+                    qual3=pilot.get("QUAL3"),
+                    qual4=pilot.get("QUAL4"),
+                    qual5=pilot.get("QUAL5"),
+                    qual6=pilot.get("QUAL6"),
+                )
         else:
             i: int = 0
             qual_list = self.repository.find_qualifications_by_tipo(session, pilot_obj.tipo)

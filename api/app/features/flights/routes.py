@@ -1,5 +1,7 @@
 """Flights routes - thin request/response handlers."""
 
+import logging
+
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.orm import Session
 
@@ -8,12 +10,14 @@ from app.features.flights.policies import require_authenticated
 from app.features.flights.schemas import (
     FlightCreateSchema,
     FlightUpdateSchema,
+    format_validation_errors,
     validate_request,
 )
 from app.features.flights.service import FlightService
 from app.shared.enums import Role
 from app.shared.permissions import require_role
 
+logger = logging.getLogger(__name__)
 flights_bp = Blueprint("flights", __name__)
 flight_service = FlightService()
 
@@ -265,7 +269,8 @@ def retrieve_flights() -> tuple[Response, int]:
 
     validated_data, errors = validate_request(flight_create_schema, flight_data)
     if errors:
-        error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
+        error_message = format_validation_errors(errors)
+        logger.warning("[flights] POST validation failed: %s", error_message)
         return jsonify({"message": error_message}), 400
 
     with Session(engine, autoflush=False) as session:
@@ -274,20 +279,22 @@ def retrieve_flights() -> tuple[Response, int]:
         if "message" in result and isinstance(result["message"], int):
             return jsonify(result), 201
 
+        msg = result.get("message", result)
+        logger.warning("[flights] POST create_flight failed: %s", msg)
         return jsonify(result), 400
 
 
-@flights_bp.route("/<int:flight_id>", methods=["DELETE", "PATCH"], strict_slashes=False)
+@flights_bp.route("/<int:flight_id>", methods=["DELETE", "PATCH", "PUT"], strict_slashes=False)
 @require_role(Role.FLYERS.level)
 def handle_flights(flight_id: int) -> tuple[Response, int]:
-    """Handle DELETE and PATCH requests for a specific flight.
+    """Handle DELETE, PATCH and PUT requests for a specific flight.
 
     ---
     tags:
       - Flights
     summary: Update or delete a flight
     description: |
-      PATCH: Update flight information
+      PATCH/PUT: Update flight information
       DELETE: Delete a flight by ID
     parameters:
       - in: path
@@ -388,7 +395,9 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             message:
               type: string
     """
-    if request.method == "PATCH":
+    logger.info("[flights] %s /api/flights/%s", request.method, flight_id)
+
+    if request.method in ("PATCH", "PUT"):
         # Check authentication
         auth_error = require_authenticated()
         if auth_error:
@@ -396,19 +405,24 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
         flight_data: dict | None = request.get_json()
         if flight_data is None:
+            logger.warning("[flights] PATCH/PUT %s: body is not JSON", flight_id)
             return jsonify({"message": "Request body must be JSON"}), 400
 
         validated_data, errors = validate_request(flight_update_schema, flight_data)
         if errors:
-            error_message = "; ".join([f"{field}: {', '.join(msgs)}" for field, msgs in errors.items()])
+            error_message = format_validation_errors(errors)
+            logger.warning("[flights] PATCH/PUT %s validation failed: %s", flight_id, error_message)
             return jsonify({"message": error_message}), 400
 
         with Session(engine, autoflush=False) as session:
             result = flight_service.update_flight(flight_id, validated_data, session)
 
             if "message" in result:
+                logger.info("[flights] PATCH/PUT %s updated successfully", flight_id)
                 return jsonify(result), 204
 
+            msg = result.get("message", result)
+            logger.warning("[flights] PATCH/PUT %s update failed: %s", flight_id, msg)
             return jsonify(result), 400
 
     if request.method == "DELETE":
@@ -421,10 +435,13 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             result = flight_service.delete_flight(flight_id, session)
 
             if "deleted_id" in result:
+                logger.info("[flights] DELETE %s deleted successfully", flight_id)
                 return jsonify(result), 200
 
+            logger.warning("[flights] DELETE %s not found", flight_id)
             return jsonify(result), 404
 
+    logger.warning("[flights] %s %s method not handled", request.method, flight_id)
     return jsonify({"message": "Bad Manual Request"}), 403
 
 

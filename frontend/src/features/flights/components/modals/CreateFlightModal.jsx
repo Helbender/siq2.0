@@ -508,7 +508,7 @@ export function CreateFlightModal({ flight, trigger }) {
                     colorPalette="blue"
                     type="button"
                   >
-                    Registar Voo
+                    {isEdit ? "Editar voo" : "Registar voo"}
                   </Button>
                 </Dialog.Footer>
               </FormProvider>

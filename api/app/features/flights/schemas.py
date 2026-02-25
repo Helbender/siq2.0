@@ -1,10 +1,34 @@
 """Marshmallow schemas for flights request/response validation."""
 
-from marshmallow import Schema, ValidationError, fields, validate
+from marshmallow import EXCLUDE, Schema, ValidationError, fields, pre_load, validate
+
+
+def _coerce_optional_int(value: object) -> int | None:
+    """Coerce empty string, numeric string, or number to int or None."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value == int(value) else None
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return None
+        try:
+            return int(float(s))
+        except (ValueError, TypeError):
+            return None
+    return None
 
 
 class FlightPilotSchema(Schema):
-    """Schema for flight pilot data."""
+    """Schema for flight pilot data. Unknown fields from frontend are ignored."""
+
+    class Meta:
+        unknown = EXCLUDE
 
     nip = fields.Int(required=True, metadata={"description": "Pilot NIP"})
     name = fields.Str(metadata={"description": "Pilot name"})
@@ -19,10 +43,25 @@ class FlightPilotSchema(Schema):
     QUAL4 = fields.Raw(allow_none=True, metadata={"description": "Qualification 4"})
     QUAL5 = fields.Raw(allow_none=True, metadata={"description": "Qualification 5"})
     QUAL6 = fields.Raw(allow_none=True, metadata={"description": "Qualification 6"})
+    CON = fields.Raw(allow_none=True, metadata={"description": "CON"})
+    VIR = fields.Raw(allow_none=True, metadata={"description": "VIR"})
+    VN = fields.Raw(allow_none=True, metadata={"description": "VN"})
+    rank = fields.Raw(allow_none=True, metadata={"description": "Pilot rank"})
+
+    @pre_load
+    def coerce_optional_ints(self, data: dict, **kwargs: object) -> dict:
+        out = dict(data)
+        for key in ("ATR", "ATN", "precapp", "nprecapp"):
+            if key in out:
+                out[key] = _coerce_optional_int(out[key])
+        return out
 
 
 class FlightCreateSchema(Schema):
-    """Schema for creating a new flight."""
+    """Schema for creating a new flight. Unknown fields from frontend are ignored."""
+
+    class Meta:
+        unknown = EXCLUDE
 
     airtask = fields.Str(required=True, validate=validate.Length(min=1, max=7), metadata={"description": "Flight airtask"})
     date = fields.Str(required=True, validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"), metadata={"description": "Flight date (YYYY-MM-DD)"})
@@ -54,8 +93,13 @@ class FlightCreateSchema(Schema):
 
 
 class FlightUpdateSchema(Schema):
-    """Schema for updating a flight."""
+    """Schema for updating a flight. Unknown fields from frontend are ignored."""
 
+    class Meta:
+        unknown = EXCLUDE
+
+    # Aceite no body (frontend envia); qual voo editar vem da URL (flight_id), não daqui
+    id = fields.Raw(allow_none=True, load_default=None, metadata={"description": "Flight ID (opcional; o voo a editar é o da URL)"})
     airtask = fields.Str(validate=validate.Length(min=1, max=7), metadata={"description": "Flight airtask"})
     date = fields.Str(validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"), metadata={"description": "Flight date (YYYY-MM-DD)"})
     origin = fields.Str(allow_none=True, validate=validate.Length(max=4), metadata={"description": "Origin airport code"})
@@ -122,7 +166,41 @@ class ReprocessResponseSchema(Schema):
     error_details = fields.List(fields.Str(), metadata={"description": "Error details"})
 
 
-def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | None]:
+def _format_field_errors(value: dict | list) -> str:
+    """Turn Marshmallow field errors (possibly nested by index) into a single string."""
+    if isinstance(value, dict):
+        parts = []
+        for key, val in value.items():
+            if isinstance(val, dict):
+                part = _format_field_errors(val)
+                parts.append(f"item {key}: {part}" if part else f"item {key}")
+            elif isinstance(val, list):
+                part = "; ".join(str(m) for m in val)
+                parts.append(f"item {key}: {part}" if part else f"item {key}")
+            else:
+                parts.append(f"item {key}: {val}")
+        return "; ".join(parts)
+    if isinstance(value, list):
+        return "; ".join(str(m) for m in value)
+    return str(value)
+
+
+def format_validation_errors(messages: dict | list) -> str:
+    """Convert Marshmallow validation error dict (or list) to a single human-readable string."""
+    if isinstance(messages, list):
+        return "; ".join(str(m) for m in messages)
+    parts = []
+    for field, msgs in messages.items():
+        if isinstance(msgs, dict):
+            parts.append(f"{field}: {_format_field_errors(msgs)}")
+        elif isinstance(msgs, list):
+            parts.append(f"{field}: {', '.join(str(m) for m in msgs)}")
+        else:
+            parts.append(f"{field}: {msgs}")
+    return "; ".join(parts)
+
+
+def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | list | None]:
     """Validate request data against a schema.
 
     Args:
@@ -130,9 +208,9 @@ def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | No
         data: Request data dictionary
 
     Returns:
-        tuple of (validated_data, errors_dict)
+        tuple of (validated_data, errors)
         If validation passes: (validated_data, None)
-        If validation fails: (None, errors_dict)
+        If validation fails: (None, errors dict or list from Marshmallow)
     """
     try:
         validated = schema.load(data)

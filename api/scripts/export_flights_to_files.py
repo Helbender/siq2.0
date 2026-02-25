@@ -12,7 +12,7 @@ import os
 import sys
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 # Add the api/ directory to Python path to import local modules
@@ -31,13 +31,29 @@ from app.shared.rbac_models import Role  # noqa: F401 - Required for SQLAlchemy 
 from config import engine
 
 
-def export_flights_to_files(output_folder: str, session: Session, as_json: bool = False) -> tuple[int, int]:
+def _load_old_models():
+    """Load old models from scripts/models. Call only when --old is used."""
+    scripts_dir = os.path.join(api_dir, "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    # Import order matters for SQLAlchemy relationship resolution
+    from models.users import Base  # noqa: F401
+    from models.pilots import Pilot, Qualification  # noqa: F401
+    from models.crew import Crew, QualificationCrew  # noqa: F401
+    from models.flights import Flight as OldFlight  # noqa: F401
+    return OldFlight
+
+
+def export_flights_to_files(
+    output_folder: str, session: Session, as_json: bool = False, use_old: bool = False
+) -> tuple[int, int]:
     """Export all flights from the database to .1m files.
 
     Args:
         output_folder: Path to the folder where .1m files will be saved
         session: Database session
         as_json: If True, save as JSON string instead of base64-encoded
+        use_old: If True, use old models (pilots/crew) for old database schema
 
     Returns:
         tuple[int, int]: (successful_exports, failed_exports)
@@ -46,13 +62,18 @@ def export_flights_to_files(output_folder: str, session: Session, as_json: bool 
     output_path = Path(output_folder)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    # Pre-load all qualifications into a cache for efficient lookups
-    all_qualifications = session.execute(select(Qualificacao)).scalars().all()
-    qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
-    print(f"Loaded {len(qual_cache)} qualifications into cache")
+    if use_old:
+        FlightModel = _load_old_models()
+        qual_cache = None
+    else:
+        FlightModel = Flight
+        # Pre-load all qualifications into a cache for efficient lookups
+        all_qualifications = session.execute(select(Qualificacao)).scalars().all()
+        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
+        print(f"Loaded {len(qual_cache)} qualifications into cache")
 
     # Query all flights ordered by date
-    stmt = select(Flight).order_by(Flight.date, Flight.departure_time)
+    stmt = select(FlightModel).order_by(FlightModel.date, FlightModel.departure_time)
     flights = session.execute(stmt).scalars().all()
 
     print(f"\n📊 Found {len(flights)} flights in database")
@@ -64,7 +85,7 @@ def export_flights_to_files(output_folder: str, session: Session, as_json: bool 
     for idx, flight in enumerate(flights, 1):
         try:
             # Convert flight to JSON format (matches import format)
-            flight_json = flight.to_json(qual_cache)
+            flight_json = flight.to_json(qual_cache) if qual_cache is not None else flight.to_json()
 
             # Generate filename using the flight's get_file_name method
             filename = flight.get_file_name()
@@ -118,6 +139,9 @@ Examples:
 
   # Export as JSON strings (not encoded)
   python export_flights_to_files.py ./exports --json
+
+  # Export from old database (DB_URL_OLD)
+  python export_flights_to_files.py ./exports --old
         """,
     )
     parser.add_argument(
@@ -130,8 +154,30 @@ Examples:
         action="store_true",
         help="Save files as JSON strings instead of base64-encoded",
     )
+    parser.add_argument(
+        "--old",
+        action="store_true",
+        help="Use DB_URL_OLD environment variable for the database connection",
+    )
 
     args = parser.parse_args()
+
+    # Select engine: DB_URL_OLD when --old, else default engine
+    if args.old:
+        db_url = os.environ.get("DB_URL_OLD")
+        if not db_url:
+            print("❌ Error: DB_URL_OLD is not set in environment (required when using --old)")
+            sys.exit(1)
+        db_engine = create_engine(
+            db_url,
+            pool_size=200,
+            max_overflow=10,
+            pool_timeout=30,
+            pool_recycle=3600,
+            pool_pre_ping=True,
+        )
+    else:
+        db_engine = engine
 
     # Validate output folder path
     output_folder = os.path.abspath(args.output_folder)
@@ -140,11 +186,17 @@ Examples:
         sys.exit(1)
 
     print("🚀 Starting flight export...")
-    print(f"📂 Output folder: {output_folder}\n")
+    print(f"📂 Output folder: {output_folder}")
+    if args.old:
+        print("🗄️  Using old database (DB_URL_OLD)\n")
+    else:
+        print()
 
     try:
-        with Session(engine) as session:
-            successful, failed = export_flights_to_files(output_folder, session, as_json=args.json)
+        with Session(db_engine) as session:
+            successful, failed = export_flights_to_files(
+                output_folder, session, as_json=args.json, use_old=args.old
+            )
 
         print("\n" + "=" * 60)
         print("✅ Export completed!")
