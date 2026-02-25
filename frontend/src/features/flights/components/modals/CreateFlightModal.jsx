@@ -231,7 +231,9 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>Data</Field.Label>
                           <Input
                             type="date"
-                            {...methods.register("date")}
+                            {...methods.register("date", {
+                              required: "Campo obrigatório",
+                            })}
                           />
                         </Field.Root>
 
@@ -239,7 +241,9 @@ export function CreateFlightModal({ flight, trigger }) {
                           <Field.Label>ATD</Field.Label>
                           <Input
                             type="time"
-                            {...methods.register("ATD")}
+                            {...methods.register("ATD", {
+                              required: "Campo obrigatório",
+                            })}
                           />
                         </Field.Root>
 
@@ -307,6 +311,7 @@ export function CreateFlightModal({ flight, trigger }) {
                             <NativeSelect.Root>
                               <NativeSelect.Field
                                 {...methods.register("tailNumber", {
+                                  required: "Campo obrigatório",
                                   setValueAs: (value) => value ? parseInt(value) : 0
                                 })}
                                 placeholder=""
