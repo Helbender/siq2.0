@@ -172,14 +172,20 @@ class FlightService:
         flight.ready_ac = flight_data.get("readyAC", "__:__")
         flight.med_arrival = flight_data.get("medArrival", "__:__")
 
-        # Get all existing FlightPilots before making changes
+        # Lista de NIPs no payload = tripulantes que devem ficar no voo
+        payload_nips = {p["nip"] for p in flight_data["flight_pilots"]}
         existing_flight_pilots = list(flight.flight_pilots)
 
-        # First, revert qualifications for all existing pilots
+        # Para cada tripulante que já estava no voo:
+        # - Recalcular qualificações como se o voo não contasse (revert)
+        # - Se não vier no payload, apagar o registo FlightPilots e manter as qualificações revertidas
         for existing_pilot in existing_flight_pilots:
             self._update_qualifications_on_delete(flight_id, session, existing_pilot)
+            if existing_pilot.pilot_id not in payload_nips:
+                flight.flight_pilots.remove(existing_pilot)
+                session.delete(existing_pilot)
 
-        # Then process the new pilot data which will update/create qualifications
+        # Atualizar/criar registos e qualificações para os tripulantes do payload
         for pilot in flight_data["flight_pilots"]:
             result = self._add_crew_and_pilots(session, flight, pilot, edit=True)
             if result is None:
