@@ -192,7 +192,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
           ></Input>
         </Field.Root>
       </GridItem>
-      {["PI", "PC", "CP", "P"].includes(member.position)
+      {["PI", "PC", "CP", "P"].includes(position || member.position)
         ? ["VIR", "VN", "CON", "ATR", "ATN", "precapp", "nprecapp"].map(
             (campo) => (
               <GridItem
