@@ -19,7 +19,7 @@ from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
 
 # Load environment variables
 load_dotenv(dotenv_path="./.env")
-DEV = bool(os.environ.get("DEV", "0"))
+DEV = os.environ.get("DEV", "").lower() in ("1", "true", "yes")
 
 
 def safe_int_or_none(value: Any) -> int | None:

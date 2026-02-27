@@ -327,16 +327,43 @@ class FlightRepository:
         Returns:
             Maximum date or None if not found
         """
-        qual_fields = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
-        qual_conditions = [
-            getattr(FlightPilots, field) == str(qualificacao_id) for field in qual_fields
-        ]
-        stmt = (
-            select(func.max(Flight.date))
-            .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
-            .where(FlightPilots.pilot_id == pilot_id)
-            .where(Flight.fid != exclude_flight_id)
-            .where(or_(*qual_conditions))
-        )
+        # First, load the qualification to understand how it is tracked
+        qual = session.get(Qualificacao, qualificacao_id)  # type: ignore[arg-type]
+
+        # For landing-based qualifications (ATR, ATN, precapp, nprecapp),
+        # the presence of the qualification on a flight is encoded via
+        # the corresponding landing counters on FlightPilots rather than
+        # qual1-qual6. We need to look at those counters instead.
+        landing_qual_map: dict[str, Any] = {
+            "ATR": FlightPilots.day_landings,
+            "ATN": FlightPilots.night_landings,
+            "precapp": FlightPilots.prec_app,
+            "nprecapp": FlightPilots.nprec_app,
+        }
+
+        if qual is not None and qual.nome in landing_qual_map:
+            landing_field = landing_qual_map[qual.nome]
+            stmt = (
+                select(func.max(Flight.date))
+                .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
+                .where(FlightPilots.pilot_id == pilot_id)
+                .where(Flight.fid != exclude_flight_id)
+                .where(landing_field.isnot(None))
+                .where(landing_field > 0)
+            )
+        else:
+            # For all other qualifications, they are tracked by ID in qual1-qual6.
+            qual_fields = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
+            qual_conditions = [
+                getattr(FlightPilots, field) == str(qualificacao_id) for field in qual_fields
+            ]
+            stmt = (
+                select(func.max(Flight.date))
+                .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
+                .where(FlightPilots.pilot_id == pilot_id)
+                .where(Flight.fid != exclude_flight_id)
+                .where(or_(*qual_conditions))
+            )
+
         result = session.execute(stmt).scalar_one_or_none()
         return result if result else date(year_init, 1, 1)

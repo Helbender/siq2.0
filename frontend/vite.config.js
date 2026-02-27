@@ -62,4 +62,10 @@ export default defineConfig({
   define: {
     BUILD_DATE: JSON.stringify(new Date().toISOString().slice(0, 10)),
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    include: ["src/**/*.{test,spec}.{js,jsx}"],
+    setupFiles: ["./src/test/setup.js"],
+  },
 });
