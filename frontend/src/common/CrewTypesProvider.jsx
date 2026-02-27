@@ -45,7 +45,7 @@ export function CrewTypesProvider({ children }) {
       return {
         PILOTO: "PILOTO",
         OPERADOR_CABINE: "OPERADOR CABINE",
-        CONTROLADOR_TATICO: "CONTROLADOR TATICO",
+        COORDENADOR_TATICO: "COORDENADOR TATICO",
         OPERADOR_VIGILANCIA: "OPERADOR VIGILANCIA",
         OPERACOES: "OPERAÇÕES",
       };
@@ -84,7 +84,7 @@ export function CrewTypesProvider({ children }) {
       return [
         { value: "PILOTO", label: "Piloto" },
         { value: "OPERADOR CABINE", label: "Operador Cabine" },
-        { value: "CONTROLADOR TATICO", label: "Controlador Tático" },
+        { value: "COORDENADOR TATICO", label: "Coordenador Tático" },
         { value: "OPERADOR VIGILANCIA", label: "Operador Vigilância" },
         { value: "OPERAÇÕES", label: "Operações" },
       ];
@@ -102,9 +102,9 @@ export function CrewTypesProvider({ children }) {
         OCI: TipoTripulante.OPERADOR_CABINE,
         OC: TipoTripulante.OPERADOR_CABINE,
         OCA: TipoTripulante.OPERADOR_CABINE,
-        CTI: TipoTripulante.CONTROLADOR_TATICO,
-        CT: TipoTripulante.CONTROLADOR_TATICO,
-        CTA: TipoTripulante.CONTROLADOR_TATICO,
+        CTI: TipoTripulante.COORDENADOR_TATICO,
+        CT: TipoTripulante.COORDENADOR_TATICO,
+        CTA: TipoTripulante.COORDENADOR_TATICO,
         OPVI: TipoTripulante.OPERADOR_VIGILANCIA,
         OPV: TipoTripulante.OPERADOR_VIGILANCIA,
         OPVA: TipoTripulante.OPERADOR_VIGILANCIA,

@@ -14,7 +14,7 @@ vi.mock("@/common/CrewTypesProvider", () => ({
     TipoTripulante: {
       PILOTO: "PILOTO",
       OPERADOR_CABINE: "OPERADOR CABINE",
-      CONTROLADOR_TATICO: "CONTROLADOR TATICO",
+      COORDENADOR_TATICO: "COORDENADOR TATICO",
       OPERADOR_VIGILANCIA: "OPERADOR VIGILANCIA",
       OPERACOES: "OPERAÇÕES",
     },

@@ -8,14 +8,13 @@ import {
   Skeleton,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { DateRangeSelector } from "../components/DateRangeSelector";
 import { ExpiringQualificationsTable } from "../components/ExpiringQualificationsTable";
 import { PieChartCard } from "../components/PieChartCard";
 import { StatCard } from "../components/StatCard";
 import { SunTimesDisplay } from "../components/SunTimesDisplay";
 import { TopPilotsSection } from "../components/TopPilotsSection";
-import { YearSelector } from "../components/YearSelector";
-import { useAvailableYears } from "../hooks/useAvailableYears";
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import { useExpiringQualifications } from "../hooks/useExpiringQualifications";
 
@@ -25,6 +24,14 @@ function getTomorrow() {
   return d;
 }
 
+function getDefaultDateRange() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const dateFrom = `${year}-01-01`;
+  const dateTo = formatDateISO(today);
+  return { dateFrom, dateTo };
+}
+
 function LoadingSkeleton() {
   return (
     <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg="bg.canvas">
@@ -32,10 +39,10 @@ function LoadingSkeleton() {
         Dashboard (A carregar estatísticas...)
       </Heading>
 
-      {/* Sun Times and Year Selector Skeleton */}
+      {/* Sun Times and Date Range Skeleton */}
       <Flex justifyContent="space-between" alignItems="center" mb={2}>
         <Skeleton width="120px" height="80px" borderRadius="md" />
-        <Skeleton width="200px" height="40px" borderRadius="md" />
+        <Skeleton width="320px" height="40px" borderRadius="md" />
         <Skeleton width="120px" height="80px" borderRadius="md" />
       </Flex>
       <Skeleton width="200px" height="20px" ml="auto" mb={4} />
@@ -128,9 +135,10 @@ function LoadingSkeleton() {
 }
 
 export function DashboardPage() {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  
-  const { availableYears, loading: loadingYears } = useAvailableYears();
+  const [pendingRange, setPendingRange] = useState(getDefaultDateRange);
+  const [appliedRange, setAppliedRange] = useState(getDefaultDateRange);
+  const { dateFrom: appliedFrom, dateTo: appliedTo } = appliedRange;
+
   const {
     totalFlights,
     totalHours,
@@ -141,8 +149,12 @@ export function DashboardPage() {
     totalCargo,
     topPilotsByType,
     loading: loadingStats,
-  } = useDashboardStats(selectedYear);
-  
+  } = useDashboardStats(appliedFrom, appliedTo);
+
+  const handleApplyRange = () => {
+    setAppliedRange(pendingRange);
+  };
+
   const { expiringQualifications, loading: loadingExpiring } = useExpiringQualifications();
 
   const todayStr = formatDateISO(new Date());
@@ -151,17 +163,7 @@ export function DashboardPage() {
   const { sunrise, sunset, error: errorSunTimes } = useSunTimes(todayStr);
   const { sunrise: sunriseT, sunset: sunsetT, error: errorT } = useSunTimes(tomorrowStr);
 
-  // Set selected year to current year if available, otherwise first year in list
-  useEffect(() => {
-    if (
-      availableYears.length > 0 &&
-      !availableYears.includes(new Date().getFullYear())
-    ) {
-      setSelectedYear(availableYears[0]);
-    }
-  }, [availableYears]);
-
-  const loading = loadingStats || loadingYears;
+  const loading = loadingStats;
 
   if (loading) {
     return <LoadingSkeleton />;
@@ -181,10 +183,11 @@ export function DashboardPage() {
           sunset={sunset}
           error={errorSunTimes}
         />
-        <YearSelector
-          value={selectedYear}
-          onChange={setSelectedYear}
-          availableYears={availableYears}
+        <DateRangeSelector
+          dateFrom={pendingRange.dateFrom}
+          dateTo={pendingRange.dateTo}
+          onChange={setPendingRange}
+          onApply={handleApplyRange}
         />
         <SunTimesDisplay
           date="Amanhã"
@@ -229,7 +232,7 @@ export function DashboardPage() {
       {/* Top Pilots by Type */}
       <TopPilotsSection
         topPilotsByType={topPilotsByType}
-        selectedYear={selectedYear}
+        dateRangeLabel={`${appliedFrom} – ${appliedTo}`}
       />
 
       {/* Expiring Qualifications */}

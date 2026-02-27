@@ -2,7 +2,7 @@ import { useCrewTypes } from "@/common/CrewTypesProvider";
 import { formatHours } from "@/utils/timeCalc";
 import { Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 
-export function TopPilotsSection({ topPilotsByType, selectedYear }) {
+export function TopPilotsSection({ topPilotsByType, dateRangeLabel }) {
   const { getAllCrewTypes } = useCrewTypes();
 
   if (Object.keys(topPilotsByType).length === 0) {
@@ -12,7 +12,7 @@ export function TopPilotsSection({ topPilotsByType, selectedYear }) {
   return (
     <Box mb={6}>
       <Heading size="md" mb={4} textAlign="center">
-        Tripulantes com Mais Horas de Voo ({selectedYear})
+        Tripulantes com Mais Horas de Voo ({dateRangeLabel})
       </Heading>
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
         {getAllCrewTypes().filter((tipo) => topPilotsByType[tipo])

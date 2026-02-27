@@ -1,5 +1,7 @@
 """Dashboard routes - thin request/response handlers."""
 
+from datetime import date
+
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.orm import Session
 
@@ -21,11 +23,17 @@ def get_flight_statistics() -> tuple[Response, int]:
     description: Retrieve comprehensive flight statistics for the dashboard, optionally filtered by year
     parameters:
       - in: query
-        name: year
-        type: integer
+        name: date_from
+        type: string
+        format: date
         required: false
-        description: Year to filter flights (defaults to current year)
-        example: 2024
+        description: Start date (YYYY-MM-DD). Defaults to Jan 1 of current year.
+      - in: query
+        name: date_to
+        type: string
+        format: date
+        required: false
+        description: End date (YYYY-MM-DD). Defaults to today.
     responses:
       200:
         description: Flight statistics
@@ -56,15 +64,35 @@ def get_flight_statistics() -> tuple[Response, int]:
             top_pilots_by_type:
               type: object
               description: Top pilot for each crew type
-            year:
-              type: integer
-              description: Selected year
+            date_from:
+              type: string
+              format: date
+              description: Start date of range
+            date_to:
+              type: string
+              format: date
+              description: End date of range
     """
-    # Get year from query parameter, default to current year
-    year = request.args.get("year", type=int)
+    date_from_str = request.args.get("date_from")
+    date_to_str = request.args.get("date_to")
+
+    date_from = None
+    date_to = None
+    if date_from_str:
+        try:
+            date_from = date.fromisoformat(date_from_str)
+        except ValueError:
+            pass
+    if date_to_str:
+        try:
+            date_to = date.fromisoformat(date_to_str)
+        except ValueError:
+            pass
 
     with Session(engine) as session:
-        statistics = dashboard_service.get_flight_statistics(year, session)
+        statistics = dashboard_service.get_flight_statistics(
+            date_from, date_to, session
+        )
         return jsonify(statistics), 200
 
 

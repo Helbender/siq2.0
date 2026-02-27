@@ -55,7 +55,7 @@ class GrupoQualificacoes(Enum):
 class TipoTripulante(Enum):
     PILOTO = "PILOTO"
     OPERADOR_CABINE = "OPERADOR CABINE"
-    CONTROLADOR_TATICO = "CONTROLADOR TATICO"
+    COORDENADOR_TATICO = "COORDENADOR TATICO"
     OPERADOR_VIGILANCIA = "OPERADOR VIGILANCIA"
     OPERACOES = "OPERAÇÕES"
 
@@ -94,10 +94,10 @@ QUALIFICATION_GROUP_TO_CREW_TYPES = {
     GrupoQualificacoes.MQOIOC: [TipoTripulante.OPERADOR_CABINE],
     GrupoQualificacoes.MQOAOC: [TipoTripulante.OPERADOR_CABINE],
     # Tactical controller qualifications
-    GrupoQualificacoes.MQCT: [TipoTripulante.CONTROLADOR_TATICO],
-    GrupoQualificacoes.MQOBCT: [TipoTripulante.CONTROLADOR_TATICO],
-    GrupoQualificacoes.MQOICT: [TipoTripulante.CONTROLADOR_TATICO],
-    GrupoQualificacoes.MQOACT: [TipoTripulante.CONTROLADOR_TATICO],
+    GrupoQualificacoes.MQCT: [TipoTripulante.COORDENADOR_TATICO],
+    GrupoQualificacoes.MQOBCT: [TipoTripulante.COORDENADOR_TATICO],
+    GrupoQualificacoes.MQOICT: [TipoTripulante.COORDENADOR_TATICO],
+    GrupoQualificacoes.MQOACT: [TipoTripulante.COORDENADOR_TATICO],
     # Surveillance operator qualifications
     GrupoQualificacoes.MQOPV: [TipoTripulante.OPERADOR_VIGILANCIA],
     GrupoQualificacoes.MQOBOPV: [TipoTripulante.OPERADOR_VIGILANCIA],

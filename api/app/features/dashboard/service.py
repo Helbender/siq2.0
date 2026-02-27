@@ -1,6 +1,6 @@
 """Dashboard service containing business logic for dashboard operations."""
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -17,24 +17,41 @@ class DashboardService:
         """Initialize dashboard service with repository."""
         self.repository = DashboardRepository()
 
-    def get_flight_statistics(self, year: int | None, session: Session) -> dict[str, Any]:
+    def get_flight_statistics(
+        self,
+        date_from: date | None,
+        date_to: date | None,
+        session: Session,
+    ) -> dict[str, Any]:
         """Get flight statistics for dashboard.
 
         Args:
-            year: Year to filter flights (None for current year)
+            date_from: Start date (inclusive). If None, uses Jan 1 of current year.
+            date_to: End date (inclusive). If None, uses today.
             session: Database session
 
         Returns:
             dict with statistics data
         """
-        if year is None:
-            year = datetime.now(UTC).year
+        today = date.today()
+        if date_from is None:
+            date_from = date(today.year, 1, 1)
+        if date_to is None:
+            date_to = today
 
-        # Get total flights count for the selected year
-        total_flights = self.repository.count_flights_by_year(session, year)
+        # Ensure date_from <= date_to
+        if date_from > date_to:
+            date_from, date_to = date_to, date_from
 
-        # Get all flights for the selected year with pilots loaded
-        all_flights = self.repository.find_flights_by_year_with_pilots(session, year)
+        # Get total flights count for the date range
+        total_flights = self.repository.count_flights_by_date_range(
+            session, date_from, date_to
+        )
+
+        # Get all flights for the date range with pilots loaded
+        all_flights = self.repository.find_flights_by_date_range_with_pilots(
+            session, date_from, date_to
+        )
 
         # Calculate hours by flight_type
         hours_by_type: dict[str, int] = {}  # type -> total minutes
@@ -127,14 +144,15 @@ class DashboardService:
 
         statistics = {
             "total_flights": total_flights,
-            "total_hours": total_hours,  # Total flight hours for the year
+            "total_hours": total_hours,
             "hours_by_type": format_for_pie_chart(hours_by_type),
             "hours_by_action": format_for_pie_chart(hours_by_action),
             "total_passengers": total_passengers,
             "total_doe": total_doe,
             "total_cargo": total_cargo,
-            "top_pilots_by_type": top_pilots_by_type,  # Top pilot for each crew type
-            "year": year,
+            "top_pilots_by_type": top_pilots_by_type,
+            "date_from": date_from.isoformat(),
+            "date_to": date_to.isoformat(),
         }
         return statistics
 

@@ -58,7 +58,7 @@ def upgrade() -> None:
     sa.Column('nome', sa.String(length=100), nullable=False),
     sa.Column('grupo', sa.Enum('CURRENCY', 'MQP', 'MQOBP', 'MQOIP', 'MQOAP', 'STANDARD', 'MQOC', 'MQOBOC', 'MQOIOC', 'MQOAOC', 'MQCT', 'MQOBCT', 'MQOICT', 'MQOACT', 'MQOPV', 'MQOBOPV', 'MQOIOPV', 'MQOAOPV', 'OPERATIONS_PLANNING', name='grupoqualificacoes', native_enum=False), nullable=False),
     sa.Column('validade', sa.Integer(), nullable=False),
-    sa.Column('tipo_aplicavel', sa.Enum('PILOTO', 'OPERADOR_CABINE', 'CONTROLADOR_TATICO', 'OPERADOR_VIGILANCIA', 'OPERACOES', name='tipotripulante'), nullable=False),
+    sa.Column('tipo_aplicavel', sa.Enum('PILOTO', 'OPERADOR_CABINE', 'COORDENADOR_TATICO', 'OPERADOR_VIGILANCIA', 'OPERACOES', name='tipotripulante'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('roles',
@@ -87,7 +87,7 @@ def upgrade() -> None:
     sa.Column('recover', sa.String(length=500), nullable=False),
     sa.Column('squadron', sa.String(length=30), nullable=False),
     sa.Column('password', sa.String(length=150), nullable=False),
-    sa.Column('tipo', sa.Enum('PILOTO', 'OPERADOR_CABINE', 'CONTROLADOR_TATICO', 'OPERADOR_VIGILANCIA', 'OPERACOES', name='tipotripulante'), nullable=False),
+    sa.Column('tipo', sa.Enum('PILOTO', 'OPERADOR_CABINE', 'COORDENADOR_TATICO', 'OPERADOR_VIGILANCIA', 'OPERACOES', name='tipotripulante'), nullable=False),
     sa.Column('status', sa.String(length=20), nullable=False, server_default='Presente'),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('nip')
