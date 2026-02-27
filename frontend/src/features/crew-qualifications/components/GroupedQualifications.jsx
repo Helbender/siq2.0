@@ -4,8 +4,17 @@ import { Fragment } from "react";
 import { StandardText } from "@/common/components/StandardText";
 
 export function GroupedQualifications({ qualificacoes }) {
+  // Deduplicate by (grupo, nome) so the same qualification never appears twice (e.g. duplicate payload from API)
+  const seen = new Map();
+  const deduped = (qualificacoes ?? []).filter((qual) => {
+    const key = `${qual.grupo ?? ""}\0${qual.nome ?? ""}`;
+    if (seen.has(key)) return false;
+    seen.set(key, true);
+    return true;
+  });
+
   // Group by 'grupo'
-  const grouped = qualificacoes.reduce((acc, qual) => {
+  const grouped = deduped.reduce((acc, qual) => {
     acc[qual.grupo] = acc[qual.grupo] || [];
     acc[qual.grupo].push(qual);
     return acc;

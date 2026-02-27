@@ -2,7 +2,7 @@ from datetime import date, timedelta  # noqa: TCH003
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, Integer, String, TypeDecorator
+from sqlalchemy import Date, ForeignKey, Integer, String, TypeDecorator, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
@@ -97,9 +97,14 @@ class Tripulante(Base):
         response["roleLevel"] = role_level_value
         if self.role:
             response["role"] = self.role.to_json()
-        # Sort qualificacoes by grupo and nome for consistent ordering
+        # Deduplicate by qualificacao_id (keep latest data_ultima_validacao), then sort by grupo and nome
+        by_qual_id: dict[int, "TripulanteQualificacao"] = {}
+        for q in self.qualificacoes:
+            qid = q.qualificacao_id
+            if qid not in by_qual_id or q.data_ultima_validacao > by_qual_id[qid].data_ultima_validacao:
+                by_qual_id[qid] = q
         sorted_quals = sorted(
-            self.qualificacoes,
+            by_qual_id.values(),
             key=lambda q: (q.qualificacao.grupo.value, q.qualificacao.nome),
         )
         response["qualificacoes"] = [q.to_json() for q in sorted_quals]
@@ -125,6 +130,7 @@ class Tripulante(Base):
 
 class TripulanteQualificacao(Base):
     __tablename__ = "tripulante_qualificacoes"
+    __table_args__ = (UniqueConstraint("tripulante_id", "qualificacao_id", name="uq_tripulante_qualificacao"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     tripulante_id: Mapped[int] = mapped_column(ForeignKey("tripulantes.nip"), nullable=False)
