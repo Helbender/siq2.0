@@ -3,8 +3,8 @@
 Removes duplicate rows first (keeps one per pair with latest data_ultima_validacao),
 then adds the constraint so duplicates cannot be re-created.
 
-Revision ID: a1b2c3d4e5f6
-Revises: 88d1c145826b
+Revision ID: c3d4e5f6a1b2
+Revises: a1b2c3d4e5f6
 Create Date: 2026-02-27
 
 """
@@ -15,8 +15,8 @@ from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "88d1c145826b"
+revision: str = "c3d4e5f6a1b2"
+down_revision: Union[str, None] = "a1b2c3d4e5f6"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
