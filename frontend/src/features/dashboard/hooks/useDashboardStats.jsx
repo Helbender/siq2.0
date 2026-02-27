@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "../services/dashboard.service";
 
-export function useDashboardStats(year) {
+export function useDashboardStats(dateFrom, dateTo) {
   const { data, isLoading: loading, error } = useQuery({
-    queryKey: ["dashboard", "statistics", year],
-    queryFn: () => dashboardService.getStatistics(year),
-    enabled: !!year,
+    queryKey: ["dashboard", "statistics", dateFrom, dateTo],
+    queryFn: () => dashboardService.getStatistics(dateFrom, dateTo),
+    enabled: !!(dateFrom && dateTo),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

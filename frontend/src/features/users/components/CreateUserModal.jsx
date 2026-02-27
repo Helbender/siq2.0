@@ -141,8 +141,8 @@ export function CreateUserModal({
                         <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_CABINE)}>
                           {TipoTripulante.OPERADOR_CABINE}
                         </option>
-                        <option value={crewTypeToApiFormat(TipoTripulante.CONTROLADOR_TATICO)}>
-                          {TipoTripulante.CONTROLADOR_TATICO}
+                        <option value={crewTypeToApiFormat(TipoTripulante.COORDENADOR_TATICO)}>
+                          {TipoTripulante.COORDENADOR_TATICO}
                         </option>
                         <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_VIGILANCIA)}>
                           {TipoTripulante.OPERADOR_VIGILANCIA}

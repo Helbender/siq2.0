@@ -174,7 +174,7 @@ def convert_old_crew_to_new(crew_data: dict, validate: bool = True) -> tuple[dic
 
     warnings = []
 
-    # Crew members are typically OPERADOR_CABINE or CONTROLADOR_TATICO
+    # Crew members are typically OPERADOR_CABINE or COORDENADOR_TATICO
     # We'll validate against OPERADOR_CABINE as default (most common crew type)
     crew_tipo = TipoTripulante.OPERADOR_CABINE  # Default assumption
 
