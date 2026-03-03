@@ -146,7 +146,7 @@ export function FlightsByCrewSearchPage() {
             </Text>
             {rows.length > 0 ? (
               <Box overflowX="auto" w="100%">
-                <Table.Root size="sm">
+                <Table.Root size="sm" >
                   <Table.Header>
                     <Table.Row>
                       {/* <Table.ColumnHeader>Tripulante</Table.ColumnHeader>
@@ -165,7 +165,7 @@ export function FlightsByCrewSearchPage() {
                   </Table.Header>
                   <Table.Body>
                     {rows.map((row, idx) => (
-                      <Table.Row key={`${row.flightId}-${row.nip}-${idx}`}>
+                      <Table.Row key={`${row.flightId}-${row.nip}-${idx}`} _hover={{ bg: "bg.cardSubtle" }}>
                         {/* <Table.Cell>{row.name}</Table.Cell>
                         <Table.Cell>{row.nip}</Table.Cell>
                         <Table.Cell>{row.rank ?? "-"}</Table.Cell> */}

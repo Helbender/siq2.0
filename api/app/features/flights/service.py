@@ -586,9 +586,12 @@ class FlightService:
                 )
         else:
             coerced_id = coerce_qualification_id(qual_identifier)
-            if coerced_id is None:
-                return 0
-            qual = qual_cache_by_id.get(int(coerced_id))
+            if coerced_id is not None:
+                qual = qual_cache_by_id.get(int(coerced_id))
+            else:
+                qual = None
+            if qual is None:
+                qual = qual_cache_by_name.get((str(qual_identifier).strip(), pilot_obj.tipo))
 
         if qual is None:
             return 0
