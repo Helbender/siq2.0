@@ -495,7 +495,7 @@ export function CreateFlightModal({ flight, trigger }) {
                       alignSelf="center"
                         colorPalette="green"
                         size="sm"
-                        onClick={() => append({ name: "" })}
+                        onClick={() => append({ name: "", VIR: "", VN: "", CON: "" })}
                         variant="solid"
                         leftIcon={<FaPlus />}
                         type="button"

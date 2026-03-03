@@ -20,5 +20,5 @@ export const flightDefaults = {
   activationLast: "__:__",
   readyAC: "__:__",
   medArrival: "__:__",
-  flight_pilots: [{ name: "" }],
+  flight_pilots: [{ name: "", VIR: "", VN: "", CON: "" }],
 };

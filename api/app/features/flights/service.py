@@ -32,6 +32,14 @@ def safe_int_or_none(value: Any) -> int | None:
         return None
 
 
+def _normalize_time(value: Any) -> str | None:
+    """Normalize time to String(5) for VIR/VN/CON: None if empty, else stripped up to 5 chars."""
+    if value is None or value == "":
+        return None
+    s = str(value).strip()[:5]
+    return s if s else None
+
+
 def coerce_qualification_id(value: Any) -> str | None:
     """Convert various qualification representations into a stringified ID."""
     if value in (None, "", False):
@@ -492,6 +500,9 @@ class FlightService:
                 flight_pilot.qual4 = pilot.get("QUAL4")
                 flight_pilot.qual5 = pilot.get("QUAL5")
                 flight_pilot.qual6 = pilot.get("QUAL6")
+                flight_pilot.vir = _normalize_time(pilot.get("VIR"))
+                flight_pilot.vn = _normalize_time(pilot.get("VN"))
+                flight_pilot.con = _normalize_time(pilot.get("CON"))
             else:
                 # Piloto novo na lista deste voo (adicionado na edição): criar registo
                 flight_pilot = FlightPilots(
@@ -508,6 +519,9 @@ class FlightService:
                     qual4=pilot.get("QUAL4"),
                     qual5=pilot.get("QUAL5"),
                     qual6=pilot.get("QUAL6"),
+                    vir=_normalize_time(pilot.get("VIR")),
+                    vn=_normalize_time(pilot.get("VN")),
+                    con=_normalize_time(pilot.get("CON")),
                 )
         else:
             i: int = 0
@@ -546,6 +560,9 @@ class FlightService:
                 qual4=pilot.get("QUAL4"),
                 qual5=pilot.get("QUAL5"),
                 qual6=pilot.get("QUAL6"),
+                vir=_normalize_time(pilot.get("VIR")),
+                vn=_normalize_time(pilot.get("VN")),
+                con=_normalize_time(pilot.get("CON")),
             )
 
         for k in ["QUAL1", "QUAL2", "QUAL3", "QUAL4", "QUAL5", "QUAL6"]:
