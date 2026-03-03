@@ -433,7 +433,7 @@ def process_chunk(
                     if upload_job and upload_executor is not None:
                         try:
                             dados, nome_arquivo_voo, nome_pdf = upload_job
-                            upload_executor.submit(tarefa_enviar_para_drive, dados, nome_arquivo_voo, nome_pdf)
+                            upload_executor.submit(tarefa_enviar_para_drive, dados, dados, nome_arquivo_voo, nome_pdf)
                         except Exception as e:
                             _log(worker_label, f"⚠️  Failed to schedule Google Drive upload for {filename}: {e}")
                     break

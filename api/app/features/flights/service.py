@@ -2,12 +2,12 @@
 
 import os
 import time
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from threading import Thread
 from typing import Any
 
 from dotenv import load_dotenv
-from sqlalchemy import exc, select
+from sqlalchemy import exc, select, text
 from sqlalchemy.orm import Session
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
@@ -30,6 +30,14 @@ def safe_int_or_none(value: Any) -> int | None:
         return int(value)
     except (ValueError, TypeError):
         return None
+
+
+def _normalize_time(value: Any) -> str | None:
+    """Normalize time to String(5) for VIR/VN/CON: None if empty, else stripped up to 5 chars."""
+    if value is None or value == "":
+        return None
+    s = str(value).strip()[:5]
+    return s if s else None
 
 
 def coerce_qualification_id(value: Any) -> str | None:
@@ -70,10 +78,85 @@ class FlightService:
         all_qualifications = self.repository.find_all_qualifications(session)
         qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
 
+        # Disable statement timeout for this connection (heavy full-table join)
+        try:
+            session.execute(text("SET statement_timeout = '0'"))
+        except Exception:
+            pass
+
         flights_obj = self.repository.find_all_with_pilots(session)
 
         flights = [row.to_json(qual_cache) for row in flights_obj]
         return flights
+
+    def get_flights_by_crew_search(
+        self,
+        session: Session,
+        search: str,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict]:
+        """Get crew-flight rows where a crew member matches the search term (NIP or name), optionally within a date range.
+
+        Returns one row per matching (crew member, flight) with full FlightPilots data plus flight id, airtask, date.
+        Only the crew member(s) that match the search are included, not all crew on each flight.
+
+        Args:
+            session: Database session
+            search: Crew search term (numeric NIP or partial name)
+            date_from: Optional start date string (YYYY-MM-DD)
+            date_to: Optional end date string (YYYY-MM-DD)
+
+        Returns:
+            List of dicts: each = FlightPilots.to_json() + flightId, airtask, date
+
+        Raises:
+            ValueError: If search is empty or dates are invalid
+        """
+        search = (search or "").strip()
+        if not search:
+            raise ValueError("Search term is required")
+
+        parsed_date_from: date | None = None
+        parsed_date_to: date | None = None
+        if date_from:
+            try:
+                parsed_date_from = datetime.strptime(date_from.strip(), "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date_from format; use YYYY-MM-DD") from None
+        if date_to:
+            try:
+                parsed_date_to = datetime.strptime(date_to.strip(), "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date_to format; use YYYY-MM-DD") from None
+        if parsed_date_from is not None and parsed_date_to is not None and parsed_date_from > parsed_date_to:
+            raise ValueError("date_from must be before or equal to date_to")
+
+        flights_obj = self.repository.find_flights_by_crew_search(
+            session, search, date_from=parsed_date_from, date_to=parsed_date_to
+        )
+        all_qualifications = self.repository.find_all_qualifications(session)
+        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
+
+        is_nip_search = search.isdigit()
+        nip_match = int(search) if is_nip_search else None
+        search_lower = search.lower() if not is_nip_search else ""
+
+        result: list[dict] = []
+        for flight in flights_obj:
+            for fp in flight.flight_pilots:
+                if is_nip_search:
+                    if fp.tripulante.nip != nip_match:
+                        continue
+                else:
+                    if (fp.tripulante.name or "").lower().find(search_lower) < 0:
+                        continue
+                row = fp.to_json(qual_cache)
+                row["flightId"] = flight.fid
+                row["airtask"] = flight.airtask
+                row["date"] = flight.date.strftime("%Y-%m-%d")
+                result.append(row)
+        return result
 
     def create_flight(self, flight_data: dict, session: Session) -> dict[str, Any]:
         """Create a new flight.
@@ -129,9 +212,15 @@ class FlightService:
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
-        # Launch background task to send to Google Drive
+        # Launch background task: .1m with qualifications by ID, PDF with names
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(flight_data, nome_arquivo_voo, nome_pdf)).start()
+            flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
+            if flight_with_pilots:
+                all_qualifications = self.repository.find_all_qualifications(session)
+                qual_cache = {q.id: q.nome for q in all_qualifications}
+                dados_1m = flight_with_pilots.to_json(None)
+                dados_pdf = flight_with_pilots.to_json(qual_cache)
+                Thread(target=tarefa_enviar_para_drive, args=(dados_1m, dados_pdf, nome_arquivo_voo, nome_pdf)).start()
 
         return {"message": flight.fid}
 
@@ -197,7 +286,13 @@ class FlightService:
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(flight_data, nome_arquivo_voo, nome_pdf)).start()
+            flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
+            if flight_with_pilots:
+                all_qualifications = self.repository.find_all_qualifications(session)
+                qual_cache = {q.id: q.nome for q in all_qualifications}
+                dados_1m = flight_with_pilots.to_json(None)
+                dados_pdf = flight_with_pilots.to_json(qual_cache)
+                Thread(target=tarefa_enviar_para_drive, args=(dados_1m, dados_pdf, nome_arquivo_voo, nome_pdf)).start()
 
         return {"message": "Flight changed"}
 
@@ -411,6 +506,9 @@ class FlightService:
                 flight_pilot.qual4 = pilot.get("QUAL4")
                 flight_pilot.qual5 = pilot.get("QUAL5")
                 flight_pilot.qual6 = pilot.get("QUAL6")
+                flight_pilot.vir = _normalize_time(pilot.get("VIR"))
+                flight_pilot.vn = _normalize_time(pilot.get("VN"))
+                flight_pilot.con = _normalize_time(pilot.get("CON"))
             else:
                 # Piloto novo na lista deste voo (adicionado na edição): criar registo
                 flight_pilot = FlightPilots(
@@ -427,6 +525,9 @@ class FlightService:
                     qual4=pilot.get("QUAL4"),
                     qual5=pilot.get("QUAL5"),
                     qual6=pilot.get("QUAL6"),
+                    vir=_normalize_time(pilot.get("VIR")),
+                    vn=_normalize_time(pilot.get("VN")),
+                    con=_normalize_time(pilot.get("CON")),
                 )
         else:
             i: int = 0
@@ -465,6 +566,9 @@ class FlightService:
                 qual4=pilot.get("QUAL4"),
                 qual5=pilot.get("QUAL5"),
                 qual6=pilot.get("QUAL6"),
+                vir=_normalize_time(pilot.get("VIR")),
+                vn=_normalize_time(pilot.get("VN")),
+                con=_normalize_time(pilot.get("CON")),
             )
 
         for k in ["QUAL1", "QUAL2", "QUAL3", "QUAL4", "QUAL5", "QUAL6"]:
@@ -517,9 +621,12 @@ class FlightService:
                 )
         else:
             coerced_id = coerce_qualification_id(qual_identifier)
-            if coerced_id is None:
-                return 0
-            qual = qual_cache_by_id.get(int(coerced_id))
+            if coerced_id is not None:
+                qual = qual_cache_by_id.get(int(coerced_id))
+            else:
+                qual = None
+            if qual is None:
+                qual = qual_cache_by_name.get((str(qual_identifier).strip(), pilot_obj.tipo))
 
         if qual is None:
             return 0

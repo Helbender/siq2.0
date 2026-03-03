@@ -3,6 +3,7 @@
 from datetime import date
 
 from flask import Blueprint, Response, jsonify, request
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
@@ -90,6 +91,10 @@ def get_flight_statistics() -> tuple[Response, int]:
             pass
 
     with Session(engine) as session:
+        try:
+            session.execute(text("SET statement_timeout = '0'"))
+        except Exception:
+            pass
         statistics = dashboard_service.get_flight_statistics(
             date_from, date_to, session
         )

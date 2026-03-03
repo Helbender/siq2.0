@@ -12,6 +12,13 @@ from app.features.users.models import Tripulante, TripulanteQualificacao  # type
 from app.shared.models import year_init  # type: ignore
 
 
+def _crew_search_condition(search: str):
+    """Build crew match condition: NIP if search is numeric, else name ilike."""
+    if search.strip().isdigit():
+        return Tripulante.nip == int(search.strip())
+    return Tripulante.name.ilike(f"%{search.strip()}%")
+
+
 class FlightRepository:
     """Repository for flight database operations."""
 
@@ -32,6 +39,41 @@ class FlightRepository:
                 joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
             )
         )
+        return list(session.execute(stmt).unique().scalars().all())
+
+    @staticmethod
+    def find_flights_by_crew_search(
+        session: Session,
+        search: str,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ) -> list[Flight]:
+        """Get flights where a crew member matches the search term (NIP or name), optionally within a date range.
+
+        Args:
+            session: Database session
+            search: Crew search term (numeric NIP or partial name)
+            date_from: Optional start date (inclusive)
+            date_to: Optional end date (inclusive)
+
+        Returns:
+            List of Flight instances with pilots loaded, ordered by date descending
+        """
+        stmt = (
+            select(Flight)
+            .join(Flight.flight_pilots)
+            .join(FlightPilots.tripulante)
+            .where(_crew_search_condition(search))
+            .distinct()
+            .order_by(Flight.date.desc())
+            .options(
+                joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
+            )
+        )
+        if date_from is not None:
+            stmt = stmt.where(Flight.date >= date_from)
+        if date_to is not None:
+            stmt = stmt.where(Flight.date <= date_to)
         return list(session.execute(stmt).unique().scalars().all())
 
     @staticmethod
@@ -161,11 +203,7 @@ class FlightRepository:
         Returns:
             FlightPilots instance or None if not found
         """
-        stmt = (
-            select(FlightPilots)
-            .where(FlightPilots.flight_id == flight_id)
-            .where(FlightPilots.pilot_id == pilot_id)
-        )
+        stmt = select(FlightPilots).where(FlightPilots.flight_id == flight_id).where(FlightPilots.pilot_id == pilot_id)
         return session.execute(stmt).scalar_one_or_none()
 
     @staticmethod
@@ -208,9 +246,7 @@ class FlightRepository:
         return list(session.execute(select(Qualificacao)).scalars().all())
 
     @staticmethod
-    def find_qualification_by_nome_and_tipo(
-        session: Session, nome: str, tipo: Any
-    ) -> Qualificacao | None:
+    def find_qualification_by_nome_and_tipo(session: Session, nome: str, tipo: Any) -> Qualificacao | None:
         """Find a qualification by name and tipo.
 
         Args:
@@ -221,15 +257,11 @@ class FlightRepository:
         Returns:
             Qualificacao instance or None if not found
         """
-        stmt = select(Qualificacao).where(
-            Qualificacao.nome == nome, Qualificacao.tipo_aplicavel == tipo
-        )
+        stmt = select(Qualificacao).where(Qualificacao.nome == nome, Qualificacao.tipo_aplicavel == tipo)
         return session.scalars(stmt).first()
 
     @staticmethod
-    def find_tripulante_qualificacoes_by_pilot_id(
-        session: Session, pilot_id: int
-    ) -> list[TripulanteQualificacao]:
+    def find_tripulante_qualificacoes_by_pilot_id(session: Session, pilot_id: int) -> list[TripulanteQualificacao]:
         """Find all tripulante qualifications for a pilot.
 
         Args:
@@ -239,9 +271,7 @@ class FlightRepository:
         Returns:
             List of TripulanteQualificacao instances
         """
-        stmt = select(TripulanteQualificacao).where(
-            TripulanteQualificacao.tripulante_id == pilot_id
-        )
+        stmt = select(TripulanteQualificacao).where(TripulanteQualificacao.tripulante_id == pilot_id)
         return list(session.execute(stmt).scalars().all())
 
     @staticmethod
@@ -257,9 +287,7 @@ class FlightRepository:
         Returns:
             List of TripulanteQualificacao instances
         """
-        stmt = select(TripulanteQualificacao).where(
-            TripulanteQualificacao.tripulante_id.in_(pilot_ids)
-        )
+        stmt = select(TripulanteQualificacao).where(TripulanteQualificacao.tripulante_id.in_(pilot_ids))
         return list(session.execute(stmt).scalars().all())
 
     @staticmethod
@@ -300,9 +328,7 @@ class FlightRepository:
         return tripulante_qualificacao
 
     @staticmethod
-    def update_tripulante_qualificacao(
-        session: Session, tripulante_qualificacao: TripulanteQualificacao
-    ) -> None:
+    def update_tripulante_qualificacao(session: Session, tripulante_qualificacao: TripulanteQualificacao) -> None:
         """Update a tripulante qualification.
 
         Args:
@@ -354,9 +380,7 @@ class FlightRepository:
         else:
             # For all other qualifications, they are tracked by ID in qual1-qual6.
             qual_fields = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
-            qual_conditions = [
-                getattr(FlightPilots, field) == str(qualificacao_id) for field in qual_fields
-            ]
+            qual_conditions = [getattr(FlightPilots, field) == str(qualificacao_id) for field in qual_fields]
             stmt = (
                 select(func.max(Flight.date))
                 .join(FlightPilots, Flight.fid == FlightPilots.flight_id)

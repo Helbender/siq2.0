@@ -1,4 +1,5 @@
 // Pages
+export { FlightsByCrewSearchPage } from "./pages/FlightsByCrewSearchPage";
 export { FlightsPage } from "./pages/FlightsPage";
 
 // Hooks (public API)

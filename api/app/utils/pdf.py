@@ -121,6 +121,21 @@ def gerar_pdf_conteudo_em_memoria(dados_voo) -> io.BytesIO:
                 c.drawString(725 + index * 16, 356 - (dados_voo["flight_pilots"].index(i) * 14), f"{f}")
                 index += 1
 
+        # Qualification names (QUAL1..QUAL6) for display in PDF
+        qual_names = [
+            i.get("QUAL1"),
+            i.get("QUAL2"),
+            i.get("QUAL3"),
+            i.get("QUAL4"),
+            i.get("QUAL5"),
+            i.get("QUAL6"),
+        ]
+        qual_names_str = ", ".join(str(q).strip() for q in qual_names if q and str(q).strip())
+        if qual_names_str:
+            c.setFont("Helvetica", 5)
+            row_y = 356 - (dados_voo["flight_pilots"].index(i) * 14)
+            c.drawString(130, row_y - 7, qual_names_str[:80] + ("..." if len(qual_names_str) > 80 else ""))
+
     # Finalizar página
     c.showPage()
     c.save()

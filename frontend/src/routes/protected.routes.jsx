@@ -8,7 +8,7 @@ import { AboutPage } from "@/common/pages/AboutPage";
 import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQualifications";
 import { DashboardPage } from "@/features/dashboard/index";
 import { DatabaseManagementPage } from "@/features/db-management/index";
-import { FlightsPage } from "@/features/flights/index";
+import { FlightsByCrewSearchPage, FlightsPage } from "@/features/flights/index";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 export const protectedRoutes = {
@@ -22,6 +22,7 @@ export const protectedRoutes = {
     { index: true, element: <Navigate to="/dashboard" replace /> },
     { path: "/dashboard", element: <DashboardPage /> },
     { path: "/flights", element: <FlightsPage /> },
+    { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage /> },
     { path: "/crew-qualifications", element: <CrewQualifications /> },
     {
       path: "/manage-qualifications",

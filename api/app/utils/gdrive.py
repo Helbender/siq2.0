@@ -238,23 +238,25 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
                 raise e
 
 
-def tarefa_enviar_para_drive(dados: dict, nome_arquivo_drive: str, nome_pdf: str) -> None:
+def tarefa_enviar_para_drive(dados_1m: dict, dados_pdf: dict, nome_arquivo_drive: str, nome_pdf: str) -> None:
     """Função geral de enviar os dados para os ficheiros no Google Drive.
 
-    Criada para usar multithread e enviar os ficheiros sem as respostas para o Frontend atrasarem
+    Criada para usar multithread e enviar os ficheiros sem as respostas para o Frontend atrasarem.
+    .1m uses qualifications by ID; PDF uses qualifications by name for display.
 
     Args:
-        dados (dict): _description_
+        dados_1m (dict): Flight data for .1m file (QUAL1..QUAL6 as IDs).
+        dados_pdf (dict): Flight data for PDF (QUAL1..QUAL6 as names).
         nome_arquivo_drive (str): _description_
         nome_pdf (str): _description_
     """
     try:
-        upload_with_service_account(dados=dados, nome_arquivo_drive=nome_arquivo_drive, id_pasta=ID_PASTA_VOO)
+        upload_with_service_account(dados=dados_1m, nome_arquivo_drive=nome_arquivo_drive, id_pasta=ID_PASTA_VOO)
 
         enviar_para_drive(
             combinar_template_e_conteudo(
                 template_pdf_path=os.path.join(os.path.dirname(__file__), "img", "Mod1M.pdf"),
-                conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=dados),
+                conteudo_pdf_io=gerar_pdf_conteudo_em_memoria(dados_voo=dados_pdf),
             ),
             nome_ficheiro=nome_pdf,
             id_pasta=ID_PASTA_PDF,

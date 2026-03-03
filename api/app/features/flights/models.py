@@ -121,6 +121,10 @@ class FlightPilots(Base):
     qual5: Mapped[str | None]  # noqa: UP007
     qual6: Mapped[str | None]  # noqa: UP007
 
+    vir: Mapped[str | None] = mapped_column(String(5), nullable=True)  # noqa: UP007
+    vn: Mapped[str | None] = mapped_column(String(5), nullable=True)  # noqa: UP007
+    con: Mapped[str | None] = mapped_column(String(5), nullable=True)  # noqa: UP007
+
     tripulante: Mapped["Tripulante"] = relationship(back_populates="flight_pilots")
     flight: Mapped["Flight"] = relationship(back_populates="flight_pilots")
 
@@ -147,6 +151,9 @@ class FlightPilots(Base):
             "nip": self.tripulante.nip,
             "rank": self.tripulante.rank,
             "position": self.position,
+            "VIR": self.vir or "",
+            "VN": self.vn or "",
+            "CON": self.con or "",
             "ATR": self.day_landings,
             "ATN": self.night_landings,
             "precapp": self.prec_app,
