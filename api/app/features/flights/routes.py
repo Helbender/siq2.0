@@ -284,6 +284,58 @@ def retrieve_flights() -> tuple[Response, int]:
         return jsonify(result), 400
 
 
+@flights_bp.route("/by-crew", methods=["GET"], strict_slashes=False)
+def search_flights_by_crew() -> tuple[Response, int]:
+    """Search flights by crew member name or NIP, with optional date range.
+
+    Query params: search (required), date_from (optional YYYY-MM-DD), date_to (optional YYYY-MM-DD).
+    """
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
+    from flask_jwt_extended import get_jwt, get_jwt_identity
+
+    from app.features.auth.repository import AuthRepository
+
+    nip_identity = get_jwt_identity()
+    claims = get_jwt()
+    if isinstance(nip_identity, str) and nip_identity == "admin":
+        user_role_level = Role.SUPER_ADMIN.level
+    else:
+        try:
+            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid user identity"}), 401
+        user_role_level = claims.get("roleLevel")
+        if user_role_level is None:
+            repository = AuthRepository()
+            with Session(engine) as session:
+                current_user = repository.find_user_by_nip(session, nip)
+                if current_user is None:
+                    return jsonify({"error": "User not found"}), 404
+                user_role_level = current_user.role.level if current_user.role else current_user.role_level
+
+    if user_role_level is None or user_role_level < Role.READONLY.level:
+        return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
+
+    search = request.args.get("search", "")
+    date_from = request.args.get("date_from") or None
+    date_to = request.args.get("date_to") or None
+
+    try:
+        with Session(engine) as session:
+            flights = flight_service.get_flights_by_crew_search(
+                session, search, date_from=date_from, date_to=date_to
+            )
+            return jsonify(flights), 200
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        logger.exception("[flights] GET /by-crew error: %s", e)
+        return jsonify({"message": f"Internal server error: {str(e)}"}), 500
+
+
 @flights_bp.route("/<int:flight_id>", methods=["DELETE", "PATCH", "PUT"], strict_slashes=False)
 @require_role(Role.FLYERS.level)
 def handle_flights(flight_id: int) -> tuple[Response, int]:

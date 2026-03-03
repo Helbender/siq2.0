@@ -25,4 +25,18 @@ export const flightsService = {
     const { data } = await http.get(`/v2/qualificacoeslist/${nip}`);
     return data ?? [];
   },
+
+  /**
+   * Search flights by crew member name or NIP, with optional date range.
+   * @param {string} search - Crew search term (name or NIP)
+   * @param {{ dateFrom?: string, dateTo?: string }} [options] - Optional date range (YYYY-MM-DD)
+   * @returns {Promise<Array>} List of flight objects (same shape as getAll)
+   */
+  searchByCrew: async (search, { dateFrom, dateTo } = {}) => {
+    const params = new URLSearchParams({ search: search.trim() });
+    if (dateFrom) params.set("date_from", dateFrom);
+    if (dateTo) params.set("date_to", dateTo);
+    const { data } = await http.get(`/flights/by-crew?${params.toString()}`);
+    return data ?? [];
+  },
 };

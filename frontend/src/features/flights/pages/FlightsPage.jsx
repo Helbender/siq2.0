@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { formatDate } from "@/utils/timeCalc";
 import {
   Box,
+  Button,
   Center,
   Flex,
   Input,
@@ -14,6 +15,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { List } from "react-window";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/modals/CreateFlightModal";
@@ -33,6 +35,7 @@ export function FlightsPage() {
   const [search, setSearch] = useState("");
   const [listHeight, setListHeight] = useState(600);
   const containerRef = useRef(null);
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const filteredFlights = useMemo(() => {
@@ -95,6 +98,14 @@ export function FlightsPage() {
           <Can minLevel={Role.FLYERS}>
             <CreateFlightModal />
           </Can>
+          <Button
+            variant="outline"
+            colorPalette="teal"
+            size="sm"
+            onClick={() => navigate("/flights/search-by-crew")}
+          >
+            Pesquisar por tripulante
+          </Button>
           <Spacer />
           <Input
             borderRadius={"md"}
