@@ -326,10 +326,6 @@ class DatabaseManagementService:
                 "queued": 0,
             }
 
-        # Pre-load all qualifications into a cache for efficient lookups
-        all_qualifications = self.repository.get_all_qualifications(session)
-        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
-
         if not IS_PRODUCTION:
             return {
                 "message": f"Found {len(flights)} flights but backup is disabled. Set FLASK_ENV=production to enable backups.",
@@ -338,11 +334,11 @@ class DatabaseManagementService:
                 "flask_env": FLASK_ENV,
             }
 
-        # Serialize flights to JSON before session closes (objects become detached in threads)
+        # Serialize flights to JSON (qualifications by ID for .1m) before session closes
         flight_data_list = []
         for flight in flights:
             try:
-                flight_json = flight.to_json(qual_cache)
+                flight_json = flight.to_json(None)
                 nome_arquivo_voo = flight.get_file_name()
                 flight_data_list.append((flight_json, nome_arquivo_voo))
             except Exception as e:
@@ -440,10 +436,6 @@ class DatabaseManagementService:
                 "queued": 0,
             }
 
-        # Pre-load all qualifications into a cache for efficient lookups
-        all_qualifications = self.repository.get_all_qualifications(session)
-        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
-
         if not IS_PRODUCTION:
             return {
                 "message": f"Found {len(flights)} flights for year {year} but backup is disabled. Set FLASK_ENV=production to enable backups.",
@@ -453,11 +445,11 @@ class DatabaseManagementService:
                 "flask_env": FLASK_ENV,
             }
 
-        # Serialize flights to JSON before session closes (objects become detached in threads)
+        # Serialize flights to JSON (qualifications by ID for .1m) before session closes
         flight_data_list = []
         for flight in flights:
             try:
-                flight_json = flight.to_json(qual_cache)
+                flight_json = flight.to_json(None)
                 nome_arquivo_voo = flight.get_file_name()
                 flight_data_list.append((flight_json, nome_arquivo_voo))
             except Exception as e:

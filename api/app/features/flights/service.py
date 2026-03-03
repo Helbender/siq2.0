@@ -198,9 +198,15 @@ class FlightService:
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
-        # Launch background task to send to Google Drive
+        # Launch background task: .1m with qualifications by ID, PDF with names
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(flight_data, nome_arquivo_voo, nome_pdf)).start()
+            flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
+            if flight_with_pilots:
+                all_qualifications = self.repository.find_all_qualifications(session)
+                qual_cache = {q.id: q.nome for q in all_qualifications}
+                dados_1m = flight_with_pilots.to_json(None)
+                dados_pdf = flight_with_pilots.to_json(qual_cache)
+                Thread(target=tarefa_enviar_para_drive, args=(dados_1m, dados_pdf, nome_arquivo_voo, nome_pdf)).start()
 
         return {"message": flight.fid}
 
@@ -266,7 +272,13 @@ class FlightService:
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
         if not DEV:
-            Thread(target=tarefa_enviar_para_drive, args=(flight_data, nome_arquivo_voo, nome_pdf)).start()
+            flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
+            if flight_with_pilots:
+                all_qualifications = self.repository.find_all_qualifications(session)
+                qual_cache = {q.id: q.nome for q in all_qualifications}
+                dados_1m = flight_with_pilots.to_json(None)
+                dados_pdf = flight_with_pilots.to_json(qual_cache)
+                Thread(target=tarefa_enviar_para_drive, args=(dados_1m, dados_pdf, nome_arquivo_voo, nome_pdf)).start()
 
         return {"message": "Flight changed"}
 

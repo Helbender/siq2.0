@@ -1,6 +1,6 @@
 import { Can } from "@/common/components/Can";
-import { Role } from "@/common/roles";
 import { StyledText } from "@/common/components/StyledText";
+import { Role } from "@/common/roles";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { formatDate } from "@/utils/timeCalc";
 import {
@@ -98,14 +98,16 @@ export function FlightsPage() {
           <Can minLevel={Role.FLYERS}>
             <CreateFlightModal />
           </Can>
-          <Button
-            variant="outline"
-            colorPalette="teal"
-            size="sm"
-            onClick={() => navigate("/flights/search-by-crew")}
-          >
-            Pesquisar por tripulante
-          </Button>
+          <Can minLevel={Role.SUPER_ADMIN}>
+            <Button
+              variant="outline"
+              colorPalette="teal"
+              size="sm"
+              onClick={() => navigate("/flights/search-by-crew")}
+            >
+              Pesquisar por tripulante
+            </Button>
+          </Can>
           <Spacer />
           <Input
             borderRadius={"md"}
