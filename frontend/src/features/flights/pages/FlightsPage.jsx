@@ -5,7 +5,6 @@ import { useAuth } from "@/features/auth/contexts/AuthContext";
 import { formatDate } from "@/utils/timeCalc";
 import {
   Box,
-  Button,
   Center,
   Flex,
   Input,
@@ -98,7 +97,7 @@ export function FlightsPage() {
           <Can minLevel={Role.FLYERS}>
             <CreateFlightModal />
           </Can>
-          <Can minLevel={Role.SUPER_ADMIN}>
+          {/* <Can minLevel={Role.SUPER_ADMIN}>
             <Button
               variant="outline"
               colorPalette="teal"
@@ -107,7 +106,7 @@ export function FlightsPage() {
             >
               Pesquisar por tripulante
             </Button>
-          </Can>
+          </Can> */}
           <Spacer />
           <Input
             borderRadius={"md"}

@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 from typing import Any
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.features.dashboard.repository import DashboardRepository
@@ -47,6 +48,12 @@ class DashboardService:
         total_flights = self.repository.count_flights_by_date_range(
             session, date_from, date_to
         )
+
+        # Disable statement timeout for this connection (heavy date-range join)
+        try:
+            session.execute(text("SET statement_timeout = '0'"))
+        except Exception:
+            pass
 
         # Get all flights for the date range with pilots loaded
         all_flights = self.repository.find_flights_by_date_range_with_pilots(

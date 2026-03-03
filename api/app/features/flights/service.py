@@ -7,7 +7,7 @@ from threading import Thread
 from typing import Any
 
 from dotenv import load_dotenv
-from sqlalchemy import exc, select
+from sqlalchemy import exc, select, text
 from sqlalchemy.orm import Session
 
 from app.features.flights.models import Flight, FlightPilots  # type: ignore
@@ -77,6 +77,12 @@ class FlightService:
         # Pre-load all qualifications into a cache for efficient lookups
         all_qualifications = self.repository.find_all_qualifications(session)
         qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
+
+        # Disable statement timeout for this connection (heavy full-table join)
+        try:
+            session.execute(text("SET statement_timeout = '0'"))
+        except Exception:
+            pass
 
         flights_obj = self.repository.find_all_with_pilots(session)
 

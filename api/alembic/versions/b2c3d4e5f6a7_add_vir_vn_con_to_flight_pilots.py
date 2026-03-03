@@ -18,12 +18,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Avoid statement timeout on large tables (ADD COLUMN can take time under lock)
+    conn = op.get_bind()
+    conn.execute(sa.text("SET LOCAL statement_timeout = '0'"))
     op.add_column("flight_pilots", sa.Column("vir", sa.String(length=5), nullable=True))
     op.add_column("flight_pilots", sa.Column("vn", sa.String(length=5), nullable=True))
     op.add_column("flight_pilots", sa.Column("con", sa.String(length=5), nullable=True))
 
 
 def downgrade() -> None:
-    op.drop_column("flight_pilots", "con")
-    op.drop_column("flight_pilots", "vn")
-    op.drop_column("flight_pilots", "vir")
+    # Use IF EXISTS so downgrade works even if upgrade failed partway
+    conn = op.get_bind()
+    conn.execute(sa.text("SET LOCAL statement_timeout = '0'"))
+    conn.execute(sa.text("ALTER TABLE flight_pilots DROP COLUMN IF EXISTS con"))
+    conn.execute(sa.text("ALTER TABLE flight_pilots DROP COLUMN IF EXISTS vn"))
+    conn.execute(sa.text("ALTER TABLE flight_pilots DROP COLUMN IF EXISTS vir"))

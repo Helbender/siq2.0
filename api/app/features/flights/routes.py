@@ -3,6 +3,7 @@
 import logging
 
 from flask import Blueprint, Response, jsonify, request
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
@@ -217,6 +218,10 @@ def retrieve_flights() -> tuple[Response, int]:
 
         try:
             with Session(engine) as session:
+                try:
+                    session.execute(text("SET statement_timeout = '0'"))
+                except Exception:
+                    pass
                 flights = flight_service.get_all_flights(session)
                 return jsonify(flights), 200
         except Exception as e:
