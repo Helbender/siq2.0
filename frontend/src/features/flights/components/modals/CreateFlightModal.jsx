@@ -112,6 +112,7 @@ export function CreateFlightModal({ flight, trigger }) {
       });
 
       if (loadingToast?.id) toaster.dismiss(loadingToast.id);
+      else if (loadingToast) toaster.dismiss(loadingToast);
       toaster.create({
         title: isEdit ? "Voo atualizado" : "Voo criado",
         type: "success",
@@ -120,6 +121,7 @@ export function CreateFlightModal({ flight, trigger }) {
       onClose();
     } catch {
       if (loadingToast?.id) toaster.dismiss(loadingToast.id);
+      else if (loadingToast) toaster.dismiss(loadingToast);
       toaster.create({
         title: "Erro ao guardar voo",
         type: "error",

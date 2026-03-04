@@ -9,6 +9,7 @@ import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQua
 import { DashboardPage } from "@/features/dashboard/index";
 import { DatabaseManagementPage } from "@/features/db-management/index";
 import { FlightsByCrewSearchPage, FlightsPage } from "@/features/flights/index";
+import { QualificationsPreviewPage } from "@/features/qualifications-preview/index";
 import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
 import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
 export const protectedRoutes = {
@@ -24,6 +25,7 @@ export const protectedRoutes = {
     { path: "/flights", element: <FlightsPage /> },
     { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage /> },
     { path: "/crew-qualifications", element: <CrewQualifications /> },
+    { path: "/qualifications-preview", element: <QualificationsPreviewPage /> },
     {
       path: "/manage-qualifications",
       element: <QualificationManagementPage />,
