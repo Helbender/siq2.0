@@ -11,15 +11,48 @@ import { useDeleteFlight } from "../../hooks/useDeleteFlight";
 
 export function DeleteFlightModal({ flight }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { mutateAsync, isLoading } = useDeleteFlight();
+  const { mutateAsync, isPending } = useDeleteFlight();
 
   const handleDelete = async () => {
-    await mutateAsync(flight.id);
-    toaster.create({
-      title: "Voo apagado",
-      type: "success",
+    const pendingToast = toaster.create({
+      title: "A apagar voo…",
+      type: "loading",
+      duration: null,
+      closable: false,
     });
-    onClose();
+
+    const dismissPendingToast = () => {
+      try {
+        if (pendingToast?.id) toaster.dismiss(pendingToast.id);
+        else if (pendingToast) toaster.dismiss(pendingToast);
+        else toaster.dismiss();
+      } catch {
+        toaster.dismiss();
+      }
+    };
+
+    try {
+      await mutateAsync(flight.id);
+      dismissPendingToast();
+      toaster.create({
+        title: "Voo apagado",
+        type: "success",
+      });
+      // Defer close so Dialog receives state update after async/toaster (fixes modal not closing)
+      setTimeout(() => onClose(), 0);
+    } catch (error) {
+      dismissPendingToast();
+      const message =
+        error.response?.data?.error ??
+        error.response?.data?.message ??
+        error.message ??
+        "Erro ao apagar o voo.";
+      toaster.create({
+        title: "Erro ao apagar voo",
+        description: message,
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -61,14 +94,15 @@ export function DeleteFlightModal({ flight }) {
 
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="ghost">
+                  <Button variant="ghost" disabled={isPending}>
                     Cancelar
                   </Button>
                 </Dialog.ActionTrigger>
                 <Button
                   colorPalette="red"
                   onClick={handleDelete}
-                  loading={isLoading}
+                  loading={isPending}
+                  disabled={isPending}
                 >
                   Apagar
                 </Button>
