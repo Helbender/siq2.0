@@ -13,6 +13,23 @@ import { FaMinus } from "react-icons/fa";
 
 const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
 
+// Fallback position -> tipo when CrewTypesProvider hasn't loaded (e.g. on edit modal open)
+const POSITION_TO_TIPO_FALLBACK = {
+  PI: "PILOTO",
+  PC: "PILOTO",
+  P: "PILOTO",
+  CP: "PILOTO",
+  OCI: "OPERADOR CABINE",
+  OC: "OPERADOR CABINE",
+  OCA: "OPERADOR CABINE",
+  CTI: "COORDENADOR TATICO",
+  CT: "COORDENADOR TATICO",
+  CTA: "COORDENADOR TATICO",
+  OPVI: "OPERADOR VIGILANCIA",
+  OPV: "OPERADOR VIGILANCIA",
+  OPVA: "OPERADOR VIGILANCIA",
+};
+
 export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   const { positionToCrewType } = useCrewTypes();
   const [qualP, setQualP] = useState([]);
@@ -26,11 +43,14 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   // Track previous position to detect changes
   const prevPositionRef = useRef(position || member.position);
 
-  // Get tipo from position for qualifications fetching
+  // Get tipo from position for qualifications fetching (use fallback when provider not ready, e.g. edit mode)
   const tipo = useMemo(() => {
-    const pos = position || member.position;
-    return pos ? positionToCrewType(pos) : null;
-  }, [position, member.position, positionToCrewType]);
+    const pos = position ?? member?.position;
+    if (!pos) return null;
+    const fromProvider = positionToCrewType?.(pos);
+    if (fromProvider) return fromProvider;
+    return POSITION_TO_TIPO_FALLBACK[pos] ?? null;
+  }, [position, member?.position, positionToCrewType]);
 
   // Lista de pilotos filtrada consoante a posição selecionada
   const pilotosFiltrados = useMemo(() => {
@@ -55,20 +75,15 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       }
 
       try {
-        console.log("Fetching qualifications by tipo:", tipo);
-        // Fetch all qualifications and filter by tipo_aplicavel
         const response = await http.get("/v2/qualificacoes");
-        console.log("All qualifications:", response.data);
-        console.log("Looking for tipo_aplicavel:", tipo);
-        
-        // Filter qualifications by tipo_aplicavel
-        const filteredQuals = (response.data || []).filter(
-          (qual) => qual.tipo_aplicavel === tipo
-        );
-        console.log("Filtered qualifications:", filteredQuals);
+        const all = response.data || [];
+        const tipoNorm = String(tipo).trim().toUpperCase();
+        const filteredQuals = all.filter((qual) => {
+          const aplicavel = String(qual.tipo_aplicavel ?? "").trim().toUpperCase();
+          return aplicavel === tipoNorm;
+        });
         setQualP(filteredQuals);
       } catch (error) {
-        console.error("Error fetching qualifications by tipo:", error);
         setQualP([]);
       }
     };
@@ -104,7 +119,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
     setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
   }, [name, member.name, pilotos, pilotosFiltrados, setValue, index]);
 
-  // Ensure qualification values are preserved when options load
+  // Ensure qualification values are preserved when options load (IDs may be number or string)
   useEffect(() => {
     if (!qualP?.length) {
       return;
@@ -112,19 +127,18 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
     for (let n = 1; n <= 6; n++) {
       const qualFieldName = `flight_pilots.${index}.QUAL${n}`;
       const currentValue = getValues(qualFieldName);
-      if (!currentValue) continue;
-      const valueAsString = String(currentValue);
-      const matchedById = qualP.find((qual) => qual.id === valueAsString);
+      if (currentValue == null || currentValue === "") continue;
+      const valueAsString = String(currentValue).trim();
+      const matchedById = qualP.find((qual) => String(qual.id) === valueAsString);
       if (matchedById) {
-        // Ensure stored value is normalized to the ID string
-        setValue(qualFieldName, matchedById.id, { shouldValidate: false });
+        setValue(qualFieldName, String(matchedById.id), { shouldValidate: false });
         continue;
       }
       const matchedByName = qualP.find(
-        (qual) => qual.nome?.toUpperCase() === valueAsString.toUpperCase(),
+        (qual) => (qual.nome ?? "").toUpperCase() === valueAsString.toUpperCase(),
       );
       if (matchedByName) {
-        setValue(qualFieldName, matchedByName.id, { shouldValidate: false });
+        setValue(qualFieldName, String(matchedByName.id), { shouldValidate: false });
       }
     }
   }, [qualP, index, getValues, setValue]);
@@ -230,33 +244,50 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
               <Controller
                 name={qualFieldName}
                 control={control}
-                render={({ field }) => (
-                  <NativeSelect.Root>
-                    <NativeSelect.Field
-                      {...field}
-                      placeholder=" "
-                      value={field.value ? String(field.value) : ""}
-                      onChange={(event) =>
-                        field.onChange(event.target.value || "")
-                      }
-                    >
-                      {qualP &&
-                        qualP
-                          .filter(
-                            (qual) =>
-                              !HIDDEN_QUALIFICATIONS.includes(
-                                (qual.nome || "").toUpperCase(),
-                              ),
-                          )
-                          .map((qual) => (
-                            <option key={qual.id} value={qual.id}>
-                              {qual.nome}
-                            </option>
-                          ))}
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
-                )}
+                render={({ field }) => {
+                  const options = (qualP || [])
+                    .filter(
+                      (qual) =>
+                        !HIDDEN_QUALIFICATIONS.includes(
+                          (qual.nome || "").toUpperCase(),
+                        ),
+                    )
+                    .map((qual) => ({
+                      value: String(qual.id),
+                      label: qual.nome,
+                      id: qual.id,
+                    }));
+                  const currentVal = field.value ? String(field.value).trim() : "";
+                  const valueInOptions = options.some(
+                    (o) => o.value === currentVal || (o.label ?? "").toUpperCase() === currentVal.toUpperCase(),
+                  );
+                  const showFallbackOption = currentVal && !valueInOptions;
+
+                  return (
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        {...field}
+                        placeholder=" "
+                        value={currentVal || ""}
+                        onChange={(event) =>
+                          field.onChange(event.target.value || "")
+                        }
+                      >
+                        {options.map((opt) => (
+                          <option key={opt.id} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                        {showFallbackOption && (
+                          <option value={currentVal}>
+                            {currentVal}
+                          </option>
+                        )}
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                  );
+                }}
               />
             </Field.Root>
           </GridItem>

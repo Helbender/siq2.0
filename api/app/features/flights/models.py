@@ -5,7 +5,7 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date  # noqa: TC003
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.models import Base  # type: ignore
@@ -23,6 +23,15 @@ class Flight(Base):
     """
 
     __tablename__: str = "flights_table"
+    __table_args__ = (
+        UniqueConstraint(
+            "airtask",
+            "date",
+            "departure_time",
+            "tailnumber",
+            name="uq_flight_airtask_date_atd_tail",
+        ),
+    )
 
     fid: Mapped[int] = mapped_column(primary_key=True)
     airtask: Mapped[str] = mapped_column(String(7), nullable=False)

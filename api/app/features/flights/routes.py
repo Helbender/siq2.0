@@ -269,10 +269,13 @@ def retrieve_flights() -> tuple[Response, int]:
         return jsonify({"error": "Forbidden - USER level or above required"}), 403
 
     flight_data: dict | None = request.get_json()
+    print(flight_data)
     if flight_data is None:
         return jsonify({"message": "Request body must be JSON"}), 400
 
     validated_data, errors = validate_request(flight_create_schema, flight_data)
+    print("\nValidated Data:")
+    print(validated_data)
     if errors:
         error_message = format_validation_errors(errors)
         logger.warning("[flights] POST validation failed: %s", error_message)
@@ -330,9 +333,7 @@ def search_flights_by_crew() -> tuple[Response, int]:
 
     try:
         with Session(engine) as session:
-            flights = flight_service.get_flights_by_crew_search(
-                session, search, date_from=date_from, date_to=date_to
-            )
+            flights = flight_service.get_flights_by_crew_search(session, search, date_from=date_from, date_to=date_to)
             return jsonify(flights), 200
     except ValueError as e:
         return jsonify({"message": str(e)}), 400

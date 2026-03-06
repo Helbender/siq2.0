@@ -3,6 +3,10 @@
 
 This script connects to Google Drive, navigates the folder structure (year/month/day),
 finds all .1m files, and downloads them to a local directory.
+
+This script only downloads files; it does not process them or use any app models.
+To import downloaded .1m files into the database, run import_flights.py on the
+download folder; that script uses the current app models (app.features.flights).
 """
 
 import argparse
@@ -314,6 +318,10 @@ def download_flights_from_drive(
         file_name = file_info["name"]
         file_id = file_info["id"]
 
+        # Only process files that are actually .1m (guard against wrong extension from API)
+        if not file_name.lower().endswith(".1m"):
+            continue
+
         # Extract folder structure from filename
         folder_structure = get_folder_structure_from_filename(file_name)
         if not folder_structure or None:
@@ -340,8 +348,10 @@ def download_flights_from_drive(
         local_folder = os.path.join(output_folder, year, month, day)
         os.makedirs(local_folder, exist_ok=True)
 
-        # Destination file path
-        destination_path = os.path.join(local_folder, file_name)
+        # Destination file path: ensure we always save with .1m extension
+        base, ext = os.path.splitext(file_name)
+        safe_name = f"{base}.1m" if ext.lower() != ".1m" else file_name
+        destination_path = os.path.join(local_folder, safe_name)
 
         # Check if file already exists
         if os.path.exists(destination_path):

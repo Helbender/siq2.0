@@ -19,7 +19,7 @@ from app.utils.gdrive import tarefa_enviar_para_drive  # type: ignore
 
 # Load environment variables
 load_dotenv(dotenv_path="./.env")
-DEV = os.environ.get("DEV", "").lower() in ("1", "true", "yes")
+FLASK_ENV = os.environ.get("FLASK_ENV", "development").lower()
 
 
 def safe_int_or_none(value: Any) -> int | None:
@@ -168,16 +168,32 @@ class FlightService:
         Returns:
             dict with "message" key containing flight ID on success, or error message
         """
+        flight_date = datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+        departure_time = flight_data.get("ATD", "")
+        tailnumber = flight_data.get("tailNumber", "")
+
+        existing = self.repository.find_by_natural_key(
+            session,
+            airtask=flight_data["airtask"],
+            flight_date=flight_date,
+            departure_time=departure_time,
+            tailnumber=tailnumber,
+        )
+        if existing is not None:
+            return {
+                "message": "A flight with this airtask, date, departure time and aircraft already exists"
+            }
+
         flight = Flight(
             airtask=flight_data["airtask"],
-            date=datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date(),
+            date=flight_date,
             origin=flight_data.get("origin", ""),
             destination=flight_data.get("destination", ""),
-            departure_time=flight_data.get("ATD", ""),
+            departure_time=departure_time,
             arrival_time=flight_data.get("ATA", ""),
             flight_type=flight_data.get("flightType", ""),
             flight_action=flight_data.get("flightAction", ""),
-            tailnumber=flight_data.get("tailNumber", ""),
+            tailnumber=tailnumber,
             total_time=flight_data.get("ATE", ""),
             atr=flight_data.get("totalLandings", 0),
             passengers=flight_data.get("passengers", 0),
@@ -197,7 +213,9 @@ class FlightService:
         if "flight_pilots" not in flight_data:
             return {"message": "At least one pilot is required"}
 
+        print("\nCrewmembers:")
         for pilot in flight_data["flight_pilots"]:
+            print(pilot)
             result = self._add_crew_and_pilots(session, flight, pilot, edit=False)
             if result is None:
                 continue
@@ -213,7 +231,7 @@ class FlightService:
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
         # Launch background task: .1m with qualifications by ID, PDF with names
-        if not DEV:
+        if FLASK_ENV == "production":
             flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
             if flight_with_pilots:
                 all_qualifications = self.repository.find_all_qualifications(session)
@@ -239,15 +257,33 @@ class FlightService:
         if flight is None:
             return {"message": "Flight not found"}
 
-        flight.airtask = flight_data.get("airtask", "")
-        flight.date = datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+        new_date = datetime.strptime(flight_data["date"], "%Y-%m-%d").replace(tzinfo=UTC).date()
+        new_airtask = flight_data.get("airtask", "")
+        new_atd = flight_data.get("ATD", "")
+        new_tail = flight_data.get("tailNumber", "")
+
+        other = self.repository.find_by_natural_key(
+            session,
+            airtask=new_airtask,
+            flight_date=new_date,
+            departure_time=new_atd,
+            tailnumber=new_tail,
+            exclude_fid=flight_id,
+        )
+        if other is not None:
+            return {
+                "message": "Another flight already exists with this airtask, date, departure time and aircraft"
+            }
+
+        flight.airtask = new_airtask
+        flight.date = new_date
         flight.origin = flight_data.get("origin", "")
         flight.destination = flight_data.get("destination", "")
-        flight.departure_time = flight_data.get("ATD", "")
+        flight.departure_time = new_atd
         flight.arrival_time = flight_data.get("ATA", "")
         flight.flight_type = flight_data.get("flightType", "")
         flight.flight_action = flight_data.get("flightAction", "")
-        flight.tailnumber = flight_data.get("tailNumber", "")
+        flight.tailnumber = new_tail
         flight.total_time = flight_data.get("ATE", "")
         flight.atr = flight_data.get("totalLandings", 0)
         flight.passengers = flight_data.get("passengers", 0)
@@ -285,7 +321,7 @@ class FlightService:
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
 
-        if not DEV:
+        if FLASK_ENV == "production":
             flight_with_pilots = self.repository.find_by_id_with_pilots(session, flight.fid)
             if flight_with_pilots:
                 all_qualifications = self.repository.find_all_qualifications(session)
@@ -452,20 +488,51 @@ class FlightService:
             "error_details": errors[:10] if errors else [],
         }
 
+    def _qualification_ids_validated_by_flight_pilot(
+        self, session: Session, flight_pilot: FlightPilots
+    ) -> set[int]:
+        """Return qualification IDs that this FlightPilots row actually validated (qual1–qual6 + landing quals)."""
+        ids: set[int] = set()
+        for attr in ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]:
+            val = getattr(flight_pilot, attr, None)
+            qid = coerce_qualification_id(val)
+            if qid is not None:
+                try:
+                    ids.add(int(qid))
+                except (ValueError, TypeError):
+                    pass
+        pilot_obj = getattr(flight_pilot, "tripulante", None)
+        if pilot_obj is not None and getattr(pilot_obj, "tipo", None) is not None:
+            tipo = pilot_obj.tipo
+            landing_specs: list[tuple[str, int | None]] = [
+                ("ATR", flight_pilot.day_landings),
+                ("ATN", flight_pilot.night_landings),
+                ("precapp", flight_pilot.prec_app),
+                ("nprecapp", flight_pilot.nprec_app),
+            ]
+            for qual_name, count in landing_specs:
+                if count is not None and count > 0:
+                    qual = self.repository.find_qualification_by_nome_and_tipo(session, qual_name, tipo)
+                    if qual is not None:
+                        ids.add(qual.id)
+        return ids
+
     def _update_qualifications_on_delete(
         self,
         flight_id: int,
         session: Session,
         tripulante: FlightPilots,
     ) -> None:
-        """Update qualifications when a flight is deleted."""
+        """Update qualifications when a flight is deleted. Only touches qualifications that this flight actually validated."""
+        qual_ids_on_this_flight = self._qualification_ids_validated_by_flight_pilot(session, tripulante)
         tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(session, tripulante.pilot_id)
 
         for pq in tripulante_quals:
+            if pq.qualificacao_id not in qual_ids_on_this_flight:
+                continue
             last_date = self.repository.find_max_flight_date_for_qualification(
                 session, tripulante.pilot_id, pq.qualificacao_id, flight_id
             )
-
             pq.data_ultima_validacao = last_date
             self.repository.update_tripulante_qualificacao(session, pq)
 
@@ -536,12 +603,12 @@ class FlightService:
             excluded_names = {"ATR", "ATN", "precapp", "nprecapp"}
             qual_list = [q for q in qual_list if q.nome not in excluded_names]
 
-            for l in qual_list:
-                qual_value = pilot.get(l.nome)
+            for qual_item in qual_list:
+                qual_value = pilot.get(qual_item.nome)
                 if qual_value is not None and qual_value is not False:
                     qual = session.scalars(
                         select(Qualificacao).where(
-                            Qualificacao.nome == l.nome,
+                            Qualificacao.nome == qual_item.nome,
                             Qualificacao.tipo_aplicavel == pilot_obj.tipo,
                         )
                     ).first()

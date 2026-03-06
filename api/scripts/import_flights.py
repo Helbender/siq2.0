@@ -126,12 +126,14 @@ def _sort_key_from_filename(filename: str) -> tuple[str, str]:
 
 
 def collect_all_files(root_folder: str) -> list[tuple[str, str]]:
-    """Walk folder, collect (file_path, filename) for each file.
+    """Walk folder, collect (file_path, filename) for each .1m file only.
     Sorted by (date, time) from filename for deterministic order.
     """
     items: list[tuple[str, str, str, str]] = []
     for dirpath, _, filenames in os.walk(root_folder):
         for filename in filenames:
+            if not filename.lower().endswith(".1m"):
+                continue
             file_path = os.path.join(dirpath, filename)
             date_str, time_str = _sort_key_from_filename(filename)
             items.append((file_path, filename, date_str, time_str))
@@ -157,15 +159,23 @@ def chunk_list(lst: list, n: int) -> list[list]:
 
 
 def check_duplicate_flight(session: Session, airtask: str, date, departure_time: str, tailnumber: int) -> Flight | None:
-    """Check if a flight with the same airtask, date, ATD, and aircraft already exists."""
-    return session.execute(
-        select(Flight).where(
+    """Check if a flight with the same airtask, date, ATD, and aircraft already exists.
+
+    If multiple such flights exist (data integrity issue), returns the first by fid
+    so the import can proceed; duplicates should be cleaned up in the DB separately.
+    """
+    stmt = (
+        select(Flight)
+        .where(
             Flight.airtask == airtask,
             Flight.date == date,
             Flight.departure_time == departure_time,
             Flight.tailnumber == tailnumber,
         )
-    ).scalar_one_or_none()
+        .order_by(Flight.fid)
+        .limit(1)
+    )
+    return session.execute(stmt).scalar_one_or_none()
 
 
 def is_old_format(pilot_data: dict) -> bool:

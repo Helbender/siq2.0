@@ -110,6 +110,46 @@ class FlightRepository:
         return session.execute(stmt).scalar_one_or_none()
 
     @staticmethod
+    def find_by_natural_key(
+        session: Session,
+        airtask: str,
+        flight_date: date,
+        departure_time: str,
+        tailnumber: int,
+        exclude_fid: int | None = None,
+    ) -> Flight | None:
+        """Find a flight by natural key (airtask, date, departure_time, tailnumber).
+
+        Used for duplicate checks: create must find none; update must find none
+        when excluding the current flight id.
+
+        Args:
+            session: Database session
+            airtask: Flight airtask
+            flight_date: Flight date
+            departure_time: Departure time (ATD)
+            tailnumber: Aircraft tail number
+            exclude_fid: If set, ignore the flight with this fid (for update case)
+
+        Returns:
+            Flight instance or None if not found (or only the excluded one exists)
+        """
+        stmt = (
+            select(Flight)
+            .where(
+                Flight.airtask == airtask,
+                Flight.date == flight_date,
+                Flight.departure_time == departure_time,
+                Flight.tailnumber == tailnumber,
+            )
+            .order_by(Flight.fid)
+            .limit(1)
+        )
+        if exclude_fid is not None:
+            stmt = stmt.where(Flight.fid != exclude_fid)
+        return session.execute(stmt).scalar_one_or_none()
+
+    @staticmethod
     def find_by_id_with_pilots(session: Session, flight_id: int) -> Flight | None:
         """Find a flight by ID with pilots loaded.
 

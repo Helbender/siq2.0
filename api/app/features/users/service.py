@@ -1,5 +1,6 @@
 """Users service containing business logic for user operations."""
 
+import os
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -9,6 +10,8 @@ from app.features.users.repository import UserRepository
 from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
 from app.utils.email import hash_code
 from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
+
+FLASK_ENV = os.environ.get("FLASK_ENV", "development").lower()
 
 
 class UserService:
@@ -237,6 +240,12 @@ class UserService:
         Returns:
             dict with success message
         """
+        if FLASK_ENV != "production":
+            return {
+                "message": "Backup is disabled. Set FLASK_ENV=production to enable Google Drive backups.",
+                "flask_env": FLASK_ENV,
+            }
+
         users_list = self.repository.find_all(session)
 
         user_base: list = []
