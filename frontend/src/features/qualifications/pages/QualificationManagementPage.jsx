@@ -1,6 +1,6 @@
-import { Can } from "@common/components/Can";
-import { Role } from "@common/roles";
-import { toaster } from "@/utils/toaster";
+import { Can } from "@/shared/components/Can";
+import { Role } from "@/shared/roles";
+import { toaster } from "@/shared/utils/toaster";
 import {
   Box,
   Button,

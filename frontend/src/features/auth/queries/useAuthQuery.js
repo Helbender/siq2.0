@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { useQuery } from "@tanstack/react-query";
 
 export const authQueryKeys = {

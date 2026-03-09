@@ -1,5 +1,5 @@
-import { useCrewTypes } from "@common/CrewTypesProvider";
-import { getRoleOptionsForUser } from "@common/roles";
+import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
+import { getRoleOptionsForUser } from "@/shared/roles";
 import { useAuth } from "@features/auth";
 import {
     Button,

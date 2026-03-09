@@ -1,5 +1,5 @@
-import { TipoTripulanteDefault } from "@common/enums";
-import { Role } from "@common/roles";
+import { TipoTripulanteDefault } from "@/shared/enums";
+import { Role } from "@/shared/roles";
 import { useEffect, useState } from "react";
 
 export function useUserForm(editingUser) {

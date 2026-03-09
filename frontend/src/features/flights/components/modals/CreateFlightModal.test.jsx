@@ -20,7 +20,7 @@ vi.mock("@features/users", () => ({
   useUsersQuery: () => ({ data: [] }),
 }));
 
-vi.mock("@/utils/toaster", () => ({
+vi.mock("@/shared/utils/toaster", () => ({
   toaster: {
     create: vi.fn(),
   },

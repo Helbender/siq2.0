@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 
 // Utility function to convert crew type to API format
 const crewTypeToApiFormat = (crewType) => {

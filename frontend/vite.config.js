@@ -13,7 +13,7 @@ export default defineConfig({
       "@features": path.resolve(__dirname, "./src/features"),
       "@shared": path.resolve(__dirname, "./src/shared"),
       "@layout": path.resolve(__dirname, "./src/layout"),
-      "@common": path.resolve(__dirname, "./src/common"),
+      "@app": path.resolve(__dirname, "./src/app"),
     },
   },
   // build: {

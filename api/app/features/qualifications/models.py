@@ -18,7 +18,7 @@ class Qualificacao(Base):
 
     __tablename__ = "qualificacoes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     nome: Mapped[str] = mapped_column(String(100), nullable=False)
     grupo: Mapped[GrupoQualificacoes] = mapped_column(
         SQLEnum(GrupoQualificacoes, name="grupoqualificacoes", native_enum=False), nullable=False

@@ -1,6 +1,6 @@
-import { http } from "@/api/http";
-import { useCrewTypes } from "@common/CrewTypesProvider";
-import { toaster } from "@/utils/toaster";
+import { http } from "@/app/config/http";
+import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
+import { toaster } from "@/shared/utils/toaster";
 import {
     Button,
     Dialog,

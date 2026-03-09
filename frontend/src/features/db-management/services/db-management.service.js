@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 
 export const dbManagementService = {
   getFlightsByYear: async () => {

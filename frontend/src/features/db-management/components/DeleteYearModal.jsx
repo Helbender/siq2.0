@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { useDeleteYear } from "../mutations/useDeleteYear";
-import { toaster } from "@/utils/toaster";
+import { toaster } from "@/shared/utils/toaster";
 
 export function DeleteYearModal({ isOpen, onClose, year, flightCount }) {
   const deleteYear = useDeleteYear();

@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authQueryKeys } from "../queries/useAuthQuery";
 

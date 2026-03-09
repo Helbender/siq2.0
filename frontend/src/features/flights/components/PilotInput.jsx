@@ -1,5 +1,5 @@
-import { http } from "@/api/http";
-import { useCrewTypes } from "@common/CrewTypesProvider";
+import { http } from "@/app/config/http";
+import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
 import {
     Field,
     GridItem,

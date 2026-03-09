@@ -9,7 +9,7 @@ vi.mock("@features/auth/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { roleLevel: 80 } }),
 }));
 
-vi.mock("@common/CrewTypesProvider", () => ({
+vi.mock("@/app/providers/CrewTypesProvider", () => ({
   useCrewTypes: () => ({
     TipoTripulante: {
       PILOTO: "PILOTO",

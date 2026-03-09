@@ -1,6 +1,9 @@
 // Pages
 export { UserManagementPage } from "./pages/UserManagementPage";
 
+// Permissions
+export { USERS_PERMISSIONS } from "./permissions";
+
 // Hooks (public API)
 export { useUsers } from "./hooks/useUsers";
 

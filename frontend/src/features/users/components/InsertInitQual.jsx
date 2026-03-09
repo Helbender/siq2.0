@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { useForm } from "react-hook-form";
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 
 const today = new Date();
 

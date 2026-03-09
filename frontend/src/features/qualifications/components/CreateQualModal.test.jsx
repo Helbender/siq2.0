@@ -5,21 +5,21 @@ import { CreateQualModal } from "./CreateQualModal";
 const mockGet = vi.fn();
 const mockPost = vi.fn();
 
-vi.mock("@/api/http", () => ({
+vi.mock("@/app/config/http", () => ({
   http: {
     get: (...args) => mockGet(...args),
     post: (...args) => mockPost(...args),
   },
 }));
 
-vi.mock("@common/CrewTypesProvider", () => ({
+vi.mock("@/app/providers/CrewTypesProvider", () => ({
   useCrewTypes: () => ({
     getAllCrewTypes: () => ["PILOTO"],
     isLoading: false,
   }),
 }));
 
-vi.mock("@/utils/toaster", () => ({
+vi.mock("@/shared/utils/toaster", () => ({
   toaster: {
     create: vi.fn(),
   },

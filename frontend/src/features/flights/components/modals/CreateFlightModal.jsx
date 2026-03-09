@@ -15,8 +15,8 @@ import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { FaPlus } from "react-icons/fa";
 
 import { useUsersQuery } from "@features/users";
-import { getTimeDiff } from "@/utils/timeCalc";
-import { toaster } from "@/utils/toaster";
+import { getTimeDiff } from "@/shared/utils/timeCalc";
+import { toaster } from "@/shared/utils/toaster";
 import { Field, Flex, Input, NativeSelect } from "@chakra-ui/react";
 import { useCreateFlight } from "../../hooks/useCreateFlight";
 import { flightDefaults } from "../../mappers/flightDefaults";

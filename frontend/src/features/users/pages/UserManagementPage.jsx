@@ -1,7 +1,7 @@
-import { Can } from "@common/components/Can";
-import { useDialogForm } from "@common/hooks/useDialogForm";
-import { Role } from "@common/roles";
-import { toaster } from "@/components/ui/toaster";
+import { Can } from "@/shared/components/Can";
+import { useDialogForm } from "@/shared/hooks/useDialogForm";
+import { Role } from "@/shared/roles";
+import { toaster } from "@/shared/utils/toaster";
 import { useAuth } from "@features/auth";
 import {
   Box,

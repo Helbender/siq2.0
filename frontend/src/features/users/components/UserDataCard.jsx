@@ -1,6 +1,6 @@
-import { canModifyUser, getRoleName, Role } from "@common/roles";
+import { canModifyUser, getRoleName, Role } from "@/shared/roles";
 import { useAuth } from "@features/auth";
-import { StyledText } from "@common/components/StyledText";
+import { StyledText } from "@/shared/components/StyledText";
 import { useSendEmail } from "@/utils/useSendEmail";
 import {
   Card,

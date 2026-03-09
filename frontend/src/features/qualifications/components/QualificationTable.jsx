@@ -1,5 +1,5 @@
-import { Can } from "@common/components/Can";
-import { Role } from "@common/roles";
+import { Can } from "@/shared/components/Can";
+import { Role } from "@/shared/roles";
 import { HStack, Table } from "@chakra-ui/react";
 import { CreateQualModal } from "./CreateQualModal";
 import { DeleteQualModal } from "./DeleteQualModal";

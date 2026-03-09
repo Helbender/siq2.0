@@ -1,4 +1,4 @@
-import { http, setLoggingOut } from "@/api/http";
+import { http, setLoggingOut } from "@/app/config/http";
 import { isTokenExpiringSoon } from "@/utils/jwt";
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useRef } from "react";
