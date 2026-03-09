@@ -1,5 +1,5 @@
-import { Can } from "@/common/components/Can";
-import { Role } from "@/common/roles";
+import { Can } from "@common/components/Can";
+import { Role } from "@common/roles";
 import { toaster } from "@/utils/toaster";
 import {
   Box,

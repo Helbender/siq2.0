@@ -1,6 +1,6 @@
 import { ColorModeProvider } from "@/components/ui/color-mode";
-import { CrewTypesProvider } from "@/common/CrewTypesProvider";
-import { AuthProvider } from "@/features/auth/contexts/AuthContext";
+import { CrewTypesProvider } from "@common/CrewTypesProvider";
+import { AuthProvider } from "@features/auth";
 import { router } from "@/routes/router";
 import React from "react";
 import { RouterProvider } from "react-router";

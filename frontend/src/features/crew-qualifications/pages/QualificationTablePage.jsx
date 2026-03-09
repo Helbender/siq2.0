@@ -51,18 +51,17 @@ export function QualificationTablePage({ pilotos = [], loading }) {
     return grouped;
   }, [allQualifications]);
 
-  // Initialize selected groups when qualificationsByGroup changes
+  // Initialize available groups when qualificationsByGroup changes (no pre-selection; "Todos" = empty)
   useEffect(() => {
     const groups = Object.keys(qualificationsByGroup).sort();
     setAvailableGroups(groups);
-    // Select all groups by default if none selected
-    if (groups.length > 0 && selectedGroups.length === 0) {
-      setSelectedGroups(groups);
-    }
-  }, [qualificationsByGroup, selectedGroups.length]);
+  }, [qualificationsByGroup]);
 
-  // Filter qualifications by selected groups
+  // Filter qualifications by selected groups; empty selectedGroups = "Todos" (show all)
   const visibleQualificationsByGroup = useMemo(() => {
+    if (selectedGroups.length === 0) {
+      return qualificationsByGroup;
+    }
     const filtered = {};
     selectedGroups.forEach((group) => {
       if (qualificationsByGroup[group]) {
@@ -150,7 +149,10 @@ export function QualificationTablePage({ pilotos = [], loading }) {
   };
 
   const handleToggleGroup = (group) => {
-    if (selectedGroups.includes(group)) {
+    if (selectedGroups.length === 0) {
+      // Exiting "Todos" mode: select only this group
+      setSelectedGroups([group]);
+    } else if (selectedGroups.includes(group)) {
       setSelectedGroups(selectedGroups.filter((g) => g !== group));
     } else {
       setSelectedGroups([...selectedGroups, group]);
@@ -158,15 +160,12 @@ export function QualificationTablePage({ pilotos = [], loading }) {
   };
 
   const handleSelectAll = () => {
-    if (selectedGroups.length === availableGroups.length) {
-      setSelectedGroups([]);
-    } else {
-      setSelectedGroups([...availableGroups]);
-    }
+    // "Todos" selected: clear individual selection and show all
+    setSelectedGroups([]);
   };
 
-  const allSelected = availableGroups.length > 0 && selectedGroups.length === availableGroups.length;
-  const isIndeterminate = selectedGroups.length > 0 && !allSelected;
+  const allSelected = selectedGroups.length === 0;
+  const isIndeterminate = false;
 
   return (
     <Stack m={4} pb={10}>

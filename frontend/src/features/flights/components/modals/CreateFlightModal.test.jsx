@@ -16,7 +16,7 @@ vi.mock("../../services/flights.service", () => ({
   },
 }));
 
-vi.mock("@/features/users/queries/useUsersQuery", () => ({
+vi.mock("@features/users", () => ({
   useUsersQuery: () => ({ data: [] }),
 }));
 

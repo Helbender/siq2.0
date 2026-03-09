@@ -12,7 +12,7 @@ vi.mock("@/api/http", () => ({
   },
 }));
 
-vi.mock("@/common/CrewTypesProvider", () => ({
+vi.mock("@common/CrewTypesProvider", () => ({
   useCrewTypes: () => ({
     getAllCrewTypes: () => ["PILOTO"],
     isLoading: false,

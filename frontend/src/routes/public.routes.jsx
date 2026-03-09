@@ -3,8 +3,8 @@ import {
   LoginPage,
   ForgotPasswordPage,
   ResetPasswordPage,
-} from "@/features/auth";
-import { ErrorBoundary } from "@/common/components/ErrorBoundary";
+} from "@features/auth";
+import { ErrorBoundary } from "@common/components/ErrorBoundary";
 
 export const publicRoutes = {
   element: <Layout />,

@@ -1,17 +1,17 @@
-import { ErrorBoundary } from "@/common/components/ErrorBoundary";
-import { RequireAuth } from "@/features/auth/components/RequireAuth";
+import { ErrorBoundary } from "@common/components/ErrorBoundary";
+import { RequireAuth } from "@features/auth";
 import { AuthenticatedLayout } from "@/shell/layout/AuthenticatedLayout";
 import { Navigate } from "react-router";
 
-// Feature routes
-import { AboutPage } from "@/common/pages/AboutPage";
-import { CrewQualifications } from "@/features/crew-qualifications/pages/CrewQualifications";
-import { DashboardPage } from "@/features/dashboard/index";
-import { DatabaseManagementPage } from "@/features/db-management/index";
-import { FlightsByCrewSearchPage, FlightsPage } from "@/features/flights/index";
-import { QualificationsPreviewPage } from "@/features/qualifications-preview/index";
-import { QualificationManagementPage } from "@/features/qualifications/pages/QualificationManagementPage";
-import { UserManagementPage } from "@/features/users/pages/UserManagementPage";
+// Feature routes (barrel imports)
+import { DashboardPage } from "@features/dashboard";
+import { DatabaseManagementPage } from "@features/db-management";
+import { FlightsByCrewSearchPage, FlightsPage } from "@features/flights";
+import { QualificationsPreviewPage } from "@features/qualifications-preview";
+import { AboutPage } from "@common/pages/AboutPage";
+import { CrewQualifications } from "@features/crew-qualifications";
+import { QualificationManagementPage } from "@features/qualifications";
+import { UserManagementPage } from "@features/users";
 export const protectedRoutes = {
   element: (
     <RequireAuth>

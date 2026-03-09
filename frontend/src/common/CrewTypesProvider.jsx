@@ -1,4 +1,4 @@
-import { getCachedCrewTypes, useCrewTypesQuery } from "@/features/qualifications/queries/useCrewTypesQuery";
+import { getCachedCrewTypes, useCrewTypesQuery } from "@features/qualifications";
 import { createContext, useContext, useMemo } from "react";
 
 const CrewTypesContext = createContext(null);

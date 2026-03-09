@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { useAuth } from "@features/auth";
 
 /**
  * Can component - Conditionally renders children based on user role level.

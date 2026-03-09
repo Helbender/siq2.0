@@ -1,4 +1,4 @@
-import { useCrewTypes } from "@/common/CrewTypesProvider";
+import { useCrewTypes } from "@common/CrewTypesProvider";
 import { formatHours } from "@/utils/timeCalc";
 import { Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 

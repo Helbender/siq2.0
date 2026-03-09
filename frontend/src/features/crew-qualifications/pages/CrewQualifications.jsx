@@ -1,5 +1,5 @@
-import { FeatureBasePage } from "@/common/components/FeatureBasePage";
-import { useCrewTypes } from "@/common/CrewTypesProvider";
+import { FeatureBasePage } from "@common/components/FeatureBasePage";
+import { useCrewTypes } from "@common/CrewTypesProvider";
 import { Box, Flex, SegmentGroup, Tabs, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { usePilots } from "../hooks/usePilots";

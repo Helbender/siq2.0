@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { useAuth } from "@features/auth";
 import { Box, Link as ChakraLink, Flex, Separator, Spacer, Text } from "@chakra-ui/react";
 import {
   FaInfoCircle,

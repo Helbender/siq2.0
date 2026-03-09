@@ -3,15 +3,15 @@ import {
   Button,
   Dialog,
   IconButton,
-  Portal,
-  useDisclosure,
+  Portal
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { BiTrash } from "react-icons/bi";
 import { useDeleteFlight } from "../../hooks/useDeleteFlight";
 
 export function DeleteFlightModal({ flight }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const { mutateAsync, isPending } = useDeleteFlight();
+  const [open, setOpen] = useState(false);
 
   const handleDelete = async () => {
     const pendingToast = toaster.create({
@@ -39,7 +39,8 @@ export function DeleteFlightModal({ flight }) {
         type: "success",
       });
       // Defer close so Dialog receives state update after async/toaster (fixes modal not closing)
-      setTimeout(() => onClose(), 0);
+      // setTimeout(() => onClose(), 0);
+      setOpen(false);
     } catch (error) {
       dismissPendingToast();
       const message =
@@ -57,14 +58,8 @@ export function DeleteFlightModal({ flight }) {
 
   return (
     <Dialog.Root 
-      open={isOpen} 
-      onOpenChange={({ open }) => {
-        if (open) {
-          onOpen();
-        } else {
-          onClose();
-        }
-      }}
+      open={open} 
+      onOpenChange={(e) => setOpen(e.open)}
     >
       <Dialog.Trigger asChild>
         <IconButton
@@ -80,13 +75,6 @@ export function DeleteFlightModal({ flight }) {
           <Dialog.Positioner>
             <Dialog.Content bg="bg.surface">
               <Dialog.Header>Apagar voo</Dialog.Header>
-
-              {/* <Dialog.CloseTrigger asChild>
-                <IconButton variant="ghost" size="sm">
-                  <HiX />
-                </IconButton>
-              </Dialog.CloseTrigger> */}
-
               <Dialog.Body>
                 Tens a certeza que queres apagar o voo{" "}
                 <strong>{flight.airtask}</strong>?
@@ -98,14 +86,15 @@ export function DeleteFlightModal({ flight }) {
                     Cancelar
                   </Button>
                 </Dialog.ActionTrigger>
-                <Button
-                  colorPalette="red"
-                  onClick={handleDelete}
-                  loading={isPending}
-                  disabled={isPending}
-                >
-                  Apagar
-                </Button>
+                {/* <Dialog.ActionTrigger> */}
+                  <Button
+                    colorPalette="red"
+                    onClick={handleDelete}
+                    loading={isPending}
+                  >
+                    Apagar
+                  </Button>
+                {/* </Dialog.ActionTrigger> */}
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

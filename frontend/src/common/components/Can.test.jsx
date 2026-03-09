@@ -3,7 +3,7 @@ import { Can } from "./Can";
 
 const mockAuthState = { current: { user: { roleLevel: 50 } } };
 
-vi.mock("@/features/auth/contexts/AuthContext", () => ({
+vi.mock("@features/auth/contexts/AuthContext", () => ({
   useAuth: () => ({ user: mockAuthState.current.user }),
 }));
 

@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { FaCloud } from "react-icons/fa";
 import { DeleteYearModal } from "./DeleteYearModal";
-import { useDialogForm } from "@/common/hooks/useDialogForm";
+import { useDialogForm } from "@common/hooks/useDialogForm";
 import { useRebackupFlightsByYear } from "../mutations/useRebackupFlightsByYear";
 import { toaster } from "@/components/ui/toaster";
 
