@@ -1,4 +1,4 @@
-import { formatHours } from "@/utils/timeCalc";
+import { formatHours } from "@/shared/utils/timeCalc";
 import { Box, Heading, Text } from "@chakra-ui/react";
 import {
   Cell,

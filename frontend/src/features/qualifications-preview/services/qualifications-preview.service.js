@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { PREVIEW_DAYS } from "../constants";
 
 export const qualificationsPreviewService = {

@@ -3,7 +3,7 @@ import { HealthCard } from "./HealthCard";
 
 const mockGet = vi.fn();
 
-vi.mock("@/api/http", () => ({
+vi.mock("@/app/config/http", () => ({
   http: {
     get: (...args) => mockGet(...args),
   },

@@ -1,7 +1,7 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authQueryKeys } from "../queries/useAuthQuery";
-import { setLoggingOut } from "@/api/http";
+import { setLoggingOut } from "@/app/config/http";
 
 export function useLogin() {
   const queryClient = useQueryClient();

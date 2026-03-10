@@ -1,4 +1,4 @@
-import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { useAuth } from "@features/auth";
 import { useMemo, useState } from "react";
 import { useUsersQuery } from "../queries/useUsersQuery";
 

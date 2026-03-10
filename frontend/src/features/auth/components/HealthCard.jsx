@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { Badge, Card, Spinner, Stat } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 

@@ -5,6 +5,7 @@ Frontend:
 - React Router v7 (Data Router)
 - Chakra UI v3
 - TanStack React Query
+- React Hook Form
 
 Backend:
 - Python + Flask
@@ -21,7 +22,8 @@ GLOBAL ARCHITECTURAL PRINCIPLES
 1. Feature-first architecture
 - Business logic lives in FEATURES
 - Infrastructure and orchestration live OUTSIDE features
-- No "shared god folders"
+- Shared utilities live in SHARED
+- No "god folders"
 
 2. Clear responsibility boundaries
 Each folder has ONE job.
@@ -32,77 +34,132 @@ Never mix responsibilities.
 - Permissions MUST align
 - Routes and policies MUST align
 
+4. Features must expose a PUBLIC API
+- External code MUST import from feature index
+- Internal structure MUST remain private
+
+Example:
+import { FlightsPage } from "@/features/flights"
+
+NOT:
+import FlightsPage from "@/features/flights/pages/FlightsPage"
+
+5. Forms with more than ~15 fields MUST use form folders
+Large forms must be modularized using React Hook Form patterns.
+
 =====================================================
 FRONTEND ARCHITECTURE
 =====================================================
 
 -----------------------------------------------------
-SHELL (APP CHROME)
+APP (APPLICATION ORCHESTRATION)
 -----------------------------------------------------
 
 Location:
-src/shell/
+src/app/
 
 Purpose:
-- Application structure only
-- Visual frame of the app
+- Global application setup
+- Providers
+- Router orchestration
+
+Structure:
+
+src/app/
+  router/
+    router.tsx
+    protected.routes.ts
+    public.routes.ts
+  providers/
+    AppProviders.tsx
+  config/
+    env.ts
+
+Rules:
+
+- createBrowserRouter MUST exist ONLY in router.tsx
+- Providers are defined here
+- No business logic
+
+-----------------------------------------------------
+LAYOUT (APPLICATION CHROME)
+-----------------------------------------------------
+
+Location:
+src/layout/
+
+Purpose:
+- Application visual structure
 
 Allowed:
 - Layout components
 - Header / Footer / Navbar
-- <Outlet /> rendering
+- Outlet rendering
 
 Forbidden:
 ❌ Business logic
 ❌ API calls
 ❌ React Query
-❌ Permissions logic
-❌ Feature imports
+❌ Permission checks
+❌ Feature logic
 
 Structure:
-src/shell/
-  layout/
+
+src/layout/
+  layouts/
     AppLayout.tsx
     AuthenticatedLayout.tsx
   components/
     Header.tsx
     Footer.tsx
-    NavbarLeft.tsx
+    Navbar.tsx
+  constants/
+    navItems.ts
 
 Rules:
+
 - Layouts MAY render Outlet
 - Layouts MUST NOT fetch data
-- Layouts MUST NOT check roles or permissions
+- Layouts MUST NOT check permissions
 
 -----------------------------------------------------
-COMMON (REUSABLE, APP-AGNOSTIC)
+SHARED (REUSABLE GENERIC LOGIC)
 -----------------------------------------------------
 
 Location:
-src/common/
+src/shared/
 
 Purpose:
-- Reusable UI and hooks
-- No domain knowledge
+Reusable code with NO domain knowledge.
 
 Allowed:
+
 - Generic components
 - Generic hooks
-- Styling helpers
+- Generic utilities
+- Generic providers
 
 Forbidden:
-❌ Feature-specific logic
+
+❌ Business logic
+❌ Feature logic
 ❌ Routing
 ❌ API endpoints
 
 Structure:
-src/common/
+
+src/shared/
   components/
-    StandardText.tsx
-    StyledText.tsx
   hooks/
-    useDialogForm.ts
-    useConfirm.ts
+  utils/
+  providers/
+  enums/
+
+Examples:
+
+shared/components
+shared/hooks/useDialogForm.ts
+shared/utils/timeCalc.ts
 
 -----------------------------------------------------
 FEATURES (BUSINESS DOMAINS)
@@ -112,79 +169,179 @@ Location:
 src/features/<feature-name>/
 
 Purpose:
-- Own ALL logic related to a business domain
+Each feature owns its complete business domain.
 
 Structure:
+
 src/features/<feature>/
+
+  api/
+    queries/
+    mutations/
+    <feature>.service.ts
+
   components/
-  pages/
+
   hooks/
-  queries/
-  mutations/
-  routes.ts
+
+  pages/
+
+  forms/          ← for complex React Hook Form structures
+
+  mappers/
+
   permissions.ts
 
+  routes.ts
+
+  index.ts        ← FEATURE PUBLIC API
+
 Rules:
-- Features MUST export route objects (not routers)
-- Features MUST export permission definitions
+
+- Features MUST own their API communication
+- Features MUST export routes
+- Features MUST export permissions
 - Features MUST NOT import layouts
 - Features MUST NOT import router
 
-Example routes export:
-export const flightsRoutes = [
-  {
-    path: "/flights",
-    element: <FlightsPage />,
-    meta: { permission: "flights.read" }
-  }
-];
+-----------------------------------------------------
+FEATURE PUBLIC API
+-----------------------------------------------------
+
+Every feature MUST expose a public API via index.ts.
+
+Example:
+
+src/features/flights/index.ts
+
+export * from "./pages/FlightsPage"
+export * from "./components/FlightCard"
+export * from "./routes"
+export * from "./permissions"
+
+Rules:
+
+External code MUST import from:
+
+@/features/flights
+
+NOT from internal folders.
+
+Forbidden:
+
+❌ "@/features/flights/pages/FlightsPage"
+❌ "@/features/flights/components/FlightCard"
+
+This ensures internal structure can change safely.
+
+-----------------------------------------------------
+FEATURE API LAYER
+-----------------------------------------------------
+
+All backend communication MUST live in:
+
+features/<feature>/api
+
+Structure:
+
+api/
+  queries/
+  mutations/
+  <feature>.service.ts
+
+Example:
+
+features/flights/api/
+
+  queries/
+    useFlightsQuery.ts
+
+  mutations/
+    useCreateFlight.ts
+    useDeleteFlight.ts
+
+  flights.service.ts
+
+Rules:
+
+- Queries use React Query
+- Mutations use React Query
+- Services perform HTTP requests
+- Components MUST NOT call APIs directly
+
+Forbidden:
+
+❌ fetch inside components
+❌ axios inside components
+❌ API calls in layouts
 
 -----------------------------------------------------
 ROUTING (FIRST-CLASS SYSTEM)
 -----------------------------------------------------
 
 Location:
-src/routes/
+
+src/app/router/
 
 Purpose:
+
 - Application orchestration
 - Layout assignment
 - Access control enforcement
 
 Structure:
-src/routes/
+
+router/
   router.tsx
   public.routes.ts
   protected.routes.ts
 
 Rules:
-- createBrowserRouter MUST exist ONLY in router.tsx
-- Layouts are applied ONLY here
-- Route guards are applied ONLY here
+
+- createBrowserRouter ONLY here
+- Layout assignment ONLY here
+- Route guards ONLY here
+- Features export route objects only
+
+Example feature routes:
+
+export const flightsRoutes = [
+  {
+    path: "/flights",
+    element: <FlightsPage />,
+    meta: { permission: "flights.read" }
+  }
+]
 
 -----------------------------------------------------
 RBAC (FRONTEND)
 -----------------------------------------------------
 
 Rules:
-- Permissions are STRINGS (not booleans)
+
+- Permissions are STRINGS
 - Roles are GROUPS of permissions
 - UI checks permissions, not roles
 
-Example permission:
+Example permissions:
+
 "flights.read"
 "flights.write"
 "users.admin"
 
 Feature permissions:
+
 src/features/flights/permissions.ts
+
+Example:
 
 export const FLIGHTS_PERMISSIONS = {
   READ: "flights.read",
   WRITE: "flights.write",
-};
+}
 
 Routes use permissions via meta:
+
 meta: { permission: FLIGHTS_PERMISSIONS.READ }
 
 Route guards check permissions globally.
@@ -194,31 +351,86 @@ TANSTACK QUERY RULES
 -----------------------------------------------------
 
 Rules:
+
 - ALL data fetching uses React Query
-- Queries live in features/<feature>/queries
-- Mutations live in features/<feature>/mutations
+- Queries live in features/<feature>/api/queries
+- Mutations live in features/<feature>/api/mutations
 - Pages MAY call useQuery
-- Components MUST NOT call useQuery unless explicitly container components
+- Components SHOULD avoid calling useQuery unless container components
 
 Forbidden:
+
 ❌ API calls in components
 ❌ API calls in layouts
-❌ API calls in shell
+❌ API calls outside features
+
+-----------------------------------------------------
+LARGE FORM ARCHITECTURE (React Hook Form)
+-----------------------------------------------------
+
+Forms with more than ~15 fields MUST use a form module.
+
+Location:
+
+features/<feature>/forms/
+
+Example:
+
+features/flights/forms/create-flight/
+
+  CreateFlightForm.tsx
+  CreateFlightSchema.ts
+  useCreateFlightForm.ts
+  CreateFlightFields.tsx
+  CrewSection.tsx
+  AircraftSection.tsx
+  ValidationSchema.ts
+
+Rules:
+
+- Form logic lives in forms/
+- Validation schemas live with the form
+- Field groups are split into components
+- React Hook Form context used across components
+
+Example pattern:
+
+CreateFlightForm
+  ├── CrewSection
+  ├── AircraftSection
+  ├── TimingSection
+  └── NotesSection
+
+This prevents extremely large modal components.
 
 -----------------------------------------------------
 ABSOLUTE IMPORT RULES
 -----------------------------------------------------
 
-- Use alias imports: "@/features/..."
-- Features MAY import from:
-  - common
-  - services
-  - lib
-- Features MUST NOT import from:
-  - shell
-  - routes
+Use path aliases:
 
-- shell MUST NOT import from features
+@
+
+Examples:
+
+@/features/flights
+@/shared/hooks
+@/layout/components
+@/app/router
+
+Rules:
+
+Features MAY import from:
+
+- shared
+- other features (via public API only)
+
+Features MUST NOT import from:
+
+❌ layout
+❌ router internals
+
+Layouts MUST NOT import from features.
 
 =====================================================
 BACKEND ARCHITECTURE (FLASK)
@@ -229,9 +441,11 @@ CORE
 -----------------------------------------------------
 
 Location:
+
 api/app/core/
 
 Purpose:
+
 - App setup
 - Security
 - JWT
@@ -242,10 +456,13 @@ FEATURES (BACKEND)
 -----------------------------------------------------
 
 Location:
+
 api/app/features/<feature>/
 
 Structure:
+
 api/app/features/<feature>/
+
   routes.py
   service.py
   repository.py
@@ -254,12 +471,21 @@ api/app/features/<feature>/
   policies.py
 
 Rules:
-- routes.py → HTTP only
-- service.py → business logic
-- repository.py → database access ONLY
-- policies.py → permission checks ONLY
+
+routes.py
+→ HTTP layer only
+
+service.py
+→ business logic
+
+repository.py
+→ database access ONLY
+
+policies.py
+→ permission checks ONLY
 
 Forbidden:
+
 ❌ DB access in routes
 ❌ Permission logic in routes
 ❌ HTTP logic in services
@@ -269,36 +495,41 @@ RBAC (BACKEND)
 -----------------------------------------------------
 
 Rules:
+
 - Permissions are STRING constants
 - Policies enforce permissions
 - Routes call policies
 
 Example:
+
 require_permission("flights.write")
 
 Frontend permissions MUST match backend permissions exactly.
 
------------------------------------------------------
+=====================================================
 WHAT NOT TO DO (STRICT)
------------------------------------------------------
+=====================================================
 
-❌ Do NOT create "shared" dumping grounds
+❌ Do NOT create dumping folders
 ❌ Do NOT fetch data in layouts
 ❌ Do NOT check roles in components
 ❌ Do NOT hardcode permissions in UI
 ❌ Do NOT place routers inside features
 ❌ Do NOT place business logic in UI components
+❌ Do NOT import feature internals (use public API)
 
 =====================================================
 DEFAULT DECISION RULE
 =====================================================
 
 When unsure:
-- Business logic → feature
-- App structure → shell
-- Reusable logic → common
-- Orchestration → routes
-- Data access → repository
-- Permission checks → policies
+
+Business logic → feature  
+App structure → layout  
+Reusable logic → shared  
+App orchestration → app/router  
+Data access → repository  
+Permission checks → policies  
+Forms → feature/forms
 
 Follow these rules without exception.

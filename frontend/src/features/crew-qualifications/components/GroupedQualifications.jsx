@@ -1,7 +1,7 @@
 import { Flex, Text, Grid, GridItem } from "@chakra-ui/react";
 import { QualificationsPanel } from "./QualificationsPanel";
 import { Fragment } from "react";
-import { StandardText } from "@/common/components/StandardText";
+import { StandardText } from "@/shared/components/StandardText";
 
 export function GroupedQualifications({ qualificacoes }) {
   // Deduplicate by (grupo, nome) so the same qualification never appears twice (e.g. duplicate payload from API)

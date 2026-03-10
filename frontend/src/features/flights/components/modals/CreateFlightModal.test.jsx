@@ -16,11 +16,11 @@ vi.mock("../../services/flights.service", () => ({
   },
 }));
 
-vi.mock("@/features/users/queries/useUsersQuery", () => ({
+vi.mock("@features/users", () => ({
   useUsersQuery: () => ({ data: [] }),
 }));
 
-vi.mock("@/utils/toaster", () => ({
+vi.mock("@/shared/utils/toaster", () => ({
   toaster: {
     create: vi.fn(),
   },

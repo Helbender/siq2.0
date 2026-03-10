@@ -1,4 +1,4 @@
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 
 export const loginRequest = (nip, password) =>
   http.post("/auth/login", { nip, password }).then((res) => res.data);

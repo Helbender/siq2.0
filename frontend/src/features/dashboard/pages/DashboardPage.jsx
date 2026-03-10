@@ -1,5 +1,5 @@
-import { formatDateISO, formatHours } from "@/utils/timeCalc";
-import { useSunTimes } from "@/utils/useSunTimes";
+import { formatDateISO, formatHours } from "@/shared/utils/timeCalc";
+import { useSunTimes } from "@/shared/utils/useSunTimes";
 import {
   Box,
   Flex,

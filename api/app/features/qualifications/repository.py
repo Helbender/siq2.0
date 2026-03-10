@@ -1,6 +1,7 @@
 """Qualifications repository - database access only."""
 
-from sqlalchemy import select
+from sqlalchemy import select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.features.qualifications.models import Qualificacao  # type: ignore
@@ -10,6 +11,24 @@ from app.shared.enums import StatusTripulante  # type: ignore
 
 class QualificationRepository:
     """Repository for qualification database operations."""
+
+    @staticmethod
+    def _sync_primary_key_sequence(session: Session) -> None:
+        """Sync PostgreSQL sequence with current max table id.
+
+        This handles environments where manual imports/seeds inserted explicit IDs
+        and the auto-increment sequence was not advanced accordingly.
+        """
+        session.execute(
+            text(
+                """
+                SELECT setval(
+                    pg_get_serial_sequence('qualificacoes', 'id'),
+                    COALESCE((SELECT MAX(id) FROM qualificacoes), 0)
+                )
+                """
+            )
+        )
 
     @staticmethod
     def find_all(session: Session) -> list[Qualificacao]:
@@ -22,7 +41,7 @@ class QualificationRepository:
             List of Qualificacao instances ordered by grupo and nome
         """
         stmt = select(Qualificacao).order_by(Qualificacao.grupo, Qualificacao.nome)
-        return session.execute(stmt).scalars().all()
+        return list(session.execute(stmt).scalars().all())
 
     @staticmethod
     def find_by_id(session: Session, qualification_id: int) -> Qualificacao | None:
@@ -50,7 +69,7 @@ class QualificationRepository:
             List of Qualificacao instances
         """
         stmt = select(Qualificacao).where(Qualificacao.tipo_aplicavel == tipo)
-        return session.execute(stmt).scalars().all()
+        return list(session.execute(stmt).scalars().all())
 
     @staticmethod
     def create(session: Session, qualification: Qualificacao) -> Qualificacao:
@@ -64,7 +83,20 @@ class QualificationRepository:
             Created Qualificacao instance
         """
         session.add(qualification)
-        session.commit()
+        try:
+            session.commit()
+        except IntegrityError as exc:
+            session.rollback()
+
+            # Recover automatically when the PK sequence is behind table values.
+            if 'duplicate key value violates unique constraint "qualificacoes_pkey"' not in str(exc.orig):
+                raise
+
+            QualificationRepository._sync_primary_key_sequence(session)
+            session.add(qualification)
+            session.commit()
+
+        session.refresh(qualification)
         return qualification
 
     @staticmethod
@@ -104,7 +136,7 @@ class QualificationRepository:
             .where(Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value)
             .order_by(Tripulante.nip, Tripulante.rank)
         )
-        return session.execute(stmt).scalars().all()
+        return list(session.execute(stmt).scalars().all())
 
     @staticmethod
     def find_tripulante_by_nip(session: Session, nip: int) -> Tripulante | None:

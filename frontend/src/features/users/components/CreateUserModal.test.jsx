@@ -5,11 +5,11 @@ import { CreateUserModal } from "./CreateUserModal";
 const mockOnSubmit = vi.fn();
 const mockOnClose = vi.fn();
 
-vi.mock("@/features/auth/contexts/AuthContext", () => ({
+vi.mock("@features/auth/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { roleLevel: 80 } }),
 }));
 
-vi.mock("@/common/CrewTypesProvider", () => ({
+vi.mock("@/app/providers/CrewTypesProvider", () => ({
   useCrewTypes: () => ({
     TipoTripulante: {
       PILOTO: "PILOTO",

@@ -1,8 +1,8 @@
-import { Can } from "@/common/components/Can";
-import { StyledText } from "@/common/components/StyledText";
-import { Role } from "@/common/roles";
-import { useAuth } from "@/features/auth/contexts/AuthContext";
-import { formatDate } from "@/utils/timeCalc";
+import { Can } from "@/shared/components/Can";
+import { StyledText } from "@/shared/components/StyledText";
+import { Role } from "@/shared/roles";
+import { useAuth } from "@features/auth";
+import { formatDate } from "@/shared/utils/timeCalc";
 import {
   Box,
   Center,

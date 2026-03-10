@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { toaster } from "./toaster";
+import { toaster } from "@/shared/utils/toaster";
 
 /**
  * Custom hook to send an email and handle the response.
@@ -21,7 +21,7 @@ export const useSendEmail = () => {
     setLoading(true);
     try {
       const response = await axios.post(endpoint, { email });
-      console.log("Email sent response:", response); // Log response for debugging
+      console.log("Email sent response:", response);
       toaster.create({
         title: "Email sent.",
         description: "Please check your email.",
@@ -31,7 +31,7 @@ export const useSendEmail = () => {
         placement: "top",
       });
     } catch (error) {
-      console.error("Error sending email:", error); // Log error for debugging
+      console.error("Error sending email:", error);
       toaster.create({
         title: "Error.",
         description:

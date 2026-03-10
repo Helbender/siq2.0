@@ -1,4 +1,4 @@
-import { toaster } from "@/utils/toaster";
+import { toaster } from "@/shared/utils/toaster";
 import {
   Box,
   Button,

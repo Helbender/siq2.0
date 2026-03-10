@@ -1,5 +1,5 @@
-import { useCrewTypes } from "@/common/CrewTypesProvider";
-import { formatHours } from "@/utils/timeCalc";
+import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
+import { formatHours } from "@/shared/utils/timeCalc";
 import { Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 
 export function TopPilotsSection({ topPilotsByType, dateRangeLabel }) {

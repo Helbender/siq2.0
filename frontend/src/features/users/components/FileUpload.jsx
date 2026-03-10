@@ -10,7 +10,7 @@ import {
   HStack,
   Field,
 } from "@chakra-ui/react";
-import { http } from "@/api/http";
+import { http } from "@/app/config/http";
 import { FiUploadCloud } from "react-icons/fi";
 
 export function FileUpload() {

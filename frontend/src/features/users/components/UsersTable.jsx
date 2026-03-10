@@ -1,5 +1,5 @@
-import { canModifyUser, getRoleName, Role } from "@/common/roles";
-import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { canModifyUser, getRoleName, Role } from "@/shared/roles";
+import { useAuth } from "@features/auth";
 import { useSendEmail } from "@/utils/useSendEmail";
 import {
   HStack,

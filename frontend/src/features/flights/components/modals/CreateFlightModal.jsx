@@ -14,9 +14,9 @@ import { useEffect, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 
-import { useUsersQuery } from "@/features/users/queries/useUsersQuery";
-import { getTimeDiff } from "@/utils/timeCalc";
-import { toaster } from "@/utils/toaster";
+import { useUsersQuery } from "@features/users";
+import { getTimeDiff } from "@/shared/utils/timeCalc";
+import { toaster } from "@/shared/utils/toaster";
 import { Field, Flex, Input, NativeSelect } from "@chakra-ui/react";
 import { useCreateFlight } from "../../hooks/useCreateFlight";
 import { flightDefaults } from "../../mappers/flightDefaults";
@@ -25,9 +25,8 @@ import { PilotInput } from "../PilotInput";
 export function CreateFlightModal({ flight, trigger }) {
   const isEdit = Boolean(flight);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { mutateAsync, isLoading } = useCreateFlight();
+  const { mutateAsync } = useCreateFlight();
   const { data: pilotos = [] } = useUsersQuery();
-
   const methods = useForm({
     defaultValues: flight ?? flightDefaults,
   });
@@ -38,6 +37,7 @@ export function CreateFlightModal({ flight, trigger }) {
     reset,
     setValue,
     register,
+    formState: { errors, isSubmitting },
   } = methods;
 
   // Register origin and destination with combined onChange handlers
@@ -102,9 +102,8 @@ export function CreateFlightModal({ flight, trigger }) {
   const onSubmit = async (data) => {
     const loadingToast = toaster.create({
       title: isEdit ? "A atualizar voo…" : "A registar voo…",
-      type: "loading",
+      type: "info",
     });
-
     try {
       await mutateAsync({
         id: flight?.id,
@@ -172,18 +171,21 @@ export function CreateFlightModal({ flight, trigger }) {
                       alignItems="center"
                       justifyContent="space-between">
 <Flex gap={2}>
-                          <Field.Root>
+                          <Field.Root invalid={!!errors.airtask}>
                             <Field.Label>Airtask</Field.Label>
                             <Input
                               placeholder="00A0000"
-                               {...methods.register("airtask", {
-                          required: "Campo obrigatório",
-                          pattern: {
-                            value: /^\d{2}[A-Za-z]\d{4}$/,
-                            message: "Formato inválido. Ex: 00A0000",
-                          },
-                        })}
+                              {...methods.register("airtask", {
+                                required: "Airtask é obrigatório",
+                                pattern: {
+                                  value: /^\d{2}[A-Za-z]\d{4}$/,
+                                  message: "Formato inválido. Ex: 00A0000",
+                                },
+                              })}
                             />
+                            {errors.airtask && (
+                              <Field.ErrorText>{errors.airtask.message}</Field.ErrorText>
+                            )}
                           </Field.Root>
                           <Field.Root>
                             <Field.Label>Modalidade</Field.Label>
@@ -236,24 +238,30 @@ export function CreateFlightModal({ flight, trigger }) {
 </Flex>
 
                       <Flex gap={2} direction={{ base: "column", md: "row" }}>
-                        <Field.Root>
+                        <Field.Root invalid={!!errors.date}>
                           <Field.Label>Data</Field.Label>
                           <Input
                             type="date"
                             {...methods.register("date", {
-                              required: "Campo obrigatório",
+                              required: "Data é obrigatória",
                             })}
                           />
+                          {errors.date && (
+                            <Field.ErrorText>{errors.date.message}</Field.ErrorText>
+                          )}
                         </Field.Root>
 
-                        <Field.Root>
+                        <Field.Root invalid={!!errors.ATD}>
                           <Field.Label>ATD</Field.Label>
                           <Input
                             type="time"
                             {...methods.register("ATD", {
-                              required: "Campo obrigatório",
+                              required: "ATD é obrigatório",
                             })}
                           />
+                          {errors.ATD && (
+                            <Field.ErrorText>{errors.ATD.message}</Field.ErrorText>
+                          )}
                         </Field.Root>
 
                         <Field.Root>
@@ -315,12 +323,12 @@ export function CreateFlightModal({ flight, trigger }) {
                         <Flex gap={2}
                         direction={{ base: "column", md: "row" }}
                         >
-                          <Field.Root>
+                          <Field.Root invalid={!!errors.tailNumber}>
                             <Field.Label>Nº Cauda</Field.Label>
                             <NativeSelect.Root>
                               <NativeSelect.Field
                                 {...methods.register("tailNumber", {
-                                  required: "Campo obrigatório",
+                                  required: "Nº Cauda é obrigatório",
                                   setValueAs: (value) => value ? parseInt(value) : 0
                                 })}
                                 placeholder=""
@@ -340,6 +348,9 @@ export function CreateFlightModal({ flight, trigger }) {
                               </NativeSelect.Field>
                               <NativeSelect.Indicator />
                             </NativeSelect.Root>
+                            {errors.tailNumber && (
+                              <Field.ErrorText>{errors.tailNumber.message}</Field.ErrorText>
+                            )}
                           </Field.Root>
                           <Field.Root>
                             <Field.Label>Aterragens</Field.Label>
@@ -518,9 +529,10 @@ export function CreateFlightModal({ flight, trigger }) {
                   </Dialog.ActionTrigger>
                   <Button
                     onClick={handleSubmit(onSubmit)}
-                    loading={isLoading}
+                    loading={isSubmitting}
                     colorPalette="blue"
                     type="button"
+                    disabled={isSubmitting}
                   >
                     {isEdit ? "Editar voo" : "Registar voo"}
                   </Button>
