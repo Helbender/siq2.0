@@ -7,6 +7,3 @@ export { useCreateFlight } from "./hooks/useCreateFlight";
 export { useDeleteFlight } from "./hooks/useDeleteFlight";
 export { useFlights } from "./hooks/useFlights";
 
-// Permissions
-export { FLIGHTS_PERMISSIONS } from "./permissions";
-

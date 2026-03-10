@@ -13,6 +13,3 @@ export { getCachedCrewTypes, useCrewTypesQuery } from "./queries/useCrewTypesQue
 
 // Hooks
 export { useQualificationFilters } from "./hooks/useQualificationFilters";
-
-// Permissions
-export { QUALIFICATIONS_PERMISSIONS } from "./permissions";

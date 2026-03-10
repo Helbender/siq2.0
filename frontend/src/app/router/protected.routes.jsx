@@ -3,14 +3,14 @@ import { RequireAuth } from "@features/auth";
 import { AuthenticatedLayout } from "@/layout/layouts/AuthenticatedLayout";
 import { Navigate } from "react-router";
 
-import { DashboardPage, DASHBOARD_PERMISSIONS } from "@features/dashboard";
-import { DatabaseManagementPage, DB_MANAGEMENT_PERMISSIONS } from "@features/db-management";
-import { FlightsByCrewSearchPage, FlightsPage, FLIGHTS_PERMISSIONS } from "@features/flights";
-import { QualificationsPreviewPage, QUALIFICATIONS_PREVIEW_PERMISSIONS } from "@features/qualifications-preview";
+import { DashboardPage } from "@features/dashboard";
+import { DatabaseManagementPage } from "@features/db-management";
+import { FlightsByCrewSearchPage, FlightsPage } from "@features/flights";
+import { QualificationsPreviewPage } from "@features/qualifications-preview";
 import { AboutPage } from "@/shared/components/AboutPage";
-import { CrewQualifications, CREW_QUALIFICATIONS_PERMISSIONS } from "@features/crew-qualifications";
-import { QualificationManagementPage, QUALIFICATIONS_PERMISSIONS } from "@features/qualifications";
-import { UserManagementPage, USERS_PERMISSIONS } from "@features/users";
+import { CrewQualifications } from "@features/crew-qualifications";
+import { QualificationManagementPage } from "@features/qualifications";
+import { UserManagementPage } from "@features/users";
 
 export const protectedRoutes = {
   element: (
@@ -21,18 +21,17 @@ export const protectedRoutes = {
   errorElement: <ErrorBoundary />,
   children: [
     { index: true, element: <Navigate to="/dashboard" replace /> },
-    { path: "/dashboard", element: <DashboardPage />, meta: { permission: DASHBOARD_PERMISSIONS.READ } },
-    { path: "/flights", element: <FlightsPage />, meta: { permission: FLIGHTS_PERMISSIONS.READ } },
-    { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage />, meta: { permission: FLIGHTS_PERMISSIONS.READ } },
-    { path: "/crew-qualifications", element: <CrewQualifications />, meta: { permission: CREW_QUALIFICATIONS_PERMISSIONS.READ } },
-    { path: "/qualifications-preview", element: <QualificationsPreviewPage />, meta: { permission: QUALIFICATIONS_PREVIEW_PERMISSIONS.READ } },
+    { path: "/dashboard", element: <DashboardPage /> },
+    { path: "/flights", element: <FlightsPage /> },
+    { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage /> },
+    { path: "/crew-qualifications", element: <CrewQualifications /> },
+    { path: "/qualifications-preview", element: <QualificationsPreviewPage /> },
     {
       path: "/manage-qualifications",
       element: <QualificationManagementPage />,
-      meta: { permission: QUALIFICATIONS_PERMISSIONS.WRITE },
     },
-    { path: "/users", element: <UserManagementPage />, meta: { permission: USERS_PERMISSIONS.READ } },
-    { path: "/db-management", element: <DatabaseManagementPage />, meta: { permission: DB_MANAGEMENT_PERMISSIONS.ADMIN } },
+    { path: "/users", element: <UserManagementPage /> },
+    { path: "/db-management", element: <DatabaseManagementPage /> },
     { path: "/about", element: <AboutPage /> },
   ],
 };
