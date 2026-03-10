@@ -42,71 +42,65 @@ export function UserManagementPage() {
   const canCreateUsers = currentUserRoleLevel !== Role.READONLY;
 
   const handleSubmit = async (userNip, formData) => {
-    let loadingToast = null;
-    
+    const promise = userNip
+      ? updateUser.mutateAsync({ userId: userNip, userData: formData })
+      : createUser.mutateAsync(formData);
+
+    toaster.promise(promise, {
+      loading: {
+        title: userNip ? "A atualizar utilizador" : "A criar utilizador",
+        description: "Por favor aguarde",
+      },
+      success: {
+        title: userNip ? "Utilizador atualizado com sucesso" : "Utilizador criado com sucesso",
+        description: "Operação concluída",
+      },
+      error: (err) => ({
+        title: userNip ? "Erro ao atualizar utilizador" : "Erro ao criar utilizador",
+        description:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "An error occurred",
+      }),
+    });
+
     try {
-      if (userNip) {
-        // Show loading toast for updates
-        loadingToast = toaster.create({
-          title: "A atualizar utilizador",
-          description: "Por favor aguarde...",
-          type: "info",
-          duration: null,
-          closable: false,
-        });
-        
-        await updateUser.mutateAsync({ userId: userNip, userData: formData });
-        
-        // Close all toasts (including loading) and show success
-        toaster.dismiss();
-        toaster.create({
-          title: "Utilizador atualizado com sucesso",
-          type: "success",
-        });
-      } else {
-        await createUser.mutateAsync(formData);
-        // Close all existing toasts before showing success
-        toaster.dismiss();
-        toaster.create({
-          title: "Utilizador criado com sucesso",
-          type: "success",
-        });
-      }
+      await promise;
       dialog.close();
     } catch (error) {
-      // Close all toasts (including loading) if it exists
-      toaster.dismiss();
-      
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.error || "An error occurred";
-      toaster.create({
-        title: userNip ? "Erro ao atualizar utilizador" : "Erro ao criar utilizador",
-        description: errorMessage,
-        type: "error",
-      });
       throw error;
     }
   };
 
   const handleDelete = async (user) => {
     if (!window.confirm(`Are you sure you want to delete user ${user.name}?`)) return;
-    try {
-      const res = await deleteUser.mutateAsync(user.nip);
-      if (res?.deleted_id) {
-        toaster.create({
-          title: "Utilizador apagado com sucesso",
-          description: `Utilizador com o nip ${res.deleted_id} apagado`,
-          type: "info",
-        });
-      }
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.error || "An error occurred";
-      toaster.create({
+
+    const promise = deleteUser.mutateAsync(user.nip);
+
+    toaster.promise(promise, {
+      loading: {
+        title: "A apagar utilizador…",
+        description: "Por favor aguarde",
+      },
+      success: (res) => ({
+        title: "Utilizador apagado com sucesso",
+        description: res?.deleted_id
+          ? `Utilizador com o nip ${res.deleted_id} apagado`
+          : "Operação concluída",
+      }),
+      error: (err) => ({
         title: "Erro ao apagar utilizador",
-        description: errorMessage,
-        type: "error",
-      });
+        description:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "An error occurred",
+      }),
+    });
+
+    try {
+      await promise;
+    } catch {
+      // Error toast handled by toaster.promise
     }
   };
   if (loading) {

@@ -100,31 +100,35 @@ export function CreateFlightModal({ flight, trigger }) {
   }, [isOpen, flight, reset]);
 
   const onSubmit = async (data) => {
-    const loadingToast = toaster.create({
-      title: isEdit ? "A atualizar voo…" : "A registar voo…",
-      type: "info",
+    const promise = mutateAsync({
+      id: flight?.id,
+      payload: data,
     });
-    try {
-      await mutateAsync({
-        id: flight?.id,
-        payload: data,
-      });
 
-      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
-      else if (loadingToast) toaster.dismiss(loadingToast);
-      toaster.create({
+    toaster.promise(promise, {
+      loading: {
+        title: isEdit ? "A atualizar voo…" : "A registar voo…",
+        description: "Por favor aguarde",
+      },
+      success: {
         title: isEdit ? "Voo atualizado" : "Voo criado",
-        type: "success",
-      });
+        description: "Operação concluída com sucesso",
+      },
+      error: (err) => ({
+        title: "Erro ao guardar voo",
+        description:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Algo correu mal",
+      }),
+    });
 
+    try {
+      await promise;
       onClose();
     } catch {
-      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
-      else if (loadingToast) toaster.dismiss(loadingToast);
-      toaster.create({
-        title: "Erro ao guardar voo",
-        type: "error",
-      });
+      // Error toast handled by toaster.promise
     }
   };
 

@@ -37,25 +37,27 @@ export function QualificationManagementPage() {
   } = useQualificationFilters(qualifications);
 
   const handleReprocessAllFlights = async () => {
-    const loadingToast = toaster.create({
-      title: "A reprocessar voos",
-      description: "Por favor aguarde...",
-      type: "loading",
-      duration: null,
-      closable: true,
+    const promise = reprocessFlights.mutateAsync();
+
+    toaster.promise(promise, {
+      loading: {
+        title: "A reprocessar voos",
+        description: "Por favor aguarde",
+      },
+      success: (res) => ({
+        title: "Sucesso!",
+        description: res?.message ?? "Reprocessamento concluído",
+      }),
+      error: (err) => ({
+        title: "Erro",
+        description: err.response?.data?.message ?? "Erro ao reprocessar",
+      }),
     });
 
     try {
-      const res = await reprocessFlights.mutateAsync();
-      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
-      toaster.create({ title: "Sucesso!", description: res.message, type: "success" });
-    } catch (error) {
-      if (loadingToast?.id) toaster.dismiss(loadingToast.id);
-      toaster.create({
-        title: "Erro",
-        description: error.response?.data?.message || "Erro ao reprocessar",
-        type: "error",
-      });
+      await promise;
+    } catch {
+      // Error toast handled by toaster.promise
     }
   };
 

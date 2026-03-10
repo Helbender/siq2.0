@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toaster } from "../../../components/ui/toaster";
 import { HealthCard } from "../components/HealthCard";
 import { useLogin } from "../mutations/useLogin";
 
@@ -36,20 +37,39 @@ export function LoginPage() {
     e.preventDefault();
     setError("");
 
+    const promise = loginMutation.mutateAsync({ nip, password });
+
+    toaster.promise(promise, {
+      loading: {
+        title: "A iniciar sessão...",
+        description: "Por favor aguarde",
+      },
+      success: (data) => ({
+        title: data?.user?.name ? `Bem-vindo, ${data.user.name}` : "Bem-vindo!",
+        description: "Sessão iniciada com sucesso",
+      }),
+      error: (err) => ({
+        title: "Falha no início de sessão",
+        description:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Algo correu mal",
+      }),
+    });
+
     try {
-      await loginMutation.mutateAsync({ nip, password });
-      // Small delay to ensure state is updated before navigation
+      await promise;
       setTimeout(() => {
         navigate("/dashboard", { replace: true });
       }, 100);
     } catch (err) {
       console.error("Login submission error:", err);
-      // Extract error message
       const errorMessage =
         err.response?.data?.message ||
         err.response?.data?.error ||
         err.message ||
-        "Login failed";
+        "Falha no início de sessão";
       setError(errorMessage);
     }
   };
@@ -75,7 +95,7 @@ export function LoginPage() {
             <Alert.Root status="error" mb={4}>
               <Alert.Indicator />
               <Alert.Content>
-                <Alert.Title>Error</Alert.Title>
+                <Alert.Title>Erro</Alert.Title>
                 <Alert.Description>{error}</Alert.Description>
               </Alert.Content>
             </Alert.Root>
@@ -95,13 +115,13 @@ export function LoginPage() {
             />
           </Field.Root>
           <Field.Root mt="2">
-            <Field.Label textAlign={"center"}>Password</Field.Label>
+            <Field.Label textAlign={"center"}>Palavra-passe</Field.Label>
             <Input
               bg="gray.700"
               type="password"
               value={password}
               name="password"
-              placeholder="Password"
+              placeholder="Palavra-passe"
               _hover={{borderColor:"teal.500"}}
 
               onChange={(e) => setPassword(e.target.value)}
@@ -112,12 +132,12 @@ export function LoginPage() {
             color="teal.500"
             fontWeight="bold"
             onClick={() => navigate("/forgot-password")}
-            aria-label="Forgot Password"
+            aria-label="Esqueceu-se da palavra-passe"
             textAlign="center"
             cursor="pointer"
             _hover={{ textDecoration: "underline" }}
           >
-            Esqueceu-se da password?
+            Esqueceu-se da palavra-passe?
           </Link>
           <Button
             mt="10"
@@ -127,7 +147,7 @@ export function LoginPage() {
             colorPalette={"teal"}
           >
             <b>
-              Login
+              Entrar
               </b>
           </Button>
         </Stack>

@@ -80,26 +80,35 @@ export function CreateQualModal({ edit, qualification }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formData = qualificacao.getValues();
-      if (edit) {
-        await updateQualification.mutateAsync({
+    const formData = qualificacao.getValues();
+    const promise = edit
+      ? updateQualification.mutateAsync({
           qualificationId: qualification.id,
           qualificationData: formData,
-        });
-        toaster.create({
-          title: "Qualificação atualizada com sucesso",
-          type: "success",
-        });
-      } else {
-        await createQualification.mutateAsync(formData);
-        toaster.create({ title: "Qualificação criada com sucesso", type: "success" });
-      }
+        })
+      : createQualification.mutateAsync(formData);
+
+    toaster.promise(promise, {
+      loading: {
+        title: edit ? "A atualizar qualificação…" : "A criar qualificação…",
+        description: "Por favor aguarde",
+      },
+      success: {
+        title: edit ? "Qualificação atualizada com sucesso" : "Qualificação criada com sucesso",
+        description: "Operação concluída",
+      },
+      error: (err) => ({
+        title: edit ? "Erro ao atualizar" : "Erro ao criar",
+        description:
+          err.response?.data?.message ?? "Erro a salvar a Qualificação",
+      }),
+    });
+
+    try {
+      await promise;
       onClose();
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Erro a salvar a Qualificação";
-      toaster.create({ title: errorMessage, type: "error" });
+    } catch {
+      // Error toast handled by toaster.promise
     }
   };
 

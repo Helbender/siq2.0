@@ -17,27 +17,30 @@ export function DeleteQualModal({ qual }) {
   const deleteQualification = useDeleteQualification();
 
   const deleteQual = async () => {
-    try {
-      await deleteQualification.mutateAsync(qual.id);
-      toaster.create({
+    const promise = deleteQualification.mutateAsync(qual.id);
+
+    toaster.promise(promise, {
+      loading: {
+        title: "A excluir qualificação…",
+        description: "Por favor aguarde",
+      },
+      success: {
         title: "Sucesso!",
         description: "Qualificação excluída com sucesso.",
-        type: "success",
-        duration: 3000,
-        closable: true,
-      });
-      onClose();
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Ocorreu um erro ao excluir a qualificação.";
-      toaster.create({
+      },
+      error: (err) => ({
         title: "Erro!",
-        description: errorMessage,
-        type: "error",
-        duration: 3000,
-        closable: true,
-      });
+        description:
+          err.response?.data?.message ??
+          "Ocorreu um erro ao excluir a qualificação.",
+      }),
+    });
+
+    try {
+      await promise;
+      onClose();
+    } catch {
+      // Error toast handled by toaster.promise
     }
   };
   return (
