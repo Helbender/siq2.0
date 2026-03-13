@@ -1,6 +1,6 @@
 """Users repository - database access only."""
 
-from sqlalchemy import delete, exc, select
+from sqlalchemy import exc, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
@@ -20,7 +20,7 @@ class UserRepository:
         Returns:
             List of Tripulante instances
         """
-        return session.execute(select(Tripulante)).scalars().all()
+        return list(session.scalars(select(Tripulante)))
 
     @staticmethod
     def find_by_nip(session: Session, nip: int) -> Tripulante | None:
@@ -64,6 +64,9 @@ class UserRepository:
     def delete_by_nip(session: Session, nip: int) -> bool:
         """Delete a user/tripulante by NIP.
 
+        Uses ORM delete so that cascade="all, delete-orphan" on qualificacoes
+        (and flight_pilots) is applied and related rows are removed first.
+
         Args:
             session: Database session
             nip: User NIP
@@ -71,13 +74,12 @@ class UserRepository:
         Returns:
             True if deleted, False if not found
         """
-        result = session.execute(delete(Tripulante).where(Tripulante.nip == nip))
-
-        if result.rowcount == 1:
-            session.commit()
-            return True
-
-        return False
+        tripulante = UserRepository.find_by_nip(session, nip)
+        if tripulante is None:
+            return False
+        session.delete(tripulante)
+        session.commit()
+        return True
 
     @staticmethod
     def update(session: Session, user: Tripulante) -> None:
