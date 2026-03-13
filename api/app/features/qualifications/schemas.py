@@ -10,6 +10,7 @@ class QualificationResponseSchema(Schema):
 
     id = fields.Int(required=True, metadata={"description": "Qualification ID"})
     nome = fields.Str(required=True, metadata={"description": "Qualification name"})
+    payload_key = fields.Str(allow_none=True, load_default=None, metadata={"description": "Stable key for payload (e.g. ATR, precapp); null for non-landing quals"})
     validade = fields.Int(required=True, metadata={"description": "Validity period in days"})
     tipo_aplicavel = fields.Str(required=True, metadata={"description": "Applicable crew type"})
     grupo = fields.Str(required=True, metadata={"description": "Qualification group"})
@@ -19,6 +20,7 @@ class QualificationCreateSchema(Schema):
     """Schema for creating a new qualification."""
 
     nome = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "Qualification name"})
+    payload_key = fields.Str(allow_none=True, load_default=None, metadata={"description": "Stable payload key (e.g. ATR, precapp); optional"})
     validade = fields.Int(required=True, validate=validate.Range(min=1), metadata={"description": "Validity period in days"})
     tipo_aplicavel = fields.Str(
         required=True,
@@ -36,6 +38,7 @@ class QualificationUpdateSchema(Schema):
     """Schema for updating a qualification."""
 
     nome = fields.Str(validate=validate.Length(min=1), metadata={"description": "Qualification name"})
+    payload_key = fields.Str(allow_none=True, load_default=None, metadata={"description": "Stable payload key; optional"})
     validade = fields.Int(validate=validate.Range(min=1), metadata={"description": "Validity period in days"})
     tipo_aplicavel = fields.Str(
         validate=validate.OneOf([t.value for t in TipoTripulante]),
@@ -64,6 +67,7 @@ class QualificationListResponseSchema(Schema):
 
     id = fields.Int(metadata={"description": "Qualification ID"})
     nome = fields.Str(metadata={"description": "Qualification name"})
+    payload_key = fields.Str(allow_none=True, load_default=None, metadata={"description": "Stable payload key; optional"})
 
 
 class ListsResponseSchema(Schema):

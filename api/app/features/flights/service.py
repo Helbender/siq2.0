@@ -383,13 +383,14 @@ class FlightService:
         # Pre-load all Qualificacao records into cache
         print("Pre-loading qualifications cache...")
         all_qualifications = self.repository.find_all_qualifications(session)
-        qual_cache_by_name: dict[tuple[str, TipoTripulante], Qualificacao] = {}
         qual_cache_by_id: dict[int, Qualificacao] = {}
+        qual_cache_by_payload_key: dict[tuple[str, TipoTripulante], Qualificacao] = {}
         for qual in all_qualifications:
-            qual_cache_by_name[(qual.nome, qual.tipo_aplicavel)] = qual
             qual_cache_by_id[qual.id] = qual
+            if qual.payload_key is not None:
+                qual_cache_by_payload_key[(qual.payload_key, qual.tipo_aplicavel)] = qual
 
-        print(f"Loaded {len(qual_cache_by_name)} qualifications into cache")
+        print(f"Loaded {len(qual_cache_by_id)} qualifications into cache")
 
         # Pre-load all TripulanteQualificacao records
         print("Pre-loading pilot qualifications cache...")
@@ -421,7 +422,7 @@ class FlightService:
                         errors.append(f"Pilot {flight_pilot.pilot_id} not found in flight {flight.fid}")
                         continue
 
-                    # Update qualification fields using cached lookups
+                    # Update qualification fields using cached lookups (QUAL1-6 by id only)
                     for k in ["QUAL1", "QUAL2", "QUAL3", "QUAL4", "QUAL5", "QUAL6"]:
                         qual_value = getattr(flight_pilot, k.lower())
                         if qual_value not in (None, "", False):
@@ -430,12 +431,12 @@ class FlightService:
                                 pilot_obj,
                                 qual_value,
                                 flight,
-                                qual_cache_by_name,
                                 qual_cache_by_id,
+                                qual_cache_by_payload_key,
                                 pq_cache,
                             )
 
-                    # For pilots, update landing counts
+                    # For pilots, update landing counts (resolve by payload_key)
                     if pilot_obj.tipo.value == "PILOTO":
                         landing_quals = [
                             ("ATR", flight_pilot.day_landings),
@@ -450,8 +451,8 @@ class FlightService:
                                     pilot_obj,
                                     qual_name,
                                     flight,
-                                    qual_cache_by_name,
                                     qual_cache_by_id,
+                                    qual_cache_by_payload_key,
                                     pq_cache,
                                     True,
                                 )
@@ -510,9 +511,11 @@ class FlightService:
                 ("precapp", flight_pilot.prec_app),
                 ("nprecapp", flight_pilot.nprec_app),
             ]
-            for qual_name, count in landing_specs:
+            for payload_key, count in landing_specs:
                 if count is not None and count > 0:
-                    qual = self.repository.find_qualification_by_nome_and_tipo(session, qual_name, tipo)
+                    qual = self.repository.find_qualification_by_payload_key_and_tipo(
+                        session, payload_key, tipo
+                    )
                     if qual is not None:
                         ids.add(qual.id)
         return ids
@@ -597,25 +600,6 @@ class FlightService:
                     con=_normalize_time(pilot.get("CON")),
                 )
         else:
-            i: int = 0
-            qual_list = self.repository.find_qualifications_by_tipo(session, pilot_obj.tipo)
-
-            excluded_names = {"ATR", "ATN", "precapp", "nprecapp"}
-            qual_list = [q for q in qual_list if q.nome not in excluded_names]
-
-            for qual_item in qual_list:
-                qual_value = pilot.get(qual_item.nome)
-                if qual_value is not None and qual_value is not False:
-                    qual = session.scalars(
-                        select(Qualificacao).where(
-                            Qualificacao.nome == qual_item.nome,
-                            Qualificacao.tipo_aplicavel == pilot_obj.tipo,
-                        )
-                    ).first()
-                    if qual:
-                        pilot[f"QUAL{i + 1}"] = str(qual.id)
-                        i += 1
-
             if flight.fid is None:
                 self.repository.flush(session)
 
@@ -665,35 +649,27 @@ class FlightService:
         pilot_obj: Tripulante,
         qual_identifier: Any,
         flight: Flight,
-        qual_cache_by_name: dict[tuple[str, TipoTripulante], Qualificacao],
         qual_cache_by_id: dict[int, Qualificacao],
+        qual_cache_by_payload_key: dict[tuple[str, TipoTripulante], Qualificacao],
         pq_cache: dict[tuple[int, int], TripulanteQualificacao],
         convert: bool = False,
     ) -> int:
-        """Optimized version using pre-loaded caches."""
+        """Optimized version using pre-loaded caches (id for QUAL1-6, payload_key for landing)."""
         if qual_identifier in (None, "", False):
             return 0
 
         qual: Qualificacao | None
 
         if convert:
-            qual = None
-            try:
-                qual_identifier_id = int(qual_identifier)
-            except (TypeError, ValueError):
-                qual = qual_cache_by_name.get((str(qual_identifier), pilot_obj.tipo))
-            else:
-                qual = qual_cache_by_id.get(qual_identifier_id) or qual_cache_by_name.get(
-                    (str(qual_identifier), pilot_obj.tipo)
-                )
+            # Landing quals: resolve by payload_key (ATR, ATN, precapp, nprecapp)
+            qual = qual_cache_by_payload_key.get((str(qual_identifier), pilot_obj.tipo))
         else:
+            # QUAL1-6: resolve by id only
             coerced_id = coerce_qualification_id(qual_identifier)
             if coerced_id is not None:
                 qual = qual_cache_by_id.get(int(coerced_id))
             else:
                 qual = None
-            if qual is None:
-                qual = qual_cache_by_name.get((str(qual_identifier).strip(), pilot_obj.tipo))
 
         if qual is None:
             return 0
@@ -735,36 +711,25 @@ class FlightService:
 
         if not convert:
             qual_id = getattr(flight_pilot, qual_name.lower())
-
+            # QUAL1-6: resolve by id only; non-digit values are invalid
             if isinstance(qual_id, str) and qual_id.strip() and not qual_id.isdigit():
-                qual_name_from_value = qual_id.strip()
-                qual = self.repository.find_qualification_by_nome_and_tipo(
-                    session, qual_name_from_value, pilot_obj.tipo
+                print(
+                    f"⚠️  Warning: Invalid qualification value '{qual_id}' for {qual_name} "
+                    f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Expected qualification ID. Skipping."
                 )
-                if qual:
-                    qual_id = qual.id
-                else:
-                    print(
-                        f"⚠️  Warning: Qualification '{qual_name_from_value}' not found for type {pilot_obj.tipo.value} "
-                        f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
-                    )
-                    return
+                return
         else:
-            for trip_qual in pilot_obj.qualificacoes:
-                if trip_qual.qualificacao.id == qual_name:
-                    qual_id = trip_qual.qualificacao_id
-                    break
-
-            if qual_id is None:
-                qual = self.repository.find_qualification_by_nome_and_tipo(session, qual_name, pilot_obj.tipo)
-                if qual:
-                    qual_id = qual.id
-                else:
-                    print(
-                        f"⚠️  Warning: Qualification '{qual_name}' not found for type {pilot_obj.tipo.value} "
-                        f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
-                    )
-                    return
+            # Landing quals: resolve by payload_key (ATR, ATN, precapp, nprecapp)
+            qual = self.repository.find_qualification_by_payload_key_and_tipo(
+                session, qual_name, pilot_obj.tipo
+            )
+            if qual is None:
+                print(
+                    f"⚠️  Warning: Qualification with payload_key '{qual_name}' not found for type {pilot_obj.tipo.value} "
+                    f"(Pilot: {pilot_obj.nip}, Flight: {flight.airtask} on {flight.date}). Skipping qualification update."
+                )
+                return
+            qual_id = qual.id
 
         if qual_id == "" or qual_id is None:
             return

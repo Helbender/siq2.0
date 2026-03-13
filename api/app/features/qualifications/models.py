@@ -20,6 +20,7 @@ class Qualificacao(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     nome: Mapped[str] = mapped_column(String(100), nullable=False)
+    payload_key: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     grupo: Mapped[GrupoQualificacoes] = mapped_column(
         SQLEnum(GrupoQualificacoes, name="grupoqualificacoes", native_enum=False), nullable=False
     )

@@ -39,6 +39,7 @@ class QualificationService:
             {
                 "id": q.id,
                 "nome": q.nome,
+                "payload_key": q.payload_key,
                 "validade": q.validade,
                 "tipo_aplicavel": q.tipo_aplicavel.value,
                 "grupo": q.grupo.value,
@@ -70,6 +71,7 @@ class QualificationService:
 
         qualification = Qualificacao(
             nome=qualification_data["nome"],
+            payload_key=qualification_data.get("payload_key"),
             validade=qualification_data["validade"],
             tipo_aplicavel=tipo_enum,
             grupo=grupo_enum,
@@ -95,6 +97,7 @@ class QualificationService:
         return {
             "id": qualification.id,
             "nome": qualification.nome,
+            "payload_key": qualification.payload_key,
             "validade": qualification.validade,
             "tipo_aplicavel": qualification.tipo_aplicavel.value,
             "grupo": qualification.grupo.value,
@@ -118,6 +121,11 @@ class QualificationService:
 
         if "nome" in qualification_data:
             qualification.nome = qualification_data["nome"]
+        if "payload_key" in qualification_data:
+            new_pk = qualification_data["payload_key"]
+            # Do not clear payload_key when frontend sends null/empty (e.g. edit form only sends nome)
+            if new_pk is not None and (not isinstance(new_pk, str) or new_pk.strip()):
+                qualification.payload_key = new_pk.strip() if isinstance(new_pk, str) else new_pk
         if "validade" in qualification_data:
             qualification.validade = qualification_data["validade"]
         if "tipo_aplicavel" in qualification_data:

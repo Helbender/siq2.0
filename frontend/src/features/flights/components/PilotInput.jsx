@@ -11,8 +11,6 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { FaMinus } from "react-icons/fa";
 
-const HIDDEN_QUALIFICATIONS = ["ATR", "ATN", "PREC", "NPREC"];
-
 // Fallback position -> tipo when CrewTypesProvider hasn't loaded (e.g. on edit modal open)
 const POSITION_TO_TIPO_FALLBACK = {
   PI: "PILOTO",
@@ -245,13 +243,9 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                 name={qualFieldName}
                 control={control}
                 render={({ field }) => {
-                  const options = (qualP || [])
-                    .filter(
-                      (qual) =>
-                        !HIDDEN_QUALIFICATIONS.includes(
-                          (qual.nome || "").toUpperCase(),
-                        ),
-                    )
+                  const options = (qualP || []).filter(
+                    (qual) => !(qual.payload_key ?? "").trim(),
+                  )
                     .map((qual) => ({
                       value: String(qual.id),
                       label: qual.nome,
