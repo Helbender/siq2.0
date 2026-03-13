@@ -301,6 +301,25 @@ class FlightRepository:
         return session.scalars(stmt).first()
 
     @staticmethod
+    def find_qualification_by_payload_key_and_tipo(
+        session: Session, payload_key: str, tipo: Any
+    ) -> Qualificacao | None:
+        """Find a qualification by payload_key and tipo (for landing quals: ATR, ATN, precapp, nprecapp).
+
+        Args:
+            session: Database session
+            payload_key: Stable payload key (e.g. ATR, precapp)
+            tipo: TipoTripulante enum
+
+        Returns:
+            Qualificacao instance or None if not found
+        """
+        stmt = select(Qualificacao).where(
+            Qualificacao.payload_key == payload_key, Qualificacao.tipo_aplicavel == tipo
+        )
+        return session.scalars(stmt).first()
+
+    @staticmethod
     def find_tripulante_qualificacoes_by_pilot_id(session: Session, pilot_id: int) -> list[TripulanteQualificacao]:
         """Find all tripulante qualifications for a pilot.
 
@@ -407,8 +426,8 @@ class FlightRepository:
             "nprecapp": FlightPilots.nprec_app,
         }
 
-        if qual is not None and qual.nome in landing_qual_map:
-            landing_field = landing_qual_map[qual.nome]
+        if qual is not None and qual.payload_key is not None and qual.payload_key in landing_qual_map:
+            landing_field = landing_qual_map[qual.payload_key]
             stmt = (
                 select(func.max(Flight.date))
                 .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
