@@ -560,11 +560,13 @@ export function CreateFlightModal({ flight, trigger }) {
                       <Separator />
 
                       <Box>
-                        <Field.Root>
+                        <Field.Root invalid={!!errors.anomalyOption}>
                           <Field.Label>Anomalias</Field.Label>
                           <NativeSelect.Root>
                             <NativeSelect.Field
-                              {...methods.register("anomalyOption")}
+                              {...methods.register("anomalyOption", {
+                                required: "Selecione uma opção (ex.: Nenhuma anomalia a reportar)",
+                              })}
                               placeholder={tailNumber ? (isLoadingAnomalies ? "A carregar…" : "Selecionar") : "Selecione o Nº Cauda primeiro"}
                               disabled={!tailNumber || isLoadingAnomalies}
                             >
@@ -578,6 +580,9 @@ export function CreateFlightModal({ flight, trigger }) {
                             </NativeSelect.Field>
                             <NativeSelect.Indicator />
                           </NativeSelect.Root>
+                          {errors.anomalyOption && (
+                            <Field.ErrorText>{errors.anomalyOption.message}</Field.ErrorText>
+                          )}
                           {methods.watch("anomalyOption") === "__NEW__" && (
                             <Input
                               mt={2}
