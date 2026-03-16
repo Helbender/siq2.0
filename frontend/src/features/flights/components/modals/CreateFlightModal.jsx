@@ -14,10 +14,11 @@ import { useEffect, useRef } from "react";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 
-import { useUsersQuery } from "@features/users";
 import { getTimeDiff } from "@/shared/utils/timeCalc";
 import { toaster } from "@/shared/utils/toaster";
 import { Field, Flex, Input, NativeSelect } from "@chakra-ui/react";
+import { useUsersQuery } from "@features/users";
+import { useAnomalyDescriptionsByPlane } from "../../hooks/useAnomalyDescriptionsByPlane";
 import { useCreateFlight } from "../../hooks/useCreateFlight";
 import { flightDefaults } from "../../mappers/flightDefaults";
 import { PilotInput } from "../PilotInput";
@@ -62,6 +63,8 @@ export function CreateFlightModal({ flight, trigger }) {
   // Watch ATD and ATA to calculate ATE
   const ATD = useWatch({ control, name: "ATD" });
   const ATA = useWatch({ control, name: "ATA" });
+  const tailNumber = useWatch({ control, name: "tailNumber" });
+  const { data: anomalyDescriptions = [], isLoading: isLoadingAnomalies } = useAnomalyDescriptionsByPlane(tailNumber);
 
   // Ref for horizontal scrolling
   const scrollRef = useRef(null);
@@ -95,14 +98,48 @@ export function CreateFlightModal({ flight, trigger }) {
 
   useEffect(() => {
     if (isOpen) {
-      reset(flight ?? flightDefaults);
+      if (flight) {
+        const firstAnomaly = flight.anomalies?.[0];
+        reset({
+          ...flight,
+          anomalyOption: firstAnomaly ?? "NO_ANOMALY",
+          anomalyNewText: "",
+        });
+      } else {
+        reset(flightDefaults);
+      }
     }
   }, [isOpen, flight, reset]);
 
+  // When editing, if current anomaly is not in the list, show "Add new" with that value
+  const currentOption = methods.watch("anomalyOption");
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !currentOption ||
+      currentOption === "NO_ANOMALY" ||
+      currentOption === "__NEW__" ||
+      anomalyDescriptions.includes(currentOption)
+    ) {
+      return;
+    }
+    setValue("anomalyNewText", currentOption);
+    setValue("anomalyOption", "__NEW__");
+  }, [isOpen, anomalyDescriptions, currentOption, setValue]);
+
   const onSubmit = async (data) => {
+    const anomalyOption = data.anomalyOption ?? "";
+    const anomalyNewText = (data.anomalyNewText ?? "").trim().slice(0, 50);
+    const anomalies =
+      anomalyOption === "__NEW__"
+        ? (anomalyNewText ? [anomalyNewText] : [])
+        : anomalyOption && anomalyOption !== "NO_ANOMALY"
+          ? [anomalyOption]
+          : [];
+    const payload = { ...data, anomalies };
     const promise = mutateAsync({
       id: flight?.id,
-      payload: data,
+      payload,
     });
 
     toaster.promise(promise, {
@@ -519,6 +556,45 @@ export function CreateFlightModal({ flight, trigger }) {
                       >
                         Adicionar Tripulante
                       </Button>
+
+                      <Separator />
+
+                      <Box>
+                        <Field.Root>
+                          <Field.Label>Anomalias</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              {...methods.register("anomalyOption")}
+                              placeholder={tailNumber ? (isLoadingAnomalies ? "A carregar…" : "Selecionar") : "Selecione o Nº Cauda primeiro"}
+                              disabled={!tailNumber || isLoadingAnomalies}
+                            >
+                              <option value="NO_ANOMALY">Nenhuma anomalia a reportar</option>
+                              {anomalyDescriptions.map((d) => (
+                                <option key={d} value={d}>
+                                  {d}
+                                </option>
+                              ))}
+                              <option value="__NEW__">Adicionar nova…</option>
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                          {methods.watch("anomalyOption") === "__NEW__" && (
+                            <Input
+                              mt={2}
+                              placeholder="Descrição da anomalia (máx. 50 caracteres)"
+                              maxLength={50}
+                              {...methods.register("anomalyNewText", {
+                                maxLength: 50,
+                              })}
+                            />
+                          )}
+                          {methods.watch("anomalyOption") === "__NEW__" && (
+                            <Field.HelperText>
+                              {((methods.watch("anomalyNewText") ?? "").length)}/50
+                            </Field.HelperText>
+                          )}
+                        </Field.Root>
+                      </Box>
                
                     </Stack>
                   </Dialog.Body>

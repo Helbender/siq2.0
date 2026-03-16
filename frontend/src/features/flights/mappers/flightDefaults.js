@@ -21,4 +21,6 @@ export const flightDefaults = {
   readyAC: "__:__",
   medArrival: "__:__",
   flight_pilots: [{ name: "", VIR: "", VN: "", CON: "" }],
+  anomalyOption: "",
+  anomalyNewText: "",
 };

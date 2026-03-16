@@ -90,6 +90,11 @@ class FlightCreateSchema(Schema):
         validate=validate.Length(min=1),
         metadata={"description": "List of pilots/crew on the flight"},
     )
+    anomalies = fields.List(
+        fields.Str(validate=validate.Length(max=50)),
+        load_default=list,
+        metadata={"description": "List of anomaly descriptions (max 50 chars each)"},
+    )
 
 
 class FlightUpdateSchema(Schema):
@@ -126,6 +131,11 @@ class FlightUpdateSchema(Schema):
         validate=validate.Length(min=1),
         metadata={"description": "List of pilots/crew on the flight"},
     )
+    anomalies = fields.List(
+        fields.Str(validate=validate.Length(max=50)),
+        load_default=list,
+        metadata={"description": "List of anomaly descriptions (max 50 chars each)"},
+    )
 
 
 class FlightResponseSchema(Schema):
@@ -154,6 +164,7 @@ class FlightResponseSchema(Schema):
     readyAC = fields.Str(metadata={"description": "Aircraft ready"})
     medArrival = fields.Str(metadata={"description": "Medical arrival"})
     flight_pilots = fields.List(fields.Dict(), metadata={"description": "Flight pilots"})
+    anomalies = fields.List(fields.Str(), metadata={"description": "Anomaly descriptions"})
 
 
 class ReprocessResponseSchema(Schema):

@@ -292,6 +292,54 @@ def retrieve_flights() -> tuple[Response, int]:
         return jsonify(result), 400
 
 
+@flights_bp.route("/anomaly-descriptions", methods=["GET"], strict_slashes=False)
+def get_anomaly_descriptions() -> tuple[Response, int]:
+    """Return distinct anomaly descriptions for an aircraft (tail number).
+
+    Query params: tailnumber (required, integer).
+    """
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
+    from flask_jwt_extended import get_jwt, get_jwt_identity
+
+    from app.features.auth.repository import AuthRepository
+
+    nip_identity = get_jwt_identity()
+    claims = get_jwt()
+    if isinstance(nip_identity, str) and nip_identity == "admin":
+        user_role_level = Role.SUPER_ADMIN.level
+    else:
+        try:
+            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+        except (ValueError, TypeError):
+            return jsonify({"error": "Invalid user identity"}), 401
+        user_role_level = claims.get("roleLevel")
+        if user_role_level is None:
+            repository = AuthRepository()
+            with Session(engine) as session:
+                current_user = repository.find_user_by_nip(session, nip)
+                if current_user is None:
+                    return jsonify({"error": "User not found"}), 404
+                user_role_level = current_user.role.level if current_user.role else current_user.role_level
+
+    if user_role_level is None or user_role_level < Role.READONLY.level:
+        return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
+
+    try:
+        tailnumber = int(request.args.get("tailnumber", 0))
+    except (ValueError, TypeError):
+        return jsonify({"message": "tailnumber must be an integer"}), 400
+
+    if tailnumber <= 0:
+        return jsonify([]), 200
+
+    with Session(engine) as session:
+        descriptions = flight_service.get_anomaly_descriptions_by_tailnumber(session, tailnumber)
+        return jsonify(descriptions), 200
+
+
 @flights_bp.route("/by-crew", methods=["GET"], strict_slashes=False)
 def search_flights_by_crew() -> tuple[Response, int]:
     """Search flights by crew member name or NIP, with optional date range.

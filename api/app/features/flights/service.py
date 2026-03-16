@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from sqlalchemy import exc, select, text
 from sqlalchemy.orm import Session
 
-from app.features.flights.models import Flight, FlightPilots  # type: ignore
+from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # type: ignore
 from app.features.flights.repository import FlightRepository
 from app.features.qualifications.models import Qualificacao  # type: ignore
 from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
@@ -88,6 +88,18 @@ class FlightService:
 
         flights = [row.to_json(qual_cache) for row in flights_obj]
         return flights
+
+    def get_anomaly_descriptions_by_tailnumber(self, session: Session, tailnumber: int) -> list[str]:
+        """Get distinct anomaly descriptions for an aircraft (tail number).
+
+        Args:
+            session: Database session
+            tailnumber: Aircraft tail number
+
+        Returns:
+            List of distinct description strings
+        """
+        return self.repository.find_anomaly_descriptions_by_tailnumber(session, tailnumber)
 
     def get_flights_by_crew_search(
         self,
@@ -226,6 +238,12 @@ class FlightService:
             self.repository.rollback(session)
             return {"message": str(e.orig)}
 
+        # Add flight anomalies (after flush so flight.fid exists)
+        for desc in flight_data.get("anomalies") or []:
+            text_desc = (str(desc).strip()[:50]).strip() if desc else ""
+            if text_desc:
+                session.add(FlightAnomaly(flight_id=flight.fid, description=text_desc))
+
         self.repository.commit(session)
         nome_arquivo_voo = flight.get_file_name()
         nome_pdf = nome_arquivo_voo.replace(".1m", ".pdf")
@@ -315,6 +333,13 @@ class FlightService:
             result = self._add_crew_and_pilots(session, flight, pilot, edit=True)
             if result is None:
                 continue
+
+        # Replace flight anomalies
+        self.repository.delete_flight_anomalies_for_flight(session, flight_id)
+        for desc in flight_data.get("anomalies") or []:
+            text_desc = (str(desc).strip()[:50]).strip() if desc else ""
+            if text_desc:
+                session.add(FlightAnomaly(flight_id=flight_id, description=text_desc))
 
         self.repository.commit(session)
         session.refresh(flight)

@@ -1,15 +1,16 @@
+import { AuthenticatedLayout } from "@/layout/layouts/AuthenticatedLayout";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import { RequireAuth } from "@features/auth";
-import { AuthenticatedLayout } from "@/layout/layouts/AuthenticatedLayout";
 import { Navigate } from "react-router";
 
+import { AboutPage } from "@/shared/components/AboutPage";
+import { Anomalias } from "@features/aircraft_anomalies";
+import { CrewQualifications } from "@features/crew-qualifications";
 import { DashboardPage } from "@features/dashboard";
 import { DatabaseManagementPage } from "@features/db-management";
 import { FlightsByCrewSearchPage, FlightsPage } from "@features/flights";
-import { QualificationsPreviewPage } from "@features/qualifications-preview";
-import { AboutPage } from "@/shared/components/AboutPage";
-import { CrewQualifications } from "@features/crew-qualifications";
 import { QualificationManagementPage } from "@features/qualifications";
+import { QualificationsPreviewPage } from "@features/qualifications-preview";
 import { UserManagementPage } from "@features/users";
 
 export const protectedRoutes = {
@@ -33,5 +34,7 @@ export const protectedRoutes = {
     { path: "/users", element: <UserManagementPage /> },
     { path: "/db-management", element: <DatabaseManagementPage /> },
     { path: "/about", element: <AboutPage /> },
+    { path: "/anomalias", element: <Anomalias /> },
+
   ],
 };
