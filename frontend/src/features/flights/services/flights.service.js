@@ -39,4 +39,17 @@ export const flightsService = {
     const { data } = await http.get(`/flights/by-crew?${params.toString()}`);
     return data ?? [];
   },
+
+  /**
+   * Get distinct anomaly descriptions for an aircraft (tail number).
+   * @param {number} tailNumber - Aircraft tail number
+   * @returns {Promise<string[]>} List of description strings
+   */
+  getAnomalyDescriptions: async (tailNumber) => {
+    if (!tailNumber || tailNumber <= 0) return [];
+    const { data } = await http.get("/flights/anomaly-descriptions", {
+      params: { tailnumber: tailNumber },
+    });
+    return Array.isArray(data) ? data : [];
+  },
 };

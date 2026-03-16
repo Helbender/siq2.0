@@ -3,10 +3,10 @@
 from datetime import date
 from typing import Any
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.features.flights.models import Flight, FlightPilots  # type: ignore
+from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
 from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 from app.shared.models import year_init  # type: ignore
@@ -37,6 +37,7 @@ class FlightRepository:
             .order_by(Flight.date.desc())
             .options(
                 joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
+                joinedload(Flight.flight_anomalies),
             )
         )
         return list(session.execute(stmt).unique().scalars().all())
@@ -165,6 +166,7 @@ class FlightRepository:
             .where(Flight.fid == flight_id)
             .options(
                 joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
+                joinedload(Flight.flight_anomalies),
             )
         )
         return session.execute(stmt).unique().scalar_one_or_none()
@@ -245,6 +247,36 @@ class FlightRepository:
         """
         stmt = select(FlightPilots).where(FlightPilots.flight_id == flight_id).where(FlightPilots.pilot_id == pilot_id)
         return session.execute(stmt).scalar_one_or_none()
+
+    @staticmethod
+    def find_anomaly_descriptions_by_tailnumber(session: Session, tailnumber: int) -> list[str]:
+        """Get distinct anomaly descriptions ever reported for a given aircraft (tail number).
+
+        Args:
+            session: Database session
+            tailnumber: Aircraft tail number
+
+        Returns:
+            List of distinct description strings, ordered by description
+        """
+        stmt = (
+            select(FlightAnomaly.description)
+            .join(Flight, Flight.fid == FlightAnomaly.flight_id)
+            .where(Flight.tailnumber == tailnumber)
+            .distinct()
+            .order_by(FlightAnomaly.description)
+        )
+        return list(session.execute(stmt).scalars().all())
+
+    @staticmethod
+    def delete_flight_anomalies_for_flight(session: Session, flight_id: int) -> None:
+        """Remove all anomaly rows for a flight (used before replacing with new list).
+
+        Args:
+            session: Database session
+            flight_id: Flight ID
+        """
+        session.execute(delete(FlightAnomaly).where(FlightAnomaly.flight_id == flight_id))
 
     @staticmethod
     def find_tripulante_by_nip(session: Session, nip: int) -> Tripulante | None:

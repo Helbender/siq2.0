@@ -43,7 +43,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # IMPORTANT: Import all models so they register with Base.metadata
-from app.features.flights.models import Flight, FlightPilots  # noqa: E402, F401
+from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # noqa: E402, F401
 from app.features.qualifications.models import Qualificacao  # noqa: E402, F401
 
 # Import all models to ensure they're registered with Base.metadata

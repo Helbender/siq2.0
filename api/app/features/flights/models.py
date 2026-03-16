@@ -61,6 +61,11 @@ class Flight(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+    flight_anomalies: Mapped[list["FlightAnomaly"]] = relationship(  # noqa: UP006
+        back_populates="flight",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def to_json(self, qual_cache: dict[int, str] | None = None) -> dict:
         """Return all model data in JSON format.
@@ -95,6 +100,7 @@ class Flight(Base):
             "readyAC": self.ready_ac,
             "medArrival": self.med_arrival,
             "flight_pilots": flight_crewmembers,
+            "anomalies": [fa.description for fa in self.flight_anomalies],
         }
 
     def get_file_name(self) -> str:
@@ -176,4 +182,19 @@ class FlightPilots(Base):
         }
 
         return response
+
+
+class FlightAnomaly(Base):
+    """Anomaly reported for a flight (one row per anomaly description)."""
+
+    __tablename__ = "flight_anomalies"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    flight_id: Mapped[int] = mapped_column(
+        ForeignKey("flights_table.fid", ondelete="CASCADE"),
+        nullable=False,
+    )
+    description: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    flight: Mapped["Flight"] = relationship(back_populates="flight_anomalies")
 

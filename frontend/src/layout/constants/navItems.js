@@ -2,6 +2,7 @@ import { Role } from "@/shared/roles";
 import {
   FaCalendarCheck,
   FaDatabase,
+  FaExclamationTriangle,
   FaPlaneArrival,
   FaSearch,
   FaTable,
@@ -38,5 +39,11 @@ export const NAV_ITEMS = [
     icon: FaSearch,
     path: "/flights/search-by-crew",
     minLevel: Role.SUPER_ADMIN,
+  },
+  {
+    label: "Anomalias",
+    icon: FaExclamationTriangle,
+    path: "/anomalias",
+    minLevel: Role.USER,
   },
 ];
