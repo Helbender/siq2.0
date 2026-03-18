@@ -5,8 +5,9 @@ import {
   Heading
 } from "@chakra-ui/react";
 import { GroupedQualifications } from "./GroupedQualifications";
+import { memo } from "react";
 
-export function PilotCard({ user }) {
+export const PilotCard = memo(function PilotCard({ user }) {
   return (
     <Card.Root
       bg="bg.cardSubtle"
@@ -42,4 +43,4 @@ export function PilotCard({ user }) {
       </Card.Body>
     </Card.Root>
   );
-}
+});

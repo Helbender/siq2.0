@@ -1,5 +1,5 @@
-import { FeatureBasePage } from "@/shared/components/FeatureBasePage";
 import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
+import { FeatureBasePage } from "@/shared/components/FeatureBasePage";
 import { Box, Flex, SegmentGroup, Tabs, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { usePilots } from "../hooks/usePilots";
@@ -59,14 +59,9 @@ export function CrewQualifications({ tipo }) {
     <FeatureBasePage title="Qualificações de Tripulantes">
       
       <Tabs.Root
+      lazyMount
         variant="enclosed"
-        value={activeTab}
-        onValueChange={(d) => setActiveTab(d.value)}
-        css={{
-        "--tabs-indicator-bg": "colors.teal.500",
-        "--tabs-indicator-shadow": "shadows.lg",
-        "--tabs-trigger-radius": "radii.full",
-        }}
+        defaultValue="Individuais"
       >
      
         <VStack gap={4} mb={6}>
