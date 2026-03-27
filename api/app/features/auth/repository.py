@@ -46,7 +46,7 @@ class AuthRepository:
         Returns:
             First Tripulante instance or None if database is empty
         """
-        return session.execute(select(Tripulante)).first()  # type: ignore
+        return session.execute(select(Tripulante)).scalars().first()  # type: ignore
 
     @staticmethod
     def update_user_password(session: Session, user: Tripulante, hashed_password: str) -> None:

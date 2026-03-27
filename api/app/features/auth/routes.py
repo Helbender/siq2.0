@@ -14,7 +14,7 @@ from app.features.auth.schemas import (
     ResetPasswordRequestSchema,
     validate_request,
 )
-from app.features.auth.service import AuthService
+from app.features.auth.service import AuthError, AuthService
 
 auth_bp = Blueprint("auth", __name__)
 auth_service = AuthService()
@@ -107,16 +107,12 @@ def create_token() -> tuple[Response | dict[str, str], int]:
                 validated_data["password"],
                 session,
             )
-
-            if "access_token" in result:
-                response = jsonify(result)
-                # Set refresh token in httpOnly cookie
-                cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(result["refresh_token"])
-                response.set_cookie(**cookie_kwargs)
-                return response, 201
-
-            status_code = 401 if "Wrong password" in result.get("message", "") else 404
-            return jsonify(result), status_code
+            response = jsonify(result)
+            cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(result["refresh_token"])
+            response.set_cookie(**cookie_kwargs)
+            return response, 201
+    except AuthError as e:
+        return jsonify({"message": e.message}), e.status_code
     except Exception as e:
         print(f"Error in POST /token: {e}")
         traceback.print_exc()
@@ -129,15 +125,11 @@ def get_current_user():
     """Get current authenticated user."""
     try:
         nip_identity = get_jwt_identity()
-
         with Session(engine) as session:
             result = auth_service.get_current_user(nip_identity, session)
-
-            if "error" in result:
-                status_code = 404 if "not found" in result["error"] else 400
-                return jsonify(result), status_code
-
-            return jsonify(result), 200
+        return jsonify(result), 200
+    except AuthError as e:
+        return jsonify({"error": e.message}), e.status_code
     except Exception as e:
         print(f"[auth/me] Error: {e}")
         traceback.print_exc()
@@ -150,15 +142,11 @@ def refresh():
     """Refresh access token using refresh token."""
     try:
         nip = get_jwt_identity()
-        print(f"[auth/refresh] Refreshing token for NIP: {nip}")
-        access_token, error = AuthService.refresh_access_token(nip)
-
-        if error:
-            print(f"[auth/refresh] Error refreshing token: {error}")
-            return jsonify({"error": error}), 404
-
-        print(f"[auth/refresh] Successfully refreshed token for NIP: {nip}")
+        with Session(engine) as session:
+            access_token = auth_service.refresh_access_token(nip, session)
         return jsonify({"access_token": access_token}), 200
+    except AuthError as e:
+        return jsonify({"error": e.message}), e.status_code
     except Exception as e:
         print(f"[auth/refresh] Exception during refresh: {e}")
         traceback.print_exc()
@@ -313,17 +301,14 @@ def reset_password() -> tuple[Response, int]:
             return jsonify({"message": error_message}), 400
 
         with Session(engine) as session:
-            result = auth_service.reset_password(
+            auth_service.reset_password(
                 token=validated_data["token"],
                 new_password=validated_data["password"],
                 session=session,
             )
-
-            if "Password updated successfully" in result.get("message", ""):
-                return jsonify({"message": "Password atualizada com sucesso"}), 200
-
-            status_code = 400 if "can not be empty" in result.get("message", "") else 404
-            return jsonify(result), status_code
+        return jsonify({"message": "Password atualizada com sucesso"}), 200
+    except AuthError as e:
+        return jsonify({"message": e.message}), e.status_code
     except Exception as e:
         print(f"[auth/reset-password] Error: {e}")
         traceback.print_exc()

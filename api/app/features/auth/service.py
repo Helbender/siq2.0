@@ -7,10 +7,18 @@ from typing import Any
 from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.orm import Session
 
-from app.core.config import engine
 from app.features.auth.repository import AuthRepository
 from app.shared.enums import Role
 from app.utils.email import hash_code, send_email
+
+
+class AuthError(Exception):
+    """Raised by AuthService when an operation fails with a known HTTP status."""
+
+    def __init__(self, message: str, status_code: int) -> None:
+        super().__init__(message)
+        self.message = message
+        self.status_code = status_code
 
 
 class AuthService:
@@ -21,7 +29,7 @@ class AuthService:
         self.repository = AuthRepository()
 
     def authenticate_user(self, nip: str | int, password: str, session: Session) -> dict[str, Any]:
-        """Authenticate a user and return token or error.
+        """Authenticate a user and return tokens.
 
         Args:
             nip: User NIP (can be string or int, "admin" for admin login)
@@ -29,7 +37,10 @@ class AuthService:
             session: Database session
 
         Returns:
-            dict with "access_token" key on success, or "message" key on error
+            dict with "access_token" and "refresh_token" keys on success
+
+        Raises:
+            AuthError: If credentials are invalid or user not found
         """
         # Handle admin login
         if nip == "admin" and password == "admin":
@@ -47,20 +58,18 @@ class AuthService:
                     "access_token": access_token,
                     "refresh_token": refresh_token,
                 }
-            return {"message": "Can not login as admin. Db already populated"}
+            raise AuthError("Can not login as admin. Db already populated", 403)
 
         # Handle regular user login
         tripulante = self.repository.find_user_by_nip(session, int(nip))
 
         if tripulante is None:
-            return {"message": f"No user with the NIP {nip}"}
+            raise AuthError(f"No user with the NIP {nip}", 404)
 
         if hash_code(password) != tripulante.password:
-            return {"message": "Wrong password"}
+            raise AuthError("Wrong password", 401)
 
-        # Ensure identity is consistently a string for JWT
         nip_str = str(nip)
-        # Get roleLevel from role relationship if exists, otherwise use role_level field
         role_level = tripulante.role.level if tripulante.role else tripulante.role_level
         access_token = create_access_token(
             identity=nip_str,
@@ -75,49 +84,42 @@ class AuthService:
             "refresh_token": refresh_token,
         }
 
-    @staticmethod
-    def refresh_access_token(nip: str | int) -> tuple[str | None, str | None]:
+    def refresh_access_token(self, nip: str | int, session: Session) -> str:
         """Generate a new access token for a user.
 
         Args:
             nip: User NIP (can be string or int)
+            session: Database session
 
         Returns:
-            tuple of (access_token, error) where error is None on success
+            New access token string
+
+        Raises:
+            AuthError: If user not found
         """
-        # Handle admin case
         if str(nip) == "admin":
-            new_access_token = create_access_token(
+            return create_access_token(
                 identity="admin",
                 additional_claims={
                     "name": "ADMIN",
                     "roleLevel": Role.SUPER_ADMIN.level,
                 },
             )
-            return new_access_token, None
 
-        with Session(engine) as session:
-            repository = AuthRepository()
-            # Convert to int for database query
-            nip_int = int(nip) if isinstance(nip, str) else nip
-            tripulante = repository.find_user_by_nip(session, nip_int)
+        nip_int = int(nip)
+        tripulante = self.repository.find_user_by_nip(session, nip_int)
 
-            if tripulante is None:
-                return None, "User not found"
+        if tripulante is None:
+            raise AuthError("User not found", 404)
 
-            # Always use string for JWT identity for consistency
-            nip_str = str(nip_int)
-            # Get roleLevel from role relationship if exists, otherwise use role_level field
-            role_level = tripulante.role.level if tripulante.role else tripulante.role_level
-            new_access_token = create_access_token(
-                identity=nip_str,
-                additional_claims={
-                    "name": tripulante.name,
-                    "roleLevel": role_level,
-                },
-            )
-
-            return new_access_token, None
+        role_level = tripulante.role.level if tripulante.role else tripulante.role_level
+        return create_access_token(
+            identity=str(nip_int),
+            additional_claims={
+                "name": tripulante.name,
+                "roleLevel": role_level,
+            },
+        )
 
     def get_current_user(self, nip_identity: str | int, session: Session) -> dict[str, Any]:
         """Get current authenticated user by NIP identity.
@@ -127,9 +129,11 @@ class AuthService:
             session: Database session
 
         Returns:
-            dict with user data on success, or error message
+            dict with user data on success
+
+        Raises:
+            AuthError: If identity is invalid or user not found
         """
-        # Handle admin case
         if isinstance(nip_identity, str) and nip_identity == "admin":
             return {
                 "nip": "admin",
@@ -141,16 +145,15 @@ class AuthService:
                 },
             }
 
-        # Convert to int for database query
         try:
             nip = int(nip_identity)
         except (ValueError, TypeError):
-            return {"error": f"Invalid user identity: {nip_identity}"}
+            raise AuthError(f"Invalid user identity: {nip_identity}", 400)
 
         tripulante = self.repository.find_user_by_nip(session, nip)
 
         if tripulante is None:
-            return {"error": f"User with NIP {nip} not found"}
+            raise AuthError(f"User with NIP {nip} not found", 404)
 
         return tripulante.to_json()
 
@@ -194,7 +197,6 @@ class AuthService:
         from datetime import UTC, datetime
 
         token = secrets.token_urlsafe(32)
-        # Store token in user's recover field (can be refactored to use a separate table)
         token_data = {
             "token": token,
             "timestamp": datetime.now(UTC).isoformat(),
@@ -202,7 +204,7 @@ class AuthService:
         self.repository.update_user_recovery_token(session, user, json.dumps(token_data))
         return token
 
-    def reset_password(self, token: str, new_password: str, session: Session) -> dict[str, Any]:
+    def reset_password(self, token: str, new_password: str, session: Session) -> None:
         """Reset user password using a reset token.
 
         Args:
@@ -210,8 +212,8 @@ class AuthService:
             new_password: New password (plain text)
             session: Database session
 
-        Returns:
-            dict with success message or error message
+        Raises:
+            AuthError: If password is empty, token is expired, or token is invalid
         """
         import json
         from datetime import UTC, datetime, timedelta
@@ -221,9 +223,7 @@ class AuthService:
         from app.features.users.models import Tripulante  # type: ignore
 
         if not new_password:
-            return {"message": "Password can not be empty"}
-
-        # Find user by token (this is a simple implementation - can be optimized)
+            raise AuthError("Password can not be empty", 400)
 
         stmt = select(Tripulante).where(Tripulante.recover != "")
         users = session.execute(stmt).scalars().all()
@@ -232,19 +232,17 @@ class AuthService:
             try:
                 recover_data = json.loads(user.recover)
                 if recover_data.get("token") == token:
-                    # Check if token is expired (24 hours)
                     token_timestamp = datetime.fromisoformat(recover_data["timestamp"])
                     if datetime.now(UTC) - token_timestamp > timedelta(hours=24):
-                        return {"message": "Token expired"}
+                        raise AuthError("Token expired", 404)
 
-                    # Update password
                     hashed_password = hash_code(new_password)
                     self.repository.update_user_password(session, user, hashed_password)
-                    return {"message": "Password updated successfully"}
+                    return
             except (json.JSONDecodeError, KeyError, ValueError):
                 continue
 
-        return {"message": "Invalid token"}
+        raise AuthError("Invalid token", 404)
 
     @staticmethod
     def send_reset_password_email(user, token: str) -> None:
