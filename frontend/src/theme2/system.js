@@ -1,10 +1,13 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react";
 import {
+  alertRecipe,
   badgeRecipe,
   buttonRecipe,
   cardRecipe,
+  dialogRecipe,
   formRecipe,
   inputRecipe,
+  nativeSelectRecipe,
   segmentGroupSlotRecipe,
   sidebarRecipe,
   tableRecipe,
@@ -59,6 +62,9 @@ export const system = createSystem(defaultConfig, {
       formSection: formRecipe,
       segmentGroup: segmentGroupSlotRecipe,
       tabs: tabsSlotRecipe,
+      nativeSelect: nativeSelectRecipe,
+      dialog: dialogRecipe,
+      alert: alertRecipe,
     },
   },
 });

@@ -172,4 +172,9 @@ export const colors = {
   bgGradient1: "#0d1a14",
   bgGradient2: "#132419",
   bgGradient3: "#1a2e23",
+
+  // Background gradients (glass light theme)
+  bgLight: "#f3fbf6",
+  bgLightGradient1: "#ecf7f1",
+  bgLightGradient2: "#f7fbff",
 };

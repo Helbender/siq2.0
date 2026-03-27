@@ -5,11 +5,11 @@ export const baseSemanticTokens = defineSemanticTokens({
   colors: {
     bg: {
       canvas: {
-        value: { _light: "{colors.bgGradient1}", _dark: "{colors.bgDark}" },
+        value: { _light: "{colors.bgLight}", _dark: "{colors.bgDark}" },
       },
       surface: {
         value: {
-          _light: "{colors.bgGradient3}",
+          _light: "{colors.bgLightGradient1}",
           _dark: "{colors.bgGradient2}",
         },
       },
@@ -87,7 +87,7 @@ export const baseSemanticTokens = defineSemanticTokens({
     },
 
     warning: {
-      solid: { value: "{colors.yellow.500}" },
+      solid: { value: "{colors.amber.400}" },
       subtle: { value: "rgba(234, 179, 8, 0.15)" },
     },
 

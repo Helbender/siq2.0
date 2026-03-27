@@ -12,7 +12,6 @@ export const inputRecipe = defineRecipe({
     backdropFilter: "blur(10px)",
     WebkitBackdropFilter: "blur(10px)",
     transition: "all 0.2s ease",
-    my: "2",
     _placeholder: {
       color: "text.muted",
     },
@@ -32,6 +31,11 @@ export const inputRecipe = defineRecipe({
       subtle: {
         border: "none",
         bg: "bg.cardSubtle",
+      },
+      readOnly: {
+        bg: "bg.disabled",
+        cursor: "not-allowed",
+        borderColor: "border.strong",
       },
     },
     size: {
