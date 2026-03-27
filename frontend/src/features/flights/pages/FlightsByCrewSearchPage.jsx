@@ -149,9 +149,6 @@ export function FlightsByCrewSearchPage() {
                 <Table.Root size="sm" >
                   <Table.Header>
                     <Table.Row>
-                      {/* <Table.ColumnHeader>Tripulante</Table.ColumnHeader>
-                      <Table.ColumnHeader>NIP</Table.ColumnHeader>
-                      <Table.ColumnHeader>Posto</Table.ColumnHeader> */}
                       <Table.ColumnHeader>Posição</Table.ColumnHeader>
                       <Table.ColumnHeader>ATR</Table.ColumnHeader>
                       <Table.ColumnHeader>ATN</Table.ColumnHeader>
@@ -166,9 +163,6 @@ export function FlightsByCrewSearchPage() {
                   <Table.Body>
                     {rows.map((row, idx) => (
                       <Table.Row key={`${row.flightId}-${row.nip}-${idx}`} _hover={{ bg: "bg.cardSubtle" }}>
-                        {/* <Table.Cell>{row.name}</Table.Cell>
-                        <Table.Cell>{row.nip}</Table.Cell>
-                        <Table.Cell>{row.rank ?? "-"}</Table.Cell> */}
                         <Table.Cell>{row.position ?? "-"}</Table.Cell>
                         <Table.Cell>{row.ATR ?? "-"}</Table.Cell>
                         <Table.Cell>{row.ATN ?? "-"}</Table.Cell>

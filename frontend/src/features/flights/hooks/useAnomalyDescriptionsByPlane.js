@@ -9,7 +9,7 @@ import { flightsService } from "../services/flights.service";
  */
 export function useAnomalyDescriptionsByPlane(tailNumber) {
   const numericTail = Number(tailNumber);
-  const enabled = Boolean(numericTail > 0);
+  const enabled = numericTail > 0;
 
   return useQuery({
     queryKey: ["flights", "anomaly-descriptions", numericTail],

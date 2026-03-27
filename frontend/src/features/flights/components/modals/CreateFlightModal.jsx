@@ -8,10 +8,15 @@ import {
   Separator,
   Spacer,
   Stack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
-import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
 
 import { getTimeDiff } from "@/shared/utils/timeCalc";
@@ -45,14 +50,14 @@ export function CreateFlightModal({ flight, trigger }) {
   const originRegister = register("origin", {
     maxLength: {
       value: 4,
-      message: "Máximo 4 caracteres"
-    }
+      message: "Máximo 4 caracteres",
+    },
   });
   const destinationRegister = register("destination", {
     maxLength: {
       value: 4,
-      message: "Máximo 4 caracteres"
-    }
+      message: "Máximo 4 caracteres",
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -64,7 +69,8 @@ export function CreateFlightModal({ flight, trigger }) {
   const ATD = useWatch({ control, name: "ATD" });
   const ATA = useWatch({ control, name: "ATA" });
   const tailNumber = useWatch({ control, name: "tailNumber" });
-  const { data: anomalyDescriptions = [], isLoading: isLoadingAnomalies } = useAnomalyDescriptionsByPlane(tailNumber);
+  const { data: anomalyDescriptions = [], isLoading: isLoadingAnomalies } =
+    useAnomalyDescriptionsByPlane(tailNumber);
 
   // Ref for horizontal scrolling
   const scrollRef = useRef(null);
@@ -74,7 +80,7 @@ export function CreateFlightModal({ flight, trigger }) {
     if (scrollRef.current && !e.shiftKey) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       const canScrollHorizontally = scrollWidth > clientWidth;
-      
+
       if (canScrollHorizontally) {
         e.preventDefault();
         scrollRef.current.scrollLeft += e.deltaY;
@@ -132,7 +138,9 @@ export function CreateFlightModal({ flight, trigger }) {
     const anomalyNewText = (data.anomalyNewText ?? "").trim().slice(0, 50);
     const anomalies =
       anomalyOption === "__NEW__"
-        ? (anomalyNewText ? [anomalyNewText] : [])
+        ? anomalyNewText
+          ? [anomalyNewText]
+          : []
         : anomalyOption && anomalyOption !== "NO_ANOMALY"
           ? [anomalyOption]
           : [];
@@ -170,115 +178,119 @@ export function CreateFlightModal({ flight, trigger }) {
   };
 
   return (
-      <Dialog.Root 
-        open={isOpen} 
-        onOpenChange={({ open }) => {
-          if (open) {
-            onOpen();
-          } else {
-            reset(flight ?? flightDefaults);
-            onClose();
-          }
-        }}
-        size="full"
-        preventScroll
-      >
-        {!isEdit ? (
-          <Dialog.Trigger asChild>
-            <Button colorPalette="green">Novo Voo</Button>
-          </Dialog.Trigger>
-        ) : trigger ? (
-          <Dialog.Trigger asChild>
-            {trigger}
-          </Dialog.Trigger>
-        ) : null}
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content bg="bg.cardSubtle">
-              <Dialog.Header>
-                {isEdit ? "Editar voo" : "Criar voo"}
-              </Dialog.Header>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={({ open }) => {
+        if (open) {
+          onOpen();
+        } else {
+          reset(flight ?? flightDefaults);
+          onClose();
+        }
+      }}
+      size="full"
+      preventScroll
+    >
+      {!isEdit ? (
+        <Dialog.Trigger asChild>
+          <Button variant="success">Novo Voo</Button>
+        </Dialog.Trigger>
+      ) : trigger ? (
+        <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
+      ) : null}
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="bg.cardSubtle" display="flex" flexDirection="column">
+            <Dialog.Header>
+              <Dialog.Title>{isEdit ? "Editar voo" : "Criar voo"}</Dialog.Title>
+            </Dialog.Header>
 
-              <Dialog.CloseTrigger />
+            <Dialog.CloseTrigger />
 
-
-              <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  <Dialog.Body>
-                    <Stack>
-                      <Flex gap={"5"}
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                <Dialog.Body display="flex" flexDirection="column" flex="1" minH="0">
+                  <Stack flex="1" minH="0">
+                    <Flex
+                      gap={"5"}
                       direction={{ base: "column", md: "row" }}
-                      alignItems="center"
-                      justifyContent="space-between">
-<Flex gap={2}>
-                          <Field.Root invalid={!!errors.airtask}>
-                            <Field.Label>Airtask</Field.Label>
-                            <Input
-                              placeholder="00A0000"
-                              {...methods.register("airtask", {
-                                required: "Airtask é obrigatório",
-                                pattern: {
-                                  value: /^\d{2}[A-Za-z]\d{4}$/,
-                                  message: "Formato inválido. Ex: 00A0000",
-                                },
-                              })}
-                            />
-                            {errors.airtask && (
-                              <Field.ErrorText>{errors.airtask.message}</Field.ErrorText>
-                            )}
-                          </Field.Root>
-                          <Field.Root>
-                            <Field.Label>Modalidade</Field.Label>
-                            <NativeSelect.Root>
-                              <NativeSelect.Field
-                                {...methods.register("flightType")}
-                                placeholder=""
-                              >
-                                  <option value="ADEM">ADEM</option>
-                        <option value="ADROP">ADROP</option>
-                        <option value="AIREV">AIREV</option>
-                        <option value="ALSO">ALSO</option>
-                        <option value="AMOV">AMOV</option>
-                        <option value="AQUAL">AQUAL</option>
-                        <option value="ITAS">ITAS</option>
-                        <option value="MNT">MNT</option>
-                        <option value="PHOTO">PHOTO</option>
-                        <option value="RECCE">RECCE</option>
-                        <option value="SAO">SAO</option>
-                        <option value="SAR">SAR</option>
-                        <option value="SMOV">SMOV</option>
-                        <option value="TALD">TALD</option>
-                        <option value="VIPLF">VIPLF</option>
-                        <option value="VIS">VIS</option>
-                        <option value="ISR">ISR</option>
-                        <option value="TRCA">TRCA</option>
-                        <option value="SIM">SIM</option>
-                              </NativeSelect.Field>
-                              <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                          </Field.Root>
-                          <Field.Root>
-                            <Field.Label>Ação</Field.Label>
-                            <NativeSelect.Root>
-                              <NativeSelect.Field
-                                {...methods.register("flightAction")}
-                                placeholder=""
-                              >
-                                <option value="OPER">OPER</option>
-                                <option value="MNT">MNT</option>
-                                <option value="TRM">TRM</option>
-                                <option value="TRQ">TRQ</option>
-                                <option value="TRU">TRU</option>
-                                <option value="INST">INST</option>
-                              </NativeSelect.Field>
-                              <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                          </Field.Root>
- 
-</Flex>
+                      alignItems="flex-start"
+                      justifyContent="space-between"
+                    >
+                      <Flex gap={2} alignItems="flex-start">
+                        <Field.Root invalid={!!errors.airtask}>
+                          <Field.Label>Airtask</Field.Label>
+                          <Input
+                            placeholder="00A0000"
+                            {...methods.register("airtask", {
+                              required: "Airtask é obrigatório",
+                              pattern: {
+                                value: /^\d{2}[A-Za-z]\d{4}$/,
+                                message: "Formato inválido. Ex: 00A0000",
+                              },
+                            })}
+                          />
+                          {errors.airtask && (
+                            <Field.ErrorText>
+                              {errors.airtask.message}
+                            </Field.ErrorText>
+                          )}
+                        </Field.Root>
+                        <Field.Root>
+                          <Field.Label>Modalidade</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              {...methods.register("flightType")}
+                              placeholder=""
+                            >
+                              <option value="ADEM">ADEM</option>
+                              <option value="ADROP">ADROP</option>
+                              <option value="AIREV">AIREV</option>
+                              <option value="ALSO">ALSO</option>
+                              <option value="AMOV">AMOV</option>
+                              <option value="AQUAL">AQUAL</option>
+                              <option value="ITAS">ITAS</option>
+                              <option value="MNT">MNT</option>
+                              <option value="PHOTO">PHOTO</option>
+                              <option value="RECCE">RECCE</option>
+                              <option value="SAO">SAO</option>
+                              <option value="SAR">SAR</option>
+                              <option value="SMOV">SMOV</option>
+                              <option value="TALD">TALD</option>
+                              <option value="VIPLF">VIPLF</option>
+                              <option value="VIS">VIS</option>
+                              <option value="ISR">ISR</option>
+                              <option value="TRCA">TRCA</option>
+                              <option value="SIM">SIM</option>
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                        </Field.Root>
+                        <Field.Root>
+                          <Field.Label>Ação</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              {...methods.register("flightAction")}
+                              placeholder=""
+                            >
+                              <option value="OPER">OPER</option>
+                              <option value="MNT">MNT</option>
+                              <option value="TRM">TRM</option>
+                              <option value="TRQ">TRQ</option>
+                              <option value="TRU">TRU</option>
+                              <option value="INST">INST</option>
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                        </Field.Root>
+                      </Flex>
 
-                      <Flex gap={2} direction={{ base: "column", md: "row" }}>
+                      <Flex
+                        gap={2}
+                        direction={{ base: "column", md: "row" }}
+                        alignItems="flex-start"
+                      >
                         <Field.Root invalid={!!errors.date}>
                           <Field.Label>Data</Field.Label>
                           <Input
@@ -288,7 +300,9 @@ export function CreateFlightModal({ flight, trigger }) {
                             })}
                           />
                           {errors.date && (
-                            <Field.ErrorText>{errors.date.message}</Field.ErrorText>
+                            <Field.ErrorText>
+                              {errors.date.message}
+                            </Field.ErrorText>
                           )}
                         </Field.Root>
 
@@ -301,7 +315,9 @@ export function CreateFlightModal({ flight, trigger }) {
                             })}
                           />
                           {errors.ATD && (
-                            <Field.ErrorText>{errors.ATD.message}</Field.ErrorText>
+                            <Field.ErrorText>
+                              {errors.ATD.message}
+                            </Field.ErrorText>
                           )}
                         </Field.Root>
 
@@ -320,7 +336,7 @@ export function CreateFlightModal({ flight, trigger }) {
                           />
                         </Field.Root>
                       </Flex>
-                      <Flex gap={2}>
+                      <Flex gap={2} alignItems="flex-start">
                         <Field.Root>
                           <Field.Label>Origem</Field.Label>
                           <Input
@@ -332,7 +348,9 @@ export function CreateFlightModal({ flight, trigger }) {
                               const upperValue = e.target.value.toUpperCase();
                               e.target.value = upperValue;
                               originRegister.onChange(e);
-                              setValue("origin", upperValue, { shouldValidate: true });
+                              setValue("origin", upperValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </Field.Root>
@@ -348,99 +366,107 @@ export function CreateFlightModal({ flight, trigger }) {
                               const upperValue = e.target.value.toUpperCase();
                               e.target.value = upperValue;
                               destinationRegister.onChange(e);
-                              setValue("destination", upperValue, { shouldValidate: true });
+                              setValue("destination", upperValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </Field.Root>
                       </Flex>
+                    </Flex>
 
-                      </Flex>
-         
-<Flex
-                  mt="5"
-                  gap={"5"}
-                  direction={{ base: "column", md: "row" }}
-                >
-                        <Flex gap={2}
+                    <Flex
+                      mt="5"
+                      gap={"5"}
+                      direction={{ base: "column", md: "row" }}
+                    >
+                      <Flex
+                        gap={2}
                         direction={{ base: "column", md: "row" }}
-                        >
-                          <Field.Root invalid={!!errors.tailNumber}>
-                            <Field.Label>Nº Cauda</Field.Label>
-                            <NativeSelect.Root>
-                              <NativeSelect.Field
-                                {...methods.register("tailNumber", {
-                                  required: "Nº Cauda é obrigatório",
-                                  setValueAs: (value) => value ? parseInt(value) : 0
-                                })}
-                                placeholder=""
-                              >
-                                <option value="16701">16701</option>
-                                <option value="16702">16702</option>
-                                <option value="16703">16703</option>
-                                <option value="16704">16704</option>
-                                <option value="16705">16705</option>
-                                <option value="16706">16706</option>
-                                <option value="16707">16707</option>
-                                <option value="16708">16708</option>
-                                <option value="16709">16709</option>
-                                <option value="16710">16710</option>
-                                <option value="16711">16711</option>
-                                <option value="16712">16712</option>
-                              </NativeSelect.Field>
-                              <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                            {errors.tailNumber && (
-                              <Field.ErrorText>{errors.tailNumber.message}</Field.ErrorText>
-                            )}
-                          </Field.Root>
-                          <Field.Root>
-                            <Field.Label>Aterragens</Field.Label>
-                            <Input
-                              type="number"
-                              {...methods.register("totalLandings", {
-                                valueAsNumber: true,
-                                min: { value: 0, message: "Mínimo 0" }
+                        alignItems="flex-start"
+                      >
+                        <Field.Root invalid={!!errors.tailNumber}>
+                          <Field.Label>Nº Cauda</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              {...methods.register("tailNumber", {
+                                required: "Nº Cauda é obrigatório",
+                                setValueAs: (value) =>
+                                  value ? parseInt(value) : 0,
                               })}
-                              placeholder="0"
-                              textAlign="center"
-                            />
-                          </Field.Root>
-                          <Field.Root>
-                            <Field.Label>Nº Tripulantes</Field.Label>
-                            <Input
-                              type="number"
-                              {...methods.register("numberOfCrew", {
-                                valueAsNumber: true
-                              })}
-                              readOnly
-                              variant="readOnly"
-                              textAlign="center"
-                            />
-                          </Field.Root>
-                          <Field.Root>
-                            <Field.Label>PAX</Field.Label>
-                            <Input
-                              type="number"
-                              {...methods.register("passengers", {
-                                valueAsNumber: true,
-                                min: { value: 0, message: "Mínimo 0" }
-                              })}
-                              placeholder="0"
-                              textAlign="center"
-                            />
-                          </Field.Root>
-                        </Flex>
-                        <Spacer />
-                  <Flex gap={2}
-                  direction={{ base: "column", md: "row" }}
-                  >
+                              placeholder=""
+                            >
+                              <option value="16701">16701</option>
+                              <option value="16702">16702</option>
+                              <option value="16703">16703</option>
+                              <option value="16704">16704</option>
+                              <option value="16705">16705</option>
+                              <option value="16706">16706</option>
+                              <option value="16707">16707</option>
+                              <option value="16708">16708</option>
+                              <option value="16709">16709</option>
+                              <option value="16710">16710</option>
+                              <option value="16711">16711</option>
+                              <option value="16712">16712</option>
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                          {errors.tailNumber && (
+                            <Field.ErrorText>
+                              {errors.tailNumber.message}
+                            </Field.ErrorText>
+                          )}
+                        </Field.Root>
+                        <Field.Root>
+                          <Field.Label>Aterragens</Field.Label>
+                          <Input
+                            type="number"
+                            {...methods.register("totalLandings", {
+                              valueAsNumber: true,
+                              min: { value: 0, message: "Mínimo 0" },
+                            })}
+                            placeholder="0"
+                            textAlign="center"
+                          />
+                        </Field.Root>
+                        <Field.Root>
+                          <Field.Label>Nº Tripulantes</Field.Label>
+                          <Input
+                            type="number"
+                            {...methods.register("numberOfCrew", {
+                              valueAsNumber: true,
+                            })}
+                            readOnly
+                            variant="readOnly"
+                            textAlign="center"
+                          />
+                        </Field.Root>
+                        <Field.Root>
+                          <Field.Label>PAX</Field.Label>
+                          <Input
+                            type="number"
+                            {...methods.register("passengers", {
+                              valueAsNumber: true,
+                              min: { value: 0, message: "Mínimo 0" },
+                            })}
+                            placeholder="0"
+                            textAlign="center"
+                          />
+                        </Field.Root>
+                      </Flex>
+                      <Spacer />
+                      <Flex
+                        gap={2}
+                        direction={{ base: "column", md: "row" }}
+                        alignItems="flex-start"
+                      >
                         <Field.Root>
                           <Field.Label>Doentes</Field.Label>
                           <Input
                             type="number"
                             {...methods.register("doe", {
                               valueAsNumber: true,
-                              min: { value: 0, message: "Mínimo 0" }
+                              min: { value: 0, message: "Mínimo 0" },
                             })}
                             placeholder="0"
                             textAlign="center"
@@ -452,7 +478,7 @@ export function CreateFlightModal({ flight, trigger }) {
                             type="number"
                             {...methods.register("cargo", {
                               valueAsNumber: true,
-                              min: { value: 0, message: "Mínimo 0" }
+                              min: { value: 0, message: "Mínimo 0" },
                             })}
                             placeholder="0"
                             textAlign="center"
@@ -464,7 +490,7 @@ export function CreateFlightModal({ flight, trigger }) {
                             type="number"
                             {...methods.register("orm", {
                               valueAsNumber: true,
-                              min: { value: 0, message: "Mínimo 0" }
+                              min: { value: 0, message: "Mínimo 0" },
                             })}
                             placeholder="0"
                             textAlign="center"
@@ -477,155 +503,169 @@ export function CreateFlightModal({ flight, trigger }) {
                             type="number"
                             {...methods.register("fuel", {
                               valueAsNumber: true,
-                              min: { value: 0, message: "Mínimo 0" }
+                              min: { value: 0, message: "Mínimo 0" },
                             })}
                             placeholder="Kg"
                             textAlign="right"
                           />
                         </Field.Root>
-                  </Flex>
-</Flex>
+                      </Flex>
+                    </Flex>
 
-        <Separator borderWidth="1px" borderColor="teal.400" mb={2} mx={2}/>
-
-                      <Box 
-                      
-                  ref={scrollRef}
-                  overflowX="auto"
-                  paddingBottom={5}
-                  onWheel={handleWheel}
-                  >
-
-                        <Grid
-                    minW="max-content"
-                    // maxWidth={"1000px"}
-                    templateColumns="repeat(17, auto)"
-                    rowGap={2}
-                    columnGap={1}
-                  >
-                     <GridItem textAlign={"center"}>Posição</GridItem>
-                    <GridItem textAlign={"center"}>Nome</GridItem>
-                    <GridItem w={"80px"} textAlign={"center"}>
-                      NIP
-                    </GridItem>
-                    <GridItem w={"50px"} textAlign={"center"} ml={2}>
-                      VIR
-                    </GridItem>
-                    <GridItem w={"50px"} textAlign={"center"}>
-                      VN
-                          </GridItem>
-                    <GridItem w={"50px"} textAlign={"center"}>
-                      CON
-                    </GridItem>
-                    <GridItem w={"50px"} textAlign={"center"}>
-                      ATR
-                    </GridItem>
-                    <GridItem w={"50px"} textAlign={"center"}>
-                      ATN
-                    </GridItem>
-                    <GridItem w={"80px"} textAlign={"center"}>
-                      Precisão
-                    </GridItem>
-                    <GridItem w={"80px"} textAlign={"center"}>
-                      Não Precisão
-                    </GridItem>
-                      <GridItem textAlign={"center"} colSpan={6}>
-                      Qualificações
-                    </GridItem>
-                    <GridItem m="auto" />
-                          {fields.map((field, index) => (
-                            <PilotInput
-                              key={field.id}
-                              index={index}
-                              pilotos={pilotos}
-                              member={field}
-                              remove={remove}
-                            />
-                          ))}
-                        </Grid>
-                      </Box>
-
-                      <Button
-                      alignSelf="center"
-                        colorPalette="green"
-                        size="sm"
-                        onClick={() => append({ name: "", VIR: "", VN: "", CON: "" })}
-                        variant="solid"
-                        leftIcon={<FaPlus />}
-                        type="button"
+                    <Separator
+                      borderWidth="1px"
+                      borderColor="teal.400"
+                      mb={2}
+                      mt={5}
+                      mx={2}
+                    />
+                    <Box
+                      ref={scrollRef}
+                      overflowX="auto"
+                      paddingBottom={5}
+                      onWheel={handleWheel}
+                    >
+                      <Grid
+                        minW="max-content"
+                        // maxWidth={"1000px"}
+                        templateColumns="repeat(17, auto)"
+                        rowGap={2}
+                        columnGap={1}
                       >
-                        Adicionar Tripulante
-                      </Button>
+                        <GridItem textAlign={"center"}>Posição</GridItem>
+                        <GridItem textAlign={"center"}>Nome</GridItem>
+                        <GridItem w={"80px"} textAlign={"center"}>
+                          NIP
+                        </GridItem>
+                        <GridItem w={"50px"} textAlign={"center"} ml={2}>
+                          VIR
+                        </GridItem>
+                        <GridItem w={"50px"} textAlign={"center"}>
+                          VN
+                        </GridItem>
+                        <GridItem w={"50px"} textAlign={"center"}>
+                          CON
+                        </GridItem>
+                        <GridItem w={"50px"} textAlign={"center"}>
+                          ATR
+                        </GridItem>
+                        <GridItem w={"50px"} textAlign={"center"}>
+                          ATN
+                        </GridItem>
+                        <GridItem w={"80px"} textAlign={"center"}>
+                          Precisão
+                        </GridItem>
+                        <GridItem w={"80px"} textAlign={"center"}>
+                          Não Precisão
+                        </GridItem>
+                        <GridItem textAlign={"center"} colSpan={6}>
+                          Qualificações
+                        </GridItem>
+                        <GridItem m="auto" />
+                        {fields.map((field, index) => (
+                          <PilotInput
+                            key={field.id}
+                            index={index}
+                            pilotos={pilotos}
+                            member={field}
+                            remove={remove}
+                          />
+                        ))}
+                      </Grid>
+                    </Box>
 
-                      <Separator />
-
-                      <Box>
-                        <Field.Root invalid={!!errors.anomalyOption}>
-                          <Field.Label>Anomalias</Field.Label>
-                          <NativeSelect.Root>
-                            <NativeSelect.Field
-                              {...methods.register("anomalyOption", {
-                                required: "Selecione uma opção (ex.: Nenhuma anomalia a reportar)",
-                              })}
-                              placeholder={tailNumber ? (isLoadingAnomalies ? "A carregar…" : "Selecionar") : "Selecione o Nº Cauda primeiro"}
-                              disabled={!tailNumber || isLoadingAnomalies}
-                            >
-                              <option value="NO_ANOMALY">Nenhuma anomalia a reportar</option>
-                              {anomalyDescriptions.map((d) => (
-                                <option key={d} value={d}>
-                                  {d}
-                                </option>
-                              ))}
-                              <option value="__NEW__">Adicionar nova…</option>
-                            </NativeSelect.Field>
-                            <NativeSelect.Indicator />
-                          </NativeSelect.Root>
-                          {errors.anomalyOption && (
-                            <Field.ErrorText>{errors.anomalyOption.message}</Field.ErrorText>
-                          )}
-                          {methods.watch("anomalyOption") === "__NEW__" && (
-                            <Input
-                              mt={2}
-                              placeholder="Descrição da anomalia (máx. 50 caracteres)"
-                              maxLength={50}
-                              {...methods.register("anomalyNewText", {
-                                maxLength: 50,
-                              })}
-                            />
-                          )}
-                          {methods.watch("anomalyOption") === "__NEW__" && (
-                            <Field.HelperText>
-                              {((methods.watch("anomalyNewText") ?? "").length)}/50
-                            </Field.HelperText>
-                          )}
-                        </Field.Root>
-                      </Box>
-               
-                    </Stack>
-                  </Dialog.Body>
-                </form>
-
-                <Dialog.Footer>
-                  <Dialog.ActionTrigger asChild>
-                    <Button variant="subtle" colorPalette="gray">
-                      Cancelar
+                    <Button
+                      alignSelf="center"
+                      colorPalette="green"
+                      size="sm"
+                      onClick={() =>
+                        append({ name: "", VIR: "", VN: "", CON: "" })
+                      }
+                      variant="solid"
+                      leftIcon={<FaPlus />}
+                      type="button"
+                    >
+                      Adicionar Tripulante
                     </Button>
-                   
-                  </Dialog.ActionTrigger>
-                  <Button
-                    onClick={handleSubmit(onSubmit)}
-                    loading={isSubmitting}
-                    colorPalette="blue"
-                    type="button"
-                    disabled={isSubmitting}
-                  >
-                    {isEdit ? "Editar voo" : "Registar voo"}
+
+                    <Spacer />
+
+                    <Box>
+                      <Field.Root invalid={!!errors.anomalyOption}>
+                        <Field.Label>Anomalias</Field.Label>
+                        <NativeSelect.Root>
+                          <NativeSelect.Field
+                            {...methods.register("anomalyOption", {
+                              required:
+                                "Selecione uma opção (ex.: Nenhuma anomalia a reportar)",
+                            })}
+                            placeholder={
+                              tailNumber
+                                ? isLoadingAnomalies
+                                  ? "A carregar…"
+                                  : "Selecionar"
+                                : "Selecione o Nº Cauda primeiro"
+                            }
+                            disabled={!tailNumber || isLoadingAnomalies}
+                          >
+                            <option value="NO_ANOMALY">
+                              Nenhuma anomalia a reportar
+                            </option>
+                            {anomalyDescriptions.map((d) => (
+                              <option key={d} value={d}>
+                                {d}
+                              </option>
+                            ))}
+                            <option value="__NEW__">Adicionar nova…</option>
+                          </NativeSelect.Field>
+                          <NativeSelect.Indicator />
+                        </NativeSelect.Root>
+                        {errors.anomalyOption && (
+                          <Field.ErrorText>
+                            {errors.anomalyOption.message}
+                          </Field.ErrorText>
+                        )}
+                        {methods.watch("anomalyOption") === "__NEW__" && (
+                          <Input
+                            mt={2}
+                            placeholder="Descrição da anomalia (máx. 50 caracteres)"
+                            maxLength={50}
+                            {...methods.register("anomalyNewText", {
+                              maxLength: 50,
+                            })}
+                          />
+                        )}
+                        {methods.watch("anomalyOption") === "__NEW__" && (
+                          <Field.HelperText>
+                            {(methods.watch("anomalyNewText") ?? "").length}/50
+                          </Field.HelperText>
+                        )}
+                      </Field.Root>
+                    </Box>
+                  </Stack>
+                </Dialog.Body>
+              </form>
+
+              <Dialog.Footer>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="subtle" colorPalette="gray">
+                    Cancelar
                   </Button>
-                </Dialog.Footer>
-              </FormProvider>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+                </Dialog.ActionTrigger>
+                <Button
+                  onClick={handleSubmit(onSubmit)}
+                  loading={isSubmitting}
+                  colorPalette="blue"
+                  type="button"
+                  disabled={isSubmitting}
+                >
+                  {isEdit ? "Editar voo" : "Registar voo"}
+                </Button>
+              </Dialog.Footer>
+            </FormProvider>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }

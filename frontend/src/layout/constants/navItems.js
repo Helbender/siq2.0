@@ -1,6 +1,5 @@
 import { Role } from "@/shared/roles";
 import {
-  FaCalendarCheck,
   FaDatabase,
   FaExclamationTriangle,
   FaPlaneArrival,
@@ -15,12 +14,12 @@ export const NAV_ITEMS = [
   { label: "Dashboard", icon: MdSpaceDashboard, path: "/dashboard" },
   { label: "Voos", icon: FaPlaneArrival, path: "/flights" },
   { label: "Qualificações", icon: FaTable, path: "/crew-qualifications" },
-  {
-    label: "Qualificações a expirar",
-    icon: FaCalendarCheck,
-    path: "/qualifications-preview",
-    minLevel: Role.USER,
-  },
+  // {
+  //   label: "Qualificações a expirar",
+  //   icon: FaCalendarCheck,
+  //   path: "/qualifications-preview",
+  //   minLevel: Role.USER,
+  // },
   {
     label: "Gerir Qualificações",
     icon: FaTools,

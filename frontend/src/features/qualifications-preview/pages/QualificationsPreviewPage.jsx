@@ -15,14 +15,15 @@ function getRemainingDaysColor(remainingDays) {
 }
 
 export function QualificationsPreviewPage() {
-  const { columns, loading, error } = usePilotQualificationsPreview(PREVIEW_DAYS);
+  const { columns, loading, error } =
+    usePilotQualificationsPreview(PREVIEW_DAYS);
 
   const maxRows = columns.length
     ? Math.max(...columns.map((col) => (col.pilots || []).length), 0)
     : 0;
 
   return (
-    <Box p={6} overflow="auto" minH="50vh" bg="bg.canvas">
+    <Box p={6} overflow="auto" minH="50vh">
       <Heading size="lg" mb={2} textAlign="center">
         Qualificações MQP/MQOBP a expirar
       </Heading>
@@ -38,7 +39,9 @@ export function QualificationsPreviewPage() {
           </Text>
         )}
         {loading ? (
-          <Text textAlign="center" color="white">A carregar...</Text>
+          <Text textAlign="center" color="white">
+            A carregar...
+          </Text>
         ) : columns.length === 0 ? (
           <Text textAlign="center" color="white">
             Nenhum piloto com qualificações MQP/MQOBP a expirar nos próximos{" "}
@@ -73,7 +76,8 @@ export function QualificationsPreviewPage() {
                               pilot.remaining_days <= 30 ? "medium" : "normal"
                             }
                           >
-                            {pilot.name} | {getRemainingDaysText(pilot.remaining_days)}
+                            {pilot.name} |{" "}
+                            {getRemainingDaysText(pilot.remaining_days)}
                           </Text>
                         ) : (
                           ""

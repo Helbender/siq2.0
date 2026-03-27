@@ -1,29 +1,28 @@
-/* eslint-disable no-undef */
 import { HStack, Spacer, Text, useBreakpointValue } from "@chakra-ui/react";
 
 export function Footer() {
   const isSmall = useBreakpointValue({ base: true, sm: false });
+  const buildDate = typeof BUILD_DATE !== "undefined" ? BUILD_DATE : "";
+
   return (
     <HStack
       w="100%"
-      bg="teal.500"
-      color="white"
+      bg="bg.card"
+      backdropFilter="blur(10px)"
+      borderTop="1px solid"
+      borderColor="border.subtle"
       py={2}
-      px={3}
-      textAlign="center"
-      boxShadow="lg"
+      px={4}
       flexShrink={0}
-      h="45px"
+      minH="45px"
     >
-      <Spacer />
-
-      <Text mb={1} fontSize="lg" fontWeight="bold">
+      <Text fontSize="sm" fontWeight="600" color="text.primary">
         Esquadra 502
       </Text>
       <Spacer />
-      {isSmall ? null : (
-        <Text textAlign="right" mb={1} fontSize="sm" fontWeight="italic">
-          {"Build: " + BUILD_DATE}
+      {!isSmall && buildDate && (
+        <Text fontSize="xs" color="text.muted">
+          Build: {buildDate}
         </Text>
       )}
     </HStack>

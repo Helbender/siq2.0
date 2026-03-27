@@ -73,15 +73,13 @@ export function DeleteFlightModal({ flight }) {
                     Cancelar
                   </Button>
                 </Dialog.ActionTrigger>
-                {/* <Dialog.ActionTrigger> */}
-                  <Button
-                    colorPalette="red"
-                    onClick={handleDelete}
-                    loading={isPending}
-                  >
-                    Apagar
-                  </Button>
-                {/* </Dialog.ActionTrigger> */}
+                <Button
+                  colorPalette="red"
+                  onClick={handleDelete}
+                  loading={isPending}
+                >
+                  Apagar
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
