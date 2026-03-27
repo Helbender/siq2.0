@@ -1,6 +1,7 @@
 """Authentication routes - thin request/response handlers."""
 
 import os
+import traceback
 
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
@@ -118,8 +119,6 @@ def create_token() -> tuple[Response | dict[str, str], int]:
             return jsonify(result), status_code
     except Exception as e:
         print(f"Error in POST /token: {e}")
-        import traceback
-
         traceback.print_exc()
         return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
@@ -140,8 +139,6 @@ def get_current_user():
 
             return jsonify(result), 200
     except Exception as e:
-        import traceback
-
         print(f"[auth/me] Error: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to get user"}), 500
@@ -163,8 +160,6 @@ def refresh():
         print(f"[auth/refresh] Successfully refreshed token for NIP: {nip}")
         return jsonify({"access_token": access_token}), 200
     except Exception as e:
-        import traceback
-
         print(f"[auth/refresh] Exception during refresh: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to refresh token"}), 401
@@ -175,31 +170,6 @@ def logout() -> tuple[Response, int]:
     """Clear the login token on server side."""
     response = jsonify({"msg": "logout sucessful"})
     unset_jwt_cookies(response)
-    return response, 200
-
-
-@auth_bp.route("/clear-refresh-token", methods=["POST"])
-def clear_refresh_token() -> tuple[Response, int]:
-    """Manually clear the refresh token cookie.
-    
-    This endpoint allows you to clear the refresh token cookie without logging out.
-    Useful for testing or forcing a re-login.
-    """
-    response = jsonify({"msg": "Refresh token cleared successfully"})
-    secure = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
-    samesite_raw = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
-    samesite = "None" if samesite_raw.lower() == "none" else "Lax"
-    if samesite == "None":
-        secure = True
-    response.set_cookie(
-        "siq2_refresh_token",
-        "",
-        expires=0,
-        path="/api/auth",
-        httponly=True,
-        samesite=samesite,
-        secure=secure,
-    )
     return response, 200
 
 
@@ -274,8 +244,6 @@ def forgot_password() -> tuple[Response, int]:
 
             return jsonify({"message": "Email enviado"}), 200
     except Exception as e:
-        import traceback
-
         print(f"[auth/forgot-password] Error: {e}")
         traceback.print_exc()
         return jsonify({"message": "Internal server error"}), 500
@@ -357,8 +325,6 @@ def reset_password() -> tuple[Response, int]:
             status_code = 400 if "can not be empty" in result.get("message", "") else 404
             return jsonify(result), status_code
     except Exception as e:
-        import traceback
-
         print(f"[auth/reset-password] Error: {e}")
         traceback.print_exc()
         return jsonify({"message": "Internal server error"}), 500

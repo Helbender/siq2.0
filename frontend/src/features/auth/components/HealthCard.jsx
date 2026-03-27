@@ -51,12 +51,17 @@ export function HealthCard() {
       top={4}
       left={4}
       minW="200px"
-      bg="gray.800"
-      borderColor="gray.700"
+      bg="bg.cardSubtle"
+      backdropBlur={"12px"}
+      borderColor="border.strong"
+      shadow="md"
+      _hover={{
+        borderColor: "border.focus",
+      }}
     >
       <Card.Body>
         <Stat.Root>
-          <Stat.Label color="gray.300">Server Status</Stat.Label>
+          <Stat.Label color="text.muted">Server Status</Stat.Label>
           <Stat.ValueText>
             {loading ? (
               <Spinner size="sm" />
@@ -71,7 +76,7 @@ export function HealthCard() {
             )}
           </Stat.ValueText>
           {responseTime !== null && (
-            <Stat.HelpText color="gray.400" fontSize="xs">
+            <Stat.HelpText color="text.muted" fontSize="xs">
               {responseTime}ms
             </Stat.HelpText>
           )}

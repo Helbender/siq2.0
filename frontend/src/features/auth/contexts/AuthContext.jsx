@@ -57,13 +57,6 @@ export function AuthProvider({ children }) {
   const refreshIntervalRef = useRef(null);
 
   useEffect(() => {
-    // Check if auto-refresh is disabled
-    const autoRefreshDisabled = localStorage.getItem("disableAutoRefresh") === "true";
-    if (autoRefreshDisabled) {
-      console.log("[Auto-refresh] Auto-refresh is disabled");
-      return;
-    }
-
     const checkAndRefreshToken = async () => {
       const token = localStorage.getItem("token");
       

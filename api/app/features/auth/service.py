@@ -85,8 +85,6 @@ class AuthService:
         Returns:
             tuple of (access_token, error) where error is None on success
         """
-        from sqlalchemy.orm import Session
-
         # Handle admin case
         if str(nip) == "admin":
             new_access_token = create_access_token(
@@ -137,11 +135,15 @@ class AuthService:
                 "nip": "admin",
                 "name": "ADMIN",
                 "roleLevel": Role.SUPER_ADMIN.level,
+                "role": {
+                    "name": Role.SUPER_ADMIN.name,
+                    "level": Role.SUPER_ADMIN.level,
+                },
             }
 
         # Convert to int for database query
         try:
-            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+            nip = int(nip_identity)
         except (ValueError, TypeError):
             return {"error": f"Invalid user identity: {nip_identity}"}
 
