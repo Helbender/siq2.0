@@ -10,14 +10,14 @@ export function useDashboardStats(dateFrom, dateTo) {
   });
 
   return {
-    totalFlights: data?.total_flights || 0,
-    totalHours: data?.total_hours || 0,
-    hoursByType: data?.hours_by_type || [],
-    hoursByAction: data?.hours_by_action || [],
-    totalPassengers: data?.total_passengers || 0,
-    totalDoe: data?.total_doe || 0,
-    totalCargo: data?.total_cargo || 0,
-    topPilotsByType: data?.top_pilots_by_type || {},
+    totalFlights: data?.total_flights ?? 0,
+    totalHours: data?.total_hours ?? 0,
+    hoursByType: data?.hours_by_type ?? [],
+    hoursByAction: data?.hours_by_action ?? [],
+    totalPassengers: data?.total_passengers ?? 0,
+    totalDoe: data?.total_doe ?? 0,
+    totalCargo: data?.total_cargo ?? 0,
+    topPilotsByType: data?.top_pilots_by_type ?? {},
     loading,
     error,
   };

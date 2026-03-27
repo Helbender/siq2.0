@@ -1,9 +1,8 @@
 """Dashboard service containing business logic for dashboard operations."""
 
-from datetime import date, timedelta
+from datetime import date
 from typing import Any
 
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.features.dashboard.repository import DashboardRepository
@@ -49,12 +48,6 @@ class DashboardService:
             session, date_from, date_to
         )
 
-        # Disable statement timeout for this connection (heavy date-range join)
-        try:
-            session.execute(text("SET statement_timeout = '0'"))
-        except Exception:
-            pass
-
         # Get all flights for the date range with pilots loaded
         all_flights = self.repository.find_flights_by_date_range_with_pilots(
             session, date_from, date_to
@@ -69,6 +62,7 @@ class DashboardService:
         total_minutes = 0  # Total flight minutes for the year
         pilot_hours: dict[int, int] = {}  # pilot_id -> total minutes
         pilot_hours_by_type: dict[TipoTripulante, dict[int, int]] = {}  # tipo -> {pilot_id -> total minutes}
+        pilot_info: dict[int, Any] = {}  # pilot_id -> tripulante object (already loaded via joinedload)
 
         # Initialize dictionaries for each crew type
         for crew_type in TipoTripulante:
@@ -100,6 +94,7 @@ class DashboardService:
                         continue
                     pilot_id = flight_pilot.pilot_id
                     pilot_tipo = flight_pilot.tripulante.tipo
+                    pilot_info[pilot_id] = flight_pilot.tripulante
 
                     # Overall hours
                     pilot_hours[pilot_id] = pilot_hours.get(pilot_id, 0) + minutes
@@ -135,7 +130,7 @@ class DashboardService:
                 # Find the pilot ID with maximum hours for this type
                 top_pilot_id = max(hours_dict, key=lambda pid: hours_dict[pid])
                 top_pilot_minutes = hours_dict[top_pilot_id]
-                top_pilot_obj = self.repository.find_tripulante_by_id(session, top_pilot_id)
+                top_pilot_obj = pilot_info.get(top_pilot_id)
                 if top_pilot_obj:
                     top_pilots_by_type[crew_type.value] = {
                         "nip": top_pilot_obj.nip,
@@ -173,53 +168,4 @@ class DashboardService:
             List of years (integers)
         """
         return self.repository.find_available_years(session)
-
-    def get_expiring_qualifications(self, session: Session, limit: int = 10) -> list[dict[str, Any]]:
-        """Get top qualifications with lowest remaining days across all crew members.
-
-        Args:
-            session: Database session
-            limit: Number of qualifications to return (default: 10)
-
-        Returns:
-            List of qualification dictionaries sorted by remaining days (lowest first)
-        """
-        # Get all TripulanteQualificacao records with related data, filtering by status Presente
-        all_qualifications = self.repository.find_all_tripulante_qualificacoes_with_presente_status(
-            session
-        )
-
-        # Calculate remaining days for each qualification
-        today = date.today()
-        qualification_data = []
-
-        for tq in all_qualifications:
-            validade = tq.qualificacao.validade  # validity in days
-            expiry_date = tq.data_ultima_validacao + timedelta(days=validade)
-            remaining_days = (expiry_date - today).days
-
-            qualification_data.append(
-                {
-                    "crew_member": {
-                        "nip": tq.tripulante.nip,
-                        "name": tq.tripulante.name,
-                        "rank": tq.tripulante.rank or "",
-                    },
-                    "qualification_name": tq.qualificacao.nome,
-                    "remaining_days": remaining_days,
-                    "expiry_date": expiry_date.isoformat(),
-                }
-            )
-
-        # Sort by remaining_days (ascending - lowest first)
-        def get_remaining_days(item: dict) -> int:
-            days = item["remaining_days"]
-            return int(days) if isinstance(days, (int, float, str)) else 0
-
-        qualification_data.sort(key=get_remaining_days)
-
-        # Get top N (lowest remaining days)
-        top_n = qualification_data[:limit]
-
-        return top_n
 

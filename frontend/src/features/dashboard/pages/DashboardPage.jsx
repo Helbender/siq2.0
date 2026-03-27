@@ -2,21 +2,21 @@ import { formatDateISO, formatHours } from "@/shared/utils/timeCalc";
 import { useSunTimes } from "@/shared/utils/useSunTimes";
 import {
   Box,
+  Card,
   Flex,
   Heading,
+  Link,
   SimpleGrid,
   Skeleton,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { DateRangeSelector } from "../components/DateRangeSelector";
-import { ExpiringQualificationsTable } from "../components/ExpiringQualificationsTable";
 import { PieChartCard } from "../components/PieChartCard";
 import { StatCard } from "../components/StatCard";
 import { SunTimesDisplay } from "../components/SunTimesDisplay";
 import { TopPilotsSection } from "../components/TopPilotsSection";
 import { useDashboardStats } from "../hooks/useDashboardStats";
-import { useExpiringQualifications } from "../hooks/useExpiringQualifications";
 
 function getTomorrow() {
   const d = new Date();
@@ -109,17 +109,6 @@ function LoadingSkeleton() {
         </SimpleGrid>
       </Box>
 
-      {/* Expiring Qualifications Table Skeleton */}
-      <Box mb={6}>
-        <Skeleton height="24px" width="400px" mx="auto" mb={4} />
-        <Box bg="bg.surface" p={4} borderRadius="lg" boxShadow="md">
-          <Skeleton height="40px" width="100%" mb={2} />
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} height="60px" width="100%" mb={2} />
-          ))}
-        </Box>
-      </Box>
-
       {/* Status Indicator Skeleton */}
       <Box
         bg="bg.card"
@@ -155,26 +144,22 @@ export function DashboardPage() {
     setAppliedRange(pendingRange);
   };
 
-  const { expiringQualifications, loading: loadingExpiring } = useExpiringQualifications();
-
   const todayStr = formatDateISO(new Date());
   const tomorrowStr = formatDateISO(getTomorrow());
 
   const { sunrise, sunset, error: errorSunTimes } = useSunTimes(todayStr);
-  const { sunrise: sunriseT, sunset: sunsetT, error: errorT } = useSunTimes(tomorrowStr);
+  const {
+    sunrise: sunriseT,
+    sunset: sunsetT,
+    error: errorT,
+  } = useSunTimes(tomorrowStr);
 
-  const loading = loadingStats;
-
-  if (loading) {
+  if (loadingStats) {
     return <LoadingSkeleton />;
   }
 
   return (
-    <Box p={6} overflow={"scroll"} h={"calc(95vh - 75px)"} bg="bg.canvas">
-      <Heading mb={6} textAlign={"center"}>
-        Dashboard
-      </Heading>
-
+    <Box>
       {/* Sun Times and Year Selector */}
       <Flex justifyContent="space-between" alignItems="center" mb={2}>
         <SunTimesDisplay
@@ -196,13 +181,17 @@ export function DashboardPage() {
           error={errorT}
         />
       </Flex>
-      <Text mb={4} textAlign={"right"}>
-        https://sunrise-sunset.org/
+      <Text mb={4} textAlign={"right"} fontSize="xs" color="fg.muted">
+        Dados de{" "}
+        <Link href="https://sunrise-sunset.org/" target="_blank" rel="noopener noreferrer">
+          sunrise-sunset.org
+        </Link>
       </Text>
 
       {/* Summary Statistics */}
       <SimpleGrid columns={{ base: 1, md: 5 }} gap={4} mb={6}>
         <StatCard label="Voos" value={totalFlights} />
+
         <StatCard label="Total de Horas" value={formatHours(totalHours)} />
         <StatCard
           label="Total de Passageiros"
@@ -235,25 +224,15 @@ export function DashboardPage() {
         dateRangeLabel={`${appliedFrom} – ${appliedTo}`}
       />
 
-      {/* Expiring Qualifications */}
-      <ExpiringQualificationsTable
-        qualifications={expiringQualifications}
-        loading={loadingExpiring}
-      />
-
       {/* Realtime Status Indicator */}
-      <Box
-        bg="bg.card"
-        p={3}
-        borderRadius="lg"
-        boxShadow="md"
-        textAlign="center"
-      >
-        <Text fontSize="sm" color="green.500">
-          ● Auto-refresh - Estatísticas atualizam automaticamente a cada 5
-          minutos
-        </Text>
-      </Box>
+      <Card.Root variant="glass">
+        <Card.Body py={3} textAlign="center">
+          <Text fontSize="sm" color="success.solid">
+            ● Auto-refresh - Estatísticas atualizam automaticamente a cada 5
+            minutos
+          </Text>
+        </Card.Body>
+      </Card.Root>
     </Box>
   );
 }

@@ -97,6 +97,13 @@ class Tripulante(Base):
         response["roleLevel"] = role_level_value
         if self.role:
             response["role"] = self.role.to_json()
+        else:
+            # role_id unset (legacy rows): still expose a label for UIs that read role.name
+            enum_role = next((r for r in Role if r.level == role_level_value), None)
+            response["role"] = {
+                "name": enum_role.name if enum_role else str(role_level_value),
+                "level": role_level_value,
+            }
         # Deduplicate by qualificacao_id (keep latest data_ultima_validacao), then sort by grupo and nome
         by_qual_id: dict[int, "TripulanteQualificacao"] = {}
         for q in self.qualificacoes:
