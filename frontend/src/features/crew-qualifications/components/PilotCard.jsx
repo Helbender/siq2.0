@@ -1,9 +1,4 @@
-import {
-  Card,
-  Circle,
-  Flex,
-  Heading
-} from "@chakra-ui/react";
+import { Card, Circle, Flex, Heading } from "@chakra-ui/react";
 import { GroupedQualifications } from "./GroupedQualifications";
 import { memo } from "react";
 

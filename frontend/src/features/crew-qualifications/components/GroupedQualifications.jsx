@@ -50,13 +50,13 @@ export const GroupedQualifications = memo(function GroupedQualifications({
           m={"auto"}
           flexDirection={"column"}
           // backgroundColor={"#1a202c"}
-          backgroundColor={"bg.surface"}
+          backgroundColor={"bg.panel"}
           borderRadius={10}
           gap={2}
           p={3}
           mb={5}
         >
-          <Text fontWeight="bold" color={"white"} textAlign={"center"}>
+          <Text fontWeight="bold" color={"text.primary"} textAlign={"center"}>
             {grupo}
           </Text>
           <Grid

@@ -9,9 +9,7 @@ export const pilotsService = {
   getByTipo: async (tipo) => {
     const apiTipo = crewTypeToApiFormat(tipo);
 
-    const { data } = await http.get(
-      `/v2/tripulantes/qualificacoes/${apiTipo}`
-    );
+    const { data } = await http.get(`/v2/tripulantes/qualificacoes/${apiTipo}`);
 
     return data ?? [];
   },

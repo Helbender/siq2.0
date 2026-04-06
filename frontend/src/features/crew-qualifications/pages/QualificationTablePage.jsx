@@ -226,27 +226,52 @@ export function QualificationTablePage({ pilotos = [], loading }) {
         </Box>
       )}
 
-      <Box
+      <Table.ScrollArea
         bg="bg.card"
         borderRadius="lg"
         boxShadow="md"
         border="1px solid"
         borderColor="border.subtle"
         maxW="100%"
-        overflowX="auto"
       >
-        <Table.Root size="sm" variant="simple">
+        <Table.Root
+          size="sm"
+          stickyHeader
+          css={{
+            "& [data-sticky]": {
+              position: "sticky",
+              zIndex: 1,
+              bg: "bg.canvas",
+              _after: {
+                content: '""',
+                position: "absolute",
+                pointerEvents: "none",
+                top: "0",
+                bottom: "-1px",
+                width: "32px",
+              },
+            },
+            "& [data-sticky=end]": {
+              _after: {
+                insetInlineEnd: "0",
+                translate: "100% 0",
+                shadow: "inset 8px 0px 8px -8px rgba(0, 0, 0, 0.3)",
+              },
+            },
+            "& thead tr:has(th[data-sticky])": {
+              zIndex: 2,
+            },
+          }}
+        >
           <Table.Header>
             {/* Group header row */}
             <Table.Row>
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
-                position="sticky"
-                left="0px"
-                bg="bg.cardSubtle"
-                zIndex={3}
-                w="fit-content"
+                data-sticky="end"
+                left="0"
+                w="100px"
                 whiteSpace="nowrap"
                 borderRight="1px solid"
                 borderColor="border.subtle"
@@ -256,14 +281,11 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
-                position="sticky"
-                left="80px"
-                bg="bg.cardSubtle"
-                zIndex={3}
-                w="fit-content"
-                maxW="200px"
-                borderRight="1px solid"
-                borderColor="border.subtle"
+                data-sticky="end"
+                left="100px"
+                w="100px"
+                borderRight="2px solid"
+                borderColor="border.strong"
               >
                 Nome
               </Table.ColumnHeader>
@@ -332,13 +354,16 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               </Table.Row>
             ) : (
               sortedCrew.map((member) => (
-                <Table.Row key={member.nip} _hover={{ bg: "bg.cardSubtle" }}>
+                <Table.Row
+                  key={member.nip}
+                  _hover={{ bg: "bg.cardSubtle" }}
+                  borderBottom={"1px solid"}
+                  borderColor="border.strong"
+                >
                   <Table.Cell
-                    position="sticky"
-                    left="0px"
-                    bg="bg.card"
-                    zIndex={1}
-                    w="fit-content"
+                    data-sticky="end"
+                    left="0"
+                    w="100px"
                     whiteSpace="nowrap"
                     borderRight="1px solid"
                     borderColor="border.subtle"
@@ -346,14 +371,11 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                     {member.position}
                   </Table.Cell>
                   <Table.Cell
-                    position="sticky"
-                    left="80px"
-                    bg="bg.card"
-                    zIndex={1}
-                    w="fit-content"
-                    maxW="200px"
-                    borderRight="1px solid"
-                    borderColor="border.subtle"
+                    data-sticky="end"
+                    left="100px"
+                    w="100px"
+                    borderRight="2px solid"
+                    borderColor="border.strong"
                     isTruncated
                   >
                     {member.name?.trim() || member.name}
@@ -390,7 +412,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
             )}
           </Table.Body>
         </Table.Root>
-      </Box>
+      </Table.ScrollArea>
     </Stack>
   );
 }

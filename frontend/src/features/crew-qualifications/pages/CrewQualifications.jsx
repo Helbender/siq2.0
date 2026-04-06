@@ -35,24 +35,25 @@ export function CrewQualifications({ tipo }) {
   }, [pilotos]);
 
   const funcaoOptions = useMemo(() => {
-    return availableFuncoes.map((funcao) => ({
-      value: funcao,
-      label: funcao,
-    }));
+    return [
+      { value: "ALL", label: "Todos" },
+      ...availableFuncoes.map((funcao) => ({ value: funcao, label: funcao })),
+    ];
   }, [availableFuncoes]);
 
   // Filter crew by selected função
   const filteredCrew = useMemo(() => {
-    if (!selectedFuncao) return pilotos;
+    if (!selectedFuncao || selectedFuncao === "ALL") return pilotos;
     return pilotos.filter((p) => p.position === selectedFuncao);
   }, [pilotos, selectedFuncao]);
 
-  // Set first função as selected by default when available or when tipo changes
+  // Set "ALL" as default when funcoes load or when tipo changes
   useEffect(() => {
     setSelectedFuncao((prev) => {
       if (availableFuncoes.length === 0) return null;
-      if (!prev || !availableFuncoes.includes(prev)) return availableFuncoes[0];
-      return prev; // no state update if already valid
+      if (!prev || (prev !== "ALL" && !availableFuncoes.includes(prev)))
+        return "ALL";
+      return prev;
     });
   }, [availableFuncoes]);
 
@@ -112,7 +113,7 @@ export function CrewQualifications({ tipo }) {
                     Função
                   </Text>
                   <SegmentGroup.Root
-                    value={selectedFuncao || ""}
+                    value={selectedFuncao || "ALL"}
                     onValueChange={(details) =>
                       setSelectedFuncao(details.value)
                     }
