@@ -6,9 +6,7 @@ export function useCreateFlight() {
 
   return useMutation({
     mutationFn: ({ id, payload }) =>
-      id
-        ? flightsService.update(id, payload)
-        : flightsService.create(payload),
+      id ? flightsService.update(id, payload) : flightsService.create(payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["flights"] });

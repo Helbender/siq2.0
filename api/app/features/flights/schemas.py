@@ -63,10 +63,20 @@ class FlightCreateSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
-    airtask = fields.Str(required=True, validate=validate.Length(min=1, max=7), metadata={"description": "Flight airtask"})
-    date = fields.Str(required=True, validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"), metadata={"description": "Flight date (YYYY-MM-DD)"})
-    origin = fields.Str(allow_none=True, validate=validate.Length(max=4), metadata={"description": "Origin airport code"})
-    destination = fields.Str(allow_none=True, validate=validate.Length(max=4), metadata={"description": "Destination airport code"})
+    airtask = fields.Str(
+        required=True, validate=validate.Length(min=1, max=7), metadata={"description": "Flight airtask"}
+    )
+    date = fields.Str(
+        required=True,
+        validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"),
+        metadata={"description": "Flight date (YYYY-MM-DD)"},
+    )
+    origin = fields.Str(
+        allow_none=True, validate=validate.Length(max=4), metadata={"description": "Origin airport code"}
+    )
+    destination = fields.Str(
+        allow_none=True, validate=validate.Length(max=4), metadata={"description": "Destination airport code"}
+    )
     ATD = fields.Str(allow_none=True, metadata={"description": "Actual time of departure (HH:MM)"})
     ATA = fields.Str(allow_none=True, metadata={"description": "Actual time of arrival (HH:MM)"})
     ATE = fields.Str(allow_none=True, metadata={"description": "Actual time en route (HH:MM)"})
@@ -104,11 +114,19 @@ class FlightUpdateSchema(Schema):
         unknown = EXCLUDE
 
     # Aceite no body (frontend envia); qual voo editar vem da URL (flight_id), não daqui
-    id = fields.Raw(allow_none=True, load_default=None, metadata={"description": "Flight ID (opcional; o voo a editar é o da URL)"})
+    id = fields.Raw(
+        allow_none=True, load_default=None, metadata={"description": "Flight ID (opcional; o voo a editar é o da URL)"}
+    )
     airtask = fields.Str(validate=validate.Length(min=1, max=7), metadata={"description": "Flight airtask"})
-    date = fields.Str(validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"), metadata={"description": "Flight date (YYYY-MM-DD)"})
-    origin = fields.Str(allow_none=True, validate=validate.Length(max=4), metadata={"description": "Origin airport code"})
-    destination = fields.Str(allow_none=True, validate=validate.Length(max=4), metadata={"description": "Destination airport code"})
+    date = fields.Str(
+        validate=validate.Regexp(r"^\d{4}-\d{2}-\d{2}$"), metadata={"description": "Flight date (YYYY-MM-DD)"}
+    )
+    origin = fields.Str(
+        allow_none=True, validate=validate.Length(max=4), metadata={"description": "Origin airport code"}
+    )
+    destination = fields.Str(
+        allow_none=True, validate=validate.Length(max=4), metadata={"description": "Destination airport code"}
+    )
     ATD = fields.Str(allow_none=True, metadata={"description": "Actual time of departure (HH:MM)"})
     ATA = fields.Str(allow_none=True, metadata={"description": "Actual time of arrival (HH:MM)"})
     ATE = fields.Str(allow_none=True, metadata={"description": "Actual time en route (HH:MM)"})
@@ -228,4 +246,3 @@ def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | li
         return validated, None
     except ValidationError as err:
         return None, err.messages
-

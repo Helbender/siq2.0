@@ -1,10 +1,5 @@
 import { toaster } from "@/shared/utils/toaster";
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Portal
-} from "@chakra-ui/react";
+import { Button, Dialog, IconButton, Portal } from "@chakra-ui/react";
 import { useState } from "react";
 import { BiTrash } from "react-icons/bi";
 import { useDeleteFlight } from "../../hooks/useDeleteFlight";
@@ -44,46 +39,39 @@ export function DeleteFlightModal({ flight }) {
   };
 
   return (
-    <Dialog.Root 
-      open={open} 
-      onOpenChange={(e) => setOpen(e.open)}
-    >
+    <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
-        <IconButton
-          variant="ghost"
-          colorPalette="red"
-          aria-label="Apagar voo"
-        >
+        <IconButton variant="ghost" colorPalette="red" aria-label="Apagar voo">
           <BiTrash />
         </IconButton>
       </Dialog.Trigger>
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content bg="bg.surface">
-              <Dialog.Header>Apagar voo</Dialog.Header>
-              <Dialog.Body>
-                Tens a certeza que queres apagar o voo{" "}
-                <strong>{flight.airtask}</strong>?
-              </Dialog.Body>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="bg.surface">
+            <Dialog.Header>Apagar voo</Dialog.Header>
+            <Dialog.Body>
+              Tens a certeza que queres apagar o voo{" "}
+              <strong>{flight.airtask}</strong>?
+            </Dialog.Body>
 
-              <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
-                  <Button variant="ghost" disabled={isPending}>
-                    Cancelar
-                  </Button>
-                </Dialog.ActionTrigger>
-                <Button
-                  colorPalette="red"
-                  onClick={handleDelete}
-                  loading={isPending}
-                >
-                  Apagar
+            <Dialog.Footer>
+              <Dialog.ActionTrigger asChild>
+                <Button variant="ghost" disabled={isPending}>
+                  Cancelar
                 </Button>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+              </Dialog.ActionTrigger>
+              <Button
+                colorPalette="red"
+                onClick={handleDelete}
+                loading={isPending}
+              >
+                Apagar
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }

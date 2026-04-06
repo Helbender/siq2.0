@@ -6,4 +6,3 @@ export { FlightsPage } from "./pages/FlightsPage";
 export { useCreateFlight } from "./hooks/useCreateFlight";
 export { useDeleteFlight } from "./hooks/useDeleteFlight";
 export { useFlights } from "./hooks/useFlights";
-

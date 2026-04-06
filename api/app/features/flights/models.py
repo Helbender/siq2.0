@@ -56,12 +56,12 @@ class Flight(Base):
     ready_ac: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
     med_arrival: Mapped[str] = mapped_column(String(5), insert_default="__:__", server_default="__:__")
 
-    flight_pilots: Mapped[list["FlightPilots"]] = relationship(  # noqa: UP006
+    flight_pilots: Mapped[list[FlightPilots]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_anomalies: Mapped[list["FlightAnomaly"]] = relationship(  # noqa: UP006
+    flight_anomalies: Mapped[list[FlightAnomaly]] = relationship(  # noqa: UP006
         back_populates="flight",
         cascade="all, delete-orphan",
         passive_deletes=True,
@@ -140,8 +140,8 @@ class FlightPilots(Base):
     vn: Mapped[str | None] = mapped_column(String(5), nullable=True)  # noqa: UP007
     con: Mapped[str | None] = mapped_column(String(5), nullable=True)  # noqa: UP007
 
-    tripulante: Mapped["Tripulante"] = relationship(back_populates="flight_pilots")
-    flight: Mapped["Flight"] = relationship(back_populates="flight_pilots")
+    tripulante: Mapped[Tripulante] = relationship(back_populates="flight_pilots")
+    flight: Mapped[Flight] = relationship(back_populates="flight_pilots")
 
     def to_json(self, qual_cache: dict[int, str] | None = None) -> dict:
         """Return all model data in JSON format.
@@ -196,5 +196,4 @@ class FlightAnomaly(Base):
     )
     description: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    flight: Mapped["Flight"] = relationship(back_populates="flight_anomalies")
-
+    flight: Mapped[Flight] = relationship(back_populates="flight_anomalies")

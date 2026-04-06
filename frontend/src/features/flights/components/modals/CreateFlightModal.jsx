@@ -201,7 +201,11 @@ export function CreateFlightModal({ flight, trigger }) {
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content bg="bg.cardSubtle" display="flex" flexDirection="column">
+          <Dialog.Content
+            bg="bg.cardSubtle"
+            display="flex"
+            flexDirection="column"
+          >
             <Dialog.Header>
               <Dialog.Title>{isEdit ? "Editar voo" : "Criar voo"}</Dialog.Title>
             </Dialog.Header>
@@ -209,8 +213,21 @@ export function CreateFlightModal({ flight, trigger }) {
             <Dialog.CloseTrigger />
 
             <FormProvider {...methods}>
-              <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-                <Dialog.Body display="flex" flexDirection="column" flex="1" minH="0">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  minHeight: 0,
+                }}
+              >
+                <Dialog.Body
+                  display="flex"
+                  flexDirection="column"
+                  flex="1"
+                  minH="0"
+                >
                   <Stack flex="1" minH="0">
                     <Flex
                       gap={"5"}

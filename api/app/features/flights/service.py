@@ -46,7 +46,7 @@ def coerce_qualification_id(value: Any) -> str | None:
         return None
     if isinstance(value, dict):
         value = value.get("id")
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list | tuple):
         value = value[0] if value else None
     if value in (None, "", False):
         return None
@@ -192,9 +192,7 @@ class FlightService:
             tailnumber=tailnumber,
         )
         if existing is not None:
-            return {
-                "message": "A flight with this airtask, date, departure time and aircraft already exists"
-            }
+            return {"message": "A flight with this airtask, date, departure time and aircraft already exists"}
 
         flight = Flight(
             airtask=flight_data["airtask"],
@@ -289,9 +287,7 @@ class FlightService:
             exclude_fid=flight_id,
         )
         if other is not None:
-            return {
-                "message": "Another flight already exists with this airtask, date, departure time and aircraft"
-            }
+            return {"message": "Another flight already exists with this airtask, date, departure time and aircraft"}
 
         flight.airtask = new_airtask
         flight.date = new_date
@@ -514,9 +510,7 @@ class FlightService:
             "error_details": errors[:10] if errors else [],
         }
 
-    def _qualification_ids_validated_by_flight_pilot(
-        self, session: Session, flight_pilot: FlightPilots
-    ) -> set[int]:
+    def _qualification_ids_validated_by_flight_pilot(self, session: Session, flight_pilot: FlightPilots) -> set[int]:
         """Return qualification IDs that this FlightPilots row actually validated (qual1–qual6 + landing quals)."""
         ids: set[int] = set()
         for attr in ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]:
@@ -538,9 +532,7 @@ class FlightService:
             ]
             for payload_key, count in landing_specs:
                 if count is not None and count > 0:
-                    qual = self.repository.find_qualification_by_payload_key_and_tipo(
-                        session, payload_key, tipo
-                    )
+                    qual = self.repository.find_qualification_by_payload_key_and_tipo(session, payload_key, tipo)
                     if qual is not None:
                         ids.add(qual.id)
         return ids
@@ -745,9 +737,7 @@ class FlightService:
                 return
         else:
             # Landing quals: resolve by payload_key (ATR, ATN, precapp, nprecapp)
-            qual = self.repository.find_qualification_by_payload_key_and_tipo(
-                session, qual_name, pilot_obj.tipo
-            )
+            qual = self.repository.find_qualification_by_payload_key_and_tipo(session, qual_name, pilot_obj.tipo)
             if qual is None:
                 print(
                     f"⚠️  Warning: Qualification with payload_key '{qual_name}' not found for type {pilot_obj.tipo.value} "
