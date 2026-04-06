@@ -118,7 +118,7 @@ export function CreateFlightModal({ flight, trigger }) {
   }, [isOpen, flight, reset]);
 
   // When editing, if current anomaly is not in the list, show "Add new" with that value
-  const currentOption = methods.watch("anomalyOption");
+  const currentOption = useWatch({ control, name: "anomalyOption" });
   useEffect(() => {
     if (
       !isOpen ||

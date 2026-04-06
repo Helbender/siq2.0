@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SUN_API_URL = "https://api.sunrise-sunset.org/json";
 const LISBOA_LAT = 38.7169;
@@ -9,7 +9,7 @@ export function useSunTimes(datestr) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useMemo(() => {
+  useEffect(() => {
     async function fetchSunTimes() {
       setLoading(true);
       setError(null);
