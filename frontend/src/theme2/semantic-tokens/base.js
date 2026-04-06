@@ -21,8 +21,14 @@ export const baseSemanticTokens = defineSemanticTokens({
       },
       cardSubtle: {
         value: {
-          _light: "rgba(255, 255, 255, 0.8)",
+          _light: "rgba(255, 255, 255, 0.3)",
           _dark: "rgba(255, 255, 255, 0.08)",
+        },
+      },
+      panel: {
+        value: {
+          _light: "rgba(0, 0, 0, 0.06)",
+          _dark: "{colors.bgGradient2}",
         },
       },
       muted: {
@@ -60,6 +66,12 @@ export const baseSemanticTokens = defineSemanticTokens({
         },
       },
       strong: {
+        value: {
+          _light: "rgba(0,0,0,0.15)",
+          _dark: "rgba(255, 255, 255, 0.15)",
+        },
+      },
+      emphasized: {
         value: {
           _light: "rgba(0,0,0,0.15)",
           _dark: "rgba(255, 255, 255, 0.15)",

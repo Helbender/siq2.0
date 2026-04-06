@@ -51,7 +51,7 @@ export function isTokenExpiringSoon(token, bufferSeconds = 120) {
 
   const now = Date.now();
   const bufferMs = bufferSeconds * 1000;
-  
+
   // Token is expiring soon if expiration is within buffer time
   return expiration - now <= bufferMs;
 }

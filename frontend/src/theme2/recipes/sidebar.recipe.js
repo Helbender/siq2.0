@@ -47,7 +47,8 @@ export const sidebarRecipe = defineSlotRecipe({
     logo: {
       width: "45px",
       height: "45px",
-      background: "linear-gradient(135deg, var(--chakra-colors-emerald-500), var(--chakra-colors-gold-200))",
+      background:
+        "linear-gradient(135deg, var(--chakra-colors-emerald-500), var(--chakra-colors-gold-200))",
       borderRadius: "lg",
       display: "flex",
       alignItems: "center",
@@ -60,7 +61,8 @@ export const sidebarRecipe = defineSlotRecipe({
     logoText: {
       fontSize: "xl",
       fontWeight: "600",
-      background: "linear-gradient(135deg, var(--chakra-colors-emerald-400), var(--chakra-colors-gold-200))",
+      background:
+        "linear-gradient(135deg, var(--chakra-colors-emerald-400), var(--chakra-colors-gold-200))",
       backgroundClip: "text",
       WebkitBackgroundClip: "text",
       color: "transparent",
@@ -109,7 +111,8 @@ export const sidebarRecipe = defineSlotRecipe({
     },
     badge: {
       ml: "auto",
-      background: "linear-gradient(135deg, var(--chakra-colors-gold-200), var(--chakra-colors-amber-500))",
+      background:
+        "linear-gradient(135deg, var(--chakra-colors-gold-200), var(--chakra-colors-amber-500))",
       color: "white",
       fontSize: "2xs",
       fontWeight: "600",
@@ -138,7 +141,8 @@ export const sidebarRecipe = defineSlotRecipe({
       width: "42px",
       height: "42px",
       borderRadius: "lg",
-      background: "linear-gradient(135deg, var(--chakra-colors-emerald-500), var(--chakra-colors-gold-200))",
+      background:
+        "linear-gradient(135deg, var(--chakra-colors-emerald-500), var(--chakra-colors-gold-200))",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

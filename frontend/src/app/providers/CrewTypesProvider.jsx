@@ -1,4 +1,7 @@
-import { getCachedCrewTypes, useCrewTypesQuery } from "@features/qualifications";
+import {
+  getCachedCrewTypes,
+  useCrewTypesQuery,
+} from "@features/qualifications";
 import { createContext, useContext, useMemo } from "react";
 
 const CrewTypesContext = createContext(null);
@@ -15,15 +18,18 @@ export function CrewTypesProvider({ children }) {
   const { data: crewTypesData = [], isLoading } = useCrewTypesQuery();
 
   const TipoTripulante = useMemo(() => {
-    const crewTypes = (crewTypesData && Array.isArray(crewTypesData) && crewTypesData.length > 0)
-      ? crewTypesData
-      : (getCachedCrewTypes() || []);
+    const crewTypes =
+      crewTypesData && Array.isArray(crewTypesData) && crewTypesData.length > 0
+        ? crewTypesData
+        : getCachedCrewTypes() || [];
 
     const enumObj = {};
     if (Array.isArray(crewTypes) && crewTypes.length > 0) {
       crewTypes.forEach(({ value }) => {
         if (value) {
-          const key = value.replace(/\s+/g, "_").replace("OPERAÇÕES", "OPERACOES");
+          const key = value
+            .replace(/\s+/g, "_")
+            .replace("OPERAÇÕES", "OPERACOES");
           enumObj[key] = value;
         }
       });
@@ -42,19 +48,28 @@ export function CrewTypesProvider({ children }) {
     return enumObj;
   }, [crewTypesData]);
 
-  const getAllCrewTypes = useMemo(() => () => Object.values(TipoTripulante), [TipoTripulante]);
+  const getAllCrewTypes = useMemo(
+    () => () => Object.values(TipoTripulante),
+    [TipoTripulante],
+  );
 
   const getCrewTypeOptions = useMemo(() => {
     return () => {
-      const crewTypes = (crewTypesData && Array.isArray(crewTypesData) && crewTypesData.length > 0)
-        ? crewTypesData
-        : (getCachedCrewTypes() || []);
+      const crewTypes =
+        crewTypesData &&
+        Array.isArray(crewTypesData) &&
+        crewTypesData.length > 0
+          ? crewTypesData
+          : getCachedCrewTypes() || [];
 
       if (Array.isArray(crewTypes) && crewTypes.length > 0) {
         return crewTypes.map(({ value }) => {
           const label = value
             .split(" ")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .map(
+              (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+            )
             .join(" ");
           return { value, label };
         });
@@ -92,13 +107,15 @@ export function CrewTypesProvider({ children }) {
   }, [TipoTripulante]);
 
   const crewTypeToApiFormat = useMemo(
-    () => (crewType) => crewType.replace(/\s+/g, "_").replace("OPERAÇÕES", "OPERACOES"),
-    []
+    () => (crewType) =>
+      crewType.replace(/\s+/g, "_").replace("OPERAÇÕES", "OPERACOES"),
+    [],
   );
 
   const apiFormatToCrewType = useMemo(
-    () => (apiFormat) => apiFormat.replace(/_/g, " ").replace("OPERACOES", "OPERAÇÕES"),
-    []
+    () => (apiFormat) =>
+      apiFormat.replace(/_/g, " ").replace("OPERACOES", "OPERAÇÕES"),
+    [],
   );
 
   const value = useMemo(
@@ -119,7 +136,7 @@ export function CrewTypesProvider({ children }) {
       crewTypeToApiFormat,
       apiFormatToCrewType,
       isLoading,
-    ]
+    ],
   );
 
   return (
