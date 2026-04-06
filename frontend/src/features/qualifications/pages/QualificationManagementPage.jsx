@@ -87,13 +87,15 @@ export function QualificationManagementPage() {
 
           <Can minLevel={Role.UNIF}>
             <Button
-              leftIcon={<BiRefresh />}
               colorPalette="blue"
               onClick={handleReprocessAllFlights}
-              isLoading={reprocessFlights.isPending}
-              loadingText="A processar..."
+              loading={reprocessFlights.isPending}
+              disabled={reprocessFlights.isPending}
             >
-              Reprocessar Todas
+              <BiRefresh />
+              {reprocessFlights.isPending
+                ? "A processar..."
+                : "Reprocessar Todas"}
             </Button>
           </Can>
 

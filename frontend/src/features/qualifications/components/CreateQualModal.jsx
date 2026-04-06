@@ -60,24 +60,10 @@ export function CreateQualModal({ edit, qualification }) {
     },
   );
   const isMountedRef = useRef(true);
-  const tipoAplicavel = useWatch({
+  const [tipoAplicavel, nomeWatch, validadeWatch, grupoWatch] = useWatch({
     control: qualificacao.control,
-    name: "tipo_aplicavel",
+    name: ["tipo_aplicavel", "nome", "validade", "grupo"],
   });
-
-  // Immediate test - fetch tipos on component mount
-  useEffect(() => {
-    http
-      .get("/v2/listas")
-      .then((res) => {
-        if (res.data?.tipos && Array.isArray(res.data.tipos)) {
-          setTipos(res.data.tipos);
-        }
-      })
-      .catch((err) => {
-        // Error handled silently
-      });
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -330,7 +316,7 @@ export function CreateQualModal({ edit, qualification }) {
                       <Field.Label>Nome da Qualificação</Field.Label>
                       <Input
                         placeholder="Nome da Qualificação"
-                        value={qualificacao.watch("nome") || ""}
+                        value={nomeWatch || ""}
                         onChange={(e) =>
                           qualificacao.setValue("nome", e.target.value)
                         }
@@ -341,7 +327,7 @@ export function CreateQualModal({ edit, qualification }) {
                       <Input
                         type="number"
                         placeholder="Validade em dias"
-                        value={qualificacao.watch("validade") || ""}
+                        value={validadeWatch || ""}
                         onChange={(e) =>
                           qualificacao.setValue("validade", e.target.value)
                         }
@@ -356,7 +342,7 @@ export function CreateQualModal({ edit, qualification }) {
                               ? "Carregando..."
                               : "Selecione um tipo"
                           }
-                          value={qualificacao.watch("tipo_aplicavel") || ""}
+                          value={tipoAplicavel || ""}
                           onChange={(e) => {
                             const newTipo = e.target.value;
                             qualificacao.setValue("tipo_aplicavel", newTipo);
@@ -399,7 +385,7 @@ export function CreateQualModal({ edit, qualification }) {
                                 : "Carregando grupos..."
                               : "Primeiro selecione um tipo de tripulante"
                           }
-                          value={qualificacao.watch("grupo") || ""}
+                          value={grupoWatch || ""}
                           onChange={(e) =>
                             qualificacao.setValue("grupo", e.target.value)
                           }

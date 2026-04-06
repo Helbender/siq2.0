@@ -2,10 +2,10 @@
 
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.features.qualifications.models import Qualificacao  # type: ignore
-from app.features.users.models import Tripulante  # type: ignore
+from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 from app.shared.enums import StatusTripulante  # type: ignore
 
 
@@ -135,8 +135,12 @@ class QualificationRepository:
             select(Tripulante)
             .where(Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value)
             .order_by(Tripulante.nip, Tripulante.rank)
+            .options(
+                joinedload(Tripulante.qualificacoes).joinedload(TripulanteQualificacao.qualificacao),
+                joinedload(Tripulante.role),
+            )
         )
-        return list(session.execute(stmt).scalars().all())
+        return list(session.execute(stmt).unique().scalars().all())
 
     @staticmethod
     def find_tripulante_by_nip(session: Session, nip: int) -> Tripulante | None:
