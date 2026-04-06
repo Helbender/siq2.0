@@ -4,6 +4,7 @@ import { toaster } from "@/shared/utils/toaster";
 import {
   Box,
   Button,
+  Card,
   Container,
   Flex,
   HStack,
@@ -122,7 +123,9 @@ export function QualificationManagementPage() {
           />
         </Flex>
 
-        <QualificationTable qualifications={filtered} />
+        <Card.Root>
+          <QualificationTable qualifications={filtered} />
+        </Card.Root>
       </Container>
     </Can>
   );

@@ -6,11 +6,13 @@ export function useQualificationFilters(qualifications) {
   const [type, setType] = useState("all");
 
   const allGroups = useMemo(() => {
-    return [...new Set(qualifications.map(q => q.grupo).filter(Boolean))];
+    return [...new Set(qualifications.map((q) => q.grupo).filter(Boolean))];
   }, [qualifications]);
 
   const allTypes = useMemo(() => {
-    return [...new Set(qualifications.map(q => q.tipo_aplicavel).filter(Boolean))];
+    return [
+      ...new Set(qualifications.map((q) => q.tipo_aplicavel).filter(Boolean)),
+    ];
   }, [qualifications]);
 
   const availableGroups = useMemo(() => {
@@ -19,9 +21,9 @@ export function useQualificationFilters(qualifications) {
     return [
       ...new Set(
         qualifications
-          .filter(q => q.tipo_aplicavel === type)
-          .map(q => q.grupo)
-          .filter(Boolean)
+          .filter((q) => q.tipo_aplicavel === type)
+          .map((q) => q.grupo)
+          .filter(Boolean),
       ),
     ];
   }, [type, qualifications, allGroups]);
@@ -36,18 +38,19 @@ export function useQualificationFilters(qualifications) {
     let result = qualifications;
 
     if (group !== "all") {
-      result = result.filter(q => q.grupo === group);
+      result = result.filter((q) => q.grupo === group);
     }
 
     if (type !== "all") {
-      result = result.filter(q => q.tipo_aplicavel === type);
+      result = result.filter((q) => q.tipo_aplicavel === type);
     }
 
     if (search) {
       const term = search.toLowerCase();
-      result = result.filter(q =>
-        [q.nome, q.validade, q.tipo_aplicavel, q.grupo]
-          .some(f => f?.toString().toLowerCase().includes(term))
+      result = result.filter((q) =>
+        [q.nome, q.validade, q.tipo_aplicavel, q.grupo].some((f) =>
+          f?.toString().toLowerCase().includes(term),
+        ),
       );
     }
 

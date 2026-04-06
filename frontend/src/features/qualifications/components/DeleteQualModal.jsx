@@ -1,11 +1,11 @@
 import { toaster } from "@/shared/utils/toaster";
 import {
-    Button,
-    Dialog,
-    IconButton,
-    Portal,
-    Text,
-    useDisclosure,
+  Button,
+  Dialog,
+  IconButton,
+  Portal,
+  Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Fragment, React } from "react";
 import { BiTrash } from "react-icons/bi";
@@ -45,8 +45,8 @@ export function DeleteQualModal({ qual }) {
   };
   return (
     <Fragment>
-      <Dialog.Root 
-        open={isOpen} 
+      <Dialog.Root
+        open={isOpen}
         onOpenChange={({ open }) => {
           if (open) {
             onOpen();
@@ -56,10 +56,7 @@ export function DeleteQualModal({ qual }) {
         }}
       >
         <Dialog.Trigger asChild>
-          <IconButton
-            colorPalette="red"
-            aria-label="Delete Qualification"
-          >
+          <IconButton colorPalette="red" aria-label="Delete Qualification">
             <BiTrash />
           </IconButton>
         </Dialog.Trigger>
@@ -83,9 +80,7 @@ export function DeleteQualModal({ qual }) {
                   Excluir
                 </Button>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="ghost">
-                    Cancelar
-                  </Button>
+                  <Button variant="ghost">Cancelar</Button>
                 </Dialog.ActionTrigger>
               </Dialog.Footer>
             </Dialog.Content>

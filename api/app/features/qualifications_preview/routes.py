@@ -39,7 +39,5 @@ def get_expiring_by_qualification() -> tuple[Response, int]:
     preview_days = preview_days_arg if preview_days_arg is not None else PREVIEW_DAYS
 
     with Session(engine) as session:
-        data = qualifications_preview_service.get_expiring_by_qualification(
-            session, preview_days=preview_days
-        )
+        data = qualifications_preview_service.get_expiring_by_qualification(session, preview_days=preview_days)
         return jsonify(data), 200

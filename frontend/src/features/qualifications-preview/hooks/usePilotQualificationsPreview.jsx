@@ -9,7 +9,8 @@ export function usePilotQualificationsPreview(previewDays = PREVIEW_DAYS) {
     error,
   } = useQuery({
     queryKey: ["qualifications-preview", "expiring", previewDays],
-    queryFn: () => qualificationsPreviewService.getExpiringByQualification(previewDays),
+    queryFn: () =>
+      qualificationsPreviewService.getExpiringByQualification(previewDays),
     staleTime: 1000 * 60 * 5,
   });
 

@@ -10,12 +10,12 @@ export const SegmentFilter = memo(function SegmentFilter({
   const items = useMemo(
     () => [
       { value: "all", label: "Todos" },
-      ...options.map(opt => ({
+      ...options.map((opt) => ({
         value: opt,
         label: opt.charAt(0).toUpperCase() + opt.slice(1),
       })),
     ],
-    [options]
+    [options],
   );
 
   return (
@@ -26,7 +26,6 @@ export const SegmentFilter = memo(function SegmentFilter({
       border="1 solid"
       borderColor="#4A5568"
       boxShadow="sm"
-      
       minW="200px"
     >
       <Text fontWeight="bold" mb={3} fontSize="sm" color="text.secondary">
@@ -34,8 +33,8 @@ export const SegmentFilter = memo(function SegmentFilter({
       </Text>
 
       <SegmentGroup.Root
-      bg="#2D3748"
-      color="white"
+        bg="#2D3748"
+        color="white"
         value={value}
         onValueChange={(d) => onChange(d.value)}
         size="sm"
@@ -45,10 +44,10 @@ export const SegmentFilter = memo(function SegmentFilter({
             bg: "teal.500",
             color: "white",
           },
-        //   "& [data-part='item']:not([data-selected])": {
-        //     bg: "#2D3748",
-        //     color: "white",
-        //   },
+          //   "& [data-part='item']:not([data-selected])": {
+          //     bg: "#2D3748",
+          //     color: "white",
+          //   },
         }}
       >
         <SegmentGroup.Items items={items} />

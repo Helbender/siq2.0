@@ -2,15 +2,15 @@ import { http } from "@/app/config/http";
 import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
 import { toaster } from "@/shared/utils/toaster";
 import {
-    Button,
-    Dialog,
-    Field,
-    IconButton,
-    Input,
-    NativeSelect,
-    Portal,
-    Stack,
-    useDisclosure
+  Button,
+  Dialog,
+  Field,
+  IconButton,
+  Input,
+  NativeSelect,
+  Portal,
+  Stack,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
@@ -21,10 +21,10 @@ import { useUpdateQualification } from "../mutations/useUpdateQualification";
 
 export function CreateQualModal({ edit, qualification }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
+
   const createQualification = useCreateQualification();
   const updateQualification = useUpdateQualification();
-  
+
   let getAllCrewTypes, isLoadingCrewTypes;
   try {
     const crewTypesHook = useCrewTypes();
@@ -67,7 +67,8 @@ export function CreateQualModal({ edit, qualification }) {
 
   // Immediate test - fetch tipos on component mount
   useEffect(() => {
-    http.get("/v2/listas")
+    http
+      .get("/v2/listas")
       .then((res) => {
         if (res.data?.tipos && Array.isArray(res.data.tipos)) {
           setTipos(res.data.tipos);
@@ -94,7 +95,9 @@ export function CreateQualModal({ edit, qualification }) {
         description: "Por favor aguarde",
       },
       success: {
-        title: edit ? "Qualificação atualizada com sucesso" : "Qualificação criada com sucesso",
+        title: edit
+          ? "Qualificação atualizada com sucesso"
+          : "Qualificação criada com sucesso",
         description: "Operação concluída",
       },
       error: (err) => ({
@@ -159,10 +162,11 @@ export function CreateQualModal({ edit, qualification }) {
     if (isOpen !== false) {
       // Always fetch from API when modal opens (more reliable)
       if (!dataFetched) {
-        http.get("/v2/listas")
+        http
+          .get("/v2/listas")
           .then((res) => {
             const tiposData = res.data?.tipos;
-            
+
             if (Array.isArray(tiposData) && tiposData.length > 0) {
               setTipos(tiposData);
             } else {
@@ -174,10 +178,17 @@ export function CreateQualModal({ edit, qualification }) {
           })
           .then((crewTypesRes) => {
             if (crewTypesRes) {
-              if (Array.isArray(crewTypesRes.data) && crewTypesRes.data.length > 0) {
-                const tiposFromCrewTypes = crewTypesRes.data.map((item) => 
-                  typeof item === "string" ? item : (item.value || item.name || "")
-                ).filter(Boolean);
+              if (
+                Array.isArray(crewTypesRes.data) &&
+                crewTypesRes.data.length > 0
+              ) {
+                const tiposFromCrewTypes = crewTypesRes.data
+                  .map((item) =>
+                    typeof item === "string"
+                      ? item
+                      : item.value || item.name || "",
+                  )
+                  .filter(Boolean);
                 setTipos(tiposFromCrewTypes);
               }
               fetchAllQualificationGroups();
@@ -188,12 +199,16 @@ export function CreateQualModal({ edit, qualification }) {
             setDataFetched(true);
           });
       }
-      
+
       // Also try hook as backup
       try {
         if (getAllCrewTypes) {
           const crewTypes = getAllCrewTypes();
-          if (Array.isArray(crewTypes) && crewTypes.length > 0 && tipos.length === 0) {
+          if (
+            Array.isArray(crewTypes) &&
+            crewTypes.length > 0 &&
+            tipos.length === 0
+          ) {
             setTipos(crewTypes);
           }
         }
@@ -212,7 +227,7 @@ export function CreateQualModal({ edit, qualification }) {
   useEffect(() => {
     // Always fetch when tipoAplicavel changes, regardless of modal state
     // The modal might be open even if isOpen is undefined (Dialog manages its own state)
-    
+
     if (tipoAplicavel) {
       fetchQualificationGroups(tipoAplicavel);
     } else {
@@ -249,8 +264,8 @@ export function CreateQualModal({ edit, qualification }) {
   }, [edit, qualification, qualificacao]);
   return (
     <>
-      <Dialog.Root 
-        open={isOpen} 
+      <Dialog.Root
+        open={isOpen}
         onOpenChange={({ open }) => {
           if (open) {
             handleModalOpen();
@@ -282,15 +297,12 @@ export function CreateQualModal({ edit, qualification }) {
             }
             onClose();
           }
-        }} 
+        }}
         // size="xl"
       >
         {edit ? (
           <Dialog.Trigger asChild>
-            <IconButton
-              colorPalette="yellow"
-              aria-label="Edit Qualification"
-            >
+            <IconButton colorPalette="yellow" aria-label="Edit Qualification">
               <FaEdit />
             </IconButton>
           </Dialog.Trigger>
@@ -319,7 +331,9 @@ export function CreateQualModal({ edit, qualification }) {
                       <Input
                         placeholder="Nome da Qualificação"
                         value={qualificacao.watch("nome") || ""}
-                        onChange={(e) => qualificacao.setValue("nome", e.target.value)}
+                        onChange={(e) =>
+                          qualificacao.setValue("nome", e.target.value)
+                        }
                       />
                     </Field.Root>
                     <Field.Root>
@@ -328,14 +342,20 @@ export function CreateQualModal({ edit, qualification }) {
                         type="number"
                         placeholder="Validade em dias"
                         value={qualificacao.watch("validade") || ""}
-                        onChange={(e) => qualificacao.setValue("validade", e.target.value)}
+                        onChange={(e) =>
+                          qualificacao.setValue("validade", e.target.value)
+                        }
                       />
                     </Field.Root>
                     <Field.Root>
                       <Field.Label>Tipo de Tripulante</Field.Label>
                       <NativeSelect.Root>
                         <NativeSelect.Field
-                          placeholder={isLoadingCrewTypes ? "Carregando..." : "Selecione um tipo"}
+                          placeholder={
+                            isLoadingCrewTypes
+                              ? "Carregando..."
+                              : "Selecione um tipo"
+                          }
                           value={qualificacao.watch("tipo_aplicavel") || ""}
                           onChange={(e) => {
                             const newTipo = e.target.value;
@@ -350,18 +370,20 @@ export function CreateQualModal({ edit, qualification }) {
                           }}
                           disabled={isLoadingCrewTypes}
                         >
-                          {!isLoadingCrewTypes && <option value="">Selecione um tipo</option>}
-                          {Array.isArray(tipos) && tipos.length > 0
-                            ? tipos.map((tipo) => (
-                                <option key={tipo} value={tipo}>
-                                  {tipo}
-                                </option>
-                              ))
-                            : !isLoadingCrewTypes ? (
-                              <option value="" disabled>
-                                Nenhum tipo disponível
+                          {!isLoadingCrewTypes && (
+                            <option value="">Selecione um tipo</option>
+                          )}
+                          {Array.isArray(tipos) && tipos.length > 0 ? (
+                            tipos.map((tipo) => (
+                              <option key={tipo} value={tipo}>
+                                {tipo}
                               </option>
-                            ) : null}
+                            ))
+                          ) : !isLoadingCrewTypes ? (
+                            <option value="" disabled>
+                              Nenhum tipo disponível
+                            </option>
+                          ) : null}
                         </NativeSelect.Field>
                         <NativeSelect.Indicator />
                       </NativeSelect.Root>
@@ -378,11 +400,10 @@ export function CreateQualModal({ edit, qualification }) {
                               : "Primeiro selecione um tipo de tripulante"
                           }
                           value={qualificacao.watch("grupo") || ""}
-                          onChange={(e) => qualificacao.setValue("grupo", e.target.value)}
-                          disabled={
-                            !tipoAplicavel ||
-                            grupos.length === 0
+                          onChange={(e) =>
+                            qualificacao.setValue("grupo", e.target.value)
                           }
+                          disabled={!tipoAplicavel || grupos.length === 0}
                         >
                           {!tipoAplicavel || grupos.length === 0 ? (
                             <option value="" disabled>
@@ -394,8 +415,14 @@ export function CreateQualModal({ edit, qualification }) {
                             <>
                               <option value="">Selecione um grupo</option>
                               {grupos.map((grupo) => {
-                                const value = typeof grupo === "string" ? grupo : (grupo.value || grupo);
-                                const name = typeof grupo === "string" ? grupo : (grupo.name || grupo.value || grupo);
+                                const value =
+                                  typeof grupo === "string"
+                                    ? grupo
+                                    : grupo.value || grupo;
+                                const name =
+                                  typeof grupo === "string"
+                                    ? grupo
+                                    : grupo.name || grupo.value || grupo;
                                 return (
                                   <option key={value} value={value}>
                                     {name}
@@ -417,9 +444,7 @@ export function CreateQualModal({ edit, qualification }) {
                   {edit ? "Guardar Alterações" : "Salvar"}
                 </Button>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="subtle">
-                    Cancelar
-                  </Button>
+                  <Button variant="subtle">Cancelar</Button>
                 </Dialog.ActionTrigger>
               </Dialog.Footer>
             </Dialog.Content>
