@@ -1,8 +1,8 @@
-from datetime import date, timedelta  # noqa: TCH003
+from datetime import date, datetime, timedelta  # noqa: TCH003
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, Integer, String, TypeDecorator, UniqueConstraint
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String, TypeDecorator, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum as SQLEnum
 
@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
 class Tripulante(Base):
     __tablename__ = "tripulantes"
+    __table_args__ = (Index("ix_tripulantes_reset_token", "reset_token"),)
 
     nip: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -57,7 +58,8 @@ class Tripulante(Base):
     email: Mapped[str] = mapped_column(String(50))
     role_level: Mapped[int | None] = mapped_column(Integer, default=Role.USER.level, nullable=True)
     role_id: Mapped[int | None] = mapped_column(ForeignKey("roles.id"), nullable=True)
-    recover: Mapped[str] = mapped_column(String(500), default="")
+    reset_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    reset_token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     squadron: Mapped[str] = mapped_column(String(30), default="")
     password: Mapped[str] = mapped_column(String(150))
     tipo: Mapped[TipoTripulante] = mapped_column(SQLEnum(TipoTripulante), nullable=False)

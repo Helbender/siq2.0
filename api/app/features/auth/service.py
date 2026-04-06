@@ -1,7 +1,8 @@
 """Authentication service containing business logic for auth operations."""
 
 import os
-from datetime import timedelta
+import secrets
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from flask_jwt_extended import create_access_token, create_refresh_token
@@ -192,16 +193,9 @@ class AuthService:
         Returns:
             Reset token string
         """
-        import json
-        import secrets
-        from datetime import UTC, datetime
-
         token = secrets.token_urlsafe(32)
-        token_data = {
-            "token": token,
-            "timestamp": datetime.now(UTC).isoformat(),
-        }
-        self.repository.update_user_recovery_token(session, user, json.dumps(token_data))
+        expires_at = datetime.now(UTC) + timedelta(hours=24)
+        self.repository.set_reset_token(session, user, token, expires_at)
         return token
 
     def reset_password(self, token: str, new_password: str, session: Session) -> None:
@@ -215,34 +209,19 @@ class AuthService:
         Raises:
             AuthError: If password is empty, token is expired, or token is invalid
         """
-        import json
-        from datetime import UTC, datetime, timedelta
-
-        from sqlalchemy import select
-
-        from app.features.users.models import Tripulante  # type: ignore
-
         if not new_password:
             raise AuthError("Password can not be empty", 400)
 
-        stmt = select(Tripulante).where(Tripulante.recover != "")
-        users = session.execute(stmt).scalars().all()
+        user = self.repository.find_user_by_reset_token(session, token)
 
-        for user in users:
-            try:
-                recover_data = json.loads(user.recover)
-                if recover_data.get("token") == token:
-                    token_timestamp = datetime.fromisoformat(recover_data["timestamp"])
-                    if datetime.now(UTC) - token_timestamp > timedelta(hours=24):
-                        raise AuthError("Token expired", 404)
+        if user is None:
+            raise AuthError("Invalid token", 404)
 
-                    hashed_password = hash_code(new_password)
-                    self.repository.update_user_password(session, user, hashed_password)
-                    return
-            except (json.JSONDecodeError, KeyError, ValueError):
-                continue
+        if user.reset_token_expires_at is None or datetime.now(UTC) > user.reset_token_expires_at:
+            raise AuthError("Token expired", 404)
 
-        raise AuthError("Invalid token", 404)
+        hashed_password = hash_code(new_password)
+        self.repository.update_user_password(session, user, hashed_password)
 
     @staticmethod
     def send_reset_password_email(user, token: str) -> None:
