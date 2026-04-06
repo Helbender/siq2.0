@@ -315,11 +315,17 @@ class FlightService:
         payload_nips = {p["nip"] for p in flight_data["flight_pilots"]}
         existing_flight_pilots = list(flight.flight_pilots)
 
+        # Pre-fetch landing qual cache once to avoid N DB queries inside the pilot loop
+        all_quals = self.repository.find_all_qualifications(session)
+        qual_cache_by_payload_key: dict[tuple[str, TipoTripulante], Qualificacao] = {
+            (q.payload_key, q.tipo_aplicavel): q for q in all_quals if q.payload_key is not None
+        }
+
         # Para cada tripulante que já estava no voo:
         # - Recalcular qualificações como se o voo não contasse (revert)
         # - Se não vier no payload, apagar o registo FlightPilots e manter as qualificações revertidas
         for existing_pilot in existing_flight_pilots:
-            self._update_qualifications_on_delete(flight_id, session, existing_pilot)
+            self._update_qualifications_on_delete(flight_id, session, existing_pilot, qual_cache_by_payload_key)
             if existing_pilot.pilot_id not in payload_nips:
                 flight.flight_pilots.remove(existing_pilot)
                 session.delete(existing_pilot)
@@ -370,9 +376,15 @@ class FlightService:
         if flight_to_delete is None:
             return {"msg": "Flight not found"}
 
+        # Pre-fetch landing qual cache once to avoid N DB queries inside the pilot loop
+        all_quals = self.repository.find_all_qualifications(session)
+        qual_cache_by_payload_key: dict[tuple[str, TipoTripulante], Qualificacao] = {
+            (q.payload_key, q.tipo_aplicavel): q for q in all_quals if q.payload_key is not None
+        }
+
         # Iterate over each pilot in the flight
         for pilot in flight_to_delete.flight_pilots:
-            self._update_qualifications_on_delete(flight_id, session, pilot)
+            self._update_qualifications_on_delete(flight_id, session, pilot, qual_cache_by_payload_key)
 
         # Commit the updates
         self.repository.commit(session)
@@ -510,8 +522,20 @@ class FlightService:
             "error_details": errors[:10] if errors else [],
         }
 
-    def _qualification_ids_validated_by_flight_pilot(self, session: Session, flight_pilot: FlightPilots) -> set[int]:
-        """Return qualification IDs that this FlightPilots row actually validated (qual1–qual6 + landing quals)."""
+    def _qualification_ids_validated_by_flight_pilot(
+        self,
+        session: Session,
+        flight_pilot: FlightPilots,
+        qual_cache_by_payload_key: "dict[tuple[str, TipoTripulante], Qualificacao] | None" = None,
+    ) -> set[int]:
+        """Return qualification IDs that this FlightPilots row actually validated (qual1–qual6 + landing quals).
+
+        Args:
+            session: Database session
+            flight_pilot: FlightPilots row to inspect
+            qual_cache_by_payload_key: Optional pre-loaded {(payload_key, tipo) -> Qualificacao} cache.
+                When provided, avoids per-call DB queries for landing quals.
+        """
         ids: set[int] = set()
         for attr in ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]:
             val = getattr(flight_pilot, attr, None)
@@ -532,7 +556,10 @@ class FlightService:
             ]
             for payload_key, count in landing_specs:
                 if count is not None and count > 0:
-                    qual = self.repository.find_qualification_by_payload_key_and_tipo(session, payload_key, tipo)
+                    if qual_cache_by_payload_key is not None:
+                        qual = qual_cache_by_payload_key.get((payload_key, tipo))
+                    else:
+                        qual = self.repository.find_qualification_by_payload_key_and_tipo(session, payload_key, tipo)
                     if qual is not None:
                         ids.add(qual.id)
         return ids
@@ -542,9 +569,12 @@ class FlightService:
         flight_id: int,
         session: Session,
         tripulante: FlightPilots,
+        qual_cache_by_payload_key: "dict[tuple[str, TipoTripulante], Qualificacao] | None" = None,
     ) -> None:
         """Update qualifications when a flight is deleted. Only touches qualifications that this flight actually validated."""
-        qual_ids_on_this_flight = self._qualification_ids_validated_by_flight_pilot(session, tripulante)
+        qual_ids_on_this_flight = self._qualification_ids_validated_by_flight_pilot(
+            session, tripulante, qual_cache_by_payload_key
+        )
         tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(session, tripulante.pilot_id)
 
         for pq in tripulante_quals:
@@ -695,8 +725,6 @@ class FlightService:
         pq = pq_cache.get(cache_key)
 
         if not pq:
-            from app.features.users.models import TripulanteQualificacao  # type: ignore
-
             pq = TripulanteQualificacao(
                 tripulante_id=pilot_obj.nip,
                 qualificacao_id=qual.id,
@@ -760,8 +788,6 @@ class FlightService:
 
         pq = self.repository.find_tripulante_qualificacao(session, pilot_obj.nip, qual_id)
         if not pq:
-            from app.features.users.models import TripulanteQualificacao  # type: ignore
-
             pq = TripulanteQualificacao(
                 tripulante_id=pilot_obj.nip,
                 qualificacao_id=qual_id,

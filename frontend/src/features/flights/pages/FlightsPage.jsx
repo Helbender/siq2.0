@@ -41,6 +41,7 @@ export function FlightsPage() {
   const containerRef = useRef(null);
 
   const filteredFlights = useMemo(() => {
+    const lowerSearch = search.toLowerCase();
     return flights.filter((flight) =>
       [
         flight.airtask,
@@ -52,7 +53,7 @@ export function FlightsPage() {
       ]
         .join(" ")
         .toLowerCase()
-        .includes(search.toLowerCase()),
+        .includes(lowerSearch),
     );
   }, [flights, search]);
 
