@@ -27,7 +27,7 @@
     "editor.formatOnPaste": true, // optional
     "editor.formatOnSave": true, // optional
     "editor.formatOnSaveMode": "file", // required to format on save
-    
+
     // JSX/React specific formatting
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",

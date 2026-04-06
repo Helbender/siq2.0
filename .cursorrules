@@ -524,12 +524,12 @@ DEFAULT DECISION RULE
 
 When unsure:
 
-Business logic → feature  
-App structure → layout  
-Reusable logic → shared  
-App orchestration → app/router  
-Data access → repository  
-Permission checks → policies  
+Business logic → feature
+App structure → layout
+Reusable logic → shared
+App orchestration → app/router
+Data access → repository
+Permission checks → policies
 Forms → feature/forms
 
 Follow these rules without exception.
