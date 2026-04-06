@@ -147,8 +147,8 @@ class AuthService:
 
         try:
             nip = int(nip_identity)
-        except (ValueError, TypeError):
-            raise AuthError(f"Invalid user identity: {nip_identity}", 400)
+        except (ValueError, TypeError) as err:
+            raise AuthError(f"Invalid user identity: {nip_identity}", 400) from err
 
         tripulante = self.repository.find_user_by_nip(session, nip)
 

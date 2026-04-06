@@ -29,9 +29,7 @@ export function useLogin() {
         if (error.response?.status === 404) {
           localStorage.removeItem("token");
           throw new Error(
-            error.response?.data?.error ||
-              error.message ||
-              "User not found",
+            error.response?.data?.error || error.message || "User not found",
           );
         }
         // For other errors, still return the token but log the error

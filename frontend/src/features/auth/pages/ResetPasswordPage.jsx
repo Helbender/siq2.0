@@ -1,11 +1,5 @@
 import { toaster } from "@/shared/utils/toaster";
-import {
-  Button,
-  Field,
-  Flex,
-  Heading,
-  Input,
-} from "@chakra-ui/react";
+import { Button, Field, Flex, Heading, Input } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
@@ -25,7 +19,8 @@ export function ResetPasswordPage() {
     if (!token) {
       toaster.create({
         title: "Invalid link",
-        description: "No reset token found. Please request a new password reset.",
+        description:
+          "No reset token found. Please request a new password reset.",
         type: "error",
         duration: 5000,
         closable: true,
@@ -48,7 +43,8 @@ export function ResetPasswordPage() {
     if (!token) {
       toaster.create({
         title: "Invalid token",
-        description: "No reset token found. Please request a new password reset.",
+        description:
+          "No reset token found. Please request a new password reset.",
         type: "error",
         duration: 5000,
         closable: true,
@@ -90,7 +86,8 @@ export function ResetPasswordPage() {
       await resetPasswordRequest(token, newPassword);
       toaster.create({
         title: "Password updated.",
-        description: "Your password has been updated successfully. You can now login.",
+        description:
+          "Your password has been updated successfully. You can now login.",
         type: "success",
         duration: 5000,
         closable: true,
@@ -176,7 +173,11 @@ export function ResetPasswordPage() {
           Reset da password
         </Button>
 
-        <Button variant="subtle" onClick={() => navigate("/login")} width="100%">
+        <Button
+          variant="subtle"
+          onClick={() => navigate("/login")}
+          width="100%"
+        >
           Voltar a página anterior
         </Button>
       </AuthCard>

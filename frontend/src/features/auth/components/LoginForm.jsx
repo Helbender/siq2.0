@@ -1,11 +1,4 @@
-import {
-  Alert,
-  Button,
-  Field,
-  Heading,
-  Input,
-  Link,
-} from "@chakra-ui/react";
+import { Alert, Button, Field, Heading, Input, Link } from "@chakra-ui/react";
 import { AuthCard } from "./AuthCard";
 import { useLoginPage } from "../hooks/useLoginPage";
 

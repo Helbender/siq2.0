@@ -1,6 +1,5 @@
 """Authentication routes - thin request/response handlers."""
 
-import os
 import traceback
 
 from flask import Blueprint, Response, jsonify, request
