@@ -18,9 +18,7 @@ def decode_1m_file(path: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Convert .1M files (base64-encoded JSON) to .json files."
-    )
+    parser = argparse.ArgumentParser(description="Convert .1M files (base64-encoded JSON) to .json files.")
     parser.add_argument(
         "input_folder",
         type=str,

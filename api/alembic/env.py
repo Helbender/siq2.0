@@ -18,7 +18,7 @@ if not DB_URL:
     HOST = os.getenv("host")
     PORT = os.getenv("port")
     DBNAME = os.getenv("dbname")
-    
+
     # Build PostgreSQL connection string
     if all([USER, PASSWORD, HOST, PORT, DBNAME]):
         # Use SSL for production, disable for local development

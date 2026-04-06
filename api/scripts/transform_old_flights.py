@@ -32,10 +32,11 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
-from app.shared.enums import TipoTripulante
-from app.features.qualifications.models import Qualificacao
 from sqlalchemy.orm import Session
+
+from app.features.qualifications.models import Qualificacao
+from app.shared.enums import TipoTripulante
+from config import engine
 
 # Mapping from old boolean qualification fields to qualification names
 PILOT_QUAL_MAPPING = {
@@ -289,7 +290,7 @@ def process_file(input_path: Path, output_path: Path) -> tuple[bool, str]:
     """
     try:
         # Read and decode the file
-        with open(input_path, "r", encoding="utf-8") as f:
+        with open(input_path, encoding="utf-8") as f:
             content = f.read().strip()
 
         # Decode base64
@@ -461,4 +462,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-

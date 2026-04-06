@@ -9,7 +9,7 @@ RUN pip install pipenv
 RUN pipenv requirements > requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . ./ 
+COPY . ./
 
 EXPOSE 5051
 # CMD ["gunicorn", "-b", ":5051", "app:app"]

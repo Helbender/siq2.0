@@ -1,7 +1,7 @@
 from __future__ import annotations  # noqa: D100, INP001
 
 from datetime import date, timedelta
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from models.users import Base, People, date_init, year_init  # type: ignore
 from sqlalchemy import ForeignKey, String
@@ -44,7 +44,9 @@ class Pilot(People, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    flight_pilots: Mapped[List[FlightPilots]] = relationship(back_populates="pilot", cascade="all, delete-orphan", passive_deletes=True)
+    flight_pilots: Mapped[list[FlightPilots]] = relationship(
+        back_populates="pilot", cascade="all, delete-orphan", passive_deletes=True
+    )
 
     def __repr__(self):
         repr = super().__repr__()
@@ -141,17 +143,21 @@ class Qualification(Base):
         for item in quallist:
             match type_qual:
                 case "Alerta":
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "alerta") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "alerta") and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
                 case "VRP":
                     # for item.lower() in quallist:
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "vrp") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][0] < 0:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "vrp") and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
                 case "Currencies":
                     # for item.lower() in quallist:
-                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "currencies") and (getattr(self, f"last_{item.lower()}_date") - dia).days + QUALIFICATIONS[item.lower()][
-                        0
-                    ] < 0:
+                    if (QUALIFICATIONS.get(item.lower(), [0, ""])[1] == "currencies") and (
+                        getattr(self, f"last_{item.lower()}_date") - dia
+                    ).days + QUALIFICATIONS[item.lower()][0] < 0:
                         return False
 
         return True
