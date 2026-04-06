@@ -3,11 +3,13 @@
 import os
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.features.users.models import Tripulante  # type: ignore
 from app.features.users.repository import UserRepository
 from app.shared.enums import StatusTripulante, TipoTripulante  # type: ignore
+from app.shared.rbac_models import Role as RoleModel  # type: ignore
 from app.utils.email import hash_code
 from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignore
 
@@ -132,10 +134,6 @@ class UserService:
                     modified_user.role_level = value
                     # Try to find matching role by level and update role_id
                     # If no matching role found, role_id will remain None and role_level will be used
-                    from sqlalchemy import select
-
-                    from app.shared.rbac_models import Role as RoleModel
-
                     matching_role = session.scalars(select(RoleModel).where(RoleModel.level == value)).first()
                     if matching_role:
                         modified_user.role_id = matching_role.id
@@ -211,10 +209,6 @@ class UserService:
                 elif key == "roleLevel":
                     user.role_level = value
                     if value is not None:
-                        from sqlalchemy import select
-
-                        from app.shared.rbac_models import Role as RoleModel
-
                         matching_role = session.scalars(select(RoleModel).where(RoleModel.level == value)).first()
                         if matching_role:
                             user.role_id = matching_role.id

@@ -15,6 +15,7 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import { useMemo } from "react";
 import { useAuth } from "@features/auth";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { FileUpload } from "../components/FileUpload";
@@ -37,6 +38,15 @@ export function UserManagementPage() {
   const currentUserRoleLevel =
     currentUser?.roleLevel || currentUser?.role?.level;
   const canCreateUsers = currentUserRoleLevel !== Role.READONLY;
+
+  const positionCounts = useMemo(
+    () =>
+      filteredUsers.reduce((acc, user) => {
+        if (user.position) acc[user.position] = (acc[user.position] ?? 0) + 1;
+        return acc;
+      }, {}),
+    [filteredUsers],
+  );
 
   const handleSubmit = async (userNip, formData) => {
     const promise = userNip
@@ -132,15 +142,9 @@ export function UserManagementPage() {
         <Spacer />
       </HStack>
       <HStack>
-        {Array.from(
-          filteredUsers.reduce((set, user) => {
-            if (user.position) set.add(user.position);
-            return set;
-          }, new Set()),
-        ).map((position) => (
+        {Object.entries(positionCounts).map(([position, count]) => (
           <Text key={position}>
-            <b>{position}</b>:{" "}
-            {filteredUsers.filter((user) => user.position === position).length}
+            <b>{position}</b>: {count}
           </Text>
         ))}
       </HStack>

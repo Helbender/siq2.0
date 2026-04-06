@@ -1,4 +1,5 @@
 import { canModifyUser, getRoleName, Role } from "@/shared/roles";
+import { toaster } from "@/shared/utils/toaster";
 import { useAuth } from "@features/auth";
 import { StyledText } from "@/shared/components/StyledText";
 import { useSendEmail } from "@/utils/useSendEmail";
@@ -82,13 +83,12 @@ export function UserDataCard({ user }) {
             icon={<FaMailBulk />}
             colorPalette="blue"
             onClick={() => {
-              toast({
+              toaster.create({
                 title: "Sending Email",
                 description: "Wait while we send the Email",
-                status: "info",
+                type: "info",
                 duration: 5000,
-                isClosable: true,
-                position: "top",
+                closable: true,
               });
               sendEmail(user.email, `/api/recover/${user.email}`);
             }}

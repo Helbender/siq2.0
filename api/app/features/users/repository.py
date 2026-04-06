@@ -95,6 +95,10 @@ class UserRepository:
     def bulk_create(session: Session, users: list[Tripulante]) -> dict[str, int]:
         """Create multiple users.
 
+        Uses SAVEPOINTs so each user is isolated: an IntegrityError on one row
+        rolls back only that row, leaving the transaction alive for the rest.
+        One final commit writes all successful inserts in a single round-trip.
+
         Args:
             session: Database session
             users: List of Tripulante instances to create
@@ -105,18 +109,14 @@ class UserRepository:
         created = 0
         failed = 0
 
-        def check_integrity():
-            nonlocal created, failed
+        for user in users:
             try:
-                session.commit()
+                with session.begin_nested():  # SAVEPOINT per user
+                    session.add(user)
+                    session.flush()
                 created += 1
             except IntegrityError:
-                session.rollback()
                 failed += 1
-
-        for user in users:
-            session.add(user)
-            check_integrity()
 
         session.commit()
         return {"created": created, "failed": failed}

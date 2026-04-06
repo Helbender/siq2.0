@@ -230,7 +230,7 @@ export function CreateUserModal({
                     flex="1"
                     variant="solid"
                     colorPalette="success"
-                    isLoading={isSubmitting}
+                    loading={isSubmitting}
                     disabled={isSubmitting}
                   >
                     {editingUser ? "Guardar" : "Criar"}
