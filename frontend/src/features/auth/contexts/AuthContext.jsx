@@ -117,7 +117,7 @@ export function AuthProvider({ children }) {
 
   const login = async (nip, password) => {
     try {
-      const result = await loginMutation.mutateAsync({ nip, password });
+      await loginMutation.mutateAsync({ nip, password });
       // Fetch crew types after successful login
       queryClient.invalidateQueries({ queryKey: CREW_TYPES_QUERY_KEY });
       return { success: true };

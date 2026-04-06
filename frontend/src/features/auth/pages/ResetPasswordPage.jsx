@@ -165,8 +165,8 @@ export function ResetPasswordPage() {
           colorPalette="teal"
           type="submit"
           onClick={setnewpass}
-          isLoading={isLoading}
-          isDisabled={isLoading || !token}
+          loading={isLoading}
+          disabled={isLoading || !token}
           aria-label="Reset da password"
           width="100%"
         >

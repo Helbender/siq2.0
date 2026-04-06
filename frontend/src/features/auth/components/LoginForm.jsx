@@ -74,8 +74,8 @@ export function LoginForm() {
         <Button
           mt="10"
           type="submit"
-          isLoading={isLoading}
-          isDisabled={isLoading}
+          loading={isLoading}
+          disabled={isLoading}
           colorPalette={"teal"}
         >
           <b>Entrar</b>
