@@ -19,7 +19,9 @@ export default function AnomalyFlightsDialog({ open, onOpenChange, selected }) {
             </Dialog.CloseTrigger> */}
             <Dialog.Body>
               {!selected ? null : selected.flights.length === 0 ? (
-                <Text color="fg.muted">Sem voos associados a esta anomalia.</Text>
+                <Text color="fg.muted">
+                  Sem voos associados a esta anomalia.
+                </Text>
               ) : (
                 <Stack gap={2}>
                   {selected.flights.map((f) => (
@@ -52,4 +54,3 @@ export default function AnomalyFlightsDialog({ open, onOpenChange, selected }) {
     </Dialog.Root>
   );
 }
-

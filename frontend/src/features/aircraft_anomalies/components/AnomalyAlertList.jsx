@@ -26,9 +26,9 @@ export default function AnomalyAlertList({
             flights: anomalia.planeAnomalyFlights ?? [],
             key: `${plane.num}-${index}-${anomalia.name}`,
           };
-        })
+        }),
       ),
-    [planes]
+    [planes],
   );
 
   const filtered =
