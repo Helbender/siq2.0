@@ -20,4 +20,3 @@ class AvailableYearsResponseSchema(Schema):
     """Schema for available years response."""
 
     years = fields.List(fields.Int(), metadata={"description": "List of years with flights"})
-

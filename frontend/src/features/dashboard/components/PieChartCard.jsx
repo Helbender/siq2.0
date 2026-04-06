@@ -22,7 +22,14 @@ const CHART_HEIGHT = 350;
 
 export function PieChartCard({ title, data, totalHours }) {
   return (
-    <Card.Root variant="glass" flex={1} minW={0} h="450px" display="flex" flexDirection="column">
+    <Card.Root
+      variant="glass"
+      flex={1}
+      minW={0}
+      h="450px"
+      display="flex"
+      flexDirection="column"
+    >
       <Card.Header>
         <Heading size="md" textAlign="center">
           {title}

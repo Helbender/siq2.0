@@ -183,7 +183,11 @@ export function DashboardPage() {
       </Flex>
       <Text mb={4} textAlign={"right"} fontSize="xs" color="fg.muted">
         Dados de{" "}
-        <Link href="https://sunrise-sunset.org/" target="_blank" rel="noopener noreferrer">
+        <Link
+          href="https://sunrise-sunset.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           sunrise-sunset.org
         </Link>
       </Text>

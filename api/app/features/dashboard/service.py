@@ -44,14 +44,10 @@ class DashboardService:
             date_from, date_to = date_to, date_from
 
         # Get total flights count for the date range
-        total_flights = self.repository.count_flights_by_date_range(
-            session, date_from, date_to
-        )
+        total_flights = self.repository.count_flights_by_date_range(session, date_from, date_to)
 
         # Get all flights for the date range with pilots loaded
-        all_flights = self.repository.find_flights_by_date_range_with_pilots(
-            session, date_from, date_to
-        )
+        all_flights = self.repository.find_flights_by_date_range_with_pilots(session, date_from, date_to)
 
         # Calculate hours by flight_type
         hours_by_type: dict[str, int] = {}  # type -> total minutes
@@ -168,4 +164,3 @@ class DashboardService:
             List of years (integers)
         """
         return self.repository.find_available_years(session)
-

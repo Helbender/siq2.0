@@ -15,7 +15,8 @@ export function TopPilotsSection({ topPilotsByType, dateRangeLabel }) {
         Tripulantes com Mais Horas de Voo ({dateRangeLabel})
       </Heading>
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
-        {getAllCrewTypes().filter((tipo) => topPilotsByType[tipo])
+        {getAllCrewTypes()
+          .filter((tipo) => topPilotsByType[tipo])
           .map((tipo) => {
             const pilot = topPilotsByType[tipo];
             return (

@@ -100,9 +100,7 @@ def get_flight_statistics() -> tuple[Response, int]:
             session.execute(text("SET statement_timeout = '0'"))
         except Exception:
             pass
-        statistics = dashboard_service.get_flight_statistics(
-            date_from, date_to, session
-        )
+        statistics = dashboard_service.get_flight_statistics(date_from, date_to, session)
         return jsonify(statistics), 200
 
 
@@ -135,4 +133,3 @@ def get_available_years() -> tuple[Response, int]:
     with Session(engine) as session:
         years = dashboard_service.get_available_years(session)
         return jsonify({"years": years}), 200
-
