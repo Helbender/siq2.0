@@ -105,7 +105,7 @@ class Tripulante(Base):
                 "level": role_level_value,
             }
         # Deduplicate by qualificacao_id (keep latest data_ultima_validacao), then sort by grupo and nome
-        by_qual_id: dict[int, "TripulanteQualificacao"] = {}
+        by_qual_id: dict[int, TripulanteQualificacao] = {}
         for q in self.qualificacoes:
             qid = q.qualificacao_id
             if qid not in by_qual_id or q.data_ultima_validacao > by_qual_id[qid].data_ultima_validacao:

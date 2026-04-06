@@ -132,7 +132,9 @@ export function InsertInitQual(props) {
                     </Text>
                     <Flex marginTop={8} justifyContent={"space-evenly"}>
                       <Field.Root w={"-moz-max-content"}>
-                        <Field.Label textAlign={"center"}>Qualificação</Field.Label>
+                        <Field.Label textAlign={"center"}>
+                          Qualificação
+                        </Field.Label>
                         <Select
                           name="qualfication"
                           {...register("qualification")}

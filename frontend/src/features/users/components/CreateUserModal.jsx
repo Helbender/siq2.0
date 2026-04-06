@@ -2,14 +2,14 @@ import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
 import { getRoleOptionsForUser } from "@/shared/roles";
 import { useAuth } from "@features/auth";
 import {
-    Button,
-    Dialog,
-    Field,
-    Flex,
-    HStack,
-    Input,
-    NativeSelect,
-    VStack
+  Button,
+  Dialog,
+  Field,
+  Flex,
+  HStack,
+  Input,
+  NativeSelect,
+  VStack,
 } from "@chakra-ui/react";
 import { useUserForm } from "../hooks/useUserForm";
 
@@ -45,9 +45,13 @@ export function CreateUserModal({
         <Dialog.Content>
           <Dialog.CloseTrigger />
           <Dialog.Header>
-            <Dialog.Title textAlign={"center"}>{editingUser ? `Editar ${editingUser.rank} ${editingUser.name}` : "Novo Utilizador"}</Dialog.Title>
+            <Dialog.Title textAlign={"center"}>
+              {editingUser
+                ? `Editar ${editingUser.rank} ${editingUser.name}`
+                : "Novo Utilizador"}
+            </Dialog.Title>
           </Dialog.Header>
-          
+
           <Dialog.Body>
             <form onSubmit={handleSubmit}>
               <VStack gap={4}>
@@ -107,7 +111,7 @@ export function CreateUserModal({
                 <Field.Root width="100%">
                   <Field.Label>Nome</Field.Label>
                   <Input
-                      value={formData.name}
+                    value={formData.name}
                     placeholder="Primeiro e Último Nome"
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
@@ -135,19 +139,35 @@ export function CreateUserModal({
                           setFormData({ ...formData, tipo: e.target.value })
                         }
                       >
-                        <option value={crewTypeToApiFormat(TipoTripulante.PILOTO)}>
+                        <option
+                          value={crewTypeToApiFormat(TipoTripulante.PILOTO)}
+                        >
                           {TipoTripulante.PILOTO}
                         </option>
-                        <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_CABINE)}>
+                        <option
+                          value={crewTypeToApiFormat(
+                            TipoTripulante.OPERADOR_CABINE,
+                          )}
+                        >
                           {TipoTripulante.OPERADOR_CABINE}
                         </option>
-                        <option value={crewTypeToApiFormat(TipoTripulante.COORDENADOR_TATICO)}>
+                        <option
+                          value={crewTypeToApiFormat(
+                            TipoTripulante.COORDENADOR_TATICO,
+                          )}
+                        >
                           {TipoTripulante.COORDENADOR_TATICO}
                         </option>
-                        <option value={crewTypeToApiFormat(TipoTripulante.OPERADOR_VIGILANCIA)}>
+                        <option
+                          value={crewTypeToApiFormat(
+                            TipoTripulante.OPERADOR_VIGILANCIA,
+                          )}
+                        >
                           {TipoTripulante.OPERADOR_VIGILANCIA}
                         </option>
-                        <option value={crewTypeToApiFormat(TipoTripulante.OPERACOES)}>
+                        <option
+                          value={crewTypeToApiFormat(TipoTripulante.OPERACOES)}
+                        >
                           {TipoTripulante.OPERACOES}
                         </option>
                       </NativeSelect.Field>
@@ -173,8 +193,8 @@ export function CreateUserModal({
                     <Field.Root>
                       <Field.Label>Role</Field.Label>
                       <NativeSelect.Root>
-<NativeSelect.Field
-                        value={formData.roleLevel}
+                        <NativeSelect.Field
+                          value={formData.roleLevel}
                           onChange={(e) =>
                             setFormData({
                               ...formData,
@@ -183,7 +203,7 @@ export function CreateUserModal({
                           }
                         >
                           {getRoleOptionsForUser(
-                            currentUser?.roleLevel || currentUser?.role?.level
+                            currentUser?.roleLevel || currentUser?.role?.level,
                           ).map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
