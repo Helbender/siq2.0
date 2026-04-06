@@ -15,3 +15,10 @@ TODO
 
 
 database/
+
+# Vendor template (not part of app source)
+templatemo_607_glass_admin/
+
+# Playwright local artifacts
+.playwright/
+.playwright-cli/
