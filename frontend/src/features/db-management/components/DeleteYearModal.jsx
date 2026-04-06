@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Portal,
-  Text,
-} from "@chakra-ui/react";
+import { Button, Dialog, IconButton, Portal, Text } from "@chakra-ui/react";
 import { HiX } from "react-icons/hi";
 import { useDeleteYear } from "../mutations/useDeleteYear";
 import { toaster } from "@/shared/utils/toaster";
@@ -45,7 +39,8 @@ export function DeleteYearModal({ isOpen, onClose, year, flightCount }) {
       dismissPendingToast();
       toaster.create({
         title: "Year deleted successfully",
-        description: result.message || `All flights for year ${year} have been deleted.`,
+        description:
+          result.message || `All flights for year ${year} have been deleted.`,
         type: "success",
         duration: 3000,
         closable: true,
@@ -83,10 +78,13 @@ export function DeleteYearModal({ isOpen, onClose, year, flightCount }) {
             </Dialog.CloseTrigger>
             <Dialog.Body>
               <Text>
-                Are you sure you want to delete all flights for year <strong>{year}</strong>?
+                Are you sure you want to delete all flights for year{" "}
+                <strong>{year}</strong>?
               </Text>
               <Text mt={2} color="red.500" fontWeight="semibold">
-                This will permanently delete {flightCount} flight{flightCount !== 1 ? "s" : ""} and all associated flight pilot records.
+                This will permanently delete {flightCount} flight
+                {flightCount !== 1 ? "s" : ""} and all associated flight pilot
+                records.
               </Text>
               <Text mt={2} fontSize="sm" color="gray.500">
                 This action cannot be undone.

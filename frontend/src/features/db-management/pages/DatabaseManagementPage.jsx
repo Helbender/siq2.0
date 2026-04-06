@@ -29,7 +29,7 @@ export function DatabaseManagementPage() {
   const { user } = useAuth();
   const userRoleLevel = user?.roleLevel || user?.role?.level;
   const hasAccess = userRoleLevel >= Role.SUPER_ADMIN;
-  
+
   // Only fetch data if user has SUPER_ADMIN access
   const { data, isLoading, error } = useFlightsByYear({
     enabled: hasAccess,
@@ -46,7 +46,8 @@ export function DatabaseManagementPage() {
     // Show loading toast
     const loadingToast = toaster.create({
       title: "Starting backup...",
-      description: "Processing flights and preparing for upload to Google Drive",
+      description:
+        "Processing flights and preparing for upload to Google Drive",
       type: "info",
       duration: null,
       closable: false,
@@ -165,7 +166,8 @@ export function DatabaseManagementPage() {
               Database Management
             </Heading>
             <Text color="gray.500">
-              Manage flight data by year. View statistics, delete entire years, and create backups.
+              Manage flight data by year. View statistics, delete entire years,
+              and create backups.
             </Text>
           </Box>
 
@@ -181,7 +183,8 @@ export function DatabaseManagementPage() {
                     Google Drive Backup
                   </Text>
                   <Text fontSize="sm" color="gray.500" mb={3}>
-                    Rebackup all flights to Google Drive. This will process all flights and upload them in the background.
+                    Rebackup all flights to Google Drive. This will process all
+                    flights and upload them in the background.
                   </Text>
                   <Button
                     leftIcon={<FaCloud />}
@@ -235,7 +238,9 @@ export function DatabaseManagementPage() {
                     Upload Qualifications Backup
                   </Text>
                   <Text fontSize="sm" color="gray.500" mb={3}>
-                    Upload a JSON backup file to restore qualifications. Existing qualifications will be updated, new ones will be created.
+                    Upload a JSON backup file to restore qualifications.
+                    Existing qualifications will be updated, new ones will be
+                    created.
                   </Text>
                   <VStack spacing={3} align="stretch">
                     <Field.Root>
@@ -282,7 +287,9 @@ export function DatabaseManagementPage() {
                 <Alert.Content>
                   <Alert.Title>Warning</Alert.Title>
                   <Alert.Description>
-                    <strong>Warning:</strong> Deleting a year will permanently remove all flights and associated flight pilot records for that year. This action cannot be undone.
+                    <strong>Warning:</strong> Deleting a year will permanently
+                    remove all flights and associated flight pilot records for
+                    that year. This action cannot be undone.
                   </Alert.Description>
                 </Alert.Content>
               </Alert.Root>

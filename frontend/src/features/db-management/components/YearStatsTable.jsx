@@ -24,7 +24,8 @@ export function YearStatsTable({ data, isLoading, error }) {
     // Show loading toast
     const loadingToast = toaster.create({
       title: `Starting backup for ${year}...`,
-      description: "Processing flights and preparing for upload to Google Drive",
+      description:
+        "Processing flights and preparing for upload to Google Drive",
       type: "loading",
       duration: null, // Keep it open until we close it
       closable: false,
@@ -74,7 +75,9 @@ export function YearStatsTable({ data, isLoading, error }) {
         <Alert.Indicator />
         <Alert.Content>
           <Alert.Title>Error</Alert.Title>
-          <Alert.Description>Error loading flight statistics: {error.message}</Alert.Description>
+          <Alert.Description>
+            Error loading flight statistics: {error.message}
+          </Alert.Description>
         </Alert.Content>
       </Alert.Root>
     );
@@ -94,7 +97,9 @@ export function YearStatsTable({ data, isLoading, error }) {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeader>Year</Table.ColumnHeader>
-            <Table.ColumnHeader textAlign="end">Number of Flights</Table.ColumnHeader>
+            <Table.ColumnHeader textAlign="end">
+              Number of Flights
+            </Table.ColumnHeader>
             <Table.ColumnHeader>Actions</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -123,7 +128,12 @@ export function YearStatsTable({ data, isLoading, error }) {
                   <Button
                     colorPalette="red"
                     size="sm"
-                    onClick={() => deleteDialog.open({ year: item.year, flightCount: item.flight_count })}
+                    onClick={() =>
+                      deleteDialog.open({
+                        year: item.year,
+                        flightCount: item.flight_count,
+                      })
+                    }
                   >
                     Delete Year
                   </Button>

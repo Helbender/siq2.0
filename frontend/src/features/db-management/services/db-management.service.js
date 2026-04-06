@@ -7,7 +7,9 @@ export const dbManagementService = {
   },
 
   deleteYear: async (year) => {
-    const { data } = await http.delete(`/db-management/flights-by-year/${year}`);
+    const { data } = await http.delete(
+      `/db-management/flights-by-year/${year}`,
+    );
     return data;
   },
 
@@ -56,11 +58,15 @@ export const dbManagementService = {
   uploadQualifications: async (file) => {
     const formData = new FormData();
     formData.append("file", file);
-    const { data } = await http.post("/db-management/import/qualifications", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
+    const { data } = await http.post(
+      "/db-management/import/qualifications",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    });
+    );
     return data;
   },
 };
