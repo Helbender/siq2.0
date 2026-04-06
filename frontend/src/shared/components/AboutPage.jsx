@@ -17,7 +17,12 @@ export function AboutPage() {
       mt="0px"
     >
       <Box mb={[0, 15]}>
-        <Heading pt={20} pb={10} textAlign={"center"} fontSize={["2xl", "2xl", "3xl"]}>
+        <Heading
+          pt={20}
+          pb={10}
+          textAlign={"center"}
+          fontSize={["2xl", "2xl", "3xl"]}
+        >
           Sistema Integrado de Qualificações
         </Heading>
       </Box>

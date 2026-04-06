@@ -20,7 +20,7 @@ class Role(Base):
     permissions: Mapped[list["Permission"]] = relationship(
         "Permission", secondary="role_permissions", back_populates="roles"
     )
-    users: Mapped[list["Tripulante"]] = relationship("Tripulante", back_populates="role")
+    users: Mapped[list["Tripulante"]] = relationship("Tripulante", back_populates="role")  # noqa: F821
 
     def to_json(self):
         """Convert role to JSON representation."""
@@ -43,9 +43,7 @@ class Permission(Base):
     description: Mapped[str] = mapped_column(String(255), nullable=True)
 
     # Relationships
-    roles: Mapped[list["Role"]] = relationship(
-        "Role", secondary="role_permissions", back_populates="permissions"
-    )
+    roles: Mapped[list["Role"]] = relationship("Role", secondary="role_permissions", back_populates="permissions")
 
     def to_json(self):
         """Convert permission to JSON representation."""

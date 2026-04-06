@@ -1,5 +1,6 @@
 """Time utility functions."""
 
+
 def parse_time_to_minutes(time_str: str) -> int:
     """Parse time string in format 'HH:MM' to total minutes.
 
@@ -20,4 +21,3 @@ def parse_time_to_minutes(time_str: str) -> int:
         return hours * 60 + minutes
     except (ValueError, AttributeError):
         return 0
-

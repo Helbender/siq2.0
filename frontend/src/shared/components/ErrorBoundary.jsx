@@ -76,16 +76,33 @@ export function ErrorBoundary() {
           <Button onClick={handleGoHome} colorPalette="teal" size="lg" w="100%">
             Go to Dashboard
           </Button>
-          <Button onClick={handleGoBack} variant="outline" colorPalette="teal" w="100%">
+          <Button
+            onClick={handleGoBack}
+            variant="outline"
+            colorPalette="teal"
+            w="100%"
+          >
             Go Back
           </Button>
-          <Button onClick={handleReload} variant="ghost" colorPalette="teal" w="100%">
+          <Button
+            onClick={handleReload}
+            variant="ghost"
+            colorPalette="teal"
+            w="100%"
+          >
             Reload Page
           </Button>
         </VStack>
 
         {import.meta.env.DEV && error instanceof Error && (
-          <Box mt={4} p={4} bg="bg.muted" borderRadius="md" w="100%" textAlign="left">
+          <Box
+            mt={4}
+            p={4}
+            bg="bg.muted"
+            borderRadius="md"
+            w="100%"
+            textAlign="left"
+          >
             <Text fontSize="xs" color="text.secondary" mb={2}>
               Stack Trace (Development Only):
             </Text>

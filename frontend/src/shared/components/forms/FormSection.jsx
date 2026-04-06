@@ -1,4 +1,4 @@
-import { Box, Heading, VStack } from "@chakra-ui/react"
+import { Box, Heading, VStack } from "@chakra-ui/react";
 
 export function FormSection({ title, children }) {
   return (
@@ -10,14 +10,10 @@ export function FormSection({ title, children }) {
       // bg="bg.canvas"
     >
       <VStack align="stretch" gap="4">
-
-        <Heading size="sm">
-          {title}
-        </Heading>
+        <Heading size="sm">{title}</Heading>
 
         {children}
-
       </VStack>
     </Box>
-  )
+  );
 }

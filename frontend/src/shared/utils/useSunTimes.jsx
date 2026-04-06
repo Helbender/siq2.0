@@ -15,7 +15,7 @@ export function useSunTimes(datestr) {
       setError(null);
       try {
         const response = await fetch(
-          `${SUN_API_URL}?lat=${LISBOA_LAT}&lng=${LISBOA_LNG}&date=${datestr}&formatted=0`
+          `${SUN_API_URL}?lat=${LISBOA_LAT}&lng=${LISBOA_LNG}&date=${datestr}&formatted=0`,
         );
 
         const data = await response.json();

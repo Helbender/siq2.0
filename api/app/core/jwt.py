@@ -100,7 +100,7 @@ def _register_jwt_error_handlers(jwt: JWTManager, app: Flask) -> None:
             current_key = app.config.get("JWT_SECRET_KEY", "")
             print(f"[JWT] Current JWT_SECRET_KEY (first 20 chars): {current_key[:20] if current_key else 'EMPTY'}...")
             print(f"[JWT] Current JWT_SECRET_KEY (last 20 chars): ...{current_key[-20:] if current_key else 'EMPTY'}")
-            
+
             if refresh_token != "NOT FOUND":
                 print(f"[JWT] Refresh token cookie length: {len(refresh_token)}")
                 print(f"[JWT] Refresh token cookie value (first 100 chars): {refresh_token[:100]}")

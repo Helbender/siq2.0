@@ -11,7 +11,14 @@ export function AuthenticatedLayout() {
       <BackgroundWithOrbs />
       <Flex h="100vh" overflow="hidden" position="relative" bg="transparent">
         <Sidebar />
-        <Flex direction="column" flex="1" minW="0" overflow="hidden" position="relative" bg="transparent">
+        <Flex
+          direction="column"
+          flex="1"
+          minW="0"
+          overflow="hidden"
+          position="relative"
+          bg="transparent"
+        >
           <TopBar />
           <Box flex="1" overflow="auto" p={6} bg="transparent">
             <Outlet />

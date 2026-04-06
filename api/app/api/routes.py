@@ -37,5 +37,3 @@ api.register_blueprint(db_management_bp, url_prefix="/db-management")
 
 # Register qualifications preview blueprint (USER level)
 api.register_blueprint(qualifications_preview_bp, url_prefix="/qualifications-preview")
-
-

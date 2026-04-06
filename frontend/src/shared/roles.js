@@ -32,10 +32,17 @@ export function getRoleOptions() {
 
 export function getRoleOptionsForUser(currentUserRoleLevel) {
   if (!currentUserRoleLevel) return [];
-  return getRoleOptions().filter((option) => option.value <= currentUserRoleLevel);
+  return getRoleOptions().filter(
+    (option) => option.value <= currentUserRoleLevel,
+  );
 }
 
-export function canModifyUser(currentUserRoleLevel, targetUserRoleLevel, currentUserNip, targetUserNip) {
+export function canModifyUser(
+  currentUserRoleLevel,
+  targetUserRoleLevel,
+  currentUserNip,
+  targetUserNip,
+) {
   if (!currentUserRoleLevel) return false;
   if (currentUserRoleLevel === Role.READONLY) {
     return currentUserNip === targetUserNip;

@@ -1,5 +1,12 @@
 import { useAuth } from "@features/auth";
-import { Box, Link as ChakraLink, Flex, Separator, Spacer, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Link as ChakraLink,
+  Flex,
+  Separator,
+  Spacer,
+  Text,
+} from "@chakra-ui/react";
 import { FaInfoCircle, FaSignOutAlt } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "@/layout/constants/navItems";
@@ -39,13 +46,7 @@ export function Navbar() {
   };
 
   return (
-    <Flex
-      direction="column"
-      w="230px"
-      h="100%"
-      bg="bg.surface"
-      flexShrink={0}
-    >
+    <Flex direction="column" w="230px" h="100%" bg="bg.surface" flexShrink={0}>
       {user && (
         <Box px={3} py={2}>
           <Text

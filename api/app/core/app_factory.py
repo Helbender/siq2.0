@@ -33,10 +33,10 @@ def create_app() -> Flask:
     smtp_port_str = os.environ.get("SMTP_PORT", "587")
     smtp_user = os.environ.get("SMTP_USER")
     smtp_password = os.environ.get("SMTP_PASSWORD", "")
-    
+
     if not smtp_server or not smtp_user:
         print("WARNING: SMTP_SERVER or SMTP_USER not configured. Email functionality will not work.")
-    
+
     smtp_port = int(smtp_port_str)
     app.config["MAIL_SERVER"] = smtp_server
     app.config["MAIL_PORT"] = smtp_port
