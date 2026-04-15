@@ -22,3 +22,8 @@ templatemo_607_glass_admin/
 # Playwright local artifacts
 .playwright/
 .playwright-cli/
+
+# Graphify outputs (large/regenerable)
+graphify-out/graph.html
+graphify-out/graph.json
+graphify-out/cache/
