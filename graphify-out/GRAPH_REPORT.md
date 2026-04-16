@@ -1,7 +1,7 @@
 # Graph Report - .  (2026-04-16)
 
 ## Corpus Check
-- 273 files · ~87,564 words
+- 273 files · ~87,964 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1210,12 +1210,12 @@ Nodes (1): API README
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `TipoTripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 36`, `Community 11`, `Community 16`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **Why does `Tripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 7`, `Community 17`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+- **Why does `TipoTripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 36`, `Community 11`, `Community 16`?**
+  _High betweenness centrality (0.079) - this node is a cross-community bridge._
 - **Why does `Qualificacao` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 36`, `Community 6`, `Community 7`, `Community 11`, `Community 17`?**
-  _High betweenness centrality (0.055) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **Are the 190 inferred relationships involving `Tripulante` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
   _`Tripulante` has 190 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 187 inferred relationships involving `TipoTripulante` (e.g. with `API-level endpoints and blueprint registration.` and `FlightService`) actually correct?**
