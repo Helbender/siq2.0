@@ -25,4 +25,3 @@ def health_check():
               example: "ok"
     """
     return jsonify({"status": "ok"}), 200
-

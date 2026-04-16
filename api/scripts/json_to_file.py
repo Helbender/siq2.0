@@ -14,11 +14,12 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
-from app.features.flights.models import Flight, FlightPilots
-from app.features.users.models import Tripulante
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.features.flights.models import Flight, FlightPilots
+from app.features.users.models import Tripulante
+from config import engine
 
 # Dicionário que queremos salvar
 # meu_dicionario = {"nome": "João", "idade": 30, "cidade": "Lisboa"}
@@ -39,18 +40,14 @@ with Session(engine) as session:
         flight_pilots = session.execute(stmt2).scalars()
 
         # Creates Empty list of pilots and crew to append to JSON
-        flights[i][
-            "flight_pilots"
-        ] = []  # "flight_pilots" key used for compatability with the FRONTEND
+        flights[i]["flight_pilots"] = []  # "flight_pilots" key used for compatability with the FRONTEND
 
         for flight_pilot in flight_pilots:
             result = session.execute(
                 select(Tripulante).where(Tripulante.nip == flight_pilot.pilot_id),
             ).scalar_one_or_none()
             if result is None:
-                flights[i]["flight_pilots"].append(
-                    {"pilotName": "Not found, maybe deleted"}
-                )
+                flights[i]["flight_pilots"].append({"pilotName": "Not found, maybe deleted"})
             else:
                 flights[i]["flight_pilots"].append(flight_pilot.to_json())
 

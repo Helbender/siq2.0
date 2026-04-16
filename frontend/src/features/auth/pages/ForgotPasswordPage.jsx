@@ -1,14 +1,8 @@
 import { toaster } from "@/shared/utils/toaster";
-import {
-  Button,
-  Field,
-  Flex,
-  Heading,
-  Input,
-  Stack
-} from "@chakra-ui/react";
+import { Button, Field, Flex, Heading, Input } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthCard } from "../components/AuthCard";
 import { forgotPasswordRequest } from "../services/api";
 
 export function ForgotPasswordPage() {
@@ -61,21 +55,21 @@ export function ForgotPasswordPage() {
   }
   return (
     <Flex
-      flex="1"
-      w="100vw"
-      h="100vh"
-      justifyContent="center"
-      alignItems={"center"}
+      w={"100%"}
+      h={"100%"}
+      justifyContent={"center"}
+      alignItems={{ sm: "center", md: "top" }}
+      overflowY="auto"
+      position="relative"
     >
-      <Stack mb={{ base: "10", md: "25" }} textAlign={"center"}>
+      <AuthCard mb={{ base: "10", md: "25" }} textAlign={"center"}>
         <Heading textAlign={"center"} my={10} fontSize={["xl", "2xl", "3xl"]}>
           Recuperação de Password
         </Heading>
         <Field.Root mx="auto">
           <Field.Label textAlign={"center"}>Email</Field.Label>
           <Input
-          bg="gray.700"
-
+            bg="bg.input"
             type="email"
             value={email}
             name="email"
@@ -92,22 +86,22 @@ export function ForgotPasswordPage() {
 
         <Button
           mt={5}
-          colorPalette="teal"
+          variant="solid"
           onClick={sendEmail}
           width={["60%", "80%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button
         >
-          Recover
+          Recuperar
         </Button>
         <Button
-        colorPalette="blue"
+          variant="subtle"
           onClick={goBack}
           width={["60%", "80%", "100%"]} // Adjust button width for small screens and larger screens
           mx="auto" // Center the button
         >
           Voltar a página anterior
         </Button>
-      </Stack>
+      </AuthCard>
     </Flex>
   );
 }

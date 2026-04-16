@@ -13,7 +13,7 @@ describe("Can", () => {
     render(
       <Can minLevel={40}>
         <span>Allowed content</span>
-      </Can>
+      </Can>,
     );
     expect(screen.getByText("Allowed content")).toBeInTheDocument();
   });
@@ -23,7 +23,7 @@ describe("Can", () => {
     render(
       <Can minLevel={40}>
         <span>Allowed content</span>
-      </Can>
+      </Can>,
     );
     expect(screen.getByText("Allowed content")).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe("Can", () => {
     render(
       <Can minLevel={40} fallback={<span>No access</span>}>
         <span>Allowed content</span>
-      </Can>
+      </Can>,
     );
     expect(screen.getByText("No access")).toBeInTheDocument();
     expect(screen.queryByText("Allowed content")).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("Can", () => {
     render(
       <Can minLevel={40}>
         <span>Allowed content</span>
-      </Can>
+      </Can>,
     );
     expect(screen.queryByText("Allowed content")).not.toBeInTheDocument();
   });

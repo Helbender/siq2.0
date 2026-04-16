@@ -31,7 +31,9 @@ describe("CreateQualModal", () => {
     mockPost.mockReset().mockResolvedValue({ data: {} });
     mockGet.mockImplementation((url) => {
       if (url === "/v2/listas") {
-        return Promise.resolve({ data: { tipos: ["PILOTO", "OPERADOR CABINE"] } });
+        return Promise.resolve({
+          data: { tipos: ["PILOTO", "OPERADOR CABINE"] },
+        });
       }
       if (url.startsWith("/v2/qualification-groups/")) {
         return Promise.resolve({
@@ -46,17 +48,24 @@ describe("CreateQualModal", () => {
     const user = userEvent.setup();
     render(<CreateQualModal edit={false} />);
 
-    await user.click(screen.getByRole("button", { name: /Nova Qualificação/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Nova Qualificação/i }),
+    );
 
     await screen.findByLabelText(/Nome da Qualificação/i);
-    await user.type(screen.getByPlaceholderText("Nome da Qualificação"), "Qual Test");
+    await user.type(
+      screen.getByPlaceholderText("Nome da Qualificação"),
+      "Qual Test",
+    );
     await user.type(screen.getByPlaceholderText("Validade em dias"), "365");
 
     const tipoSelect = screen.getByLabelText(/Tipo de Tripulante/i);
     await user.selectOptions(tipoSelect, "PILOTO");
 
     await vi.waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("/v2/qualification-groups/"));
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining("/v2/qualification-groups/"),
+      );
     });
 
     const grupoSelect = await screen.findByLabelText(/Grupo de Qualificação/i);
@@ -72,7 +81,7 @@ describe("CreateQualModal", () => {
           validade: "365",
           tipo_aplicavel: "PILOTO",
           grupo: "GP1",
-        })
+        }),
       );
     });
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -82,15 +91,25 @@ describe("CreateQualModal", () => {
     const user = userEvent.setup();
     render(<CreateQualModal edit={false} />);
 
-    await user.click(screen.getByRole("button", { name: /Nova Qualificação/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Nova Qualificação/i }),
+    );
 
     await screen.findByLabelText(/Nome da Qualificação/i);
-    await user.type(screen.getByPlaceholderText("Nome da Qualificação"), "Another");
+    await user.type(
+      screen.getByPlaceholderText("Nome da Qualificação"),
+      "Another",
+    );
     await user.type(screen.getByPlaceholderText("Validade em dias"), "180");
-    await user.selectOptions(screen.getByLabelText(/Tipo de Tripulante/i), "PILOTO");
+    await user.selectOptions(
+      screen.getByLabelText(/Tipo de Tripulante/i),
+      "PILOTO",
+    );
 
     await vi.waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith(expect.stringMatching(/\/v2\/qualification-groups\//));
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringMatching(/\/v2\/qualification-groups\//),
+      );
     });
 
     const grupoSelect = await screen.findByLabelText(/Grupo de Qualificação/i);
@@ -100,6 +119,9 @@ describe("CreateQualModal", () => {
     await vi.waitFor(() => {
       expect(mockPost).toHaveBeenCalled();
     });
-    expect(mockPost).toHaveBeenCalledWith("/v2/qualificacoes", expect.any(Object));
+    expect(mockPost).toHaveBeenCalledWith(
+      "/v2/qualificacoes",
+      expect.any(Object),
+    );
   });
 });

@@ -4,6 +4,7 @@ import { toaster } from "@/shared/utils/toaster";
 import {
   Box,
   Button,
+  Card,
   Container,
   Flex,
   HStack,
@@ -86,13 +87,15 @@ export function QualificationManagementPage() {
 
           <Can minLevel={Role.UNIF}>
             <Button
-              leftIcon={<BiRefresh />}
               colorPalette="blue"
               onClick={handleReprocessAllFlights}
-              isLoading={reprocessFlights.isPending}
-              loadingText="A processar..."
+              loading={reprocessFlights.isPending}
+              disabled={reprocessFlights.isPending}
             >
-              Reprocessar Todas
+              <BiRefresh />
+              {reprocessFlights.isPending
+                ? "A processar..."
+                : "Reprocessar Todas"}
             </Button>
           </Can>
 
@@ -122,7 +125,9 @@ export function QualificationManagementPage() {
           />
         </Flex>
 
-        <QualificationTable qualifications={filtered} />
+        <Card.Root>
+          <QualificationTable qualifications={filtered} />
+        </Card.Root>
       </Container>
     </Can>
   );

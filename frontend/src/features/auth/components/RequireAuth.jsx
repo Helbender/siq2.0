@@ -1,11 +1,11 @@
 import { useAuth } from "@features/auth";
-import { Navigate } from 'react-router'
+import { Navigate } from "react-router";
 
 export function RequireAuth({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
-  if (loading) return null
-  if (!user) return <Navigate to="/login" replace />
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
 
-  return children
+  return children;
 }

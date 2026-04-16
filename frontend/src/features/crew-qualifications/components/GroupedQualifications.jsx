@@ -1,7 +1,7 @@
-import { Flex, Text, Grid, GridItem } from "@chakra-ui/react";
-import { QualificationsPanel } from "./QualificationsPanel";
-import { Fragment, memo, useMemo } from "react";
 import { StandardText } from "@/shared/components/StandardText";
+import { Flex, Grid, GridItem, Text } from "@chakra-ui/react";
+import { Fragment, memo, useMemo } from "react";
+import { QualificationsPanel } from "./QualificationsPanel";
 
 export const GroupedQualifications = memo(function GroupedQualifications({
   qualificacoes,
@@ -49,13 +49,14 @@ export const GroupedQualifications = memo(function GroupedQualifications({
           key={grupo}
           m={"auto"}
           flexDirection={"column"}
-          backgroundColor={"#1a202c"}
+          // backgroundColor={"#1a202c"}
+          backgroundColor={"bg.panel"}
           borderRadius={10}
           gap={2}
           p={3}
           mb={5}
         >
-          <Text fontWeight="bold" color={"white"} textAlign={"center"}>
+          <Text fontWeight="bold" color={"text.primary"} textAlign={"center"}>
             {grupo}
           </Text>
           <Grid

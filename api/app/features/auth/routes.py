@@ -1,6 +1,6 @@
 """Authentication routes - thin request/response handlers."""
 
-import os
+import traceback
 
 from flask import Blueprint, Response, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, unset_jwt_cookies
@@ -13,7 +13,7 @@ from app.features.auth.schemas import (
     ResetPasswordRequestSchema,
     validate_request,
 )
-from app.features.auth.service import AuthService
+from app.features.auth.service import AuthError, AuthService
 
 auth_bp = Blueprint("auth", __name__)
 auth_service = AuthService()
@@ -106,20 +106,14 @@ def create_token() -> tuple[Response | dict[str, str], int]:
                 validated_data["password"],
                 session,
             )
-
-            if "access_token" in result:
-                response = jsonify(result)
-                # Set refresh token in httpOnly cookie
-                cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(result["refresh_token"])
-                response.set_cookie(**cookie_kwargs)
-                return response, 201
-
-            status_code = 401 if "Wrong password" in result.get("message", "") else 404
-            return jsonify(result), status_code
+            response = jsonify(result)
+            cookie_kwargs = AuthService.get_refresh_token_cookie_kwargs(result["refresh_token"])
+            response.set_cookie(**cookie_kwargs)
+            return response, 201
+    except AuthError as e:
+        return jsonify({"message": e.message}), e.status_code
     except Exception as e:
         print(f"Error in POST /token: {e}")
-        import traceback
-
         traceback.print_exc()
         return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
@@ -130,18 +124,12 @@ def get_current_user():
     """Get current authenticated user."""
     try:
         nip_identity = get_jwt_identity()
-
         with Session(engine) as session:
             result = auth_service.get_current_user(nip_identity, session)
-
-            if "error" in result:
-                status_code = 404 if "not found" in result["error"] else 400
-                return jsonify(result), status_code
-
-            return jsonify(result), 200
+        return jsonify(result), 200
+    except AuthError as e:
+        return jsonify({"error": e.message}), e.status_code
     except Exception as e:
-        import traceback
-
         print(f"[auth/me] Error: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to get user"}), 500
@@ -153,18 +141,12 @@ def refresh():
     """Refresh access token using refresh token."""
     try:
         nip = get_jwt_identity()
-        print(f"[auth/refresh] Refreshing token for NIP: {nip}")
-        access_token, error = AuthService.refresh_access_token(nip)
-
-        if error:
-            print(f"[auth/refresh] Error refreshing token: {error}")
-            return jsonify({"error": error}), 404
-
-        print(f"[auth/refresh] Successfully refreshed token for NIP: {nip}")
+        with Session(engine) as session:
+            access_token = auth_service.refresh_access_token(nip, session)
         return jsonify({"access_token": access_token}), 200
+    except AuthError as e:
+        return jsonify({"error": e.message}), e.status_code
     except Exception as e:
-        import traceback
-
         print(f"[auth/refresh] Exception during refresh: {e}")
         traceback.print_exc()
         return jsonify({"error": "Failed to refresh token"}), 401
@@ -175,31 +157,6 @@ def logout() -> tuple[Response, int]:
     """Clear the login token on server side."""
     response = jsonify({"msg": "logout sucessful"})
     unset_jwt_cookies(response)
-    return response, 200
-
-
-@auth_bp.route("/clear-refresh-token", methods=["POST"])
-def clear_refresh_token() -> tuple[Response, int]:
-    """Manually clear the refresh token cookie.
-    
-    This endpoint allows you to clear the refresh token cookie without logging out.
-    Useful for testing or forcing a re-login.
-    """
-    response = jsonify({"msg": "Refresh token cleared successfully"})
-    secure = os.environ.get("JWT_COOKIE_SECURE", "False").lower() == "true"
-    samesite_raw = os.environ.get("JWT_COOKIE_SAMESITE", "Lax")
-    samesite = "None" if samesite_raw.lower() == "none" else "Lax"
-    if samesite == "None":
-        secure = True
-    response.set_cookie(
-        "siq2_refresh_token",
-        "",
-        expires=0,
-        path="/api/auth",
-        httponly=True,
-        samesite=samesite,
-        secure=secure,
-    )
     return response, 200
 
 
@@ -274,8 +231,6 @@ def forgot_password() -> tuple[Response, int]:
 
             return jsonify({"message": "Email enviado"}), 200
     except Exception as e:
-        import traceback
-
         print(f"[auth/forgot-password] Error: {e}")
         traceback.print_exc()
         return jsonify({"message": "Internal server error"}), 500
@@ -345,20 +300,15 @@ def reset_password() -> tuple[Response, int]:
             return jsonify({"message": error_message}), 400
 
         with Session(engine) as session:
-            result = auth_service.reset_password(
+            auth_service.reset_password(
                 token=validated_data["token"],
                 new_password=validated_data["password"],
                 session=session,
             )
-
-            if "Password updated successfully" in result.get("message", ""):
-                return jsonify({"message": "Password atualizada com sucesso"}), 200
-
-            status_code = 400 if "can not be empty" in result.get("message", "") else 404
-            return jsonify(result), status_code
+        return jsonify({"message": "Password atualizada com sucesso"}), 200
+    except AuthError as e:
+        return jsonify({"message": e.message}), e.status_code
     except Exception as e:
-        import traceback
-
         print(f"[auth/reset-password] Error: {e}")
         traceback.print_exc()
         return jsonify({"message": "Internal server error"}), 500

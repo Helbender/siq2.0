@@ -15,9 +15,7 @@ class QualificationsPreviewService:
     def __init__(self) -> None:
         self.repository = QualificationsPreviewRepository()
 
-    def get_expiring_by_qualification(
-        self, session: Session, preview_days: int | None = None
-    ) -> dict[str, Any]:
+    def get_expiring_by_qualification(self, session: Session, preview_days: int | None = None) -> dict[str, Any]:
         """Get pilots with MQP/MQOBP qualifications expiring within preview_days, grouped by qualification.
 
         Args:
@@ -28,9 +26,7 @@ class QualificationsPreviewService:
             {"columns": [{"qualification_id": int, "qualification_name": str, "pilots": [{"name": str, "remaining_days": int}]}]}
         """
         days = preview_days if preview_days is not None else PREVIEW_DAYS
-        all_tq = self.repository.find_mqp_mqobp_tripulante_qualificacoes_presente(
-            session
-        )
+        all_tq = self.repository.find_mqp_mqobp_tripulante_qualificacoes_presente(session)
         today = date.today()
 
         # qualification_id -> list of { name, remaining_days }

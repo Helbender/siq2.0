@@ -88,10 +88,16 @@ export function QualificationTablePage({ pilotos = [], loading }) {
 
   // Color formatter for days left (matching QualificationsPanel logic)
   const getColorForDays = (days) => {
-    if (days === null || days === undefined) return "bg.muted";
-    if (days < 0) return "red.600";
-    if (days < 10) return "yellow.400";
-    return "green.400";
+    if (days === null || days === undefined) return "transparent";
+    if (days < 0) return "danger.solid";
+    if (days < 10) return "warning.solid";
+    return "success.solid";
+  };
+
+  const getTextColorForDays = (days) => {
+    if (days === null || days === undefined) return "text.secondary";
+    if (days < 0) return "white";
+    return "text.inverted";
   };
 
   // Sort crew by qualification
@@ -220,42 +226,66 @@ export function QualificationTablePage({ pilotos = [], loading }) {
         </Box>
       )}
 
-      <Box
+      <Table.ScrollArea
         bg="bg.card"
         borderRadius="lg"
         boxShadow="md"
+        border="1px solid"
+        borderColor="border.subtle"
         maxW="100%"
-        overflowX="auto"
       >
-        <Table.Root size="sm" variant="simple">
-          <Table.Header bg="bg.muted">
+        <Table.Root
+          size="sm"
+          stickyHeader
+          css={{
+            "& [data-sticky]": {
+              position: "sticky",
+              zIndex: 1,
+              bg: "bg.canvas",
+              _after: {
+                content: '""',
+                position: "absolute",
+                pointerEvents: "none",
+                top: "0",
+                bottom: "-1px",
+                width: "32px",
+              },
+            },
+            "& [data-sticky=end]": {
+              _after: {
+                insetInlineEnd: "0",
+                translate: "100% 0",
+                shadow: "inset 8px 0px 8px -8px rgba(0, 0, 0, 0.3)",
+              },
+            },
+            "& thead tr:has(th[data-sticky])": {
+              zIndex: 2,
+            },
+          }}
+        >
+          <Table.Header>
             {/* Group header row */}
             <Table.Row>
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
-                position="sticky"
-                left="0px"
-                bg="bg.muted"
-                zIndex={3}
-                w="fit-content"
+                data-sticky="end"
+                left="0"
+                w="100px"
                 whiteSpace="nowrap"
                 borderRight="1px solid"
-                borderColor="border.muted"
+                borderColor="border.subtle"
               >
                 Posição
               </Table.ColumnHeader>
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
-                position="sticky"
-                left="80px"
-                bg="bg.muted"
-                zIndex={3}
-                w="fit-content"
-                maxW="200px"
-                borderRight="1px solid"
-                borderColor="border.muted"
+                data-sticky="end"
+                left="100px"
+                w="100px"
+                borderRight="2px solid"
+                borderColor="border.strong"
               >
                 Nome
               </Table.ColumnHeader>
@@ -267,7 +297,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                     colSpan={quals.length}
                     fontSize={"md"}
                     textAlign="center"
-                    bg="bg.card-muted"
+                    bg="bg.cardSubtle"
                     borderRight="1px solid"
                     borderColor="border.strong"
                   >
@@ -287,11 +317,11 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                       textAlign="center"
                       cursor="pointer"
                       onClick={() => handleSort(qual.nome)}
-                      _hover={{ bg: "bg.card-muted" }}
+                      _hover={{ bg: "bg.cardSubtle" }}
                       userSelect="none"
                       minW="20px"
                       borderRight="1px solid"
-                      borderColor="border.muted"
+                      borderColor="border.subtle"
                       borderRightWidth={
                         quals[quals.length - 1] === qual ? "2px" : "1px"
                       }
@@ -326,29 +356,26 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               sortedCrew.map((member) => (
                 <Table.Row
                   key={member.nip}
-                  _hover={{ bg: "bg.muted" }}
+                  _hover={{ bg: "bg.cardSubtle" }}
+                  borderBottom={"1px solid"}
+                  borderColor="border.strong"
                 >
                   <Table.Cell
-                    position="sticky"
-                    left="0px"
-                    bg="bg.card"
-                    zIndex={1}
-                    w="fit-content"
+                    data-sticky="end"
+                    left="0"
+                    w="100px"
                     whiteSpace="nowrap"
                     borderRight="1px solid"
-                    borderColor="border.muted"
+                    borderColor="border.subtle"
                   >
                     {member.position}
                   </Table.Cell>
                   <Table.Cell
-                    position="sticky"
-                    left="80px"
-                    bg="bg.card"
-                    zIndex={1}
-                    w="fit-content"
-                    maxW="200px"
-                    borderRight="1px solid"
-                    borderColor="border.muted"
+                    data-sticky="end"
+                    left="100px"
+                    w="100px"
+                    borderRight="2px solid"
+                    borderColor="border.strong"
                     isTruncated
                   >
                     {member.name?.trim() || member.name}
@@ -368,13 +395,9 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                                 ? "bold"
                                 : "normal"
                             }
-                            color={getColorForDays(daysLeft) === "red.600" ? "white" : "black"}
-                              // daysLeft !== null && daysLeft < 10
-                              //   ? "text.primary"
-                              //   : "text.primary"
-                            
+                            color={getTextColorForDays(daysLeft)}
                             borderRight="1px solid"
-                            borderColor="border.muted"
+                            borderColor="border.subtle"
                             borderRightWidth={
                               quals[quals.length - 1] === qual ? "2px" : "1px"
                             }
@@ -389,7 +412,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
             )}
           </Table.Body>
         </Table.Root>
-      </Box>
+      </Table.ScrollArea>
     </Stack>
   );
 }

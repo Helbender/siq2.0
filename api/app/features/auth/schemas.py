@@ -10,40 +10,6 @@ class LoginRequestSchema(Schema):
     password = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "User password"})
 
 
-class TokenResponseSchema(Schema):
-    """Schema for token response."""
-
-    access_token = fields.Str(metadata={"description": "JWT access token"})
-    message = fields.Str(metadata={"description": "Error message"})
-
-
-class RecoveryRequestSchema(Schema):
-    """Schema for password recovery token validation request."""
-
-    email = fields.Email(required=True, metadata={"description": "User email address"})
-    token = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "Recovery token"})
-
-
-class RecoveryResponseSchema(Schema):
-    """Schema for recovery response."""
-
-    message = fields.Str(required=True, metadata={"description": "Status message"})
-    nip = fields.Int(metadata={"description": "User NIP (present if token is valid)"})
-
-
-class PasswordUpdateRequestSchema(Schema):
-    """Schema for password update request."""
-
-    password = fields.Str(required=True, validate=validate.Length(min=1), metadata={"description": "New password"})
-
-
-class PasswordUpdateResponseSchema(Schema):
-    """Schema for password update response."""
-
-    message = fields.Str(metadata={"description": "Error message"})
-    # If successful, returns user JSON object (dict-like structure)
-
-
 class ForgotPasswordRequestSchema(Schema):
     """Schema for forgot password request validation."""
 

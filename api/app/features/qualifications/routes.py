@@ -547,4 +547,3 @@ def check_qualification_group_applicability() -> tuple[Response, int]:
         return jsonify(result), 200
 
     return jsonify(result), 400
-

@@ -1,13 +1,13 @@
-import { ChakraProvider } from "@chakra-ui/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { router } from "@/app/router/router";
 import { ColorModeProvider } from "@/components/ui/color-mode";
 import { Toaster } from "@/components/ui/toaster";
+import { theme as system } from "@/theme2";
+// import system from "@/theme";
+import { ChakraProvider } from "@chakra-ui/react";
 import { AuthProvider } from "@features/auth";
-import { CrewTypesProvider } from "./CrewTypesProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router";
-import { router } from "@/app/router/router";
-import system from "@/theme/index.js";
-
+import { CrewTypesProvider } from "./CrewTypesProvider";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,8 +21,14 @@ const queryClient = new QueryClient({
 export function AppProviders() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ChakraProvider value={system} defaultColorMode="dark">
-        <ColorModeProvider forcedTheme="dark" enableSystem={false}>
+      <ChakraProvider
+        value={system}
+        // defaultColorMode="dark"
+      >
+        <ColorModeProvider
+          defaultTheme="dark"
+          // enableSystem={false}
+        >
           <AuthProvider>
             <CrewTypesProvider>
               <RouterProvider router={router} />

@@ -1,17 +1,15 @@
 from __future__ import annotations  # noqa: D100, INP001
 
-from datetime import date
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import TYPE_CHECKING
 
+from models.users import (
+    Base,  # type: ignore
+    People,  # type: ignore
+    year_init,  # type: ignore
+)
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
-
-from models.users import Base  # type: ignore
-from models.users import People  # type: ignore
-from models.users import year_init  # type: ignore
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from flights import FlightCrew  # type: ignore

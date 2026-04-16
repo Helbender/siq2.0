@@ -86,7 +86,7 @@ class DatabaseManagementService:
         # SKIPPED: Qualification updates for year deletion (old files)
         # When deleting a year, we skip qualification updates since these are old files.
         # Single flight deletion still updates qualifications (see FlightService.delete_flight)
-        # 
+        #
         # # Collect all pilot-qualification pairs that need updating for this month
         # phase_start = time.time()
         # pilot_qual_updates = []
@@ -161,7 +161,6 @@ class DatabaseManagementService:
         #     )
 
         # Delete flights in batches
-        phase_start = time.time()
         stmt = select(Flight).where(Flight.fid.in_(flight_ids))
         flights_to_delete = list(session.execute(stmt).scalars().all())
 
@@ -213,10 +212,10 @@ class DatabaseManagementService:
 
         This will process each month independently in parallel, so if it fails mid-process,
         at least some months will have been deleted. Each month uses its own database session.
-        
+
         NOTE: Qualification updates are SKIPPED for year deletion (old files).
         Single flight deletion still updates qualifications (see FlightService.delete_flight).
-        
+
         Concurrency is controlled by:
         - MAX_MONTH_WORKERS: Max parallel months (default: 4, max: 12)
 

@@ -11,7 +11,10 @@ export function YearSelector({ value, onChange, availableYears }) {
         borderColor="gray.700"
         borderRadius="md"
       >
-        <NativeSelect.Field value={value} onChange={(e) => onChange(parseInt(e.target.value))}>
+        <NativeSelect.Field
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+        >
           {availableYears.map((year) => (
             <option key={year} value={year}>
               {year}

@@ -1,4 +1,5 @@
 import { canModifyUser, getRoleName, Role } from "@/shared/roles";
+import { toaster } from "@/shared/utils/toaster";
 import { useAuth } from "@features/auth";
 import { StyledText } from "@/shared/components/StyledText";
 import { useSendEmail } from "@/utils/useSendEmail";
@@ -9,7 +10,7 @@ import {
   Heading,
   IconButton,
   Spacer,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import { FaMailBulk } from "react-icons/fa";
 import { CreateUserModal } from "./CreateUserModal";
@@ -28,14 +29,15 @@ const colors = {
 export function UserDataCard({ user }) {
   const { user: currentUser } = useAuth();
   const sendEmail = useSendEmail();
-  
-  const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
+
+  const currentUserRoleLevel =
+    currentUser?.roleLevel || currentUser?.role?.level;
   const currentUserNip = currentUser?.nip;
   const canModify = canModifyUser(
     currentUserRoleLevel,
     user.roleLevel || user.role?.level,
     currentUserNip,
-    user.nip
+    user.nip,
   );
   return (
     <Card.Root bg="bg.cardSubtle" boxShadow={"xl"}>
@@ -81,13 +83,12 @@ export function UserDataCard({ user }) {
             icon={<FaMailBulk />}
             colorPalette="blue"
             onClick={() => {
-              toast({
+              toaster.create({
                 title: "Sending Email",
                 description: "Wait while we send the Email",
-                status: "info",
+                type: "info",
                 duration: 5000,
-                isClosable: true,
-                position: "top",
+                closable: true,
               });
               sendEmail(user.email, `/api/recover/${user.email}`);
             }}

@@ -41,18 +41,14 @@ class UserCreateSchema(Schema):
         if tipo is None:
             return
 
-        # Allow both enum and string values
         if isinstance(tipo, str):
             try:
-                # Try to match by value
-                TipoTripulante(tipo)
+                TipoTripulante(tipo)  # match by value e.g. "OPERADOR VIGILANCIA"
             except ValueError:
-                # Try normalized version
-                normalized = tipo.upper().replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
                 try:
-                    TipoTripulante(normalized)
-                except ValueError:
-                    raise ValidationError(f"Invalid tipo value: {tipo}")
+                    TipoTripulante[tipo.upper()]  # match by name e.g. "OPERADOR_VIGILANCIA"
+                except KeyError as err:
+                    raise ValidationError(f"Invalid tipo value: {tipo}") from err
 
 
 class UserUpdateSchema(Schema):
@@ -78,25 +74,25 @@ class UserUpdateSchema(Schema):
             processed_data = data.copy()
             if "nip" in processed_data:
                 del processed_data["nip"]
-            
+
             # Convert empty strings to None for optional fields that allow_none=True
             optional_fields = ["rank", "position", "email", "roleLevel", "role_id"]
             for field in optional_fields:
                 if field in processed_data and processed_data[field] == "":
                     processed_data[field] = None
-            
+
             # Handle empty name string - if name is empty, remove it (don't update)
             if "name" in processed_data and processed_data["name"] == "":
                 del processed_data["name"]
-            
+
             # Handle empty status string - if status is empty, remove it (don't update)
             if "status" in processed_data and processed_data["status"] == "":
                 del processed_data["status"]
-            
+
             # Handle empty tipo string - if tipo is empty, remove it (don't update)
             if "tipo" in processed_data and processed_data["tipo"] == "":
                 del processed_data["tipo"]
-            
+
             return processed_data
         return data
 
@@ -109,13 +105,12 @@ class UserUpdateSchema(Schema):
 
         if isinstance(tipo, str):
             try:
-                TipoTripulante(tipo)
+                TipoTripulante(tipo)  # match by value e.g. "OPERADOR VIGILANCIA"
             except ValueError:
-                normalized = tipo.upper().replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
                 try:
-                    TipoTripulante(normalized)
-                except ValueError:
-                    raise ValidationError(f"Invalid tipo value: {tipo}")
+                    TipoTripulante[tipo.upper()]  # match by name e.g. "OPERADOR_VIGILANCIA"
+                except KeyError as err:
+                    raise ValidationError(f"Invalid tipo value: {tipo}") from err
 
 
 class BulkUserCreateSchema(Schema):
@@ -164,4 +159,3 @@ def validate_request(schema: Schema, data: dict) -> tuple[dict | None, dict | No
         return validated, None
     except ValidationError as err:
         return None, err.messages
-

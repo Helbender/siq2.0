@@ -40,9 +40,13 @@ mypy_path = "."
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-exclude = ["venv", ".venv", "build", "dist"]
+exclude = ["venv", ".venv", "build", "dist", "scripts", "app/utils/email-deprecated.py"]
 lint.select = ["E", "F", "I", "UP", "N", "B"]
-lint.ignore = ["E501"]  # Exemplo: ignora linhas longas (se usares Black)
+lint.ignore = [
+    "E501",   # line too long
+    "N815",   # camelCase schema fields are intentional (Marshmallow → camelCase API)
+    "N806",   # uppercase constants assigned inside functions (JWT_KEY, model aliases)
+]
 
 [tool.ruff.format]
 quote-style = "double"

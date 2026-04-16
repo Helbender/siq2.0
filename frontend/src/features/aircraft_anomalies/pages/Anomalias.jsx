@@ -23,7 +23,11 @@ export default function Anomalias() {
       )}
       {!isLoading && !isError && (
         <>
-          <AnomalyAlertList planes={planes ?? []} threshold={0.5} mode="above" />
+          <AnomalyAlertList
+            planes={planes ?? []}
+            threshold={0.5}
+            mode="above"
+          />
           <AnomaliasTable planes={planes ?? []} />
         </>
       )}

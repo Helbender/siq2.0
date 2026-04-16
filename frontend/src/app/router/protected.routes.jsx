@@ -6,13 +6,13 @@ import { Navigate } from "react-router";
 import { AboutPage } from "@/shared/components/AboutPage";
 import { Anomalias } from "@features/aircraft_anomalies";
 import { CrewQualifications } from "@features/crew-qualifications";
+// Feature routes
 import { DashboardPage } from "@features/dashboard";
 import { DatabaseManagementPage } from "@features/db-management";
 import { FlightsByCrewSearchPage, FlightsPage } from "@features/flights";
 import { QualificationManagementPage } from "@features/qualifications";
 import { QualificationsPreviewPage } from "@features/qualifications-preview";
 import { UserManagementPage } from "@features/users";
-
 export const protectedRoutes = {
   element: (
     <RequireAuth>
@@ -22,6 +22,7 @@ export const protectedRoutes = {
   errorElement: <ErrorBoundary />,
   children: [
     { index: true, element: <Navigate to="/dashboard" replace /> },
+    // { path: "/dashboard", element: <Page /> },
     { path: "/dashboard", element: <DashboardPage /> },
     { path: "/flights", element: <FlightsPage /> },
     { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage /> },
@@ -35,6 +36,5 @@ export const protectedRoutes = {
     { path: "/db-management", element: <DatabaseManagementPage /> },
     { path: "/about", element: <AboutPage /> },
     { path: "/anomalias", element: <Anomalias /> },
-
   ],
 };

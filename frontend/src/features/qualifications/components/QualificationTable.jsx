@@ -6,8 +6,8 @@ import { DeleteQualModal } from "./DeleteQualModal";
 
 export function QualificationTable({ qualifications }) {
   return (
-    <Table.Root mt={4} overflowX="auto" striped variant="simple">
-      <Table.Header>
+    <Table.Root mt={4} overflowX="auto" variant="simple">
+      <Table.Header border="none">
         <Table.Row>
           <Table.ColumnHeader>ID</Table.ColumnHeader>
           <Table.ColumnHeader>Qualificação</Table.ColumnHeader>

@@ -18,7 +18,8 @@ vi.mock("@/app/providers/CrewTypesProvider", () => ({
       OPERADOR_VIGILANCIA: "OPERADOR VIGILANCIA",
       OPERACOES: "OPERAÇÕES",
     },
-    crewTypeToApiFormat: (v) => (v ? v.replace(/\s+/g, "_").replace("OPERAÇÕES", "OPERACOES") : v),
+    crewTypeToApiFormat: (v) =>
+      v ? v.replace(/\s+/g, "_").replace("OPERAÇÕES", "OPERACOES") : v,
   }),
 }));
 
@@ -35,12 +36,15 @@ describe("CreateUserModal", () => {
         isOpen={true}
         onClose={mockOnClose}
         onSubmit={mockOnSubmit}
-      />
+      />,
     );
 
     await user.type(screen.getByPlaceholderText("Posto"), "Cap");
     await user.type(screen.getByPlaceholderText("NIP"), "12345");
-    await user.type(screen.getByPlaceholderText("Primeiro e Último Nome"), "Test User");
+    await user.type(
+      screen.getByPlaceholderText("Primeiro e Último Nome"),
+      "Test User",
+    );
     await user.type(screen.getByPlaceholderText("Email"), "test@example.com");
 
     const submitButton = screen.getByRole("button", { name: /Criar/i });
@@ -65,7 +69,7 @@ describe("CreateUserModal", () => {
         isOpen={true}
         onClose={mockOnClose}
         onSubmit={mockOnSubmit}
-      />
+      />,
     );
 
     await user.type(screen.getByPlaceholderText("Posto"), "Maj");

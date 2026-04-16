@@ -40,6 +40,11 @@ export const flightsService = {
     return data ?? [];
   },
 
+  getAllQualifications: async () => {
+    const { data } = await http.get("/v2/qualificacoes");
+    return data ?? [];
+  },
+
   /**
    * Get distinct anomaly descriptions for an aircraft (tail number).
    * @param {number} tailNumber - Aircraft tail number

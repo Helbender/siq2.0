@@ -4,15 +4,11 @@ from __future__ import annotations  # noqa: D100, INP001
 from datetime import date  # noqa: TC003
 from typing import List
 
-from sqlalchemy import ForeignKey
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
-
-from models.pilots import Pilot  # noqa: F401 - Required for relationship resolution
 from models.crew import Crew  # noqa: F401 - Required for relationship resolution
+from models.pilots import Pilot  # noqa: F401 - Required for relationship resolution
 from models.users import Base  # type: ignore
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # locale.setlocale(locale.LC_TIME, "pt_PT.UTF-8")  # Ou 'pt_BR.UTF-8' para português do Brasil
 

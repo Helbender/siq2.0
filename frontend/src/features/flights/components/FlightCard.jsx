@@ -13,7 +13,7 @@ import {
   Stack,
   Table,
   Text,
-  useBreakpointValue
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { BiEdit } from "react-icons/bi";
 import { InfoMed } from "./InfoMed";
@@ -23,40 +23,42 @@ import { DeleteFlightModal } from "./modals/DeleteFlightModal";
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   return (
-    <Card.Root boxShadow={"lg"} bg="bg.cardSubtle">
+    <Card.Root variant="glass">
       <Card.Header>
         <Flex align={"center"}>
           {isColumn ? (
             <Box>
-              <Heading>{`${flight.airtask}`}</Heading>
-              <Text>{`${formatDate(flight.date)}`}</Text>
+              <Heading color="brand.400">{`${flight.airtask}`}</Heading>
+              <Text color="text.secondary">{`${formatDate(flight.date)}`}</Text>
             </Box>
           ) : (
-            <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
+            <Heading color="brand.400">{`${flight.airtask} (${flight.id})`}</Heading>
           )}
           <Spacer />
           <Can minLevel={Role.FLYERS}>
-            <CreateFlightModal 
+            <CreateFlightModal
               flight={flight}
               trigger={
                 <IconButton
-                  colorPalette="yellow"
                   variant="ghost"
                   aria-label="Editar voo"
+                  color="gold.200"
+                  _hover={{ bg: "bg.cardSubtle", color: "gold.100" }}
                 >
                   <BiEdit />
                 </IconButton>
               }
             />
           </Can>
-          <Heading as="h3">{flight.ATD}</Heading>
+          <Heading as="h3" color="text.secondary">
+            {flight.ATD}
+          </Heading>
           <Can minLevel={Role.FLYERS}>
             <DeleteFlightModal flight={flight} />
           </Can>
           <Spacer />
           {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>
-        <Separator />
       </Card.Header>
       <Card.Body>
         <Flex alignItems={"top"} gap={2} overflowX={"auto"}>
@@ -102,7 +104,7 @@ export function FlightCard({ flight }) {
           <InfoMed flight={flight} />
         </Flex>
 
-        <Separator my="5" />
+        <Separator my="5" borderColor="border.subtle" />
         <Box overflowY={"auto"} height={"300px"}>
           <Table.Root size={"sm"} variant="simple">
             <Table.Header>
@@ -117,14 +119,18 @@ export function FlightCard({ flight }) {
                   "Não Precisão",
                   "Qualificações",
                 ].map((header) => (
-                  <Table.ColumnHeader key={header} textAlign={"center"} fontSize={"md"}>
+                  <Table.ColumnHeader
+                    key={header}
+                    textAlign={"center"}
+                    fontSize={"md"}
+                  >
                     {header}
                   </Table.ColumnHeader>
                 ))}
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {flight.flight_pilots.map((pilot) => {
+              {flight.flight_pilots.map((pilot, idx) => {
                 // Collect qualifications from QUAL1-QUAL6, filtering out empty strings
                 const qualifications = [1, 2, 3, 4, 5, 6]
                   .map((n) => pilot[`QUAL${n}`])
@@ -134,15 +140,23 @@ export function FlightCard({ flight }) {
                 const qualificationsText = qualifications.join(" ");
 
                 return (
-                  <Table.Row key={pilot.nip}>
+                  <Table.Row key={pilot.id ?? pilot.nip ?? idx}>
                     <Table.Cell textAlign={"center"}>{pilot.nip}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{pilot.position}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>
+                      {pilot.position}
+                    </Table.Cell>
                     <Table.Cell>{pilot.name}</Table.Cell>
                     <Table.Cell textAlign={"center"}>{pilot.ATR}</Table.Cell>
                     <Table.Cell textAlign={"center"}>{pilot.ATN}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{pilot.precapp}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{pilot.nprecapp}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{qualificationsText}</Table.Cell>
+                    <Table.Cell textAlign={"center"}>
+                      {pilot.precapp}
+                    </Table.Cell>
+                    <Table.Cell textAlign={"center"}>
+                      {pilot.nprecapp}
+                    </Table.Cell>
+                    <Table.Cell textAlign={"center"}>
+                      {qualificationsText}
+                    </Table.Cell>
                   </Table.Row>
                 );
               })}

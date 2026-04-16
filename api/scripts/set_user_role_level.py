@@ -3,7 +3,7 @@
 
 Usage:
     python set_user_role_level.py <nip> <level>
-    
+
 Examples:
     python set_user_role_level.py 123456 100  # Set user to Super Admin
     python set_user_role_level.py 123456 80   # Set user to UNIF
@@ -23,8 +23,8 @@ import argparse
 import os
 import sys
 
-from sqlalchemy import select, inspect
-from sqlalchemy.orm import Session, load_only
+from sqlalchemy import inspect, select
+from sqlalchemy.orm import Session
 
 # Add the api/ directory to Python path to import local modules
 api_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,13 +35,14 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
 # Import all models to register them with SQLAlchemy
 from app.features.flights.models import Flight, FlightPilots  # noqa: F401
 from app.features.qualifications.models import Qualificacao  # noqa: F401
 from app.features.users.models import Tripulante, TripulanteQualificacao  # noqa: F401
 from app.shared.enums import Role
-from app.shared.rbac_models import Permission, Role as RoleModel  # noqa: F401
+from app.shared.rbac_models import Permission  # noqa: F401
+from app.shared.rbac_models import Role as RoleModel
+from config import engine
 
 
 def set_user_role_level(nip: int, level: int):
@@ -60,9 +61,7 @@ def set_user_role_level(nip: int, level: int):
 
     with Session(engine) as session:
         # Get the role from database
-        role = session.execute(
-            select(RoleModel).where(RoleModel.level == level)
-        ).scalar_one_or_none()
+        role = session.execute(select(RoleModel).where(RoleModel.level == level)).scalar_one_or_none()
 
         if role is None:
             print(f"Error: Role with level {level} not found in database.")
@@ -71,35 +70,32 @@ def set_user_role_level(nip: int, level: int):
 
         # Check if role_level column exists in the database
         inspector = inspect(engine)
-        columns = [col['name'] for col in inspector.get_columns('tripulantes')]
-        has_role_level = 'role_level' in columns
-        
+        columns = [col["name"] for col in inspector.get_columns("tripulantes")]
+        has_role_level = "role_level" in columns
+
         # Get user by NIP - use raw SQL update to avoid column issues
         # First, get user name with a simple query
         from sqlalchemy import text
-        result = session.execute(
-            text("SELECT name FROM tripulantes WHERE nip = :nip"),
-            {"nip": nip}
-        ).first()
-        
+
+        result = session.execute(text("SELECT name FROM tripulantes WHERE nip = :nip"), {"nip": nip}).first()
+
         if result is None:
             print(f"Error: User with NIP {nip} not found.")
             return
-        
+
         user_name = result[0]
-        
+
         # Now update the user using raw SQL to avoid model column issues
         if has_role_level:
             session.execute(
                 text("UPDATE tripulantes SET role_level = :level, role_id = :role_id WHERE nip = :nip"),
-                {"level": level, "role_id": role.id, "nip": nip}
+                {"level": level, "role_id": role.id, "nip": nip},
             )
         else:
             session.execute(
-                text("UPDATE tripulantes SET role_id = :role_id WHERE nip = :nip"),
-                {"role_id": role.id, "nip": nip}
+                text("UPDATE tripulantes SET role_id = :role_id WHERE nip = :nip"), {"role_id": role.id, "nip": nip}
             )
-        
+
         session.commit()
 
         role_name_map = {

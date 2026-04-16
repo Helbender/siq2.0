@@ -8,9 +8,7 @@ const crewTypeToApiFormat = (crewType) => {
 export async function fetchPilotsByTipo(tipo) {
   const apiTipo = crewTypeToApiFormat(tipo);
 
-  const { data } = await http.get(
-    `/v2/tripulantes/qualificacoes/${apiTipo}`
-  );
+  const { data } = await http.get(`/v2/tripulantes/qualificacoes/${apiTipo}`);
 
   return data ?? [];
 }

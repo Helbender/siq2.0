@@ -4,7 +4,6 @@ import json
 import logging
 import os.path
 import threading
-import time
 
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
@@ -197,14 +196,14 @@ def get_or_create_folder(service, parent_id: str, folder_name: str) -> str:
     Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.
     Se não existir, cria a pasta.
     Retorna o ID da pasta encontrada ou criada.
-    
+
     Uses thread lock to prevent race conditions when multiple threads try to create the same folder.
     """
     # Use lock to prevent race conditions
     with _folder_creation_lock:
         # Escape single quotes in folder_name for the query
         escaped_folder_name = folder_name.replace("'", "\\'")
-        
+
         # 1) Tenta achar a pasta por nome dentro de parent_id
         query = (
             f"name = '{escaped_folder_name}' "

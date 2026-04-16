@@ -37,10 +37,11 @@ def _load_old_models():
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
     # Import order matters for SQLAlchemy relationship resolution
-    from models.users import Base  # noqa: F401
-    from models.pilots import Pilot, Qualification  # noqa: F401
     from models.crew import Crew, QualificationCrew  # noqa: F401
     from models.flights import Flight as OldFlight  # noqa: F401
+    from models.pilots import Pilot, Qualification  # noqa: F401
+    from models.users import Base  # noqa: F401
+
     return OldFlight
 
 
@@ -194,9 +195,7 @@ Examples:
 
     try:
         with Session(db_engine) as session:
-            successful, failed = export_flights_to_files(
-                output_folder, session, as_json=args.json, use_old=args.old
-            )
+            successful, failed = export_flights_to_files(output_folder, session, as_json=args.json, use_old=args.old)
 
         print("\n" + "=" * 60)
         print("✅ Export completed!")

@@ -50,4 +50,3 @@ OPENAPI_CONFIG = {
         },
     ],
 }
-

@@ -16,18 +16,18 @@
     },
     "eslint.enable": true,
     "eslint.useFlatConfig": true,
-    // "eslint.options": {"overrideConfigFile":"./frontend/eslint.config.js"},
+    "eslint.options": {"overrideConfigFile":"./frontend/eslint.config.js"},
     "eslint.validate": ["javascript", "javascriptreact", "html"],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
     "ruff.lineLength": 120,
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnType": false, // required
     "editor.formatOnPaste": true, // optional
     "editor.formatOnSave": true, // optional
     "editor.formatOnSaveMode": "file", // required to format on save
-    
+
     // JSX/React specific formatting
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -38,7 +38,7 @@
         }
     },
     "[javascriptreact]": {
-        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit",

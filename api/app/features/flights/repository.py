@@ -346,9 +346,7 @@ class FlightRepository:
         Returns:
             Qualificacao instance or None if not found
         """
-        stmt = select(Qualificacao).where(
-            Qualificacao.payload_key == payload_key, Qualificacao.tipo_aplicavel == tipo
-        )
+        stmt = select(Qualificacao).where(Qualificacao.payload_key == payload_key, Qualificacao.tipo_aplicavel == tipo)
         return session.scalars(stmt).first()
 
     @staticmethod

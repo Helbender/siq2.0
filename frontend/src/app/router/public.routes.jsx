@@ -1,10 +1,7 @@
 import { Layout } from "@/layout/layouts/AppLayout";
-import {
-  LoginPage,
-  ForgotPasswordPage,
-  ResetPasswordPage,
-} from "@features/auth";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
+import { ForgotPasswordPage, ResetPasswordPage } from "@features/auth";
+import { LoginPage } from "@features/auth/pages/LoginPage";
 
 export const publicRoutes = {
   element: <Layout />,

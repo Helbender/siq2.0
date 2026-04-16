@@ -1,15 +1,15 @@
-import { http } from "@/app/config/http";
 import { useCrewTypes } from "@/app/providers/CrewTypesProvider";
 import {
-    Field,
-    GridItem,
-    IconButton,
-    Input,
-    NativeSelect,
+  Field,
+  GridItem,
+  IconButton,
+  Input,
+  NativeSelect,
 } from "@chakra-ui/react";
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { FaMinus } from "react-icons/fa";
+import { useQualificationsByType } from "../hooks/useQualificationsByType";
 
 // Fallback position -> tipo when CrewTypesProvider hasn't loaded (e.g. on edit modal open)
 const POSITION_TO_TIPO_FALLBACK = {
@@ -30,14 +30,16 @@ const POSITION_TO_TIPO_FALLBACK = {
 
 export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
   const { positionToCrewType } = useCrewTypes();
-  const [qualP, setQualP] = useState([]);
   const { register, setValue, getValues, control } = useFormContext();
-  
+
   // Watch the position, name, and NIP values from the form to ensure reactivity
-  const position = useWatch({ control, name: `flight_pilots.${index}.position` });
+  const position = useWatch({
+    control,
+    name: `flight_pilots.${index}.position`,
+  });
   const name = useWatch({ control, name: `flight_pilots.${index}.name` });
   const nip = useWatch({ control, name: `flight_pilots.${index}.nip` });
-  
+
   // Track previous position to detect changes
   const prevPositionRef = useRef(position || member.position);
 
@@ -49,6 +51,8 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
     if (fromProvider) return fromProvider;
     return POSITION_TO_TIPO_FALLBACK[pos] ?? null;
   }, [position, member?.position, positionToCrewType]);
+
+  const qualP = useQualificationsByType(tipo);
 
   // Lista de pilotos filtrada consoante a posição selecionada
   const pilotosFiltrados = useMemo(() => {
@@ -64,42 +68,20 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
     });
   }, [pilotos, position, member.position]);
 
-  // Fetch qualifications by tipo (memoized based on position)
-  useEffect(() => {
-    const fetchQualifications = async () => {
-      if (!tipo) {
-        setQualP([]);
-        return;
-      }
-
-      try {
-        const response = await http.get("/v2/qualificacoes");
-        const all = response.data || [];
-        const tipoNorm = String(tipo).trim().toUpperCase();
-        const filteredQuals = all.filter((qual) => {
-          const aplicavel = String(qual.tipo_aplicavel ?? "").trim().toUpperCase();
-          return aplicavel === tipoNorm;
-        });
-        setQualP(filteredQuals);
-      } catch (error) {
-        setQualP([]);
-      }
-    };
-
-    fetchQualifications();
-  }, [tipo]);
-
   // Clear name and NIP when position changes
   useEffect(() => {
     const currentPosition = position || member.position;
     const previousPosition = prevPositionRef.current;
-    
+
     // If position actually changed (skip initial render)
-    if (prevPositionRef.current !== undefined && currentPosition !== previousPosition) {
+    if (
+      prevPositionRef.current !== undefined &&
+      currentPosition !== previousPosition
+    ) {
       setValue(`flight_pilots.${index}.name`, "");
       setValue(`flight_pilots.${index}.nip`, "");
     }
-    
+
     // Update the ref for next comparison
     prevPositionRef.current = currentPosition;
   }, [position, member.position, setValue, index]);
@@ -112,8 +94,9 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       return;
     }
     // Search in filtered pilots first, then fallback to all pilots
-    const piloto = pilotosFiltrados.find((p) => p.name === currentName) 
-      || pilotos.find((p) => p.name === currentName);
+    const piloto =
+      pilotosFiltrados.find((p) => p.name === currentName) ||
+      pilotos.find((p) => p.name === currentName);
     setValue(`flight_pilots.${index}.nip`, piloto?.nip || "");
   }, [name, member.name, pilotos, pilotosFiltrados, setValue, index]);
 
@@ -127,16 +110,23 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
       const currentValue = getValues(qualFieldName);
       if (currentValue == null || currentValue === "") continue;
       const valueAsString = String(currentValue).trim();
-      const matchedById = qualP.find((qual) => String(qual.id) === valueAsString);
+      const matchedById = qualP.find(
+        (qual) => String(qual.id) === valueAsString,
+      );
       if (matchedById) {
-        setValue(qualFieldName, String(matchedById.id), { shouldValidate: false });
+        setValue(qualFieldName, String(matchedById.id), {
+          shouldValidate: false,
+        });
         continue;
       }
       const matchedByName = qualP.find(
-        (qual) => (qual.nome ?? "").toUpperCase() === valueAsString.toUpperCase(),
+        (qual) =>
+          (qual.nome ?? "").toUpperCase() === valueAsString.toUpperCase(),
       );
       if (matchedByName) {
-        setValue(qualFieldName, String(matchedByName.id), { shouldValidate: false });
+        setValue(qualFieldName, String(matchedByName.id), {
+          shouldValidate: false,
+        });
       }
     }
   }, [qualP, index, getValues, setValue]);
@@ -146,7 +136,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
         <Field.Root alignContent={"center"} alignItems={"center"}>
           <NativeSelect.Root minW={"100px"}>
             <NativeSelect.Field
-              nome="posição"
               placeholder=" "
               type="text"
               {...register(`flight_pilots.${index}.position`)}
@@ -175,7 +164,6 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
         <Field.Root>
           <NativeSelect.Root>
             <NativeSelect.Field
-              nome="nome"
               textAlign={"center"}
               type="text"
               placeholder="Selecione"
@@ -192,8 +180,8 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
           </NativeSelect.Root>
         </Field.Root>
       </GridItem>
-      <GridItem bg={"whiteAlpha.100"} w={"80px"}>
-        <Field.Root isReadOnly alignSelf={"center"}>
+      <GridItem w={"80px"}>
+        <Field.Root alignSelf={"center"}>
           <Input
             p={0}
             display="inline-block"
@@ -243,17 +231,21 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                 name={qualFieldName}
                 control={control}
                 render={({ field }) => {
-                  const options = (qualP || []).filter(
-                    (qual) => !(qual.payload_key ?? "").trim(),
-                  )
+                  const options = (qualP || [])
+                    .filter((qual) => !(qual.payload_key ?? "").trim())
                     .map((qual) => ({
                       value: String(qual.id),
                       label: qual.nome,
                       id: qual.id,
                     }));
-                  const currentVal = field.value ? String(field.value).trim() : "";
+                  const currentVal = field.value
+                    ? String(field.value).trim()
+                    : "";
                   const valueInOptions = options.some(
-                    (o) => o.value === currentVal || (o.label ?? "").toUpperCase() === currentVal.toUpperCase(),
+                    (o) =>
+                      o.value === currentVal ||
+                      (o.label ?? "").toUpperCase() ===
+                        currentVal.toUpperCase(),
                   );
                   const showFallbackOption = currentVal && !valueInOptions;
 
@@ -273,9 +265,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                           </option>
                         ))}
                         {showFallbackOption && (
-                          <option value={currentVal}>
-                            {currentVal}
-                          </option>
+                          <option value={currentVal}>{currentVal}</option>
                         )}
                       </NativeSelect.Field>
                       <NativeSelect.Indicator />
@@ -291,7 +281,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
         <IconButton
           colorPalette="red"
           onClick={() => remove(index)}
-          aria-label="Edit User"
+          aria-label="Remover tripulante"
           maxW={"50%"}
         >
           <FaMinus />

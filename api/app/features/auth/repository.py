@@ -1,9 +1,12 @@
 """Authentication repository - database access only."""
 
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.features.users.models import Tripulante  # type: ignore
+
 
 class AuthRepository:
     """Repository for authentication database operations."""
@@ -46,11 +49,25 @@ class AuthRepository:
         Returns:
             First Tripulante instance or None if database is empty
         """
-        return session.execute(select(Tripulante)).first()  # type: ignore
+        return session.execute(select(Tripulante)).scalars().first()  # type: ignore
+
+    @staticmethod
+    def find_user_by_reset_token(session: Session, token: str) -> Tripulante | None:
+        """Find a user by their password reset token (index-backed lookup).
+
+        Args:
+            session: Database session
+            token: Reset token string
+
+        Returns:
+            Tripulante instance or None if not found
+        """
+        stmt = select(Tripulante).where(Tripulante.reset_token == token)
+        return session.execute(stmt).scalar_one_or_none()  # type: ignore
 
     @staticmethod
     def update_user_password(session: Session, user: Tripulante, hashed_password: str) -> None:
-        """Update user password.
+        """Update user password and clear the reset token.
 
         Args:
             session: Database session
@@ -58,28 +75,32 @@ class AuthRepository:
             hashed_password: Hashed password string
         """
         user.password = hashed_password
-        user.recover = ""
+        user.reset_token = None
+        user.reset_token_expires_at = None
         session.commit()
 
     @staticmethod
-    def update_user_recovery_token(session: Session, user: Tripulante, recovery_data: str) -> None:
-        """Update user recovery token.
+    def set_reset_token(session: Session, user: Tripulante, token: str, expires_at: "datetime") -> None:
+        """Persist a password reset token and its expiry on the user row.
 
         Args:
             session: Database session
             user: Tripulante instance
-            recovery_data: Recovery token JSON string
+            token: Plain reset token string
+            expires_at: Token expiry datetime (timezone-aware)
         """
-        user.recover = recovery_data
+        user.reset_token = token
+        user.reset_token_expires_at = expires_at
         session.commit()
 
     @staticmethod
-    def clear_user_recovery_token(session: Session, user: Tripulante) -> None:
-        """Clear user recovery token.
+    def clear_reset_token(session: Session, user: Tripulante) -> None:
+        """Clear password reset token fields.
 
         Args:
             session: Database session
             user: Tripulante instance
         """
-        user.recover = ""
+        user.reset_token = None
+        user.reset_token_expires_at = None
         session.commit()

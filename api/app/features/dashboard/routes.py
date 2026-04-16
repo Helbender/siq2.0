@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
+from app.features.dashboard.policies import require_authenticated
 from app.features.dashboard.service import DashboardService
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -74,6 +75,10 @@ def get_flight_statistics() -> tuple[Response, int]:
               format: date
               description: End date of range
     """
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
     date_from_str = request.args.get("date_from")
     date_to_str = request.args.get("date_to")
 
@@ -83,21 +88,19 @@ def get_flight_statistics() -> tuple[Response, int]:
         try:
             date_from = date.fromisoformat(date_from_str)
         except ValueError:
-            pass
+            return jsonify({"error": f"Invalid date_from: '{date_from_str}'. Expected YYYY-MM-DD."}), 400
     if date_to_str:
         try:
             date_to = date.fromisoformat(date_to_str)
         except ValueError:
-            pass
+            return jsonify({"error": f"Invalid date_to: '{date_to_str}'. Expected YYYY-MM-DD."}), 400
 
     with Session(engine) as session:
         try:
             session.execute(text("SET statement_timeout = '0'"))
         except Exception:
             pass
-        statistics = dashboard_service.get_flight_statistics(
-            date_from, date_to, session
-        )
+        statistics = dashboard_service.get_flight_statistics(date_from, date_to, session)
         return jsonify(statistics), 200
 
 
@@ -123,56 +126,10 @@ def get_available_years() -> tuple[Response, int]:
               description: List of years with flight data
               example: [2022, 2023, 2024]
     """
+    auth_error = require_authenticated()
+    if auth_error:
+        return auth_error
+
     with Session(engine) as session:
         years = dashboard_service.get_available_years(session)
         return jsonify({"years": years}), 200
-
-
-@dashboard_bp.route("/expiring-qualifications", methods=["GET"], strict_slashes=False)
-def get_expiring_qualifications() -> tuple[Response, int]:
-    """Get top 10 qualifications with lowest remaining days across all crew members.
-
-    ---
-    tags:
-      - Dashboard
-    summary: Get expiring qualifications
-    description: |
-      Retrieve the top 10 qualifications with the lowest remaining days across all crew members.
-      Returns a list sorted from lowest to highest remaining days.
-      Same crew member may appear multiple times if they have multiple qualifications among the lowest remaining days.
-    responses:
-      200:
-        description: List of expiring qualifications
-        schema:
-          type: object
-          properties:
-            expiring_qualifications:
-              type: array
-              maxItems: 10
-              items:
-                type: object
-                properties:
-                  crew_member:
-                    type: object
-                    properties:
-                      nip:
-                        type: integer
-                      name:
-                        type: string
-                      rank:
-                        type: string
-                  qualification_name:
-                    type: string
-                    description: Name of the qualification
-                  remaining_days:
-                    type: integer
-                    description: Number of days until expiration (can be negative if expired)
-                  expiry_date:
-                    type: string
-                    format: date
-                    description: Date when the qualification expires
-    """
-    with Session(engine) as session:
-        expiring_qualifications = dashboard_service.get_expiring_qualifications(session)
-        return jsonify({"expiring_qualifications": expiring_qualifications}), 200
-

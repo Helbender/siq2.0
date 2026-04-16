@@ -20,7 +20,13 @@ export function FlightsByCrewSearchPage() {
   const [dateTo, setDateTo] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
 
-  const { data: rows = [], refetch, isFetching, error, isFetched } = useFlightsByCrewSearch({
+  const {
+    data: rows = [],
+    refetch,
+    isFetching,
+    error,
+    isFetched,
+  } = useFlightsByCrewSearch({
     search,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
@@ -34,7 +40,9 @@ export function FlightsByCrewSearchPage() {
       return;
     }
     if (dateFrom && dateTo && dateFrom > dateTo) {
-      setValidationMessage("A data de início deve ser anterior ou igual à data de fim.");
+      setValidationMessage(
+        "A data de início deve ser anterior ou igual à data de fim.",
+      );
       return;
     }
     refetch();
@@ -50,7 +58,8 @@ export function FlightsByCrewSearchPage() {
               Acesso Negado
             </Text>
             <Text mt={2} color="text.muted">
-              Você precisa ter nível READONLY ou superior para visualizar esta página.
+              Você precisa ter nível READONLY ou superior para visualizar esta
+              página.
             </Text>
           </VStack>
         </Center>
@@ -129,7 +138,9 @@ export function FlightsByCrewSearchPage() {
 
         {error && (
           <Text color="red.400" fontSize="sm">
-            {error?.response?.data?.message ?? error?.message ?? "Erro ao pesquisar."}
+            {error?.response?.data?.message ??
+              error?.message ??
+              "Erro ao pesquisar."}
           </Text>
         )}
 
@@ -146,12 +157,9 @@ export function FlightsByCrewSearchPage() {
             </Text>
             {rows.length > 0 ? (
               <Box overflowX="auto" w="100%">
-                <Table.Root size="sm" >
+                <Table.Root size="sm">
                   <Table.Header>
                     <Table.Row>
-                      {/* <Table.ColumnHeader>Tripulante</Table.ColumnHeader>
-                      <Table.ColumnHeader>NIP</Table.ColumnHeader>
-                      <Table.ColumnHeader>Posto</Table.ColumnHeader> */}
                       <Table.ColumnHeader>Posição</Table.ColumnHeader>
                       <Table.ColumnHeader>ATR</Table.ColumnHeader>
                       <Table.ColumnHeader>ATN</Table.ColumnHeader>
@@ -165,10 +173,10 @@ export function FlightsByCrewSearchPage() {
                   </Table.Header>
                   <Table.Body>
                     {rows.map((row, idx) => (
-                      <Table.Row key={`${row.flightId}-${row.nip}-${idx}`} _hover={{ bg: "bg.cardSubtle" }}>
-                        {/* <Table.Cell>{row.name}</Table.Cell>
-                        <Table.Cell>{row.nip}</Table.Cell>
-                        <Table.Cell>{row.rank ?? "-"}</Table.Cell> */}
+                      <Table.Row
+                        key={`${row.flightId}-${row.nip}-${idx}`}
+                        _hover={{ bg: "bg.cardSubtle" }}
+                      >
                         <Table.Cell>{row.position ?? "-"}</Table.Cell>
                         <Table.Cell>{row.ATR ?? "-"}</Table.Cell>
                         <Table.Cell>{row.ATN ?? "-"}</Table.Cell>
@@ -178,7 +186,14 @@ export function FlightsByCrewSearchPage() {
                         <Table.Cell>{row.airtask}</Table.Cell>
                         <Table.Cell>{row.date}</Table.Cell>
                         <Table.Cell>
-                          {[row.QUAL1, row.QUAL2, row.QUAL3, row.QUAL4, row.QUAL5, row.QUAL6]
+                          {[
+                            row.QUAL1,
+                            row.QUAL2,
+                            row.QUAL3,
+                            row.QUAL4,
+                            row.QUAL5,
+                            row.QUAL6,
+                          ]
                             .filter(Boolean)
                             .join(", ") || "-"}
                         </Table.Cell>
@@ -188,7 +203,9 @@ export function FlightsByCrewSearchPage() {
                 </Table.Root>
               </Box>
             ) : (
-              <Text color="text.muted">Nenhum voo encontrado para os critérios indicados.</Text>
+              <Text color="text.muted">
+                Nenhum voo encontrado para os critérios indicados.
+              </Text>
             )}
           </>
         )}

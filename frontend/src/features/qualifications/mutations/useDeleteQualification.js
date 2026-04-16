@@ -7,7 +7,9 @@ export function useDeleteQualification() {
 
   return useMutation({
     mutationFn: async (qualificationId) => {
-      const response = await http.delete(`/v2/qualificacoes/${qualificationId}`);
+      const response = await http.delete(
+        `/v2/qualificacoes/${qualificationId}`,
+      );
       return response.data;
     },
     onSuccess: () => {

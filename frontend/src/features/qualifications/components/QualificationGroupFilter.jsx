@@ -23,7 +23,9 @@ export const QualificationGroupFilter = memo(function QualificationGroupFilter({
     }
   };
 
-  const allSelected = availableGroups.length > 0 && selectedGroups.length === availableGroups.length;
+  const allSelected =
+    availableGroups.length > 0 &&
+    selectedGroups.length === availableGroups.length;
   const isIndeterminate = selectedGroups.length > 0 && !allSelected;
 
   return (

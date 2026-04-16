@@ -12,12 +12,12 @@ from app.features.users.policies import (
     require_authenticated,
     require_can_modify_user,
 )
+from app.features.users.repository import UserRepository
 from app.features.users.schemas import (
     UserCreateSchema,
     UserUpdateSchema,
     validate_request,
 )
-from app.features.users.repository import UserRepository
 from app.features.users.service import UserService
 from app.shared.enums import Role
 
@@ -126,7 +126,7 @@ def retrieve_user() -> tuple[Response, int]:
             auth_error = require_authenticated()
             if auth_error:
                 return auth_error
-            
+
             # All users can see all users - no role-based filtering for viewing
             with Session(engine) as session:
                 all_users = user_service.get_all_users(session)
@@ -134,6 +134,7 @@ def retrieve_user() -> tuple[Response, int]:
         except Exception as e:
             print(f"Error in GET /users: {e}")
             import traceback
+
             traceback.print_exc()
             return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
@@ -142,7 +143,7 @@ def retrieve_user() -> tuple[Response, int]:
     auth_error = require_authenticated()
     if auth_error:
         return auth_error
-    
+
     user_data: dict | None = request.get_json()
     if user_data is None:
         return jsonify({"message": "Request body must be JSON"}), 400
@@ -155,19 +156,16 @@ def retrieve_user() -> tuple[Response, int]:
     # Check role level permissions for new user
     if "roleLevel" in validated_data:
         from flask_jwt_extended import get_jwt_identity
+
         current_user_role_level = get_current_user_role_level()
         current_user_nip = get_jwt_identity()
         new_user_role_level = validated_data["roleLevel"]
         # For creating new users, we don't have a target NIP yet, so pass None
         # READONLY users cannot create new users (they can only modify themselves)
         if current_user_role_level == Role.READONLY.level:
-            return jsonify({
-                "message": "Readonly users cannot create new users"
-            }), 403
+            return jsonify({"message": "Readonly users cannot create new users"}), 403
         if not can_modify_user(current_user_role_level, new_user_role_level, current_user_nip, None):
-            return jsonify({
-                "message": "You can only create users with roles at or below your role level"
-            }), 403
+            return jsonify({"message": "You can only create users with roles at or below your role level"}), 403
 
     with Session(engine) as session:
         result = user_service.create_user(validated_data, session)
@@ -262,12 +260,12 @@ def modify_user(nip: int) -> tuple[Response, int]:
             target_user = UserRepository.find_by_nip(session, nip)
             if target_user is None:
                 return jsonify({"message": f"User with NIP {nip} not found"}), 404
-            
+
             # Check role level permissions
             permission_error = require_can_modify_user(target_user)
             if permission_error:
                 return permission_error
-            
+
             result = user_service.delete_user(nip, session)
 
             if "deleted_id" in result:
@@ -290,21 +288,19 @@ def modify_user(nip: int) -> tuple[Response, int]:
             target_user = UserRepository.find_by_nip(session, nip)
             if target_user is None:
                 return jsonify({"message": f"User with NIP {nip} not found"}), 404
-            
+
             # Check role level permissions
             permission_error = require_can_modify_user(target_user)
             if permission_error:
                 return permission_error
-            
+
             # If updating roleLevel, check that new level is at or below current user's level
             if "roleLevel" in validated_data:
                 current_user_role_level = get_current_user_role_level()
                 new_role_level = validated_data["roleLevel"]
                 if not can_modify_user(current_user_role_level, new_role_level):
-                    return jsonify({
-                        "message": "You can only assign roles at or below your role level"
-                    }), 403
-            
+                    return jsonify({"message": "You can only assign roles at or below your role level"}), 403
+
             result = user_service.update_user(nip, validated_data, session)
 
             if "message" in result:
@@ -411,4 +407,3 @@ def backup_users() -> tuple[Response, int]:
     with Session(engine) as session:
         result = user_service.backup_users(session)
         return jsonify(result), 200
-

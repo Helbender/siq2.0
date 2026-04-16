@@ -32,11 +32,8 @@ class DatabaseManagementRepository:
             .order_by(func.extract("year", Flight.date).desc())
         )
         results = session.execute(stmt).all()
-        
-        return [
-            {"year": int(row.year), "flight_count": int(row.flight_count)}
-            for row in results
-        ]
+
+        return [{"year": int(row.year), "flight_count": int(row.flight_count)} for row in results]
 
     @staticmethod
     def get_flights_for_year(session: Session, year: int) -> list[Flight]:
@@ -73,10 +70,7 @@ class DatabaseManagementRepository:
         """
         stmt = (
             select(Flight)
-            .where(
-                func.extract("year", Flight.date) == year,
-                func.extract("month", Flight.date) == month
-            )
+            .where(func.extract("year", Flight.date) == year, func.extract("month", Flight.date) == month)
             .options(
                 joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
             )

@@ -9,7 +9,10 @@ export { useReprocessFlights } from "./mutations/useReprocessFlights";
 
 // Queries
 export { useQualificationsQuery } from "./queries/useQualificationsQuery";
-export { getCachedCrewTypes, useCrewTypesQuery } from "./queries/useCrewTypesQuery";
+export {
+  getCachedCrewTypes,
+  useCrewTypesQuery,
+} from "./queries/useCrewTypesQuery";
 
 // Hooks
 export { useQualificationFilters } from "./hooks/useQualificationFilters";

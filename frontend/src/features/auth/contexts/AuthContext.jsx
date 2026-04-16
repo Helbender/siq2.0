@@ -57,16 +57,9 @@ export function AuthProvider({ children }) {
   const refreshIntervalRef = useRef(null);
 
   useEffect(() => {
-    // Check if auto-refresh is disabled
-    const autoRefreshDisabled = localStorage.getItem("disableAutoRefresh") === "true";
-    if (autoRefreshDisabled) {
-      console.log("[Auto-refresh] Auto-refresh is disabled");
-      return;
-    }
-
     const checkAndRefreshToken = async () => {
       const token = localStorage.getItem("token");
-      
+
       // Don't refresh if logging out or no token
       if (!token || localStorage.getItem("loggingOut")) {
         return;
@@ -81,7 +74,7 @@ export function AuthProvider({ children }) {
           // The backend reads the refresh_token cookie and validates it
           const res = await http.post("/auth/refresh");
           const newToken = res.data.access_token;
-          
+
           if (newToken) {
             localStorage.setItem("token", newToken);
             console.log("[Auto-refresh] Token refreshed successfully");
@@ -90,7 +83,9 @@ export function AuthProvider({ children }) {
           console.error("[Auto-refresh] Failed to refresh token:", error);
           // If refresh fails with 401 (invalid signature, expired, etc.), stop auto-refresh
           if (error.response?.status === 401) {
-            console.log("[Auto-refresh] Refresh token invalid, stopping auto-refresh");
+            console.log(
+              "[Auto-refresh] Refresh token invalid, stopping auto-refresh",
+            );
             localStorage.removeItem("token");
             queryClient.setQueryData(authQueryKeys.me(), null);
             // Clear the interval to stop retrying
@@ -122,7 +117,7 @@ export function AuthProvider({ children }) {
 
   const login = async (nip, password) => {
     try {
-      const result = await loginMutation.mutateAsync({ nip, password });
+      await loginMutation.mutateAsync({ nip, password });
       // Fetch crew types after successful login
       queryClient.invalidateQueries({ queryKey: CREW_TYPES_QUERY_KEY });
       return { success: true };

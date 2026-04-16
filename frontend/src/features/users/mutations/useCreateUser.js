@@ -11,9 +11,9 @@ export function useCreateUser() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: usersQueryKeys.all,
-        refetchType: 'active'
+        refetchType: "active",
       });
     },
   });

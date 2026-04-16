@@ -43,19 +43,24 @@ export function flightsToPlanesAnomalies(flights) {
     for (const [name, descFlights] of descriptionToFlights.entries()) {
       // Data inicial for this anomaly = first time it was registered (earliest flight date)
       const anomalyDates = descFlights.map((f) => f.date).filter(Boolean);
-      const dataInicialAnomaly = anomalyDates.length ? anomalyDates.sort()[0] : null;
+      const dataInicialAnomaly = anomalyDates.length
+        ? anomalyDates.sort()[0]
+        : null;
       // Counter only accounts for flights on or after that date
       const planeFlightsFromInicial = dataInicialAnomaly
         ? planeFlights.filter((f) => f.date && f.date >= dataInicialAnomaly)
         : planeFlights;
       const totalFromInicial = planeFlightsFromInicial.length;
       const valueFromInicial = dataInicialAnomaly
-        ? descFlights.filter((f) => f.date && f.date >= dataInicialAnomaly).length
+        ? descFlights.filter((f) => f.date && f.date >= dataInicialAnomaly)
+            .length
         : descFlights.length;
 
       const planeAnomalyFlights = descFlights.map((f) => {
         const p = f.flight_pilots?.[0];
-        const pilot = p ? `${p.rank || ""} ${p.name || ""} (${p.position || ""})`.trim() : "";
+        const pilot = p
+          ? `${p.rank || ""} ${p.name || ""} (${p.position || ""})`.trim()
+          : "";
         return {
           id: f.id,
           airtask: f.airtask ?? "",

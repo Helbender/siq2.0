@@ -42,7 +42,6 @@ from app.shared.rbac_models import Role as RoleModel
 from app.utils.email import hash_code
 from config import engine
 
-
 # Position to TipoTripulante mapping (aligned with CrewTypesProvider and config)
 POSITION_TO_TIPO = {
     "PI": TipoTripulante.PILOTO,
@@ -162,9 +161,7 @@ def upsert_users(
                     role_level=role_level,
                 )
                 if role_level is not None:
-                    role = session.execute(
-                        select(RoleModel).where(RoleModel.level == role_level)
-                    ).scalar_one_or_none()
+                    role = session.execute(select(RoleModel).where(RoleModel.level == role_level)).scalar_one_or_none()
                     new_user.role_id = role.id if role else None
 
                 _, err = repo.create(session, new_user)

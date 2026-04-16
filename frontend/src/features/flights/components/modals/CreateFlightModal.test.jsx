@@ -27,7 +27,8 @@ vi.mock("@/shared/utils/toaster", () => ({
 }));
 
 vi.mock("../PilotInput", () => ({
-  PilotInput: () => React.createElement("div", { "data-testid": "pilot-input" }),
+  PilotInput: () =>
+    React.createElement("div", { "data-testid": "pilot-input" }),
 }));
 
 describe("CreateFlightModal", () => {

@@ -11,4 +11,3 @@ from app.shared.enums import (  # noqa: F401
     is_qualification_group_applicable_to_crew_type,
 )
 from app.shared.models import Base, date_init, year_init  # noqa: F401
-

@@ -8,7 +8,7 @@ It updates both the role_level field and assigns them to the Readonly role.
 import os
 import sys
 
-from sqlalchemy import select, inspect
+from sqlalchemy import inspect, select
 from sqlalchemy.orm import Session, load_only
 
 # Add the api/ directory to Python path to import local modules
@@ -20,13 +20,14 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(api_dir, ".env"))
 
-from config import engine
 # Import all models to register them with SQLAlchemy
 from app.features.flights.models import Flight, FlightPilots  # noqa: F401
 from app.features.qualifications.models import Qualificacao  # noqa: F401
 from app.features.users.models import Tripulante, TripulanteQualificacao  # noqa: F401
 from app.shared.enums import Role
-from app.shared.rbac_models import Permission, Role as RoleModel  # noqa: F401
+from app.shared.rbac_models import Permission  # noqa: F401
+from app.shared.rbac_models import Role as RoleModel
+from config import engine
 
 
 def set_all_users_to_lowest_level():
@@ -35,9 +36,7 @@ def set_all_users_to_lowest_level():
 
     with Session(engine) as session:
         # Get the Readonly role from database
-        readonly_role = session.execute(
-            select(RoleModel).where(RoleModel.level == readonly_level)
-        ).scalar_one_or_none()
+        readonly_role = session.execute(select(RoleModel).where(RoleModel.level == readonly_level)).scalar_one_or_none()
 
         if readonly_role is None:
             print(f"Error: Readonly role (level {readonly_level}) not found in database.")
@@ -46,24 +45,36 @@ def set_all_users_to_lowest_level():
 
         # Check if role_level column exists in the database
         inspector = inspect(engine)
-        columns = [col['name'] for col in inspector.get_columns('tripulantes')]
-        has_role_level = 'role_level' in columns
-        
+        columns = [col["name"] for col in inspector.get_columns("tripulantes")]
+        has_role_level = "role_level" in columns
+
         # Get all users - only load columns that exist
         if has_role_level:
             users = session.execute(select(Tripulante)).scalars().all()
         else:
             # Load only columns that exist (excluding role_level)
-            users = session.execute(
-                select(Tripulante).options(
-                    load_only(
-                        Tripulante.nip, Tripulante.name, Tripulante.rank,
-                        Tripulante.position, Tripulante.email, Tripulante.admin,
-                        Tripulante.role_id, Tripulante.recover, Tripulante.squadron,
-                        Tripulante.password, Tripulante.tipo, Tripulante.status
+            users = (
+                session.execute(
+                    select(Tripulante).options(
+                        load_only(
+                            Tripulante.nip,
+                            Tripulante.name,
+                            Tripulante.rank,
+                            Tripulante.position,
+                            Tripulante.email,
+                            Tripulante.admin,
+                            Tripulante.role_id,
+                            Tripulante.recover,
+                            Tripulante.squadron,
+                            Tripulante.password,
+                            Tripulante.tipo,
+                            Tripulante.status,
+                        )
                     )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
 
         if not users:
             print("No users found in database.")

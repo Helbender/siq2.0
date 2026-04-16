@@ -105,7 +105,9 @@ export function FileUpload() {
           >
             <Flex direction="column" align="center" gap={2}>
               <Icon as={FiUploadCloud} boxSize={6} color="gray.500" />
-              <Text>{file ? file.name : "Clique para escolher um ficheiro"}</Text>
+              <Text>
+                {file ? file.name : "Clique para escolher um ficheiro"}
+              </Text>
             </Flex>
           </Field.Label>
 

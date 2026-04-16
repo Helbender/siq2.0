@@ -14,7 +14,7 @@ Usage Examples:
 
 API Endpoints:
 - GET /api/v2/qualification-groups - Get all qualification groups
-- GET /api/v2/crew-types - Get all crew types  
+- GET /api/v2/crew-types - Get all crew types
 - GET /api/v2/qualification-groups/<crew_type> - Get groups for specific crew type
 - GET /api/v2/crew-types-for-group/<group> - Get crew types for specific group
 - POST /api/v2/qualification-groups/check - Check if group applies to crew type

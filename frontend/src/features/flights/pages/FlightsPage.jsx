@@ -1,7 +1,6 @@
 import { Can } from "@/shared/components/Can";
 import { StyledText } from "@/shared/components/StyledText";
 import { Role } from "@/shared/roles";
-import { useAuth } from "@features/auth";
 import { formatDate } from "@/shared/utils/timeCalc";
 import {
   Box,
@@ -11,10 +10,9 @@ import {
   Spacer,
   Spinner,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
 import { List } from "react-window";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/modals/CreateFlightModal";
@@ -23,7 +21,14 @@ function Row({ index, style, flights }) {
   const flight = flights[index];
   if (!flight) return null;
   return (
-    <Box style={{ ...style, paddingLeft: "10%", paddingRight: "10%", paddingBottom: "16px" }}>
+    <Box
+      style={{
+        ...style,
+        paddingLeft: "10%",
+        paddingRight: "10%",
+        paddingBottom: "16px",
+      }}
+    >
       <FlightCard flight={flight} />
     </Box>
   );
@@ -34,10 +39,9 @@ export function FlightsPage() {
   const [search, setSearch] = useState("");
   const [listHeight, setListHeight] = useState(600);
   const containerRef = useRef(null);
-  const navigate = useNavigate();
-  const { user } = useAuth();
 
   const filteredFlights = useMemo(() => {
+    const lowerSearch = search.toLowerCase();
     return flights.filter((flight) =>
       [
         flight.airtask,
@@ -49,7 +53,7 @@ export function FlightsPage() {
       ]
         .join(" ")
         .toLowerCase()
-        .includes(search.toLowerCase()),
+        .includes(lowerSearch),
     );
   }, [flights, search]);
 
@@ -97,24 +101,11 @@ export function FlightsPage() {
           <Can minLevel={Role.FLYERS}>
             <CreateFlightModal />
           </Can>
-          {/* <Can minLevel={Role.SUPER_ADMIN}>
-            <Button
-              variant="outline"
-              colorPalette="teal"
-              size="sm"
-              onClick={() => navigate("/flights/search-by-crew")}
-            >
-              Pesquisar por tripulante
-            </Button>
-          </Can> */}
           <Spacer />
           <Input
             borderRadius={"md"}
             border="1px solid"
             borderColor="border.subtle"
-            bg="gray.700"
-            _hover={{borderColor:"teal.500"}}
-            _focus={{borderColor:"teal.500",border:"1px solid"}}
             maxW="150px"
             placeholder="Procurar…"
             onChange={(e) => setSearch(e.target.value)}

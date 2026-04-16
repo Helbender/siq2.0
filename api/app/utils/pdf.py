@@ -1,8 +1,9 @@
+import io
+import os
+
+from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import cm
-import os
-import io
-from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 
 tradutor = {

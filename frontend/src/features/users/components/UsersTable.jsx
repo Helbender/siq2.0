@@ -1,11 +1,7 @@
-import { canModifyUser, getRoleName, Role } from "@/shared/roles";
-import { useAuth } from "@features/auth";
+import { canModifyUser, getRoleName } from "@/shared/roles";
 import { useSendEmail } from "@/utils/useSendEmail";
-import {
-  HStack,
-  IconButton,
-  Table,
-} from "@chakra-ui/react";
+import { HStack, IconButton, Table } from "@chakra-ui/react";
+import { useAuth } from "@features/auth";
 import { BiTrash } from "react-icons/bi";
 import { FaEdit } from "react-icons/fa";
 import { IoIosCheckmark, IoIosClose } from "react-icons/io";
@@ -13,26 +9,30 @@ import { IoIosCheckmark, IoIosClose } from "react-icons/io";
 export function UsersTable({ users, onEdit, onDelete }) {
   const { user: currentUser } = useAuth();
   const sendEmail = useSendEmail();
-  
-  const currentUserRoleLevel = currentUser?.roleLevel || currentUser?.role?.level;
+
+  const currentUserRoleLevel =
+    currentUser?.roleLevel || currentUser?.role?.level;
   const currentUserNip = currentUser?.nip;
   return (
-    <Table.Root mt={4} overflowX="auto" variant="simple"  >
-      <Table.Header border="none" >
-        <Table.Row fontWeight="bold" fontSize="lg" bg={"teal.500"} border="none">
-          <Table.ColumnHeader color="black">NIP</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Nome</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Posto</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Função</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Tipo</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Status</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Role</Table.ColumnHeader>
-          <Table.ColumnHeader color="black">Ações</Table.ColumnHeader>
+    <Table.Root mt={4} overflowX="auto" variant="simple">
+      <Table.Header border="none">
+        <Table.Row>
+          <Table.ColumnHeader>NIP</Table.ColumnHeader>
+          <Table.ColumnHeader>Nome</Table.ColumnHeader>
+          <Table.ColumnHeader>Posto</Table.ColumnHeader>
+          <Table.ColumnHeader>Função</Table.ColumnHeader>
+          <Table.ColumnHeader>Tipo</Table.ColumnHeader>
+          <Table.ColumnHeader>Status</Table.ColumnHeader>
+          <Table.ColumnHeader>Role</Table.ColumnHeader>
+          <Table.ColumnHeader>Ações</Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
       <Table.Body>
         {users.map((user, index) => (
-          <Table.Row key={user.nip} bg={index % 2 === 0 ? "" : "blackAlpha.400"}>
+          <Table.Row
+            key={user.nip}
+            // bg={index % 2 === 0 ? "" : "blackAlpha.400"}
+          >
             <Table.Cell>{user.nip}</Table.Cell>
             <Table.Cell>{user.name}</Table.Cell>
             <Table.Cell>{user.rank}</Table.Cell>
@@ -50,32 +50,15 @@ export function UsersTable({ users, onEdit, onDelete }) {
             </Table.Cell>
             <Table.Cell>
               <HStack spacing={2} align="center">
-                {/* <IconButton
-                  colorPalette="blue"
-                  onClick={() => {
-                    toast({
-                      title: "Sending Email",
-                      description: "Wait while we send the Email",
-                      status: "info",
-                      duration: 5000,
-                      isClosable: true,
-                      position: "top",
-                    });
-                    sendEmail(user.email, `/api/recover/${user.email}`);
-                  }}
-                  aria-label="Email User"
-                >
-                  <FaMailBulk />
-                </IconButton> */}
                 {canModifyUser(
                   currentUserRoleLevel,
                   user.roleLevel || user.role?.level,
                   currentUserNip,
-                  user.nip
+                  user.nip,
                 ) ? (
                   <>
                     <IconButton
-                      colorPalette="yellow"
+                      variant={"edit"}
                       onClick={() => onEdit(user)}
                       aria-label="Edit User"
                     >
@@ -83,7 +66,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
                     </IconButton>
                     {/* <InsertInitQual user={user} /> */}
                     <IconButton
-                      colorPalette="red"
+                      variant={"danger"}
                       onClick={() => onDelete(user)}
                       aria-label="Delete User"
                     >

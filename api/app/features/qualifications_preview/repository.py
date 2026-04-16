@@ -28,9 +28,7 @@ class QualificationsPreviewRepository:
             .join(Tripulante)
             .join(Qualificacao, TripulanteQualificacao.qualificacao_id == Qualificacao.id)
             .where(Tripulante.status == StatusTripulante.PRESENTE.value)
-            .where(
-                Qualificacao.grupo.in_([GrupoQualificacoes.MQP, GrupoQualificacoes.MQOBP])
-            )
+            .where(Qualificacao.grupo.in_([GrupoQualificacoes.MQP, GrupoQualificacoes.MQOBP]))
             .options(
                 joinedload(TripulanteQualificacao.tripulante),
                 joinedload(TripulanteQualificacao.qualificacao),

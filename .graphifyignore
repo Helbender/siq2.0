@@ -1,0 +1,53 @@
+# .graphifyignore
+# Patterns follow .gitignore syntax — graphify skips matching files/dirs
+
+# Dependencies
+vendor/
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Generated files
+*.generated.py
+
+# Python artifacts
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*/.venv/
+
+# Caches and tooling
+.mypy_cache/
+.ruff_cache/
+.cursor/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Logs and local files
+*.log
+*.local
+*.db
+.env
+*.env
+*.env.local
+.env.production
+
+# Test/browser artifacts
+.playwright/
+.playwright-cli/
+
+# OS
+.DS_Store
+
+# Vendor template (not app source)
+templatemo_607_glass_admin/
+
+# Graphify own output
+graphify-out/

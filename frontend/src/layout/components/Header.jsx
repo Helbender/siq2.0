@@ -5,7 +5,7 @@ export function Header() {
     <Box
       as="header"
       w="100%"
-      bg="teal.500"
+      bg="brand.500"
       color="white"
       p={4}
       boxShadow="md"

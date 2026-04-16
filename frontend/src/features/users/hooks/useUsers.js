@@ -18,15 +18,9 @@ export function useUsers() {
 
     const term = searchTerm.toLowerCase();
     return visibleUsers.filter((user) =>
-      [
-        user.nip,
-        user.name,
-        user.position,
-        user.tipo,
-        user.status,
-      ]
-        .map((field) => (field ? field.toString().toLowerCase() : ""))
-        .some((field) => field.includes(term)),
+      [user.nip, user.name, user.position, user.tipo, user.status].some(
+        (field) => field?.toString().toLowerCase().includes(term),
+      ),
     );
   }, [searchTerm, users]);
 

@@ -51,7 +51,8 @@ http.interceptors.response.use(
     }
 
     // Don't try to refresh if the failed request WAS a refresh request
-    const isRefreshCall = originalRequest.url && originalRequest.url.includes("/auth/refresh");
+    const isRefreshCall =
+      originalRequest.url && originalRequest.url.includes("/auth/refresh");
     if (isRefreshCall) {
       localStorage.removeItem("token");
       window.dispatchEvent(new Event("auth:logout"));
@@ -90,8 +91,9 @@ http.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
 
-      const isAuthError = refreshError.response?.status === 401 ||
-                         refreshError.response?.status === 422;
+      const isAuthError =
+        refreshError.response?.status === 401 ||
+        refreshError.response?.status === 422;
 
       if (isAuthError) {
         localStorage.removeItem("token");
@@ -102,7 +104,7 @@ http.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  }
+  },
 );
 
 export const setLoggingOut = (value) => {

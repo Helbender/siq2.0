@@ -1,9 +1,4 @@
-import {
-  Center,
-  SimpleGrid,
-  Spinner,
-  Text
-} from "@chakra-ui/react";
+import { Center, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import { PilotCard } from "../components/PilotCard";
 
 export function PilotsPage({ pilotos = [], loading }) {
@@ -24,10 +19,10 @@ export function PilotsPage({ pilotos = [], loading }) {
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 3 }} gap="4">
+    <SimpleGrid columns={{ base: 1, xl: 2, "3xl": 3 }} gap="4">
       {pilotos.map((pilot) => (
-          <PilotCard key={pilot.nip} user={pilot} />
-        ))}
+        <PilotCard key={pilot.nip} user={pilot} />
+      ))}
     </SimpleGrid>
   );
 }

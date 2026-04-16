@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.core.config import engine
 from app.features.db_management.service import DatabaseManagementService
-from app.shared.permissions import require_role
 from app.shared.enums import Role
+from app.shared.permissions import require_role
 
 db_management_bp = Blueprint("db_management", __name__)
 db_management_service = DatabaseManagementService()
@@ -118,10 +118,10 @@ def delete_year(year: int) -> tuple[Response, int]:
     try:
         with Session(engine) as session:
             result = db_management_service.delete_year(session, year)
-            
+
             if result["deleted_count"] == 0:
                 return jsonify({"error": f"No flights found for year {year}"}), 404
-            
+
             return jsonify(result), 200
     except Exception as e:
         print(f"Error in DELETE /db-management/flights-by-year/{year}: {e}")
@@ -233,10 +233,10 @@ def rebackup_flights_by_year(year: int) -> tuple[Response, int]:
     try:
         with Session(engine) as session:
             result = db_management_service.rebackup_flights_by_year(session, year)
-            
+
             if result.get("total_flights", 0) == 0:
                 return jsonify({"error": f"No flights found for year {year}"}), 404
-            
+
             return jsonify(result), 200
     except Exception as e:
         print(f"Error in POST /db-management/rebackup-flights/{year}: {e}")
@@ -276,11 +276,11 @@ def export_qualifications() -> tuple[Response, int]:
     try:
         with Session(engine) as session:
             qualifications = db_management_service.export_qualifications(session)
-            
+
             # Create JSON file in memory
             json_data = json.dumps(qualifications, indent=2, ensure_ascii=False)
             json_bytes = BytesIO(json_data.encode("utf-8"))
-            
+
             return send_file(
                 json_bytes,
                 mimetype="application/json",
@@ -325,11 +325,11 @@ def export_users() -> tuple[Response, int]:
     try:
         with Session(engine) as session:
             users = db_management_service.export_users(session)
-            
+
             # Create JSON file in memory
             json_data = json.dumps(users, indent=2, ensure_ascii=False)
             json_bytes = BytesIO(json_data.encode("utf-8"))
-            
+
             return send_file(
                 json_bytes,
                 mimetype="application/json",
