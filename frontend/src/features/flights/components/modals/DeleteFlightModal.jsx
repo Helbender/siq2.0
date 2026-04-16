@@ -41,7 +41,12 @@ export function DeleteFlightModal({ flight }) {
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
-        <IconButton variant="ghost" colorPalette="red" aria-label="Apagar voo">
+        <IconButton
+          variant="ghost"
+          aria-label="Apagar voo"
+          color="red.400"
+          _hover={{ bg: "bg.cardSubtle", color: "red.300" }}
+        >
           <BiTrash />
         </IconButton>
       </Dialog.Trigger>

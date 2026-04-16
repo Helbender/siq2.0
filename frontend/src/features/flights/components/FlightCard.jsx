@@ -28,11 +28,11 @@ export function FlightCard({ flight }) {
         <Flex align={"center"}>
           {isColumn ? (
             <Box>
-              <Heading>{`${flight.airtask}`}</Heading>
-              <Text>{`${formatDate(flight.date)}`}</Text>
+              <Heading color="brand.400">{`${flight.airtask}`}</Heading>
+              <Text color="text.secondary">{`${formatDate(flight.date)}`}</Text>
             </Box>
           ) : (
-            <Heading>{`${flight.airtask} (${flight.id})`}</Heading>
+            <Heading color="brand.400">{`${flight.airtask} (${flight.id})`}</Heading>
           )}
           <Spacer />
           <Can minLevel={Role.FLYERS}>
@@ -40,23 +40,25 @@ export function FlightCard({ flight }) {
               flight={flight}
               trigger={
                 <IconButton
-                  colorPalette="yellow"
                   variant="ghost"
                   aria-label="Editar voo"
+                  color="gold.200"
+                  _hover={{ bg: "bg.cardSubtle", color: "gold.100" }}
                 >
                   <BiEdit />
                 </IconButton>
               }
             />
           </Can>
-          <Heading as="h3">{flight.ATD}</Heading>
+          <Heading as="h3" color="text.secondary">
+            {flight.ATD}
+          </Heading>
           <Can minLevel={Role.FLYERS}>
             <DeleteFlightModal flight={flight} />
           </Can>
           <Spacer />
           {isColumn ? null : <Heading>{formatDate(flight.date)}</Heading>}
         </Flex>
-        <Separator />
       </Card.Header>
       <Card.Body>
         <Flex alignItems={"top"} gap={2} overflowX={"auto"}>
@@ -102,7 +104,7 @@ export function FlightCard({ flight }) {
           <InfoMed flight={flight} />
         </Flex>
 
-        <Separator my="5" />
+        <Separator my="5" borderColor="border.subtle" />
         <Box overflowY={"auto"} height={"300px"}>
           <Table.Root size={"sm"} variant="simple">
             <Table.Header>
