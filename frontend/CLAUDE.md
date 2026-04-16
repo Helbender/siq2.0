@@ -71,6 +71,10 @@ import FlightsPage from "@/features/flights/pages/FlightsPage";
 
 Glass Admin design system in `src/theme2/` — semantic tokens, color palettes, Chakra UI component recipes (button, badge, card, sidebar, etc.).
 
+## Design System
+
+Always refer to `DESIGN.md` before creating or modifying any UI component, page, or layout. When generating new UI elements, ensure they follow the design tokens, component patterns, and visual language documented in `DESIGN.md`. Never introduce new colors, spacing values, typography styles, or component variants that are not already defined there. If a design decision is not covered by `DESIGN.md`, ask before proceeding.
+
 ## Chakra UI v3
 
 Full API docs in `docs/llms-full.txt`. Read before writing any Chakra UI component code.
