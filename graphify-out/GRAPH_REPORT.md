@@ -1,7 +1,7 @@
-# Graph Report - .  (2026-04-15)
+# Graph Report - .  (2026-04-16)
 
 ## Corpus Check
-- 273 files · ~85,371 words
+- 273 files · ~87,564 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1119,12 +1119,12 @@ Nodes (1): API README
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Tripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 18`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
 - **Why does `TipoTripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 12`, `Community 13`, `Community 16`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `Tripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 6`, `Community 18`?**
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
 - **Why does `Qualificacao` connect `Community 1` to `Community 0`, `Community 3`, `Community 4`, `Community 12`, `Community 18`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Are the 134 inferred relationships involving `Tripulante` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
   _`Tripulante` has 134 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 135 inferred relationships involving `Qualificacao` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
