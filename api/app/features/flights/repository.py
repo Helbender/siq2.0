@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Any
 
-from sqlalchemy import delete, func, or_, select
+from sqlalchemy import delete, func, or_, select, union_all
 from sqlalchemy.orm import Session, joinedload
 
 from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # type: ignore
@@ -24,14 +24,7 @@ class FlightRepository:
 
     @staticmethod
     def find_all_with_pilots(session: Session) -> list[Flight]:
-        """Get all flights with pilots loaded.
-
-        Args:
-            session: Database session
-
-        Returns:
-            List of Flight instances ordered by date descending
-        """
+        """Get all flights with pilots loaded."""
         stmt = (
             select(Flight)
             .order_by(Flight.date.desc())
@@ -41,6 +34,22 @@ class FlightRepository:
             )
         )
         return list(session.execute(stmt).unique().scalars().all())
+
+    @staticmethod
+    def find_all_with_pilots_paginated(session: Session, page: int, per_page: int) -> tuple[list[Flight], int]:
+        """Get paginated flights with pilots loaded."""
+        total = session.execute(select(func.count(Flight.fid))).scalar_one()
+        stmt = (
+            select(Flight)
+            .order_by(Flight.date.desc())
+            .options(
+                joinedload(Flight.flight_pilots).joinedload(FlightPilots.tripulante),
+                joinedload(Flight.flight_anomalies),
+            )
+            .limit(per_page)
+            .offset((page - 1) * per_page)
+        )
+        return list(session.execute(stmt).unique().scalars().all()), total
 
     @staticmethod
     def find_flights_by_crew_search(
@@ -480,3 +489,77 @@ class FlightRepository:
 
         result = session.execute(stmt).scalar_one_or_none()
         return result if result else date(year_init, 1, 1)
+
+    @staticmethod
+    def find_max_flight_dates_batch(
+        session: Session,
+        pilot_id: int,
+        qual_ids: set[int],
+        exclude_flight_id: int,
+    ) -> dict[int, date]:
+        """Return {qualificacao_id: max_date} for all qual_ids in one or two round-trips.
+
+        Replaces N individual calls to find_max_flight_date_for_qualification.
+        Landing-type quals (ATR/ATN/precapp/nprecapp) are resolved per landing field;
+        standard quals (qual1-qual6) are resolved with a single UNION ALL query.
+        """
+        if not qual_ids:
+            return {}
+
+        quals = list(session.execute(select(Qualificacao).where(Qualificacao.id.in_(qual_ids))).scalars())
+
+        landing_field_map: dict[str, Any] = {
+            "ATR": FlightPilots.day_landings,
+            "ATN": FlightPilots.night_landings,
+            "precapp": FlightPilots.prec_app,
+            "nprecapp": FlightPilots.nprec_app,
+        }
+
+        landing_quals = [q for q in quals if q.payload_key in landing_field_map]
+        standard_quals = [q for q in quals if q.payload_key not in landing_field_map]
+
+        result: dict[int, date] = {}
+        default_date = date(year_init, 1, 1)
+
+        # Landing quals: one query per distinct landing field present in the set (max 4)
+        for payload_key, field in landing_field_map.items():
+            matched = [q for q in landing_quals if q.payload_key == payload_key]
+            if not matched:
+                continue
+            stmt = (
+                select(func.max(Flight.date))
+                .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
+                .where(FlightPilots.pilot_id == pilot_id, Flight.fid != exclude_flight_id)
+                .where(field.isnot(None), field > 0)
+            )
+            max_date = session.execute(stmt).scalar_one_or_none()
+            for q in matched:
+                result[q.id] = max_date or default_date
+
+        # Standard quals: UNION ALL across qual1-qual6, one round-trip total
+        if standard_quals:
+            standard_ids_str = {str(q.id) for q in standard_quals}
+            col_names = ["qual1", "qual2", "qual3", "qual4", "qual5", "qual6"]
+            parts = [
+                select(
+                    getattr(FlightPilots, col).label("qid"),
+                    func.max(Flight.date).label("max_date"),
+                )
+                .join(FlightPilots, Flight.fid == FlightPilots.flight_id)
+                .where(FlightPilots.pilot_id == pilot_id, Flight.fid != exclude_flight_id)
+                .where(getattr(FlightPilots, col).in_(standard_ids_str))
+                .group_by(getattr(FlightPilots, col))
+                for col in col_names
+            ]
+            rows = session.execute(union_all(*parts)).all()
+            max_by_qid: dict[str, date | None] = {}
+            for qid_str, max_date in rows:
+                if qid_str is None:
+                    continue
+                existing = max_by_qid.get(qid_str)
+                if existing is None or (max_date and max_date > existing):
+                    max_by_qid[qid_str] = max_date
+            for q in standard_quals:
+                result[q.id] = max_by_qid.get(str(q.id)) or default_date
+
+        return result

@@ -7,7 +7,7 @@ from threading import Thread
 from typing import Any
 
 from dotenv import load_dotenv
-from sqlalchemy import exc, select, text
+from sqlalchemy import exc, select
 from sqlalchemy.orm import Session
 
 from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # type: ignore
@@ -66,28 +66,26 @@ class FlightService:
         self.repository = FlightRepository()
 
     def get_all_flights(self, session: Session) -> list[dict]:
-        """Get all flights from database with qualification cache.
-
-        Args:
-            session: Database session
-
-        Returns:
-            List of flight dictionaries
-        """
-        # Pre-load all qualifications into a cache for efficient lookups
+        """Get all flights from database with qualification cache."""
         all_qualifications = self.repository.find_all_qualifications(session)
         qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
-
-        # Disable statement timeout for this connection (heavy full-table join)
-        try:
-            session.execute(text("SET statement_timeout = '0'"))
-        except Exception:
-            pass
-
         flights_obj = self.repository.find_all_with_pilots(session)
+        return [row.to_json(qual_cache) for row in flights_obj]
 
-        flights = [row.to_json(qual_cache) for row in flights_obj]
-        return flights
+    def get_all_flights_paginated(self, session: Session, page: int, per_page: int) -> dict:
+        """Get paginated flights with qualification cache."""
+        all_qualifications = self.repository.find_all_qualifications(session)
+        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
+        flights_obj, total = self.repository.find_all_with_pilots_paginated(session, page, per_page)
+        return {
+            "data": [row.to_json(qual_cache) for row in flights_obj],
+            "pagination": {
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+                "pages": -(-total // per_page),
+            },
+        }
 
     def get_anomaly_descriptions_by_tailnumber(self, session: Session, tailnumber: int) -> list[str]:
         """Get distinct anomaly descriptions for an aircraft (tail number).
@@ -577,13 +575,19 @@ class FlightService:
         )
         tripulante_quals = self.repository.find_tripulante_qualificacoes_by_pilot_id(session, tripulante.pilot_id)
 
-        for pq in tripulante_quals:
-            if pq.qualificacao_id not in qual_ids_on_this_flight:
-                continue
-            last_date = self.repository.find_max_flight_date_for_qualification(
-                session, tripulante.pilot_id, pq.qualificacao_id, flight_id
-            )
-            pq.data_ultima_validacao = last_date
+        relevant_quals = [pq for pq in tripulante_quals if pq.qualificacao_id in qual_ids_on_this_flight]
+        if not relevant_quals:
+            return
+
+        max_dates = self.repository.find_max_flight_dates_batch(
+            session,
+            tripulante.pilot_id,
+            {pq.qualificacao_id for pq in relevant_quals},
+            flight_id,
+        )
+
+        for pq in relevant_quals:
+            pq.data_ultima_validacao = max_dates.get(pq.qualificacao_id)
             self.repository.update_tripulante_qualificacao(session, pq)
 
     def _add_crew_and_pilots(

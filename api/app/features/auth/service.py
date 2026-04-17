@@ -72,11 +72,13 @@ class AuthService:
 
         nip_str = str(nip)
         role_level = tripulante.role.level if tripulante.role else tripulante.role_level
+        permissions = [p.name for p in tripulante.role.permissions] if tripulante.role else []
         access_token = create_access_token(
             identity=nip_str,
             additional_claims={
                 "name": tripulante.name,
                 "roleLevel": role_level,
+                "permissions": permissions,
             },
         )
         refresh_token = create_refresh_token(identity=nip_str)
@@ -114,11 +116,13 @@ class AuthService:
             raise AuthError("User not found", 404)
 
         role_level = tripulante.role.level if tripulante.role else tripulante.role_level
+        permissions = [p.name for p in tripulante.role.permissions] if tripulante.role else []
         return create_access_token(
             identity=str(nip_int),
             additional_claims={
                 "name": tripulante.name,
                 "roleLevel": role_level,
+                "permissions": permissions,
             },
         )
 

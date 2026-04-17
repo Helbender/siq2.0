@@ -1,6 +1,6 @@
 """Users repository - database access only."""
 
-from sqlalchemy import exc, select
+from sqlalchemy import exc, func, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
@@ -12,15 +12,15 @@ class UserRepository:
 
     @staticmethod
     def find_all(session: Session) -> list[Tripulante]:
-        """Get all users/tripulantes from database.
-
-        Args:
-            session: Database session
-
-        Returns:
-            List of Tripulante instances
-        """
+        """Get all users/tripulantes from database."""
         return list(session.scalars(select(Tripulante)))
+
+    @staticmethod
+    def find_all_paginated(session: Session, page: int, per_page: int) -> tuple[list[Tripulante], int]:
+        """Get paginated users/tripulantes."""
+        total = session.execute(select(func.count(Tripulante.nip))).scalar_one()
+        stmt = select(Tripulante).order_by(Tripulante.nip).limit(per_page).offset((page - 1) * per_page)
+        return list(session.scalars(stmt)), total
 
     @staticmethod
     def find_by_nip(session: Session, nip: int) -> Tripulante | None:

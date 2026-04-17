@@ -5,13 +5,15 @@ Python 3.12+ Flask API. Runs on `:5051`.
 ## Commands
 
 ```bash
-python wsgi.py                                        # Start API
-alembic upgrade head                                  # Apply migrations
-alembic revision --autogenerate -m "description"      # Generate migration
-pytest                                                # Run tests
-ruff check api/                                       # Lint
-ruff format api/                                      # Format
-mypy api/                                             # Type check (strict)
+uv run python wsgi.py                                        # Start API
+uv run alembic upgrade head                                  # Apply migrations
+uv run alembic revision --autogenerate -m "description"      # Generate migration
+uv run alembic downgrade -1                                  # Revert last migration
+uv run pytest                                                # Run tests
+uv run pytest tests/path/test_file.py::test_name            # Run single test
+uv run ruff check app/                                       # Lint
+uv run ruff format app/                                      # Format
+uv run mypy app/                                             # Type check (strict)
 ```
 
 ## Environment

@@ -11,6 +11,17 @@ from app.core.config import engine
 from app.features.auth.repository import AuthRepository
 from app.shared.enums import Role
 
+# Fallback role levels used when permissions are not yet seeded in the database.
+_PERMISSION_MIN_LEVEL: dict[str, int] = {
+    "flights.read": Role.READONLY.level,
+    "flights.write": Role.USER.level,
+    "users.read": Role.READONLY.level,
+    "users.write": Role.UNIF.level,
+    "qualifications.read": Role.READONLY.level,
+    "qualifications.write": Role.UNIF.level,
+    "dashboard.read": Role.READONLY.level,
+}
+
 
 def admin_required(f: Callable) -> Callable:
     """Decorator to require admin privileges for a route (SUPER_ADMIN role level).
@@ -112,6 +123,73 @@ def require_role(min_level: int):
                 return jsonify({"error": "Forbidden"}), 403
 
             return fn(*args, **kwargs)
+
+        return decorated
+
+    return wrapper
+
+
+def require_permission(permission: str) -> Callable:
+    """Require a specific named permission (e.g. "flights.read").
+
+    Resolution order:
+    1. Admin identity → always allowed.
+    2. JWT ``permissions`` claim present and contains the permission → allowed.
+    3. JWT ``permissions`` claim present but permission missing → check DB.
+    4. JWT has no ``permissions`` claim (old token) → fall back to role-level check.
+
+    If the ``permissions`` table is not yet seeded the fallback map
+    ``_PERMISSION_MIN_LEVEL`` preserves existing access patterns by role level.
+    """
+
+    def wrapper(fn: Callable) -> Callable:
+        @wraps(fn)
+        def decorated(*args, **kwargs):
+            verify_jwt_in_request()
+            nip_identity = get_jwt_identity()
+            claims = get_jwt()
+
+            if isinstance(nip_identity, str) and nip_identity == "admin":
+                return fn(*args, **kwargs)
+
+            jwt_perms = claims.get("permissions")
+
+            # Fast path: permission present in JWT
+            if jwt_perms is not None and permission in jwt_perms:
+                return fn(*args, **kwargs)
+
+            # Resolve role level for fallback
+            try:
+                nip = int(nip_identity)
+            except (ValueError, TypeError):
+                return jsonify({"error": "Invalid user identity"}), 403
+
+            role_level = claims.get("roleLevel")
+            user_role = None
+
+            if role_level is None or jwt_perms is not None:
+                # Either no role level in claims, or claims has permissions but not this one
+                # → always check DB for up-to-date info
+                repository = AuthRepository()
+                with Session(engine) as session:
+                    current_user = repository.find_user_by_nip(session, nip)
+                    if current_user is None:
+                        return jsonify({"error": "User not found"}), 403
+                    user_role = current_user.role
+                    role_level = user_role.level if user_role else current_user.role_level
+
+                    if user_role and user_role.permissions:
+                        perm_names = {p.name for p in user_role.permissions}
+                        if permission in perm_names:
+                            return fn(*args, **kwargs)
+                        return jsonify({"error": f"Permission required: {permission}"}), 403
+
+            # Permissions not seeded yet — fall back to role level
+            min_level = _PERMISSION_MIN_LEVEL.get(permission, Role.UNIF.level)
+            if role_level is not None and role_level >= min_level:
+                return fn(*args, **kwargs)
+
+            return jsonify({"error": f"Permission required: {permission}"}), 403
 
         return decorated
 

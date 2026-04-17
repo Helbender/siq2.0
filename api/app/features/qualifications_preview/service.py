@@ -26,20 +26,16 @@ class QualificationsPreviewService:
             {"columns": [{"qualification_id": int, "qualification_name": str, "pilots": [{"name": str, "remaining_days": int}]}]}
         """
         days = preview_days if preview_days is not None else PREVIEW_DAYS
-        all_tq = self.repository.find_mqp_mqobp_tripulante_qualificacoes_presente(session)
+        all_tq = self.repository.find_mqp_mqobp_qualificacoes_expiring(session, days)
         today = date.today()
 
-        # qualification_id -> list of { name, remaining_days }
         by_qual: dict[int, list[dict[str, Any]]] = {}
-        # qualification_id -> (qualification_name) for header
         qual_names: dict[int, str] = {}
 
         for tq in all_tq:
             validade = tq.qualificacao.validade
             expiry_date = tq.data_ultima_validacao + timedelta(days=validade)
             remaining_days = (expiry_date - today).days
-            if remaining_days >= days:
-                continue
             qid = tq.qualificacao_id
             qual_names[qid] = tq.qualificacao.nome
             pilot_display = tq.tripulante.rank or ""

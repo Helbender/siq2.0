@@ -1,6 +1,7 @@
 """Users routes - thin request/response handlers."""
 
 import json
+import logging
 
 from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.orm import Session
@@ -21,6 +22,7 @@ from app.features.users.schemas import (
 from app.features.users.service import UserService
 from app.shared.enums import Role
 
+logger = logging.getLogger(__name__)
 users_bp = Blueprint("users", __name__)
 user_service = UserService()
 
@@ -122,20 +124,20 @@ def retrieve_user() -> tuple[Response, int]:
     """
     if request.method == "GET":
         try:
-            # Check authentication
             auth_error = require_authenticated()
             if auth_error:
                 return auth_error
 
-            # All users can see all users - no role-based filtering for viewing
+            page_str = request.args.get("page")
+            per_page_str = request.args.get("per_page")
             with Session(engine) as session:
-                all_users = user_service.get_all_users(session)
-                return jsonify(all_users), 200
+                if page_str is not None or per_page_str is not None:
+                    page = max(1, int(page_str or 1))
+                    per_page = min(500, max(1, int(per_page_str or 50)))
+                    return jsonify(user_service.get_all_users_paginated(session, page, per_page)), 200
+                return jsonify(user_service.get_all_users(session)), 200
         except Exception as e:
-            print(f"Error in GET /users: {e}")
-            import traceback
-
-            traceback.print_exc()
+            logger.exception("[users] GET / error: %s", e)
             return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
     # POST - Create new user

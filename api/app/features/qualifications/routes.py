@@ -237,6 +237,7 @@ def modify_qualification(qualification_id: int) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/tripulantes/qualificacoes/<tipo>", methods=["GET"])
+@require_role(Role.READONLY.level)
 def listar_qualificacoes_tipo(tipo: str) -> tuple[Response, int]:
     """List all tripulantes of a specific type with their qualifications.
 
@@ -271,7 +272,15 @@ def listar_qualificacoes_tipo(tipo: str) -> tuple[Response, int]:
                 items:
                   type: object
     """
+    page_str = request.args.get("page")
+    per_page_str = request.args.get("per_page")
     with Session(engine) as session:
+        if page_str is not None or per_page_str is not None:
+            page = max(1, int(page_str or 1))
+            per_page = min(500, max(1, int(per_page_str or 50)))
+            return jsonify(
+                qualification_service.get_qualifications_for_tripulante_type_paginated(tipo, session, page, per_page)
+            ), 200
         tripulantes = qualification_service.get_qualifications_for_tripulante_type(tipo, session)
         return jsonify(tripulantes), 200
 

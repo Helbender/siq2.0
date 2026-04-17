@@ -23,36 +23,39 @@ class UserService:
         """Initialize user service with repository."""
         self.repository = UserRepository()
 
+    def _tripulante_to_dict(self, t: "Tripulante") -> dict:
+        user_dict: dict = {
+            "nip": t.nip,
+            "name": t.name,
+            "tipo": t.tipo.value,
+            "rank": t.rank,
+            "position": t.position,
+            "email": t.email,
+            "status": t.status.value,
+        }
+        role_level_value = t.role.level if t.role else (t.role_level if t.role_level is not None else None)
+        if role_level_value is not None:
+            user_dict["roleLevel"] = role_level_value
+        if t.role:
+            user_dict["role"] = t.role.to_json()
+        return user_dict
+
     def get_all_users(self, session: Session) -> list[dict]:
-        """Get all users/tripulantes from database.
+        """Get all users/tripulantes from database."""
+        return [self._tripulante_to_dict(t) for t in self.repository.find_all(session)]
 
-        Args:
-            session: Database session
-
-        Returns:
-            List of user dictionaries
-        """
-        tripulantes_obj = self.repository.find_all(session)
-
-        tripulantes: list[dict] = []
-        for t in tripulantes_obj:
-            user_dict = {
-                "nip": t.nip,
-                "name": t.name,
-                "tipo": t.tipo.value,
-                "rank": t.rank,
-                "position": t.position,
-                "email": t.email,
-                "status": t.status.value,
-            }
-            # Add role information if available
-            role_level_value = t.role.level if t.role else (t.role_level if t.role_level is not None else None)
-            if role_level_value is not None:
-                user_dict["roleLevel"] = role_level_value
-            if t.role:
-                user_dict["role"] = t.role.to_json()
-            tripulantes.append(user_dict)
-        return tripulantes
+    def get_all_users_paginated(self, session: Session, page: int, per_page: int) -> dict:
+        """Get paginated users/tripulantes."""
+        tripulantes_obj, total = self.repository.find_all_paginated(session, page, per_page)
+        return {
+            "data": [self._tripulante_to_dict(t) for t in tripulantes_obj],
+            "pagination": {
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+                "pages": -(-total // per_page),
+            },
+        }
 
     def create_user(self, user_data: dict, session: Session) -> dict[str, Any]:
         """Create a new user/tripulante.

@@ -20,7 +20,7 @@ docker-compose up -d
 cd frontend && npm run dev
 
 # Backend only
-cd api && python wsgi.py
+cd api && uv run python wsgi.py
 ```
 
 ## Development Commands
@@ -38,15 +38,15 @@ npm run test:run     # Vitest single run (CI)
 ### Backend (`cd api`)
 
 ```bash
-python wsgi.py                                        # Start API on :5051
-pytest                                                # Run all tests
-pytest tests/path/test_file.py::test_name            # Run single test
-alembic upgrade head                                  # Apply migrations
-alembic revision --autogenerate -m "description"      # Generate migration
-alembic downgrade -1                                  # Revert last migration
-ruff check api/                                       # Lint
-ruff format api/                                      # Format
-mypy api/                                             # Type check
+uv run python wsgi.py                                        # Start API on :5051
+uv run pytest                                                # Run all tests
+uv run pytest tests/path/test_file.py::test_name            # Run single test
+uv run alembic upgrade head                                  # Apply migrations
+uv run alembic revision --autogenerate -m "description"      # Generate migration
+uv run alembic downgrade -1                                  # Revert last migration
+uv run ruff check app/                                       # Lint
+uv run ruff format app/                                      # Format
+uv run mypy app/                                             # Type check
 ```
 
 ## Sub-project Guides

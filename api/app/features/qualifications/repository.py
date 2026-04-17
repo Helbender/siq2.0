@@ -1,6 +1,6 @@
 """Qualifications repository - database access only."""
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -121,17 +121,9 @@ class QualificationRepository:
         session.commit()
 
     @staticmethod
-    def find_tripulantes_by_type(session: Session, tipo: str) -> list[Tripulante]:
-        """Find tripulantes by type with PRESENTE status.
-
-        Args:
-            session: Database session
-            tipo: Tripulante type string
-
-        Returns:
-            List of Tripulante instances
-        """
-        stmt = (
+    def _base_tripulantes_by_type_stmt(tipo: str):
+        """Base statement for tripulantes filtered by type and PRESENTE status."""
+        return (
             select(Tripulante)
             .where(Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value)
             .order_by(Tripulante.nip, Tripulante.rank)
@@ -140,7 +132,27 @@ class QualificationRepository:
                 joinedload(Tripulante.role),
             )
         )
+
+    @staticmethod
+    def find_tripulantes_by_type(session: Session, tipo: str) -> list[Tripulante]:
+        """Find tripulantes by type with PRESENTE status."""
+        stmt = QualificationRepository._base_tripulantes_by_type_stmt(tipo)
         return list(session.execute(stmt).unique().scalars().all())
+
+    @staticmethod
+    def find_tripulantes_by_type_paginated(
+        session: Session, tipo: str, page: int, per_page: int
+    ) -> tuple[list[Tripulante], int]:
+        """Find paginated tripulantes by type with PRESENTE status."""
+        total = session.execute(
+            select(func.count(Tripulante.nip)).where(
+                Tripulante.tipo == tipo, Tripulante.status == StatusTripulante.PRESENTE.value
+            )
+        ).scalar_one()
+        stmt = (
+            QualificationRepository._base_tripulantes_by_type_stmt(tipo).limit(per_page).offset((page - 1) * per_page)
+        )
+        return list(session.execute(stmt).unique().scalars().all()), total
 
     @staticmethod
     def find_tripulante_by_nip(session: Session, nip: int) -> Tripulante | None:

@@ -3,11 +3,9 @@
 import logging
 
 from flask import Blueprint, Response, jsonify, request
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
-from app.features.flights.policies import require_authenticated
 from app.features.flights.schemas import (
     FlightCreateSchema,
     FlightUpdateSchema,
@@ -16,7 +14,7 @@ from app.features.flights.schemas import (
 )
 from app.features.flights.service import FlightService
 from app.shared.enums import Role
-from app.shared.permissions import require_role
+from app.shared.permissions import require_permission, require_role
 
 logger = logging.getLogger(__name__)
 flights_bp = Blueprint("flights", __name__)
@@ -27,144 +25,53 @@ flight_create_schema = FlightCreateSchema()
 flight_update_schema = FlightUpdateSchema()
 
 
-@flights_bp.route("/", methods=["GET", "POST"], strict_slashes=False)
-def retrieve_flights() -> tuple[Response, int]:
-    """Handle GET (list all flights) and POST (create flight) requests.
+@flights_bp.route("/", methods=["GET"], strict_slashes=False)
+@require_permission("flights.read")
+def list_flights() -> tuple[Response, int]:
+    """List all flights.
 
     ---
     tags:
       - Flights
-    summary: List all flights or create a new flight
-    description: |
-      GET: Retrieve all flights from the database
-      POST: Create a new flight with crew and pilot information
-    parameters:
-      - in: body
-        name: body
-        description: Flight data (for POST)
-        required: false
-        schema:
-          type: object
-          required:
-            - airtask
-            - date
-            - flight_pilots
-          properties:
-            airtask:
-              type: string
-              minLength: 1
-              maxLength: 7
-              example: "MISS01"
-            date:
-              type: string
-              format: date
-              pattern: "^\\d{4}-\\d{2}-\\d{2}$"
-              example: "2024-01-15"
-            origin:
-              type: string
-              maxLength: 4
-              example: "LPPT"
-            destination:
-              type: string
-              maxLength: 4
-              example: "LPMA"
-            ATD:
-              type: string
-              description: Actual time of departure (HH:MM)
-              example: "08:30"
-            ATA:
-              type: string
-              description: Actual time of arrival (HH:MM)
-              example: "10:45"
-            ATE:
-              type: string
-              description: Actual time en route (HH:MM)
-              example: "02:15"
-            flightType:
-              type: string
-              example: "Training"
-            flightAction:
-              type: string
-              example: "Search and Rescue"
-            tailNumber:
-              type: string
-              example: "FAP-502"
-            totalLandings:
-              type: integer
-              default: 0
-            passengers:
-              type: integer
-              default: 0
-            doe:
-              type: integer
-              default: 0
-            cargo:
-              type: integer
-              default: 0
-            numberOfCrew:
-              type: integer
-              default: 0
-            orm:
-              type: integer
-              default: 0
-            fuel:
-              type: integer
-              default: 0
-            activationFirst:
-              type: string
-              default: "__:__"
-            activationLast:
-              type: string
-              default: "__:__"
-            readyAC:
-              type: string
-              default: "__:__"
-            medArrival:
-              type: string
-              default: "__:__"
-            flight_pilots:
-              type: array
-              minItems: 1
-              items:
-                type: object
-                required:
-                  - nip
-                properties:
-                  nip:
-                    type: integer
-                  name:
-                    type: string
-                  position:
-                    type: string
-                  ATR:
-                    type: integer
-                  ATN:
-                    type: integer
-                  precapp:
-                    type: integer
-                  nprecapp:
-                    type: integer
-                  QUAL1:
-                    type: string
-                  QUAL2:
-                    type: string
-                  QUAL3:
-                    type: string
-                  QUAL4:
-                    type: string
-                  QUAL5:
-                    type: string
-                  QUAL6:
-                    type: string
+    summary: List all flights
+    security:
+      - Bearer: []
     responses:
       200:
-        description: List of all flights (GET)
+        description: List of all flights
         schema:
           type: array
           items:
             type: object
+    """
+    try:
+        page_str = request.args.get("page")
+        per_page_str = request.args.get("per_page")
+        with Session(engine) as session:
+            if page_str is not None or per_page_str is not None:
+                page = max(1, int(page_str or 1))
+                per_page = min(500, max(1, int(per_page_str or 50)))
+                return jsonify(flight_service.get_all_flights_paginated(session, page, per_page)), 200
+            return jsonify(flight_service.get_all_flights(session)), 200
+    except Exception as e:
+        logger.exception("[flights] GET / error: %s", e)
+        return jsonify({"message": f"Internal server error: {str(e)}"}), 500
+
+
+@flights_bp.route("/", methods=["POST"], strict_slashes=False)
+@require_permission("flights.write")
+def create_flight_route() -> tuple[Response, int]:
+    """Create a new flight.
+
+    ---
+    tags:
+      - Flights
+    summary: Create a new flight
+    security:
+      - Bearer: []
+    responses:
       201:
-        description: Flight created successfully (POST)
+        description: Flight created successfully
         schema:
           type: object
           properties:
@@ -173,109 +80,12 @@ def retrieve_flights() -> tuple[Response, int]:
               description: Created flight ID
       400:
         description: Validation error or bad request
-        schema:
-          type: object
-          properties:
-            message:
-              type: string
     """
-    if request.method == "GET":
-        # Check authentication and require READONLY level (20) or above for viewing
-        auth_error = require_authenticated()
-        if auth_error:
-            return auth_error
-
-        # Check role level for viewing flights
-        from flask_jwt_extended import get_jwt, get_jwt_identity
-
-        from app.features.auth.repository import AuthRepository
-
-        nip_identity = get_jwt_identity()
-        claims = get_jwt()
-
-        # Handle admin case
-        if isinstance(nip_identity, str) and nip_identity == "admin":
-            user_role_level = Role.SUPER_ADMIN.level
-        else:
-            try:
-                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
-            except (ValueError, TypeError):
-                return jsonify({"error": "Invalid user identity"}), 401
-
-            # Get role level from JWT claims first
-            user_role_level = claims.get("roleLevel")
-            if user_role_level is None:
-                # Fallback to database
-                repository = AuthRepository()
-                with Session(engine) as session:
-                    current_user = repository.find_user_by_nip(session, nip)
-                    if current_user is None:
-                        return jsonify({"error": "User not found"}), 404
-                    user_role_level = current_user.role.level if current_user.role else current_user.role_level
-
-        if user_role_level is None or user_role_level < Role.READONLY.level:
-            return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
-
-        try:
-            with Session(engine) as session:
-                try:
-                    session.execute(text("SET statement_timeout = '0'"))
-                except Exception:
-                    pass
-                flights = flight_service.get_all_flights(session)
-                return jsonify(flights), 200
-        except Exception as e:
-            print(f"Error in GET /flights: {e}")
-            import traceback
-
-            traceback.print_exc()
-            return jsonify({"message": f"Internal server error: {str(e)}"}), 500
-
-    # POST - Create new flight
-    # Require FLYERS level (60) or above for creating flights
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
-    # Check role level for creating flights
-    from flask_jwt_extended import get_jwt, get_jwt_identity
-
-    from app.features.auth.repository import AuthRepository
-
-    nip_identity = get_jwt_identity()
-    claims = get_jwt()
-
-    # Handle admin case
-    if isinstance(nip_identity, str) and nip_identity == "admin":
-        user_role_level = Role.SUPER_ADMIN.level
-    else:
-        try:
-            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid user identity"}), 401
-
-        # Get role level from JWT claims first
-        user_role_level = claims.get("roleLevel")
-        if user_role_level is None:
-            # Fallback to database
-            repository = AuthRepository()
-            with Session(engine) as session:
-                current_user = repository.find_user_by_nip(session, nip)
-                if current_user is None:
-                    return jsonify({"error": "User not found"}), 404
-                user_role_level = current_user.role.level if current_user.role else current_user.role_level
-
-    if user_role_level is None or user_role_level < Role.USER.level:
-        return jsonify({"error": "Forbidden - USER level or above required"}), 403
-
     flight_data: dict | None = request.get_json()
-    print(flight_data)
     if flight_data is None:
         return jsonify({"message": "Request body must be JSON"}), 400
 
     validated_data, errors = validate_request(flight_create_schema, flight_data)
-    print("\nValidated Data:")
-    print(validated_data)
     if errors:
         error_message = format_validation_errors(errors)
         logger.warning("[flights] POST validation failed: %s", error_message)
@@ -293,40 +103,12 @@ def retrieve_flights() -> tuple[Response, int]:
 
 
 @flights_bp.route("/anomaly-descriptions", methods=["GET"], strict_slashes=False)
+@require_permission("flights.read")
 def get_anomaly_descriptions() -> tuple[Response, int]:
     """Return distinct anomaly descriptions for an aircraft (tail number).
 
     Query params: tailnumber (required, integer).
     """
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
-    from flask_jwt_extended import get_jwt, get_jwt_identity
-
-    from app.features.auth.repository import AuthRepository
-
-    nip_identity = get_jwt_identity()
-    claims = get_jwt()
-    if isinstance(nip_identity, str) and nip_identity == "admin":
-        user_role_level = Role.SUPER_ADMIN.level
-    else:
-        try:
-            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid user identity"}), 401
-        user_role_level = claims.get("roleLevel")
-        if user_role_level is None:
-            repository = AuthRepository()
-            with Session(engine) as session:
-                current_user = repository.find_user_by_nip(session, nip)
-                if current_user is None:
-                    return jsonify({"error": "User not found"}), 404
-                user_role_level = current_user.role.level if current_user.role else current_user.role_level
-
-    if user_role_level is None or user_role_level < Role.READONLY.level:
-        return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
-
     try:
         tailnumber = int(request.args.get("tailnumber", 0))
     except (ValueError, TypeError):
@@ -341,40 +123,12 @@ def get_anomaly_descriptions() -> tuple[Response, int]:
 
 
 @flights_bp.route("/by-crew", methods=["GET"], strict_slashes=False)
+@require_permission("flights.read")
 def search_flights_by_crew() -> tuple[Response, int]:
     """Search flights by crew member name or NIP, with optional date range.
 
     Query params: search (required), date_from (optional YYYY-MM-DD), date_to (optional YYYY-MM-DD).
     """
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
-    from flask_jwt_extended import get_jwt, get_jwt_identity
-
-    from app.features.auth.repository import AuthRepository
-
-    nip_identity = get_jwt_identity()
-    claims = get_jwt()
-    if isinstance(nip_identity, str) and nip_identity == "admin":
-        user_role_level = Role.SUPER_ADMIN.level
-    else:
-        try:
-            nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
-        except (ValueError, TypeError):
-            return jsonify({"error": "Invalid user identity"}), 401
-        user_role_level = claims.get("roleLevel")
-        if user_role_level is None:
-            repository = AuthRepository()
-            with Session(engine) as session:
-                current_user = repository.find_user_by_nip(session, nip)
-                if current_user is None:
-                    return jsonify({"error": "User not found"}), 404
-                user_role_level = current_user.role.level if current_user.role else current_user.role_level
-
-    if user_role_level is None or user_role_level < Role.READONLY.level:
-        return jsonify({"error": "Forbidden - READONLY level or above required"}), 403
-
     search = request.args.get("search", "")
     date_from = request.args.get("date_from") or None
     date_to = request.args.get("date_to") or None
@@ -504,11 +258,6 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
     logger.info("[flights] %s /api/flights/%s", request.method, flight_id)
 
     if request.method in ("PATCH", "PUT"):
-        # Check authentication
-        auth_error = require_authenticated()
-        if auth_error:
-            return auth_error
-
         flight_data: dict | None = request.get_json()
         if flight_data is None:
             logger.warning("[flights] PATCH/PUT %s: body is not JSON", flight_id)
@@ -532,11 +281,6 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
             return jsonify(result), 400
 
     if request.method == "DELETE":
-        # Check authentication
-        auth_error = require_authenticated()
-        if auth_error:
-            return auth_error
-
         with Session(engine, autoflush=False) as session:
             result = flight_service.delete_flight(flight_id, session)
 
@@ -552,6 +296,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
 
 @flights_bp.route("/reprocess-all-qualifications", methods=["POST"], strict_slashes=False)
+@require_role(Role.FLYERS.level)
 def reprocess_all_qualifications() -> tuple[Response, int]:
     """Reprocess all flights and update crew qualifications.
 
@@ -582,11 +327,6 @@ def reprocess_all_qualifications() -> tuple[Response, int]:
               items:
                 type: object
     """
-    # Check authentication
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
     with Session(engine, autoflush=False) as session:
         result = flight_service.reprocess_all_qualifications(session)
         return jsonify(result), 200

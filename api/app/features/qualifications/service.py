@@ -163,17 +163,24 @@ class QualificationService:
         return {"mensagem": "Qualificação apagada com sucesso."}
 
     def get_qualifications_for_tripulante_type(self, tipo: str, session: Session) -> list[dict]:
-        """Get all tripulantes of a specific type with their qualifications.
-
-        Args:
-            tipo: Tripulante type
-            session: Database session
-
-        Returns:
-            List of tripulante dictionaries with qualifications
-        """
+        """Get all tripulantes of a specific type with their qualifications."""
         tripulantes = self.repository.find_tripulantes_by_type(session, tipo)
         return [t.to_json() for t in tripulantes]
+
+    def get_qualifications_for_tripulante_type_paginated(
+        self, tipo: str, session: Session, page: int, per_page: int
+    ) -> dict:
+        """Get paginated tripulantes of a specific type with their qualifications."""
+        tripulantes, total = self.repository.find_tripulantes_by_type_paginated(session, tipo, page, per_page)
+        return {
+            "data": [t.to_json() for t in tripulantes],
+            "pagination": {
+                "page": page,
+                "per_page": per_page,
+                "total": total,
+                "pages": -(-total // per_page),
+            },
+        }
 
     def get_qualifications_for_tripulante_nip(self, nip: int, session: Session) -> dict[str, Any]:
         """Get available qualifications for a specific tripulante.
