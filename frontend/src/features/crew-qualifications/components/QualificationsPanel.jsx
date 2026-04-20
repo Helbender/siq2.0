@@ -20,7 +20,14 @@ export function QualificationsPanel(props) {
         // w={"52px"}
         px={2}
         bg={bg}
-        color={bg === "red.600" ? "white" : "text.primary"}
+        // color={"text.primary"}
+        color={
+          bg === "red.600"
+            ? "white"
+            : bg === "yellow"
+              ? "black"
+              : "text.primary"
+        }
         borderTopLeftRadius={props.borderTopLeftRadius}
         borderTopRightRadius={props.borderTopRightRadius}
         borderBottomLeftRadius={props.borderBottomLeftRadius}
