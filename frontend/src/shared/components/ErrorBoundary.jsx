@@ -36,9 +36,9 @@ export function ErrorBoundary() {
       bg="bg.canvas"
       p={4}
     >
-      <VStack spacing={6} maxW="600px" textAlign="center">
-        <VStack spacing={2}>
-          <Heading size="2xl" color="red.500">
+      <VStack gap={6} maxW="600px" textAlign="center">
+        <VStack gap={2}>
+          <Heading size="2xl" color="danger.solid">
             {errorStatus ? `${errorStatus} Error` : "Oops!"}
           </Heading>
           <Text fontSize="lg" color="text.secondary">
@@ -54,7 +54,7 @@ export function ErrorBoundary() {
           borderColor="border.subtle"
           w="100%"
         >
-          <VStack spacing={4} align="stretch">
+          <VStack gap={4} align="stretch">
             <Text fontWeight="semibold" color="text.primary">
               Error Details:
             </Text>
@@ -72,7 +72,7 @@ export function ErrorBoundary() {
           </VStack>
         </Box>
 
-        <VStack spacing={3} w="100%">
+        <VStack gap={3} w="100%">
           <Button onClick={handleGoHome} colorPalette="teal" size="lg" w="100%">
             Go to Dashboard
           </Button>

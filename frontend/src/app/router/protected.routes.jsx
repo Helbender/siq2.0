@@ -1,18 +1,54 @@
 import { AuthenticatedLayout } from "@/layout/layouts/AuthenticatedLayout";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import { RequireAuth } from "@features/auth";
+import { lazy } from "react";
 import { Navigate } from "react-router";
 
-import { AboutPage } from "@/shared/components/AboutPage";
-import { Anomalias } from "@features/aircraft_anomalies";
-import { CrewQualifications } from "@features/crew-qualifications";
-// Feature routes
-import { DashboardPage } from "@features/dashboard";
-import { DatabaseManagementPage } from "@features/db-management";
-import { FlightsByCrewSearchPage, FlightsPage } from "@features/flights";
-import { QualificationManagementPage } from "@features/qualifications";
-import { QualificationsPreviewPage } from "@features/qualifications-preview";
-import { UserManagementPage } from "@features/users";
+const DashboardPage = lazy(() =>
+  import("@features/dashboard").then((m) => ({ default: m.DashboardPage })),
+);
+const FlightsPage = lazy(() =>
+  import("@features/flights").then((m) => ({ default: m.FlightsPage })),
+);
+const FlightsByCrewSearchPage = lazy(() =>
+  import("@features/flights").then((m) => ({
+    default: m.FlightsByCrewSearchPage,
+  })),
+);
+const CrewQualifications = lazy(() =>
+  import("@features/crew-qualifications").then((m) => ({
+    default: m.CrewQualifications,
+  })),
+);
+const QualificationsPreviewPage = lazy(() =>
+  import("@features/qualifications-preview").then((m) => ({
+    default: m.QualificationsPreviewPage,
+  })),
+);
+const QualificationManagementPage = lazy(() =>
+  import("@features/qualifications").then((m) => ({
+    default: m.QualificationManagementPage,
+  })),
+);
+const UserManagementPage = lazy(() =>
+  import("@features/users").then((m) => ({ default: m.UserManagementPage })),
+);
+const DatabaseManagementPage = lazy(() =>
+  import("@features/db-management").then((m) => ({
+    default: m.DatabaseManagementPage,
+  })),
+);
+const AboutPage = lazy(() =>
+  import("@/shared/components/AboutPage").then((m) => ({
+    default: m.AboutPage,
+  })),
+);
+const Anomalias = lazy(() =>
+  import("@features/aircraft_anomalies").then((m) => ({
+    default: m.Anomalias,
+  })),
+);
+
 export const protectedRoutes = {
   element: (
     <RequireAuth>

@@ -8,7 +8,7 @@ import { toaster } from "@/shared/utils/toaster";
  * @returns {Function} sendEmail - The function to send an email.
  */
 export const useSendEmail = () => {
-  const [setLoading] = useState(true);
+  const [, setLoading] = useState(false);
 
   /**
    * Function to send an email.

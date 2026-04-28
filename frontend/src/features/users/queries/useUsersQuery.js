@@ -16,6 +16,5 @@ export function useUsersQuery() {
       const response = await http.get("/users");
       return response.data || [];
     },
-    staleTime: 0, // Always consider data stale, refetch on mount and when invalidated
   });
 }

@@ -65,7 +65,7 @@ export function FlightsByCrewSearchPage() {
         </Center>
       }
     >
-      <VStack mt={10} spacing={6} align="stretch" maxW="900px" mx="auto" px={4}>
+      <VStack mt={10} gap={6} align="stretch" maxW="900px" mx="auto" px={4}>
         <Text fontSize="xl" fontWeight="semibold">
           Pesquisar voos por tripulante
         </Text>
@@ -83,9 +83,9 @@ export function FlightsByCrewSearchPage() {
               borderRadius="md"
               border="1px solid"
               borderColor="border.subtle"
-              bg="gray.700"
-              _hover={{ borderColor: "teal.500" }}
-              _focus={{ borderColor: "teal.500", border: "1px solid" }}
+              bg="bg.canvas"
+              _hover={{ borderColor: "border.active" }}
+              _focus={{ borderColor: "border.active", border: "1px solid" }}
             />
           </Box>
           <Box>
@@ -99,9 +99,9 @@ export function FlightsByCrewSearchPage() {
               borderRadius="md"
               border="1px solid"
               borderColor="border.subtle"
-              bg="gray.700"
-              _hover={{ borderColor: "teal.500" }}
-              _focus={{ borderColor: "teal.500", border: "1px solid" }}
+              bg="bg.canvas"
+              _hover={{ borderColor: "border.active" }}
+              _focus={{ borderColor: "border.active", border: "1px solid" }}
             />
           </Box>
           <Box>
@@ -115,9 +115,9 @@ export function FlightsByCrewSearchPage() {
               borderRadius="md"
               border="1px solid"
               borderColor="border.subtle"
-              bg="gray.700"
-              _hover={{ borderColor: "teal.500" }}
-              _focus={{ borderColor: "teal.500", border: "1px solid" }}
+              bg="bg.canvas"
+              _hover={{ borderColor: "border.active" }}
+              _focus={{ borderColor: "border.active", border: "1px solid" }}
             />
           </Box>
           <Button
@@ -131,13 +131,13 @@ export function FlightsByCrewSearchPage() {
         </Flex>
 
         {validationMessage && (
-          <Text color="orange.400" fontSize="sm">
+          <Text color="warning.solid" fontSize="sm">
             {validationMessage}
           </Text>
         )}
 
         {error && (
-          <Text color="red.400" fontSize="sm">
+          <Text color="danger.solid" fontSize="sm">
             {error?.response?.data?.message ??
               error?.message ??
               "Erro ao pesquisar."}

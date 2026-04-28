@@ -599,9 +599,9 @@ export function CreateFlightModal({ flight, trigger }) {
                         append({ name: "", VIR: "", VN: "", CON: "" })
                       }
                       variant="solid"
-                      leftIcon={<FaPlus />}
                       type="button"
                     >
+                      <FaPlus />
                       Adicionar Tripulante
                     </Button>
 

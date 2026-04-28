@@ -1,5 +1,4 @@
 import { canModifyUser, getRoleName } from "@/shared/roles";
-import { useSendEmail } from "@/utils/useSendEmail";
 import { HStack, IconButton, Table } from "@chakra-ui/react";
 import { useAuth } from "@features/auth";
 import { BiTrash } from "react-icons/bi";
@@ -8,13 +7,12 @@ import { IoIosCheckmark, IoIosClose } from "react-icons/io";
 
 export function UsersTable({ users, onEdit, onDelete }) {
   const { user: currentUser } = useAuth();
-  const sendEmail = useSendEmail();
 
   const currentUserRoleLevel =
     currentUser?.roleLevel || currentUser?.role?.level;
   const currentUserNip = currentUser?.nip;
   return (
-    <Table.Root mt={4} overflowX="auto" variant="simple">
+    <Table.Root mt={4} overflowX="auto">
       <Table.Header border="none">
         <Table.Row>
           <Table.ColumnHeader>NIP</Table.ColumnHeader>
@@ -49,7 +47,7 @@ export function UsersTable({ users, onEdit, onDelete }) {
               {getRoleName(user.roleLevel || user.role?.level)}
             </Table.Cell>
             <Table.Cell>
-              <HStack spacing={2} align="center">
+              <HStack gap={2} align="center">
                 {canModifyUser(
                   currentUserRoleLevel,
                   user.roleLevel || user.role?.level,

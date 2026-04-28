@@ -327,7 +327,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                       }
                     >
                       <Flex align="center" justify="center" gap={2}>
-                        <Text fontSize="lg" isTruncated>
+                        <Text fontSize="lg" truncate>
                           {qual.nome}
                         </Text>
                         {sortBy && sortBy.qualName === qual.nome && (
@@ -376,7 +376,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                     w="100px"
                     borderRight="2px solid"
                     borderColor="border.strong"
-                    isTruncated
+                    truncate
                   >
                     {member.name?.trim() || member.name}
                   </Table.Cell>
