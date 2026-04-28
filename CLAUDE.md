@@ -8,15 +8,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Frontend**: React 19, Vite 7, React Router 7, Chakra UI v3, TanStack React Query, React Hook Form
 - **Backend**: Python 3.12+, Flask 3.1+, SQLAlchemy 2.0+, Alembic, Flask-JWT-Extended
-- **Database**: PostgreSQL (direct dev) or MySQL 5.7 (Docker Compose)
+- **Database**: PostgreSQL (Supabase in production; local Docker Compose for dev — see `database/`)
 
 ## Quick Start
 
 ```bash
-# Full stack (API :5051 + frontend :5173 + MySQL :3306)
-docker-compose up -d
+# Local database (PostgreSQL via Docker)
+cd database && docker compose up -d
 
-# Frontend only (requires api running separately)
+# Frontend only (requires API running separately)
 cd frontend && npm run dev
 
 # Backend only
@@ -73,26 +73,64 @@ Qualification validity is computed from flight history. When flights are importe
 
 Both frontend and backend are organised into the same features:
 
-| Feature | Description |
-|---------|-------------|
-| `auth` | Login, JWT refresh, password reset |
-| `flights` | Flight CRUD, Modelo 1M import/export, anomaly tracking |
-| `qualifications` | Qualification catalogue management, reprocessing |
-| `qualifications-preview` | Expiring quals dashboard (MQP/MQOBP preview) |
-| `crew-qualifications` (FE) / `users` (API) | Crew member management |
-| `dashboard` | Stats, top pilots, date-range summaries |
-| `aircraft_anomalies` | Per-aircraft anomaly aggregation |
-| `db-management` | Backup/restore, data export/import |
+| Feature | Description | API prefix |
+|---------|-------------|------------|
+| `auth` | Login, JWT refresh, password reset | `/api/auth` |
+| `flights` | Flight CRUD, Modelo 1M import/export, anomaly tracking | `/api/flights` |
+| `qualifications` | Qualification catalogue management, reprocessing | `/api/v2` |
+| `qualifications-preview` | Expiring quals dashboard (MQP/MQOBP preview) | `/api/qualifications-preview` |
+| `crew-qualifications` (FE) / `users` (API) | Crew member management | `/api/users` |
+| `dashboard` | Stats, top pilots, date-range summaries | `/api/dashboard` |
+| `aircraft_anomalies` | Per-aircraft anomaly aggregation | under `/api/flights` |
+| `db-management` | Backup/restore, data export/import | `/api/db-management` |
+
+`aircraft_anomalies` has no own blueprint — its routes live inside `flights/routes.py`. The `qualifications` blueprint registers under `/api/v2` (not `/api/qualifications`).
 
 ## RBAC (shared contract)
 
-- Permissions are **strings** (e.g., `"flights.read"`, `"flights.write"`), never roles
-- Frontend checks permissions via `<Can>` component; backend enforces via `@require_role()` / `@admin_required` decorators in `policies.py`
+Role hierarchy (numeric levels, both frontend and backend share these values):
+
+| Role | Level |
+|------|-------|
+| `SUPER_ADMIN` | 100 |
+| `UNIF` | 80 |
+| `FLYERS` | 60 |
+| `USER` | 40 |
+| `READONLY` | 20 |
+
+- Backend enforces via `@require_role(Role.UNIF.level)` / `@require_permission("flights.write")` / `@admin_required` decorators — all in `app/shared/permissions.py`
+- Frontend gate: `<Can minLevel={Role.UNIF}>...</Can>` (role-level check) from `@shared/components/Can`
+- Permission strings like `"flights.read"` are used in `@require_permission()` and stored in the DB `permissions` table; fall back to role level if not seeded
 - Feature names, permission strings, and routes must stay aligned across both sides
 
-## Google Drive Integration
+## Backend Environment Variables
 
-Optional: set `ID_PASTA_VOO` and `ID_PASTA_PDF` env vars. Flight JSON and PDF reports can be pushed to Drive. Requires OAuth credentials at `api/credentials.json`.
+```
+# api/.env
+DB_URL=postgresql+psycopg2://user:pass@host:5432/dbname   # direct dev
+# Docker Compose uses DB_HOST / DB_PORT / DB_USER / DB_PASS / DB_NAME instead of DB_URL
+JWT_KEY=<min 32 chars>
+APPLY_CORS=true
+DEV=1
+
+# Email (password reset)
+SMTP_SERVER=mail.esq502.pt
+SMTP_PORT=465          # 465=SSL, 587=TLS
+SMTP_USER=noreply@esq502.pt
+SMTP_PASSWORD=...
+
+# Google Drive (optional)
+ID_PASTA_VOO=<folder-id>
+ID_PASTA_PDF=<folder-id>
+```
+
+Google Drive requires OAuth credentials at `api/credentials.json`.
+
+## Key Implementation Notes
+
+- **Qualification reprocessing** runs inside `FlightService.reprocess_all_qualifications()` (not in `QualificationService`). It is triggered on every flight create / update / delete.
+- **Marshmallow schema fields are camelCase by design** — the API speaks camelCase JSON even though Python code is snake_case. This is intentional; do not "fix" it.
+- **Position codes** (`PILOT_USER = ["PI", "PC", "CP", "P", "PA"]`, `CREW_USER = ["OC", "OCI", ...]`) in `api/app/core/config.py` classify crew roles within a flight record.
 
 ## graphify
 
