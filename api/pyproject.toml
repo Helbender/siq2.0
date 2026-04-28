@@ -11,7 +11,6 @@ dependencies = [
     "flask-cors>=6.0.0",
     "flask-jwt-extended>=4.7.1",
     "flask-mail>=0.10.0",
-    "flask-migrate>=4.1.0",
     "google-api-python-client>=2.170.0",
     "google-auth>=2.40.2",
     "google-auth-httplib2>=0.2.0",
@@ -19,7 +18,6 @@ dependencies = [
     "gunicorn>=23.0.0",
     "marshmallow>=4.2.0",
     "psycopg2-binary>=2.9.10",
-    "pymysql>=1.1.1",
     "pypdf2>=3.0.1",
     "python-dotenv>=1.1.0",
     "reportlab>=4.4.1",
@@ -40,7 +38,7 @@ mypy_path = "."
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-exclude = ["venv", ".venv", "build", "dist", "scripts", "app/utils/email-deprecated.py"]
+exclude = ["venv", ".venv", "build", "dist", "scripts"]
 lint.select = ["E", "F", "I", "UP", "N", "B"]
 lint.ignore = [
     "E501",   # line too long

@@ -22,7 +22,6 @@ export const protectedRoutes = {
   errorElement: <ErrorBoundary />,
   children: [
     { index: true, element: <Navigate to="/dashboard" replace /> },
-    // { path: "/dashboard", element: <Page /> },
     { path: "/dashboard", element: <DashboardPage /> },
     { path: "/flights", element: <FlightsPage /> },
     { path: "/flights/search-by-crew", element: <FlightsByCrewSearchPage /> },
