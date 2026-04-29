@@ -7,14 +7,15 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
-from app.features.dashboard.policies import require_authenticated
 from app.features.dashboard.service import DashboardService
+from app.shared.permissions import require_permission
 
 dashboard_bp = Blueprint("dashboard", __name__)
 dashboard_service = DashboardService()
 
 
 @dashboard_bp.route("/statistics", methods=["GET"], strict_slashes=False)
+@require_permission("dashboard.read")
 def get_flight_statistics() -> tuple[Response, int]:
     """Get flight statistics for dashboard.
 
@@ -75,10 +76,6 @@ def get_flight_statistics() -> tuple[Response, int]:
               format: date
               description: End date of range
     """
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
     date_from_str = request.args.get("date_from")
     date_to_str = request.args.get("date_to")
 
@@ -105,6 +102,7 @@ def get_flight_statistics() -> tuple[Response, int]:
 
 
 @dashboard_bp.route("/available-years", methods=["GET"], strict_slashes=False)
+@require_permission("dashboard.read")
 def get_available_years() -> tuple[Response, int]:
     """Get list of years that have flights in the database.
 
@@ -126,10 +124,6 @@ def get_available_years() -> tuple[Response, int]:
               description: List of years with flight data
               example: [2022, 2023, 2024]
     """
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
     with Session(engine) as session:
         years = dashboard_service.get_available_years(session)
         return jsonify({"years": years}), 200

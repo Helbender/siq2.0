@@ -10,7 +10,6 @@ from app.core.config import engine
 from app.features.users.policies import (
     can_modify_user,
     get_current_user_role_level,
-    require_authenticated,
     require_can_modify_user,
 )
 from app.features.users.repository import UserRepository
@@ -21,6 +20,7 @@ from app.features.users.schemas import (
 )
 from app.features.users.service import UserService
 from app.shared.enums import Role
+from app.shared.permissions import check_permission, require_permission
 
 logger = logging.getLogger(__name__)
 users_bp = Blueprint("users", __name__)
@@ -124,7 +124,7 @@ def retrieve_user() -> tuple[Response, int]:
     """
     if request.method == "GET":
         try:
-            auth_error = require_authenticated()
+            auth_error = check_permission("users.read")
             if auth_error:
                 return auth_error
 
@@ -141,8 +141,7 @@ def retrieve_user() -> tuple[Response, int]:
             return jsonify({"message": f"Internal server error: {str(e)}"}), 500
 
     # POST - Create new user
-    # Check authentication
-    auth_error = require_authenticated()
+    auth_error = check_permission("users.write")
     if auth_error:
         return auth_error
 
@@ -251,8 +250,7 @@ def modify_user(nip: int) -> tuple[Response, int]:
             message:
               type: string
     """
-    # Check authentication
-    auth_error = require_authenticated()
+    auth_error = check_permission("users.write")
     if auth_error:
         return auth_error
 
@@ -357,8 +355,7 @@ def add_users() -> tuple[Response, int]:
             error:
               type: string
     """
-    # Check authentication
-    auth_error = require_authenticated()
+    auth_error = check_permission("users.write")
     if auth_error:
         return auth_error
 
@@ -385,6 +382,7 @@ def add_users() -> tuple[Response, int]:
 
 
 @users_bp.route("/backup", methods=["GET"], strict_slashes=False)
+@require_permission("users.write")
 def backup_users() -> tuple[Response, int]:
     """Create backup of all users and upload to Google Drive.
 

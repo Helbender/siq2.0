@@ -4,7 +4,6 @@ from flask import Blueprint, Response, jsonify, request
 from sqlalchemy.orm import Session
 
 from app.core.config import engine
-from app.features.qualifications.policies import require_authenticated
 from app.features.qualifications.schemas import (
     CheckApplicabilityRequestSchema,
     QualificationCreateSchema,
@@ -12,8 +11,7 @@ from app.features.qualifications.schemas import (
     validate_request,
 )
 from app.features.qualifications.service import QualificationService
-from app.shared.enums import Role
-from app.shared.permissions import require_role
+from app.shared.permissions import require_permission
 
 qualifications_bp = Blueprint("qualifications", __name__)
 qualification_service = QualificationService()
@@ -25,6 +23,7 @@ check_applicability_schema = CheckApplicabilityRequestSchema()
 
 
 @qualifications_bp.route("/qualificacoes", methods=["GET"])
+@require_permission("qualifications.read")
 def listar_qualificacoes() -> tuple[Response, int]:
     """List all qualifications.
 
@@ -54,18 +53,13 @@ def listar_qualificacoes() -> tuple[Response, int]:
               grupo:
                 type: string
     """
-    # Check authentication
-    auth_error = require_authenticated()
-    if auth_error:
-        return auth_error
-
     with Session(engine) as session:
         qualifications = qualification_service.get_all_qualifications(session)
         return jsonify(qualifications), 200
 
 
 @qualifications_bp.route("/qualificacoes", methods=["POST"])
-@require_role(Role.UNIF.level)
+@require_permission("qualifications.write")
 def criar_qualificacao() -> tuple[Response, int]:
     """Create a new qualification.
 
@@ -140,7 +134,7 @@ def criar_qualificacao() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualificacoes/<int:qualification_id>", methods=["PATCH", "DELETE"])
-@require_role(Role.UNIF.level)
+@require_permission("qualifications.write")
 def modify_qualification(qualification_id: int) -> tuple[Response, int]:
     """Update or delete a qualification.
 
@@ -237,7 +231,7 @@ def modify_qualification(qualification_id: int) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/tripulantes/qualificacoes/<tipo>", methods=["GET"])
-@require_role(Role.READONLY.level)
+@require_permission("qualifications.read")
 def listar_qualificacoes_tipo(tipo: str) -> tuple[Response, int]:
     """List all tripulantes of a specific type with their qualifications.
 
@@ -286,6 +280,7 @@ def listar_qualificacoes_tipo(tipo: str) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualificacoeslist/<int:nip>", methods=["GET"])
+@require_permission("qualifications.read")
 def listar_qualificacoes_tripulante(nip: int) -> tuple[Response, int]:
     """Get available qualifications for a specific tripulante.
 
@@ -337,6 +332,7 @@ def listar_qualificacoes_tripulante(nip: int) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/listas", methods=["GET"])
+@require_permission("qualifications.read")
 def listar_tipos_e_grupos() -> tuple[Response, int]:
     """Get lists of tipos and grupos.
 
@@ -365,6 +361,7 @@ def listar_tipos_e_grupos() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualification-groups", methods=["GET"])
+@require_permission("qualifications.read")
 def get_qualification_groups() -> tuple[Response, int]:
     """Get all available qualification groups.
 
@@ -386,6 +383,7 @@ def get_qualification_groups() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/crew-types", methods=["GET"])
+@require_permission("qualifications.read")
 def get_crew_types() -> tuple[Response, int]:
     """Get all available crew types.
 
@@ -407,6 +405,7 @@ def get_crew_types() -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualification-groups/<crew_type>", methods=["GET"])
+@require_permission("qualifications.read")
 def get_qualification_groups_for_crew(crew_type: str) -> tuple[Response, int]:
     """Get qualification groups applicable to a specific crew type.
 
@@ -449,6 +448,7 @@ def get_qualification_groups_for_crew(crew_type: str) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/crew-types-for-group/<group>", methods=["GET"])
+@require_permission("qualifications.read")
 def get_crew_types_for_group(group: str) -> tuple[Response, int]:
     """Get crew types that can use a specific qualification group.
 
@@ -491,6 +491,7 @@ def get_crew_types_for_group(group: str) -> tuple[Response, int]:
 
 
 @qualifications_bp.route("/qualification-groups/check", methods=["POST"])
+@require_permission("qualifications.read")
 def check_qualification_group_applicability() -> tuple[Response, int]:
     """Check if a qualification group is applicable to a crew type.
 

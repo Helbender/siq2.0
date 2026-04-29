@@ -14,13 +14,63 @@ from app.shared.enums import Role
 # Fallback role levels used when permissions are not yet seeded in the database.
 _PERMISSION_MIN_LEVEL: dict[str, int] = {
     "flights.read": Role.READONLY.level,
-    "flights.write": Role.USER.level,
+    "flights.write": Role.FLYERS.level,
     "users.read": Role.READONLY.level,
     "users.write": Role.UNIF.level,
     "qualifications.read": Role.READONLY.level,
     "qualifications.write": Role.UNIF.level,
     "dashboard.read": Role.READONLY.level,
 }
+
+
+def check_permission(permission: str) -> tuple | None:
+    """Inline permission check for multi-method routes.
+
+    Returns:
+        None if allowed, or (error_response, status_code) if not.
+    """
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        return jsonify({"error": "Authentication required"}), 401
+
+    nip_identity = get_jwt_identity()
+    claims = get_jwt()
+
+    if isinstance(nip_identity, str) and nip_identity == "admin":
+        return None
+
+    jwt_perms = claims.get("permissions")
+    if jwt_perms is not None and permission in jwt_perms:
+        return None
+
+    try:
+        nip = int(nip_identity)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid user identity"}), 403
+
+    role_level = claims.get("roleLevel")
+
+    if role_level is None or jwt_perms is not None:
+        repository = AuthRepository()
+        with Session(engine) as session:
+            current_user = repository.find_user_by_nip(session, nip)
+            if current_user is None:
+                return jsonify({"error": "User not found"}), 403
+            user_role = current_user.role
+            role_level = user_role.level if user_role else current_user.role_level
+
+            if user_role and user_role.permissions:
+                perm_names = {p.name for p in user_role.permissions}
+                if permission in perm_names:
+                    return None
+                return jsonify({"error": f"Permission required: {permission}"}), 403
+
+    min_level = _PERMISSION_MIN_LEVEL.get(permission, Role.UNIF.level)
+    if role_level is not None and role_level >= min_level:
+        return None
+
+    return jsonify({"error": f"Permission required: {permission}"}), 403
 
 
 def admin_required(f: Callable) -> Callable:

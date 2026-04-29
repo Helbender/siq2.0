@@ -13,8 +13,7 @@ from app.features.flights.schemas import (
     validate_request,
 )
 from app.features.flights.service import FlightService
-from app.shared.enums import Role
-from app.shared.permissions import require_permission, require_role
+from app.shared.permissions import require_permission
 
 logger = logging.getLogger(__name__)
 flights_bp = Blueprint("flights", __name__)
@@ -145,7 +144,7 @@ def search_flights_by_crew() -> tuple[Response, int]:
 
 
 @flights_bp.route("/<int:flight_id>", methods=["DELETE", "PATCH", "PUT"], strict_slashes=False)
-@require_role(Role.FLYERS.level)
+@require_permission("flights.write")
 def handle_flights(flight_id: int) -> tuple[Response, int]:
     """Handle DELETE, PATCH and PUT requests for a specific flight.
 
@@ -296,7 +295,7 @@ def handle_flights(flight_id: int) -> tuple[Response, int]:
 
 
 @flights_bp.route("/reprocess-all-qualifications", methods=["POST"], strict_slashes=False)
-@require_role(Role.FLYERS.level)
+@require_permission("flights.write")
 def reprocess_all_qualifications() -> tuple[Response, int]:
     """Reprocess all flights and update crew qualifications.
 
