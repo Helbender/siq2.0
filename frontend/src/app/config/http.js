@@ -8,6 +8,14 @@ export const http = axios.create({
   withCredentials: true, // REQUIRED for refresh cookies
 });
 
+// Access token lives only in module memory — never in localStorage.
+// XSS cannot exfiltrate a JS variable to another origin.
+let _token = null;
+export const getToken = () => _token;
+export const setToken = (t) => {
+  _token = t;
+};
+
 let isRefreshing = false;
 let refreshQueue = [];
 let isLoggingOut = false;
@@ -25,7 +33,7 @@ http.interceptors.request.use((config) => {
   // Do NOT attach access token when calling refresh; it should use the refresh cookie only
   const isRefreshCall = config.url && config.url.includes("/auth/refresh");
   if (!isRefreshCall) {
-    const token = localStorage.getItem("token");
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -45,8 +53,7 @@ http.interceptors.response.use(
     }
 
     // Don't try to refresh if there's no access token (user not logged in)
-    const hasToken = localStorage.getItem("token");
-    if (!hasToken) {
+    if (!getToken()) {
       return Promise.reject(error);
     }
 
@@ -54,7 +61,7 @@ http.interceptors.response.use(
     const isRefreshCall =
       originalRequest.url && originalRequest.url.includes("/auth/refresh");
     if (isRefreshCall) {
-      localStorage.removeItem("token");
+      setToken(null);
       window.dispatchEvent(new Event("auth:logout"));
       return Promise.reject(error);
     }
@@ -83,7 +90,7 @@ http.interceptors.response.use(
       const res = await http.post("/auth/refresh");
       const newToken = res.data.access_token;
 
-      localStorage.setItem("token", newToken);
+      setToken(newToken);
       processQueue(null, newToken);
 
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -96,7 +103,7 @@ http.interceptors.response.use(
         refreshError.response?.status === 422;
 
       if (isAuthError) {
-        localStorage.removeItem("token");
+        setToken(null);
         window.dispatchEvent(new Event("auth:logout"));
       }
 

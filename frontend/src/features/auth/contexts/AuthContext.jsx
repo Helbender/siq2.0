@@ -1,7 +1,7 @@
-import { http, setLoggingOut } from "@/app/config/http";
+import { http, setLoggingOut, getToken, setToken } from "@/app/config/http";
 import { isTokenExpiringSoon } from "@/utils/jwt";
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useLogin } from "../mutations/useLogin";
 import { useRegister } from "../mutations/useRegister";
 import { useUpdateAuthUser } from "../mutations/useUpdateAuthUser";
@@ -19,7 +19,26 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient();
-  const { data: user, isLoading: loading, error } = useAuthQuery();
+  const [bootstrapped, setBootstrapped] = useState(false);
+
+  // On mount: try to restore session from httpOnly refresh cookie.
+  // This replaces the need for persisting the access token in localStorage.
+  useEffect(() => {
+    if (getToken()) {
+      setBootstrapped(true);
+      return;
+    }
+    http
+      .post("/auth/refresh")
+      .then((res) => {
+        if (res.data?.access_token) setToken(res.data.access_token);
+      })
+      .catch(() => {})
+      .finally(() => setBootstrapped(true));
+  }, []);
+
+  const { data: user, isLoading: queryLoading, error } = useAuthQuery();
+  const loading = !bootstrapped || queryLoading;
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const updateUserMutation = useUpdateAuthUser();
@@ -28,13 +47,12 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (error) {
       const status = error?.response?.status;
-      // Only clear token if it's an actual auth error, not if we're logging out
       if (
         (status === 401 || status === 404 || status === 422) &&
-        localStorage.getItem("token") &&
+        getToken() &&
         !localStorage.getItem("loggingOut")
       ) {
-        localStorage.removeItem("token");
+        setToken(null);
         queryClient.setQueryData(authQueryKeys.me(), null);
       }
     }
@@ -58,43 +76,26 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const checkAndRefreshToken = async () => {
-      const token = localStorage.getItem("token");
+      const token = getToken();
 
-      // Don't refresh if logging out or no token
       if (!token || localStorage.getItem("loggingOut")) {
         return;
       }
 
-      // Check if token is expiring soon (within 2 minutes)
       if (isTokenExpiringSoon(token, 120)) {
         try {
-          console.log("[Auto-refresh] Token expiring soon, refreshing...");
-          // Use refresh token cookie (httpOnly) to get a new JWT access token
-          // The http interceptor ensures no Authorization header is sent for /auth/refresh
-          // The backend reads the refresh_token cookie and validates it
           const res = await http.post("/auth/refresh");
           const newToken = res.data.access_token;
-
-          if (newToken) {
-            localStorage.setItem("token", newToken);
-            console.log("[Auto-refresh] Token refreshed successfully");
-          }
+          if (newToken) setToken(newToken);
         } catch (error) {
-          console.error("[Auto-refresh] Failed to refresh token:", error);
-          // If refresh fails with 401 (invalid signature, expired, etc.), stop auto-refresh
           if (error.response?.status === 401) {
-            console.log(
-              "[Auto-refresh] Refresh token invalid, stopping auto-refresh",
-            );
-            localStorage.removeItem("token");
+            setToken(null);
             queryClient.setQueryData(authQueryKeys.me(), null);
-            // Clear the interval to stop retrying
             if (refreshIntervalRef.current) {
               clearInterval(refreshIntervalRef.current);
               refreshIntervalRef.current = null;
             }
           }
-          // The http interceptor will also handle logout for other cases
         }
       }
     };
@@ -148,10 +149,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    // Set flag to prevent refresh attempts
     setLoggingOut(true);
     localStorage.setItem("loggingOut", "true");
-    localStorage.removeItem("token");
+    setToken(null);
     // Clear query cache
     queryClient.setQueryData(authQueryKeys.me(), null);
     queryClient.removeQueries({ queryKey: authQueryKeys.all });

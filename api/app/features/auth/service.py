@@ -9,7 +9,6 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.orm import Session
 
 from app.features.auth.repository import AuthRepository
-from app.shared.enums import Role
 from app.utils.email import hash_code, send_email
 
 
@@ -33,7 +32,7 @@ class AuthService:
         """Authenticate a user and return tokens.
 
         Args:
-            nip: User NIP (can be string or int, "admin" for admin login)
+            nip: User NIP (numeric)
             password: User password
             session: Database session
 
@@ -43,26 +42,12 @@ class AuthService:
         Raises:
             AuthError: If credentials are invalid or user not found
         """
-        # Handle admin login
-        if nip == "admin" and password == "admin":
-            tripulante = self.repository.find_first_user(session)
-            if tripulante is None:
-                access_token = create_access_token(
-                    identity="admin",
-                    additional_claims={
-                        "name": "ADMIN",
-                        "roleLevel": Role.SUPER_ADMIN.level,
-                    },
-                )
-                refresh_token = create_refresh_token(identity="admin")
-                return {
-                    "access_token": access_token,
-                    "refresh_token": refresh_token,
-                }
-            raise AuthError("Can not login as admin. Db already populated", 403)
+        try:
+            nip_int = int(nip)
+        except (ValueError, TypeError) as err:
+            raise AuthError(f"Invalid NIP: {nip}", 400) from err
 
-        # Handle regular user login
-        tripulante = self.repository.find_user_by_nip(session, int(nip))
+        tripulante = self.repository.find_user_by_nip(session, nip_int)
 
         if tripulante is None:
             raise AuthError(f"No user with the NIP {nip}", 404)
@@ -70,7 +55,7 @@ class AuthService:
         if hash_code(password) != tripulante.password:
             raise AuthError("Wrong password", 401)
 
-        nip_str = str(nip)
+        nip_str = str(nip_int)
         role_level = tripulante.role.level if tripulante.role else tripulante.role_level
         permissions = [p.name for p in tripulante.role.permissions] if tripulante.role else []
         access_token = create_access_token(
@@ -100,16 +85,10 @@ class AuthService:
         Raises:
             AuthError: If user not found
         """
-        if str(nip) == "admin":
-            return create_access_token(
-                identity="admin",
-                additional_claims={
-                    "name": "ADMIN",
-                    "roleLevel": Role.SUPER_ADMIN.level,
-                },
-            )
-
-        nip_int = int(nip)
+        try:
+            nip_int = int(nip)
+        except (ValueError, TypeError) as err:
+            raise AuthError(f"Invalid NIP: {nip}", 400) from err
         tripulante = self.repository.find_user_by_nip(session, nip_int)
 
         if tripulante is None:
@@ -139,17 +118,6 @@ class AuthService:
         Raises:
             AuthError: If identity is invalid or user not found
         """
-        if isinstance(nip_identity, str) and nip_identity == "admin":
-            return {
-                "nip": "admin",
-                "name": "ADMIN",
-                "roleLevel": Role.SUPER_ADMIN.level,
-                "role": {
-                    "name": Role.SUPER_ADMIN.name,
-                    "level": Role.SUPER_ADMIN.level,
-                },
-            }
-
         try:
             nip = int(nip_identity)
         except (ValueError, TypeError) as err:

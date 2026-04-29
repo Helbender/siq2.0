@@ -46,12 +46,10 @@ def list_flights() -> tuple[Response, int]:
     try:
         page_str = request.args.get("page")
         per_page_str = request.args.get("per_page")
+        page = max(1, int(page_str or 1))
+        per_page = min(500, max(1, int(per_page_str or 100)))
         with Session(engine) as session:
-            if page_str is not None or per_page_str is not None:
-                page = max(1, int(page_str or 1))
-                per_page = min(500, max(1, int(per_page_str or 50)))
-                return jsonify(flight_service.get_all_flights_paginated(session, page, per_page)), 200
-            return jsonify(flight_service.get_all_flights(session)), 200
+            return jsonify(flight_service.get_all_flights_paginated(session, page, per_page)), 200
     except Exception as e:
         logger.exception("[flights] GET / error: %s", e)
         return jsonify({"message": f"Internal server error: {str(e)}"}), 500

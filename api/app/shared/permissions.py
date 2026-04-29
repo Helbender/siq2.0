@@ -20,6 +20,7 @@ _PERMISSION_MIN_LEVEL: dict[str, int] = {
     "qualifications.read": Role.READONLY.level,
     "qualifications.write": Role.UNIF.level,
     "dashboard.read": Role.READONLY.level,
+    "db.backup": Role.SUPER_ADMIN.level,
 }
 
 
@@ -36,9 +37,6 @@ def check_permission(permission: str) -> tuple | None:
 
     nip_identity = get_jwt_identity()
     claims = get_jwt()
-
-    if isinstance(nip_identity, str) and nip_identity == "admin":
-        return None
 
     jwt_perms = claims.get("permissions")
     if jwt_perms is not None and permission in jwt_perms:
@@ -89,18 +87,12 @@ def admin_required(f: Callable) -> Callable:
         nip_identity = get_jwt_identity()
         claims = get_jwt()
 
-        # Handle admin case
-        if isinstance(nip_identity, str) and nip_identity == "admin":
-            # Admin identity has SUPER_ADMIN level, so allow access
-            return f(*args, **kwargs)
-
         # Try to get role level from JWT claims first (faster)
         user_role_level = claims.get("roleLevel")
 
-        # If not in claims, get from database
         if user_role_level is None:
             try:
-                nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+                nip = int(nip_identity)
             except (ValueError, TypeError):
                 return jsonify({"message": "Admin access required"}), 403
 
@@ -142,20 +134,12 @@ def require_role(min_level: int):
             nip_identity = get_jwt_identity()
             claims = get_jwt()
 
-            # Handle admin case
-            if isinstance(nip_identity, str) and nip_identity == "admin":
-                admin_level = Role.SUPER_ADMIN.level
-                if admin_level < min_level:
-                    return jsonify({"error": "Forbidden"}), 403
-                return fn(*args, **kwargs)
-
             # Try to get role level from JWT claims first (faster)
             user_role_level = claims.get("roleLevel")
 
-            # If not in claims, get from database
             if user_role_level is None:
                 try:
-                    nip = int(nip_identity) if isinstance(nip_identity, str) else int(nip_identity)
+                    nip = int(nip_identity)
                 except (ValueError, TypeError):
                     return jsonify({"error": "Invalid user identity"}), 403
 
@@ -199,16 +183,12 @@ def require_permission(permission: str) -> Callable:
             nip_identity = get_jwt_identity()
             claims = get_jwt()
 
-            if isinstance(nip_identity, str) and nip_identity == "admin":
-                return fn(*args, **kwargs)
-
             jwt_perms = claims.get("permissions")
 
             # Fast path: permission present in JWT
             if jwt_perms is not None and permission in jwt_perms:
                 return fn(*args, **kwargs)
 
-            # Resolve role level for fallback
             try:
                 nip = int(nip_identity)
             except (ValueError, TypeError):

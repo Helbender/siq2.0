@@ -1,4 +1,4 @@
-import { http } from "@/app/config/http";
+import { http, getToken } from "@/app/config/http";
 import { useQuery } from "@tanstack/react-query";
 
 export const authQueryKeys = {
@@ -13,7 +13,7 @@ export function useAuthQuery() {
       const response = await http.get("/auth/me");
       return response.data;
     },
-    enabled: !!localStorage.getItem("token"),
+    enabled: !!getToken(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
       // Don't retry on 401/404/422 errors (auth failures)

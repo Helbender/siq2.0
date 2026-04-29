@@ -578,91 +578,77 @@ class DatabaseManagementService:
         qual_repository = QualificationRepository()
         created_count = 0
         updated_count = 0
-        error_count = 0
-        errors = []
+        validation_errors: list[str] = []
 
+        # Validate all records first — before touching the DB.
+        records_to_process = []
         for qual_data in qualifications_data:
+            name = qual_data.get("nome", "unknown")
+            if not all(k in qual_data for k in ("nome", "grupo", "validade", "tipo_aplicavel")):
+                validation_errors.append(f"Missing required fields: {name}")
+                continue
             try:
-                # Validate required fields
-                if (
-                    "nome" not in qual_data
-                    or "grupo" not in qual_data
-                    or "validade" not in qual_data
-                    or "tipo_aplicavel" not in qual_data
-                ):
-                    error_count += 1
-                    errors.append(f"Missing required fields for qualification: {qual_data.get('nome', 'unknown')}")
-                    continue
+                grupo_enum = GrupoQualificacoes(qual_data["grupo"])
+                tipo_enum = TipoTripulante(qual_data["tipo_aplicavel"])
+            except ValueError as e:
+                validation_errors.append(f"Invalid enum value for {name}: {e}")
+                continue
+            records_to_process.append((qual_data, grupo_enum, tipo_enum))
 
-                # Convert enum values
-                try:
-                    grupo_enum = GrupoQualificacoes(qual_data["grupo"])
-                    tipo_enum = TipoTripulante(qual_data["tipo_aplicavel"])
-                except ValueError as e:
-                    error_count += 1
-                    errors.append(f"Invalid enum value for {qual_data.get('nome', 'unknown')}: {str(e)}")
-                    continue
+        if validation_errors:
+            return {
+                "message": "Import aborted: validation errors",
+                "created": 0,
+                "updated": 0,
+                "errors": len(validation_errors),
+                "error_details": validation_errors[:10],
+            }
 
-                # Check if qualification exists (prioritize ID if provided)
-                qualification = None
+        # Apply all changes in a single transaction — all-or-nothing.
+        try:
+            for qual_data, grupo_enum, tipo_enum in records_to_process:
                 backup_id = qual_data.get("id")
+                qualification = qual_repository.find_by_id(session, backup_id) if backup_id is not None else None
 
-                if backup_id is not None:
-                    # First, try to find by ID (respect ID from backup)
-                    qualification = qual_repository.find_by_id(session, backup_id)
-
-                    if qualification:
-                        # Update existing qualification found by ID
-                        qualification.nome = qual_data["nome"]
-                        qualification.grupo = grupo_enum
-                        qualification.validade = qual_data["validade"]
-                        qualification.tipo_aplicavel = tipo_enum
-                        qual_repository.update(session, qualification)
-                        updated_count += 1
-                    else:
-                        # ID provided but doesn't exist - create new with that ID
-                        new_qual = Qualificacao(
-                            id=backup_id,
-                            nome=qual_data["nome"],
-                            grupo=grupo_enum,
-                            validade=qual_data["validade"],
-                            tipo_aplicavel=tipo_enum,
-                        )
-                        qual_repository.create(session, new_qual)
-                        created_count += 1
-                else:
-                    # No ID provided - fall back to name-based matching
+                if qualification is None and backup_id is None:
                     all_quals = qual_repository.find_all(session)
                     qualification = next((q for q in all_quals if q.nome == qual_data["nome"]), None)
 
-                    if qualification:
-                        # Update existing qualification found by name
-                        qualification.nome = qual_data["nome"]
-                        qualification.grupo = grupo_enum
-                        qualification.validade = qual_data["validade"]
-                        qualification.tipo_aplicavel = tipo_enum
-                        qual_repository.update(session, qualification)
-                        updated_count += 1
-                    else:
-                        # Create new qualification without ID (auto-generated)
-                        new_qual = Qualificacao(
-                            nome=qual_data["nome"],
-                            grupo=grupo_enum,
-                            validade=qual_data["validade"],
-                            tipo_aplicavel=tipo_enum,
-                        )
-                        qual_repository.create(session, new_qual)
-                        created_count += 1
+                if qualification is not None:
+                    qualification.nome = qual_data["nome"]
+                    qualification.grupo = grupo_enum
+                    qualification.validade = qual_data["validade"]
+                    qualification.tipo_aplicavel = tipo_enum
+                    session.flush()
+                    updated_count += 1
+                else:
+                    new_qual = Qualificacao(
+                        **({"id": backup_id} if backup_id is not None else {}),
+                        nome=qual_data["nome"],
+                        grupo=grupo_enum,
+                        validade=qual_data["validade"],
+                        tipo_aplicavel=tipo_enum,
+                    )
+                    session.add(new_qual)
+                    session.flush()
+                    created_count += 1
 
-            except Exception as e:
-                error_count += 1
-                errors.append(f"Error processing qualification {qual_data.get('nome', 'unknown')}: {str(e)}")
-                traceback.print_exc()
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            print(f"[db_management] import_qualifications rolled back: {e}")
+            return {
+                "message": "Import failed and was rolled back",
+                "created": 0,
+                "updated": 0,
+                "errors": 1,
+                "error_details": ["Database error — no changes were applied"],
+            }
 
         return {
-            "message": f"Import completed: {created_count} created, {updated_count} updated, {error_count} errors",
+            "message": f"Import completed: {created_count} created, {updated_count} updated",
             "created": created_count,
             "updated": updated_count,
-            "errors": error_count,
-            "error_details": errors[:10],  # Limit error details to first 10
+            "errors": 0,
+            "error_details": [],
         }

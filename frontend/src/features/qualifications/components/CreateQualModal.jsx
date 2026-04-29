@@ -23,6 +23,8 @@ export function CreateQualModal({ edit, qualification }) {
 
   const createQualification = useCreateQualification();
   const updateQualification = useUpdateQualification();
+  const isPending =
+    createQualification.isPending || updateQualification.isPending;
 
   const { data: tipos = [], isLoading: isLoadingTipos } = useTiposQuery();
 
@@ -45,6 +47,7 @@ export function CreateQualModal({ edit, qualification }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isPending) return;
     const formData = qualificacao.getValues();
     const promise = edit
       ? updateQualification.mutateAsync({
@@ -250,8 +253,17 @@ export function CreateQualModal({ edit, qualification }) {
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button colorPalette="success" mr={3} onClick={handleSubmit}>
-                  {edit ? "Guardar Alterações" : "Salvar"}
+                <Button
+                  colorPalette="success"
+                  mr={3}
+                  onClick={handleSubmit}
+                  disabled={isPending}
+                >
+                  {isPending
+                    ? "A guardar…"
+                    : edit
+                      ? "Guardar Alterações"
+                      : "Salvar"}
                 </Button>
                 <Dialog.ActionTrigger asChild>
                   <Button variant="subtle">Cancelar</Button>

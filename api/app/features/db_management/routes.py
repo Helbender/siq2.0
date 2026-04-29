@@ -403,17 +403,25 @@ def import_qualifications() -> tuple[Response, int]:
         if file.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
-        # Read and parse JSON file
+        if not file.filename.lower().endswith(".json"):
+            return jsonify({"error": "Only .json files are accepted"}), 400
+
+        if request.content_length and request.content_length > 10 * 1024 * 1024:
+            return jsonify({"error": "File too large (max 10 MB)"}), 413
+
         try:
             file_content = file.read()
             qualifications_data = json.loads(file_content.decode("utf-8"))
         except json.JSONDecodeError as e:
             return jsonify({"error": f"Invalid JSON file: {str(e)}"}), 400
-        except Exception as e:
-            return jsonify({"error": f"Error reading file: {str(e)}"}), 400
+        except Exception:
+            return jsonify({"error": "Error reading file"}), 400
 
         if not isinstance(qualifications_data, list):
             return jsonify({"error": "JSON file must contain an array of qualifications"}), 400
+
+        if len(qualifications_data) > 5000:
+            return jsonify({"error": "Import exceeds maximum of 5000 records per request"}), 400
 
         with Session(engine) as session:
             result = db_management_service.import_qualifications(qualifications_data, session)
@@ -421,5 +429,4 @@ def import_qualifications() -> tuple[Response, int]:
 
     except Exception as e:
         print(f"Error in POST /db-management/import/qualifications: {e}")
-        traceback.print_exc()
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+        return jsonify({"error": "Internal server error"}), 500

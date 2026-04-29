@@ -3,7 +3,7 @@ import { http } from "@/app/config/http";
 export const flightsService = {
   getAll: async () => {
     const { data } = await http.get("/flights");
-    return data ?? [];
+    return data?.data ?? [];
   },
 
   create: async (payload) => {

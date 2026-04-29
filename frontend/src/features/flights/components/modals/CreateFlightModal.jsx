@@ -136,6 +136,19 @@ export function CreateFlightModal({ flight, trigger }) {
   const onSubmit = async (data) => {
     const anomalyOption = data.anomalyOption ?? "";
     const anomalyNewText = (data.anomalyNewText ?? "").trim().slice(0, 50);
+
+    if (
+      anomalyOption === "__NEW__" &&
+      anomalyNewText.length > 0 &&
+      anomalyNewText.length < 3
+    ) {
+      toaster.create({
+        type: "error",
+        title: "Descrição de anomalia demasiado curta (mínimo 3 caracteres)",
+      });
+      return;
+    }
+
     const anomalies =
       anomalyOption === "__NEW__"
         ? anomalyNewText

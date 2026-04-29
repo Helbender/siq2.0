@@ -382,7 +382,7 @@ def add_users() -> tuple[Response, int]:
 
 
 @users_bp.route("/backup", methods=["GET"], strict_slashes=False)
-@require_permission("users.write")
+@require_permission("db.backup")
 def backup_users() -> tuple[Response, int]:
     """Create backup of all users and upload to Google Drive.
 

@@ -138,6 +138,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             <NativeSelect.Field
               placeholder=" "
               type="text"
+              aria-label={`Posição do tripulante ${index + 1}`}
               {...register(`flight_pilots.${index}.position`)}
               textAlign={"center"}
               alignSelf={"center"}
@@ -167,6 +168,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
               textAlign={"center"}
               type="text"
               placeholder="Selecione"
+              aria-label={`Nome do tripulante ${index + 1}`}
               disabled={!(position || member.position)}
               {...register(`flight_pilots.${index}.name`)}
             >
@@ -188,6 +190,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
             textAlign={"center"}
             readOnly
             variant="readOnly"
+            aria-label={`NIP do tripulante ${index + 1}`}
             {...register(`flight_pilots.${index}.nip`)}
           ></Input>
         </Field.Root>
@@ -211,6 +214,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                       ["VIR", "VN", "CON"].includes(campo) ? "time" : "number"
                     }
                     textAlign={"center"}
+                    aria-label={`${campo} do tripulante ${index + 1}`}
                     {...register(`flight_pilots.${index}.${campo}`)}
                   />
                 </Field.Root>
@@ -254,6 +258,7 @@ export const PilotInput = React.memo(({ index, pilotos, member, remove }) => {
                       <NativeSelect.Field
                         {...field}
                         placeholder=" "
+                        aria-label={`Qualificação ${n} do tripulante ${index + 1}`}
                         value={currentVal || ""}
                         onChange={(event) =>
                           field.onChange(event.target.value || "")

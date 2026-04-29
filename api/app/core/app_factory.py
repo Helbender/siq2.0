@@ -24,6 +24,8 @@ def create_app() -> Flask:
     """
     app = Flask(__name__)
 
+    app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB upload limit
+
     # Setup JWT
     setup_jwt(app)
 

@@ -2,6 +2,7 @@ import { formatDateISO, formatHours } from "@/shared/utils/timeCalc";
 import { useSunTimes } from "@/shared/utils/useSunTimes";
 import {
   Box,
+  Button,
   Card,
   Flex,
   Heading,
@@ -10,6 +11,7 @@ import {
   Skeleton,
   Text,
 } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { DateRangeSelector } from "../components/DateRangeSelector";
 import { PieChartCard } from "../components/PieChartCard";
@@ -124,6 +126,7 @@ function LoadingSkeleton() {
 }
 
 export function DashboardPage() {
+  const queryClient = useQueryClient();
   const [pendingRange, setPendingRange] = useState(getDefaultDateRange);
   const [appliedRange, setAppliedRange] = useState(getDefaultDateRange);
   const { dateFrom: appliedFrom, dateTo: appliedTo } = appliedRange;
@@ -138,6 +141,7 @@ export function DashboardPage() {
     totalCargo,
     topPilotsByType,
     loading: loadingStats,
+    error: statsError,
   } = useDashboardStats(appliedFrom, appliedTo);
 
   const handleApplyRange = () => {
@@ -153,6 +157,24 @@ export function DashboardPage() {
     sunset: sunsetT,
     error: errorT,
   } = useSunTimes(tomorrowStr);
+
+  if (statsError) {
+    return (
+      <Box p={6} textAlign="center">
+        <Text color="red.500" mb={3}>
+          Erro ao carregar estatísticas do dashboard.
+        </Text>
+        <Button
+          size="sm"
+          onClick={() =>
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+          }
+        >
+          Tentar novamente
+        </Button>
+      </Box>
+    );
+  }
 
   if (loadingStats) {
     return <LoadingSkeleton />;
