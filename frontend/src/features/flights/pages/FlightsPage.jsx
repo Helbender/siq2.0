@@ -1,7 +1,7 @@
 import { Can } from "@/shared/components/Can";
 import { StyledText } from "@/shared/components/StyledText";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 import { Role } from "@/shared/roles";
-import { formatDate } from "@/shared/utils/timeCalc";
 import {
   Box,
   Center,
@@ -12,7 +12,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { List } from "react-window";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/modals/CreateFlightModal";
@@ -35,27 +35,13 @@ function Row({ index, style, flights }) {
 }
 
 export function FlightsPage() {
-  const { data: flights = [], isLoading } = useFlights();
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+  const { data: flights = [], isLoading } = useFlights({
+    q: debouncedSearch || undefined,
+  });
   const [listHeight, setListHeight] = useState(600);
   const containerRef = useRef(null);
-
-  const filteredFlights = useMemo(() => {
-    const lowerSearch = search.toLowerCase();
-    return flights.filter((flight) =>
-      [
-        flight.airtask,
-        flight.flightType,
-        flight.flightAction,
-        formatDate(flight.date),
-        flight.tailNumber,
-        flight.id,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(lowerSearch),
-    );
-  }, [flights, search]);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -96,7 +82,7 @@ export function FlightsPage() {
     >
       <VStack mt={10}>
         <Flex w="80%" maxW="1000px" align="center">
-          <StyledText query="Voos:" text={`Voos: ${filteredFlights.length}`} />
+          <StyledText query="Voos:" text={`Voos: ${flights.length}`} />
           <Spacer />
           <Can minLevel={Role.FLYERS}>
             <CreateFlightModal />
@@ -113,13 +99,13 @@ export function FlightsPage() {
         </Flex>
 
         <Box ref={containerRef} w="80%" h="calc(100vh - 200px)">
-          {filteredFlights.length > 0 && listHeight > 0 && (
+          {flights.length > 0 && listHeight > 0 && (
             <List
               height={listHeight}
-              rowCount={filteredFlights.length}
+              rowCount={flights.length}
               rowHeight={650}
               rowComponent={Row}
-              rowProps={{ flights: filteredFlights }}
+              rowProps={{ flights }}
               style={{ width: "100%", height: "100%" }}
             />
           )}

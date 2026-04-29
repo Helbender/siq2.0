@@ -48,8 +48,17 @@ def list_flights() -> tuple[Response, int]:
         per_page_str = request.args.get("per_page")
         page = max(1, int(page_str or 1))
         per_page = min(500, max(1, int(per_page_str or 100)))
+        q = request.args.get("q") or None
+        date_from = request.args.get("date_from") or None
+        date_to = request.args.get("date_to") or None
         with Session(engine) as session:
-            return jsonify(flight_service.get_all_flights_paginated(session, page, per_page)), 200
+            return jsonify(
+                flight_service.get_all_flights_paginated(
+                    session, page, per_page, q=q, date_from=date_from, date_to=date_to
+                )
+            ), 200
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
     except Exception as e:
         logger.exception("[flights] GET / error: %s", e)
         return jsonify({"message": f"Internal server error: {str(e)}"}), 500

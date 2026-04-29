@@ -72,11 +72,33 @@ class FlightService:
         flights_obj = self.repository.find_all_with_pilots(session)
         return [row.to_json(qual_cache) for row in flights_obj]
 
-    def get_all_flights_paginated(self, session: Session, page: int, per_page: int) -> dict:
-        """Get paginated flights with qualification cache."""
+    def get_all_flights_paginated(
+        self,
+        session: Session,
+        page: int,
+        per_page: int,
+        q: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> dict:
+        """Get paginated flights with qualification cache and optional filters."""
+        parsed_date_from: date | None = None
+        parsed_date_to: date | None = None
+        if date_from:
+            try:
+                parsed_date_from = datetime.strptime(date_from.strip(), "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date_from format; use YYYY-MM-DD") from None
+        if date_to:
+            try:
+                parsed_date_to = datetime.strptime(date_to.strip(), "%Y-%m-%d").date()
+            except ValueError:
+                raise ValueError("Invalid date_to format; use YYYY-MM-DD") from None
         all_qualifications = self.repository.find_all_qualifications(session)
-        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
-        flights_obj, total = self.repository.find_all_with_pilots_paginated(session, page, per_page)
+        qual_cache: dict[int, str] = {q_obj.id: q_obj.nome for q_obj in all_qualifications}
+        flights_obj, total = self.repository.find_all_with_pilots_paginated_filtered(
+            session, page, per_page, q=q, date_from=parsed_date_from, date_to=parsed_date_to
+        )
         return {
             "data": [row.to_json(qual_cache) for row in flights_obj],
             "pagination": {
