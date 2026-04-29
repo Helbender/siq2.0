@@ -1,14 +1,24 @@
 import { http } from "@/app/config/http";
 
 export const flightsService = {
-  getAll: async ({ q, dateFrom, dateTo } = {}) => {
+  getAll: async ({
+    airtask,
+    tailNumber,
+    action,
+    atd,
+    dateFrom,
+    dateTo,
+  } = {}) => {
     const params = new URLSearchParams();
-    if (q) {
-      params.set("q", q.trim());
-      params.set("per_page", "500");
-    }
+    if (airtask) params.set("airtask", airtask.trim());
+    if (tailNumber) params.set("tail_number", tailNumber.trim());
+    if (action) params.set("action", action.trim());
+    if (atd) params.set("atd", atd.trim());
     if (dateFrom) params.set("date_from", dateFrom);
     if (dateTo) params.set("date_to", dateTo);
+    const hasFilter =
+      airtask || tailNumber || action || atd || dateFrom || dateTo;
+    if (hasFilter) params.set("per_page", "500");
     const qs = params.toString();
     const { data } = await http.get(qs ? `/flights?${qs}` : "/flights");
     return data?.data ?? [];

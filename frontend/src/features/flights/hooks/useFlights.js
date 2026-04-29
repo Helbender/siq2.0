@@ -1,10 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
 import { flightsService } from "../services/flights.service";
 
-export function useFlights({ q, dateFrom, dateTo } = {}) {
+export function useFlights({
+  airtask,
+  tailNumber,
+  action,
+  atd,
+  dateFrom,
+  dateTo,
+} = {}) {
   return useQuery({
-    queryKey: ["flights", q ?? "", dateFrom ?? "", dateTo ?? ""],
-    queryFn: () => flightsService.getAll({ q, dateFrom, dateTo }),
+    queryKey: [
+      "flights",
+      airtask ?? "",
+      tailNumber ?? "",
+      action ?? "",
+      atd ?? "",
+      dateFrom ?? "",
+      dateTo ?? "",
+    ],
+    queryFn: () =>
+      flightsService.getAll({
+        airtask,
+        tailNumber,
+        action,
+        atd,
+        dateFrom,
+        dateTo,
+      }),
     staleTime: 1000 * 60,
   });
 }

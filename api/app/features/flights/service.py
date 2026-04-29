@@ -77,11 +77,20 @@ class FlightService:
         session: Session,
         page: int,
         per_page: int,
-        q: str | None = None,
+        airtask: str | None = None,
+        tail_number: str | None = None,
+        action: str | None = None,
+        atd: str | None = None,
         date_from: str | None = None,
         date_to: str | None = None,
     ) -> dict:
-        """Get paginated flights with qualification cache and optional filters."""
+        """Get paginated flights with qualification cache and optional per-field filters."""
+        parsed_tail: int | None = None
+        if tail_number:
+            try:
+                parsed_tail = int(tail_number.strip())
+            except ValueError:
+                raise ValueError("tail_number must be an integer") from None
         parsed_date_from: date | None = None
         parsed_date_to: date | None = None
         if date_from:
@@ -95,9 +104,17 @@ class FlightService:
             except ValueError:
                 raise ValueError("Invalid date_to format; use YYYY-MM-DD") from None
         all_qualifications = self.repository.find_all_qualifications(session)
-        qual_cache: dict[int, str] = {q_obj.id: q_obj.nome for q_obj in all_qualifications}
+        qual_cache: dict[int, str] = {q.id: q.nome for q in all_qualifications}
         flights_obj, total = self.repository.find_all_with_pilots_paginated_filtered(
-            session, page, per_page, q=q, date_from=parsed_date_from, date_to=parsed_date_to
+            session,
+            page,
+            per_page,
+            airtask=airtask,
+            tail_number=parsed_tail,
+            action=action,
+            atd=atd,
+            date_from=parsed_date_from,
+            date_to=parsed_date_to,
         )
         return {
             "data": [row.to_json(qual_cache) for row in flights_obj],

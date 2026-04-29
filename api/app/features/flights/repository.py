@@ -3,24 +3,13 @@
 from datetime import date
 from typing import Any
 
-from sqlalchemy import String, cast, delete, func, or_, select, union_all
+from sqlalchemy import delete, func, or_, select, union_all
 from sqlalchemy.orm import Session, joinedload
 
 from app.features.flights.models import Flight, FlightAnomaly, FlightPilots  # type: ignore
 from app.features.qualifications.models import Qualificacao  # type: ignore
 from app.features.users.models import Tripulante, TripulanteQualificacao  # type: ignore
 from app.shared.models import year_init  # type: ignore
-
-
-def _build_q_condition(q: str):
-    """Build flight-level search condition across airtask, type, action, and tail number."""
-    term = f"%{q.strip()}%"
-    return or_(
-        Flight.airtask.ilike(term),
-        Flight.flight_type.ilike(term),
-        Flight.flight_action.ilike(term),
-        cast(Flight.tailnumber, String).ilike(term),
-    )
 
 
 def _crew_search_condition(search: str):
@@ -67,11 +56,14 @@ class FlightRepository:
         session: Session,
         page: int,
         per_page: int,
-        q: str | None = None,
+        airtask: str | None = None,
+        tail_number: int | None = None,
+        action: str | None = None,
+        atd: str | None = None,
         date_from: date | None = None,
         date_to: date | None = None,
     ) -> tuple[list[Flight], int]:
-        """Get paginated flights with optional text and date-range filters."""
+        """Get paginated flights with optional per-field filters."""
         count_stmt = select(func.count(Flight.fid))
         list_stmt = (
             select(Flight)
@@ -81,16 +73,22 @@ class FlightRepository:
                 joinedload(Flight.flight_anomalies),
             )
         )
-        if q:
-            cond = _build_q_condition(q)
+        conditions = []
+        if airtask:
+            conditions.append(Flight.airtask.ilike(f"%{airtask.strip()}%"))
+        if tail_number is not None:
+            conditions.append(Flight.tailnumber == tail_number)
+        if action:
+            conditions.append(Flight.flight_action.ilike(f"%{action.strip()}%"))
+        if atd:
+            conditions.append(Flight.departure_time.ilike(f"%{atd.strip()}%"))
+        if date_from is not None:
+            conditions.append(Flight.date >= date_from)
+        if date_to is not None:
+            conditions.append(Flight.date <= date_to)
+        for cond in conditions:
             count_stmt = count_stmt.where(cond)
             list_stmt = list_stmt.where(cond)
-        if date_from is not None:
-            count_stmt = count_stmt.where(Flight.date >= date_from)
-            list_stmt = list_stmt.where(Flight.date >= date_from)
-        if date_to is not None:
-            count_stmt = count_stmt.where(Flight.date <= date_to)
-            list_stmt = list_stmt.where(Flight.date <= date_to)
         total = session.execute(count_stmt).scalar_one()
         list_stmt = list_stmt.limit(per_page).offset((page - 1) * per_page)
         return list(session.execute(list_stmt).unique().scalars().all()), total

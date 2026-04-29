@@ -1,11 +1,16 @@
 import { Can } from "@/shared/components/Can";
 import { StyledText } from "@/shared/components/StyledText";
-import { useDebounce } from "@/shared/hooks/useDebounce";
 import { Role } from "@/shared/roles";
 import {
   Box,
+  Button,
   Center,
+  CollapsibleContent,
+  CollapsibleRoot,
+  CollapsibleTrigger,
   Flex,
+  Grid,
+  HStack,
   Input,
   Spacer,
   Spinner,
@@ -17,6 +22,16 @@ import { List } from "react-window";
 import { FlightCard } from "../components/FlightCard";
 import { CreateFlightModal } from "../components/modals/CreateFlightModal";
 import { useFlights } from "../hooks/useFlights";
+
+const EMPTY_FORM = {
+  airtask: "",
+  tailNumber: "",
+  action: "",
+  atd: "",
+  dateFrom: "",
+  dateTo: "",
+};
+
 function Row({ index, style, flights }) {
   const flight = flights[index];
   if (!flight) return null;
@@ -35,11 +50,9 @@ function Row({ index, style, flights }) {
 }
 
 export function FlightsPage() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 400);
-  const { data: flights = [], isLoading } = useFlights({
-    q: debouncedSearch || undefined,
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [params, setParams] = useState({});
+  const { data: flights = [], isLoading } = useFlights(params);
   const [listHeight, setListHeight] = useState(600);
   const containerRef = useRef(null);
 
@@ -51,11 +64,31 @@ export function FlightsPage() {
         setListHeight(window.innerHeight - 200);
       }
     };
-
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
+
+  const set = (field) => (e) =>
+    setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  const handleSearch = () => {
+    setParams({
+      airtask: form.airtask.trim() || undefined,
+      tailNumber: form.tailNumber.trim() || undefined,
+      action: form.action.trim() || undefined,
+      atd: form.atd.trim() || undefined,
+      dateFrom: form.dateFrom || undefined,
+      dateTo: form.dateTo || undefined,
+    });
+  };
+
+  const handleClear = () => {
+    setForm(EMPTY_FORM);
+    setParams({});
+  };
+
+  const hasActiveFilters = Object.values(params).some(Boolean);
 
   if (isLoading) {
     return (
@@ -64,6 +97,7 @@ export function FlightsPage() {
       </Center>
     );
   }
+
   return (
     <Can
       minLevel={Role.READONLY}
@@ -80,24 +114,123 @@ export function FlightsPage() {
         </Center>
       }
     >
-      <VStack mt={10}>
-        <Flex w="80%" maxW="1000px" align="center">
-          <StyledText query="Voos:" text={`Voos: ${flights.length}`} />
-          <Spacer />
-          <Can minLevel={Role.FLYERS}>
-            <CreateFlightModal />
-          </Can>
-          <Spacer />
-          <Input
-            borderRadius={"md"}
-            border="1px solid"
-            borderColor="border.subtle"
-            maxW="150px"
-            placeholder="Procurar…"
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </Flex>
+      <VStack mt={10} gap={0}>
+        {/* CollapsibleRoot wraps header bar + panel so content renders below the Flex */}
+        <CollapsibleRoot w="80%" maxW="1000px" mb={4}>
+          {/* Header bar */}
+          <Flex align="center" mb={0}>
+            <StyledText query="Voos:" text={`Voos: ${flights.length}`} />
+            <Spacer />
+            <Can minLevel={Role.FLYERS}>
+              <CreateFlightModal />
+            </Can>
+            <Spacer />
+            <CollapsibleTrigger asChild>
+              <Button
+                size="sm"
+                variant={hasActiveFilters ? "solid" : "outline"}
+                colorPalette={hasActiveFilters ? "blue" : "gray"}
+              >
+                Filtros{hasActiveFilters ? " ●" : ""}
+              </Button>
+            </CollapsibleTrigger>
+          </Flex>
 
+          {/* Filter panel — below the header bar */}
+          <CollapsibleContent>
+            <Box
+              mt={3}
+              p={4}
+              border="1px solid"
+              borderColor="border.subtle"
+              borderRadius="md"
+              bg="bg.card"
+            >
+              <Grid templateColumns="repeat(2, 1fr)" gap={3}>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Airtask
+                  </Text>
+                  <Input
+                    size="sm"
+                    placeholder="ex: 00X0000"
+                    value={form.airtask}
+                    onChange={set("airtask")}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Nº de cauda
+                  </Text>
+                  <Input
+                    size="sm"
+                    placeholder="ex: 16801"
+                    value={form.tailNumber}
+                    onChange={set("tailNumber")}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Ação
+                  </Text>
+                  <Input
+                    size="sm"
+                    placeholder="ex: LOC"
+                    value={form.action}
+                    onChange={set("action")}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Hora de descolagem (ATD)
+                  </Text>
+                  <Input
+                    size="sm"
+                    placeholder="ex: 10:30"
+                    value={form.atd}
+                    onChange={set("atd")}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Data — de
+                  </Text>
+                  <Input
+                    size="sm"
+                    type="date"
+                    value={form.dateFrom}
+                    onChange={set("dateFrom")}
+                  />
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="text.muted" mb={1}>
+                    Data — até
+                  </Text>
+                  <Input
+                    size="sm"
+                    type="date"
+                    value={form.dateTo}
+                    onChange={set("dateTo")}
+                  />
+                </Box>
+              </Grid>
+              <HStack mt={4} justify="flex-end" gap={2}>
+                <Button size="sm" variant="ghost" onClick={handleClear}>
+                  Limpar
+                </Button>
+                <Button size="sm" colorPalette="blue" onClick={handleSearch}>
+                  Pesquisar
+                </Button>
+              </HStack>
+            </Box>
+          </CollapsibleContent>
+        </CollapsibleRoot>
+
+        {/* Flight list */}
         <Box ref={containerRef} w="80%" h="calc(100vh - 200px)">
           {flights.length > 0 && listHeight > 0 && (
             <List
