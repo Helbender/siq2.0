@@ -83,7 +83,11 @@ class Role(Enum):
 # Mapping qualification groups to applicable crew types
 QUALIFICATION_GROUP_TO_CREW_TYPES = {
     # Pilot qualifications
-    GrupoQualificacoes.CURRENCY: [TipoTripulante.PILOTO],
+    GrupoQualificacoes.CURRENCY: [
+        TipoTripulante.PILOTO,
+        TipoTripulante.COORDENADOR_TATICO,
+        TipoTripulante.OPERADOR_VIGILANCIA,
+    ],
     GrupoQualificacoes.MQP: [TipoTripulante.PILOTO],
     GrupoQualificacoes.MQOBP: [TipoTripulante.PILOTO],
     GrupoQualificacoes.MQOIP: [TipoTripulante.PILOTO],

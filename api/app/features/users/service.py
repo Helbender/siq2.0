@@ -16,6 +16,31 @@ from app.utils.gdrive import ID_PASTA_VOO, enviar_json_para_pasta  # type: ignor
 FLASK_ENV = os.environ.get("FLASK_ENV", "development").lower()
 
 
+def _parse_tipo(value: str) -> TipoTripulante:
+    """Resolve a string to TipoTripulante, accepting both enum values and names."""
+    # Try exact value match first (e.g. "COORDENADOR TATICO")
+    for member in TipoTripulante:
+        if member.value == value:
+            return member
+    # Normalize: uppercase, replace underscores with spaces (e.g. "COORDENADOR_TATICO")
+    upper = value.upper()
+    for member in TipoTripulante:
+        if member.value.upper() == upper:
+            return member
+    # Try enum name lookup after normalising special chars
+    normalized = upper.replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
+    try:
+        return TipoTripulante[normalized]
+    except KeyError:
+        pass
+    # Last resort: normalise enum values the same way and compare
+    for member in TipoTripulante:
+        nv = member.value.upper().replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
+        if nv == normalized:
+            return member
+    raise ValueError(f"'{value}' is not a valid TipoTripulante")
+
+
 class UserService:
     """Service class for user business logic."""
 
@@ -70,8 +95,7 @@ class UserService:
         status = StatusTripulante(user_data.get("status", "Presente"))
         tipo = user_data.get("tipo")
         if isinstance(tipo, str):
-            # Normalize tipo string to enum value
-            tipo = TipoTripulante(tipo)
+            tipo = _parse_tipo(tipo)
 
         user = Tripulante(
             name=user_data["name"],
@@ -127,8 +151,7 @@ class UserService:
                 if key == "qualification":
                     continue
                 if key == "tipo" and isinstance(value, str):
-                    # Normalize tipo string to enum
-                    value = TipoTripulante(value)
+                    value = _parse_tipo(value)
                 if key == "status" and isinstance(value, str):
                     # Normalize status string to enum
                     value = StatusTripulante(value)
@@ -171,33 +194,7 @@ class UserService:
 
                 if key == "tipo":
                     if isinstance(value, str):
-                        tipo_found = None
-                        value_upper = value.upper()
-                        for tipo_enum in TipoTripulante:
-                            if tipo_enum.value.upper() == value_upper:
-                                tipo_found = tipo_enum
-                                break
-                        if tipo_found is None:
-                            normalized = (
-                                value_upper.replace(" ", "_").replace("Ç", "C").replace("Ã", "A").replace("Õ", "O")
-                            )
-                            try:
-                                tipo_found = TipoTripulante[normalized]
-                            except KeyError:
-                                for tipo_enum in TipoTripulante:
-                                    nv = (
-                                        tipo_enum.value.upper()
-                                        .replace(" ", "_")
-                                        .replace("Ç", "C")
-                                        .replace("Ã", "A")
-                                        .replace("Õ", "O")
-                                    )
-                                    if nv == normalized:
-                                        tipo_found = tipo_enum
-                                        break
-                        if tipo_found is None:
-                            raise ValueError(f"Invalid tipo value: {value}")
-                        value = tipo_found
+                        value = _parse_tipo(value)
                     elif not isinstance(value, TipoTripulante):
                         value = TipoTripulante(value)
                     setattr(user, key, value)
