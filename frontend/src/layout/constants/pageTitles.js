@@ -9,6 +9,8 @@ export const PATH_TITLES = {
   "/users": "Utilizadores",
   "/db-management": "Database Management",
   "/about": "About",
+  "/briefing": "Briefing Diário",
+  "/anomalias": "Anomalias de Aeronaves",
 };
 
 export function getPageTitle(pathname) {

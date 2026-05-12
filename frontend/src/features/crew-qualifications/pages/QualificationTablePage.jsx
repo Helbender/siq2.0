@@ -10,6 +10,13 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 
+function formatName(name) {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length < 2) return name.trim();
+  return `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
+}
+
 export function QualificationTablePage({ pilotos = [], loading }) {
   const [sortBy, setSortBy] = useState(null); // { qualName: string, direction: 'asc' | 'desc' }
   const [selectedGroups, setSelectedGroups] = useState([]);
@@ -88,7 +95,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
 
   // Color formatter for days left (matching QualificationsPanel logic)
   const getColorForDays = (days) => {
-    if (days === null || days === undefined) return "transparent";
+    if (days === null || days === undefined) return undefined;
     if (days < 0) return "danger.solid";
     if (days < 10) return "warning.solid";
     return "success.solid";
@@ -174,10 +181,10 @@ export function QualificationTablePage({ pilotos = [], loading }) {
   const isIndeterminate = false;
 
   return (
-    <Stack m={4} pb={10}>
+    <Stack m={2} pb={2}>
       {/* Qualification Group Filter */}
       {availableGroups.length > 0 && (
-        <Box ml={4} mb={6}>
+        <Box ml={4} mb={3}>
           <Text fontWeight="bold" mb={3} fontSize="md" color="text.secondary">
             Tipo
           </Text>
@@ -233,6 +240,8 @@ export function QualificationTablePage({ pilotos = [], loading }) {
         border="1px solid"
         borderColor="border.subtle"
         maxW="100%"
+        maxH="calc(100vh - 320px)"
+        overflowY="auto"
       >
         <Table.Root
           size="sm"
@@ -241,25 +250,35 @@ export function QualificationTablePage({ pilotos = [], loading }) {
             "& [data-sticky]": {
               position: "sticky",
               zIndex: 1,
-              bg: "bg.canvas",
+              bg: "bg.surface",
+            },
+            "& [data-sticky=end]": {
               _after: {
                 content: '""',
                 position: "absolute",
                 pointerEvents: "none",
                 top: "0",
-                bottom: "-1px",
-                width: "32px",
-              },
-            },
-            "& [data-sticky=end]": {
-              _after: {
+                bottom: "0",
                 insetInlineEnd: "0",
                 translate: "100% 0",
-                shadow: "inset 8px 0px 8px -8px rgba(0, 0, 0, 0.3)",
+                width: "8px",
+                shadow: "inset 8px 0 8px -8px rgba(0,0,0,0.45)",
               },
             },
-            "& thead tr:has(th[data-sticky])": {
+            "& thead tr:nth-of-type(1) th": {
+              position: "sticky",
+              top: "0",
               zIndex: 2,
+              bg: "bg.surface",
+            },
+            "& thead tr:nth-of-type(2) th": {
+              position: "sticky",
+              top: "45px",
+              zIndex: 2,
+              bg: "bg.surface",
+            },
+            "& thead tr th[data-sticky]": {
+              zIndex: 3,
             },
           }}
         >
@@ -269,21 +288,20 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
-                data-sticky="end"
+                data-sticky="inner"
                 left="0"
-                w="100px"
+                minW="50px"
                 whiteSpace="nowrap"
                 borderRight="1px solid"
                 borderColor="border.subtle"
               >
-                Posição
+                FC
               </Table.ColumnHeader>
               <Table.ColumnHeader
                 rowSpan={2}
                 fontSize={"lg"}
                 data-sticky="end"
-                left="100px"
-                w="100px"
+                left="50px"
                 borderRight="2px solid"
                 borderColor="border.strong"
               >
@@ -297,7 +315,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                     colSpan={quals.length}
                     fontSize={"md"}
                     textAlign="center"
-                    bg="bg.cardSubtle"
+                    bg="bg.surface"
                     borderRight="1px solid"
                     borderColor="border.strong"
                   >
@@ -306,7 +324,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                 ))}
             </Table.Row>
             {/* Qualification name row */}
-            <Table.Row>
+            <Table.Row zIndex={0}>
               {Object.entries(visibleQualificationsByGroup)
                 .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))
                 .flatMap(([, quals]) =>
@@ -316,12 +334,13 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                       fontSize={"lg"}
                       textAlign="center"
                       cursor="pointer"
+                      bg="bg.surface"
                       onClick={() => handleSort(qual.nome)}
                       _hover={{ bg: "bg.cardSubtle" }}
                       userSelect="none"
                       minW="20px"
                       borderRight="1px solid"
-                      borderColor="border.subtle"
+                      borderColor="border.strong"
                       borderRightWidth={
                         quals[quals.length - 1] === qual ? "2px" : "1px"
                       }
@@ -361,9 +380,9 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                   borderColor="border.strong"
                 >
                   <Table.Cell
-                    data-sticky="end"
+                    data-sticky="inner"
                     left="0"
-                    w="100px"
+                    minW="50px"
                     whiteSpace="nowrap"
                     borderRight="1px solid"
                     borderColor="border.subtle"
@@ -372,13 +391,13 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                   </Table.Cell>
                   <Table.Cell
                     data-sticky="end"
-                    left="100px"
-                    w="100px"
+                    left="50px"
+                    // w="100px"
                     borderRight="2px solid"
                     borderColor="border.strong"
                     truncate
                   >
-                    {member.name?.trim() || member.name}
+                    {formatName(member.name)}
                   </Table.Cell>
                   {Object.entries(visibleQualificationsByGroup)
                     .sort(([grupoA], [grupoB]) => grupoA.localeCompare(grupoB))

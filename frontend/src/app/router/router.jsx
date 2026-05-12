@@ -1,8 +1,8 @@
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import { createBrowserRouter } from "react-router";
 import { Navigate } from "react-router";
-import { protectedRoutes } from "./protected.routes";
+import { briefingRoutes, protectedRoutes } from "./protected.routes";
 import { publicRoutes } from "./public.routes";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 
 export const router = createBrowserRouter([
   {
@@ -10,6 +10,9 @@ export const router = createBrowserRouter([
   },
   {
     ...protectedRoutes,
+  },
+  {
+    ...briefingRoutes,
   },
   {
     path: "*",

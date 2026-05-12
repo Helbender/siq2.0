@@ -1,4 +1,5 @@
 import { AuthenticatedLayout } from "@/layout/layouts/AuthenticatedLayout";
+import { BriefingLayout } from "@/layout/layouts/BriefingLayout";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import { RequireAuth } from "@features/auth";
 import { lazy } from "react";
@@ -48,6 +49,9 @@ const Anomalias = lazy(() =>
     default: m.Anomalias,
   })),
 );
+const BriefingPage = lazy(() =>
+  import("@features/briefing").then((m) => ({ default: m.BriefingPage })),
+);
 
 export const protectedRoutes = {
   element: (
@@ -72,4 +76,14 @@ export const protectedRoutes = {
     { path: "/about", element: <AboutPage /> },
     { path: "/anomalias", element: <Anomalias /> },
   ],
+};
+
+export const briefingRoutes = {
+  element: (
+    <RequireAuth>
+      <BriefingLayout />
+    </RequireAuth>
+  ),
+  errorElement: <ErrorBoundary />,
+  children: [{ path: "/briefing", element: <BriefingPage /> }],
 };
