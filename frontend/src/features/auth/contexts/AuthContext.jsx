@@ -37,18 +37,28 @@ export function AuthProvider({ children }) {
       .finally(() => setBootstrapped(true));
   }, []);
 
-  const { data: user, isLoading: queryLoading, error } = useAuthQuery();
+  const {
+    data: user,
+    isLoading: queryLoading,
+    error,
+  } = useAuthQuery(bootstrapped);
   const loading = !bootstrapped || queryLoading;
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const updateUserMutation = useUpdateAuthUser();
 
-  // Handle auth errors - clear token if unauthorized
+  // Handle auth errors from /auth/me.
+  // 401 is intentionally excluded: the HTTP interceptor already handles 401 by
+  // attempting a token refresh + retry. If we also clear the token here on 401,
+  // a transient refresh failure (e.g. server 500) causes the interceptor to not
+  // clear the token, React Query to retry with the stale token, get 401 again,
+  // and then this handler logs the user out — a false positive.
+  // 404/422 are kept: they mean the user or token is genuinely invalid.
   useEffect(() => {
     if (error) {
       const status = error?.response?.status;
       if (
-        (status === 401 || status === 404 || status === 422) &&
+        (status === 404 || status === 422) &&
         getToken() &&
         !localStorage.getItem("loggingOut")
       ) {

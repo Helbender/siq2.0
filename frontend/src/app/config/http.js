@@ -88,7 +88,9 @@ http.interceptors.response.use(
 
     try {
       const res = await http.post("/auth/refresh");
-      const newToken = res.data.access_token;
+      const newToken = res.data?.access_token;
+
+      if (!newToken) throw new Error("No access_token in refresh response");
 
       setToken(newToken);
       processQueue(null, newToken);

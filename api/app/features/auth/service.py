@@ -189,7 +189,13 @@ class AuthService:
         if user is None:
             raise AuthError("Invalid token", 404)
 
-        if user.reset_token_expires_at is None or datetime.now(UTC) > user.reset_token_expires_at:
+        expires_at = user.reset_token_expires_at
+        if expires_at is None:
+            raise AuthError("Token expired", 404)
+        # SQLite retorna datetimes sem tzinfo mesmo em colunas timezone=True; normalizar.
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+        if datetime.now(UTC) > expires_at:
             raise AuthError("Token expired", 404)
 
         hashed_password = hash_code(new_password)

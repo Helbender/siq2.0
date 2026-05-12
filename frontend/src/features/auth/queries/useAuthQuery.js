@@ -6,17 +6,19 @@ export const authQueryKeys = {
   me: () => [...authQueryKeys.all, "me"],
 };
 
-export function useAuthQuery() {
+export function useAuthQuery(bootstrapped = false) {
   return useQuery({
     queryKey: authQueryKeys.me(),
     queryFn: async () => {
       const response = await http.get("/auth/me");
       return response.data;
     },
-    enabled: !!getToken(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // Only run after bootstrap completes AND a token exists.
+    // bootstrapped is React state so the query re-enables reactively after the
+    // initial /auth/refresh call sets the in-memory token.
+    enabled: bootstrapped && !!getToken(),
+    staleTime: 5 * 60 * 1000,
     retry: (failureCount, error) => {
-      // Don't retry on 401/404/422 errors (auth failures)
       if (
         error?.response?.status === 401 ||
         error?.response?.status === 404 ||
