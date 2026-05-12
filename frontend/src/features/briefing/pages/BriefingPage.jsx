@@ -2,7 +2,7 @@ import { Tabs, VStack } from "@chakra-ui/react";
 import { FlightActivityTab } from "../components/FlightActivityTab";
 import { PlanningTab } from "../components/PlanningTab";
 import { QualificationsTab } from "../components/QualificationsTab";
-
+import SectionsTab from "../components/SectionsTab";
 export function BriefingPage() {
   return (
     <VStack align="stretch" gap={3}>
@@ -11,6 +11,7 @@ export function BriefingPage() {
           <Tabs.Trigger value="qualificacoes">Qualificações</Tabs.Trigger>
           <Tabs.Trigger value="atividade">Atividade de voo</Tabs.Trigger>
           <Tabs.Trigger value="planeamento">Planeamento</Tabs.Trigger>
+          <Tabs.Trigger value="sections">Secções</Tabs.Trigger>
           <Tabs.Indicator />
         </Tabs.List>
 
@@ -24,6 +25,10 @@ export function BriefingPage() {
 
         <Tabs.Content value="planeamento">
           <PlanningTab />
+        </Tabs.Content>
+
+        <Tabs.Content value="sections">
+          <SectionsTab />
         </Tabs.Content>
       </Tabs.Root>
     </VStack>

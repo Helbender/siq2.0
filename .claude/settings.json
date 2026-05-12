@@ -13,6 +13,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "A formatar...",
+            "command": "f=$(jq -r '.tool_input.file_path'); rel=\"${f#/home/tiago/Projectos/siq2.0/}\"; case \"$f\" in *.py) case \"$rel\" in api/*) ruff check --fix \"$f\" && ruff format \"$f\" ;; esac ;; *.js|*.jsx) case \"$rel\" in frontend/*) cd /home/tiago/Projectos/siq2.0/frontend && npx prettier --write \"$f\" ;; esac ;; esac 2>/dev/null || true"
+          }
+        ]
+      }
     ]
   }
 }

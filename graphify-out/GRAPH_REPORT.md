@@ -1,12 +1,12 @@
-# Graph Report - .  (2026-05-04)
+# Graph Report - .  (2026-05-12)
 
 ## Corpus Check
-- 269 files · ~88,278 words
+- 288 files · ~143,192 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1495 nodes · 4323 edges · 181 communities detected
-- Extraction: 25% EXTRACTED · 75% INFERRED · 0% AMBIGUOUS · INFERRED: 3243 edges (avg confidence: 0.53)
+- 1728 nodes · 4672 edges · 199 communities detected
+- Extraction: 28% EXTRACTED · 72% INFERRED · 0% AMBIGUOUS · INFERRED: 3376 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -191,18 +191,36 @@
 - [[_COMMUNITY_Community 178|Community 178]]
 - [[_COMMUNITY_Community 179|Community 179]]
 - [[_COMMUNITY_Community 180|Community 180]]
+- [[_COMMUNITY_Community 181|Community 181]]
+- [[_COMMUNITY_Community 182|Community 182]]
+- [[_COMMUNITY_Community 183|Community 183]]
+- [[_COMMUNITY_Community 184|Community 184]]
+- [[_COMMUNITY_Community 185|Community 185]]
+- [[_COMMUNITY_Community 186|Community 186]]
+- [[_COMMUNITY_Community 187|Community 187]]
+- [[_COMMUNITY_Community 188|Community 188]]
+- [[_COMMUNITY_Community 189|Community 189]]
+- [[_COMMUNITY_Community 190|Community 190]]
+- [[_COMMUNITY_Community 191|Community 191]]
+- [[_COMMUNITY_Community 192|Community 192]]
+- [[_COMMUNITY_Community 193|Community 193]]
+- [[_COMMUNITY_Community 194|Community 194]]
+- [[_COMMUNITY_Community 195|Community 195]]
+- [[_COMMUNITY_Community 196|Community 196]]
+- [[_COMMUNITY_Community 197|Community 197]]
+- [[_COMMUNITY_Community 198|Community 198]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Tripulante` - 317 edges
+1. `Tripulante` - 334 edges
 2. `Qualificacao` - 297 edges
-3. `Flight` - 255 edges
-4. `TripulanteQualificacao` - 238 edges
-5. `TipoTripulante` - 237 edges
-6. `FlightPilots` - 230 edges
-7. `FlightAnomaly` - 184 edges
+3. `Flight` - 276 edges
+4. `TipoTripulante` - 254 edges
+5. `FlightPilots` - 244 edges
+6. `TripulanteQualificacao` - 238 edges
+7. `FlightAnomaly` - 198 edges
 8. `Role` - 125 edges
 9. `StatusTripulante` - 116 edges
-10. `GrupoQualificacoes` - 98 edges
+10. `FlightService` - 103 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `RBAC Permission System` --semantically_similar_to--> `Feature Public API Rule (index.ts only)`  [INFERRED] [semantically similar]
@@ -213,8 +231,8 @@
   README.MD → api/app/utils/img/Mod1M.pdf
 - `Modelo 1M - Relatório de Voo Operações` --references--> `Esquadra 502 (Portuguese Air Force Unit)`  [EXTRACTED]
   api/app/utils/img/Mod1M.pdf → CLAUDE.md
-- `commit()` --calls--> `clear_reset_token()`  [INFERRED]
-  api/app/features/flights/repository.py → api/app/features/auth/repository.py
+- `DashboardService` --uses--> `Get flight statistics for dashboard.      ---     tags:       - Dashboard     su`  [INFERRED]
+  api/app/features/dashboard/service.py → api/app/features/dashboard/routes.py
 
 ## Hyperedges (group relationships)
 - **SIQ 2.0 Full-Stack Technology Foundation** — concept_react19, concept_flask, concept_postgresql, concept_docker, concept_jwt [EXTRACTED 0.95]
@@ -225,1022 +243,1118 @@
 
 ### Community 0 - "Community 0"
 Cohesion: 0.04
-Nodes (239): Database setup and initialization., Initialize database tables., # IMPORTANT: Import all models so they register with Base.metadata, Run migrations in 'offline' mode.      This configures the context with just a U, Run migrations in 'online' mode.      In this scenario we need to create an Engi, run_migrations_offline(), run_migrations_online(), # NOTE: FlightCrew model does not exist in the current codebase (+231 more)
+Nodes (244): Database setup and initialization., Initialize database tables., # IMPORTANT: Import all models so they register with Base.metadata, Run migrations in 'offline' mode.      This configures the context with just a U, Run migrations in 'online' mode.      In this scenario we need to create an Engi, run_migrations_offline(), run_migrations_online(), # NOTE: FlightCrew model does not exist in the current codebase (+236 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.03
-Nodes (184): hash_code(), Hash the given code using SHA-256.      Args:         code: String to hash, Enum, get_crew_types_for_qualification_group(), get_qualification_groups_for_crew_type(), GrupoQualificacoes, is_qualification_group_applicable_to_crew_type(), Get all qualification groups that apply to a specific crew type. (+176 more)
+Nodes (139): Initial schema  Revision ID: 88d1c145826b Revises: Create Date: 2026-01-22 19:28, upgrade(), hash_code(), Hash the given code using SHA-256.      Args:         code: String to hash, Enum, get_qualification_groups_for_crew_type(), Get all qualification groups that apply to a specific crew type., StatusTripulante (+131 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.03
-Nodes (120): Email utilities for sending emails., Send an email with the provided subject, body, and recipient(s).      Args:, send_email(), User roles with associated access levels., Role, Exception, admin_required(), check_permission() (+112 more)
+Cohesion: 0.04
+Nodes (108): get_all_crew_types(), get_all_qualification_groups(), get_crew_types_for_qualification_group(), GrupoQualificacoes, is_qualification_group_applicable_to_crew_type(), Get all crew types that can use a specific qualification group., Get all available qualification groups., Get all available crew types. (+100 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.02
-Nodes (51): Anomalias(), AuthProvider(), useAuth(), Can(), CreateFlightModal(), CreateUserModal(), DatabaseManagementPage(), FlightsPage() (+43 more)
+Cohesion: 0.03
+Nodes (55): Email utilities for sending emails., Send an email with the provided subject, body, and recipient(s).      Args:, send_email(), clear_reset_token(), find_first_user(), find_user_by_email(), find_user_by_nip(), find_user_by_reset_token() (+47 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.06
-Nodes (62): Base, Crew, _get_days(), QualificationCrew, Return all model data in JSON format., Return all model data in JSON format., Check if the crew is qualified., Check if the crew is qualified. (+54 more)
+Cohesion: 0.02
+Nodes (50): Anomalias(), AuthProvider(), useAuth(), Can(), CreateFlightModal(), CreateUserModal(), DatabaseManagementPage(), FlightsPage() (+42 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.04
-Nodes (60): create_superadmin(), main(), check_dublicates_and_sends(), enviar_json_para_pasta(), enviar_para_drive(), get_or_create_folder(), Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict, Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.     Se não (+52 more)
+Nodes (63): create_superadmin(), main(), autenticar_drive(), check_dublicates_and_sends(), enviar_json_para_pasta(), enviar_para_drive(), get_or_create_folder(), Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict (+55 more)
 
 ### Community 6 - "Community 6"
+Cohesion: 0.04
+Nodes (78): User roles with associated access levels., Role, Exception, admin_required(), check_permission(), Shared permission utilities and decorators., Decorator to require a minimum role level for a route.      Args:         min_le, Decorator to require a minimum role level for a route.      Args:         min_le (+70 more)
+
+### Community 7 - "Community 7"
+Cohesion: 0.06
+Nodes (59): Base, Crew, _get_days(), QualificationCrew, Return all model data in JSON format., Return all model data in JSON format., Check if the crew is qualified., Check if the crew is qualified. (+51 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.05
 Nodes (74): _build_flight_from_data(), check_duplicate_flight(), chunk_list(), collect_all_files(), _is_deadlock(), is_old_format(), _is_transient_connection_error(), _log() (+66 more)
 
-### Community 7 - "Community 7"
-Cohesion: 0.08
-Nodes (53): get_all_crew_types(), get_all_qualification_groups(), Get all available qualification groups., Get all available crew types., _base_tripulantes_by_type_stmt(), find_by_tipo_aplicavel(), find_tripulantes_by_type(), find_tripulantes_by_type_paginated() (+45 more)
-
-### Community 8 - "Community 8"
-Cohesion: 0.06
-Nodes (15): DeclarativeBase, API-level endpoints and blueprint registration., Base, Construct file name based on Row parameters.          Returns:             str:, Return all model data in JSON format.          Args:             qual_cache: Opt, Return all model data in JSON format.          Args:             qual_cache: Opt, subclasses will be converted to dataclasses., StatusTripulanteType (+7 more)
-
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (22): _base_stmt(), count_flights_by_date_range(), find_available_years(), find_flights_by_date_range_with_pilots(), find_mqp_mqobp_qualificacoes_expiring(), find_mqp_mqobp_tripulante_qualificacoes_presente(), QualificationsPreviewRepository, Get all users/tripulantes from database.          Args:             session: Dat (+14 more)
+Cohesion: 0.03
+Nodes (9): TestCoerceQualificationId, TestCreateFlight, TestDeleteFlight, TestGetAllFlights, TestGetAllFlightsPaginated, TestGetFlightsByCrewSearch, TestNormalizeTime, TestSafeIntOrNone (+1 more)
 
 ### Community 10 - "Community 10"
+Cohesion: 0.03
+Nodes (10): Tests for users feature service layer., Mudar NIP para um que já existe → conflito de PK → mensagem de erro., TestBackupUsers, TestBulkCreateUsers, TestCreateUser, TestDeleteUser, TestGetAllUsers, TestGetAllUsersPaginated (+2 more)
+
+### Community 11 - "Community 11"
+Cohesion: 0.05
+Nodes (26): db_engine(), _ensure_test_db_exists(), flask_app(), flight_factory(), Shared pytest fixtures for SIQ 2.0 backend tests., Create test tripulantes via direct model insertion., Create the test database if it doesn't exist., PostgreSQL engine — tables created once per session, dropped after. (+18 more)
+
+### Community 12 - "Community 12"
 Cohesion: 0.1
 Nodes (10): CreateQualModal(), CrewQualifications(), CrewTypesProvider(), useCrewTypes(), useCreateQualification(), useCrewTypesQuery(), usePilots(), useQualificationGroupsQuery() (+2 more)
 
-### Community 11 - "Community 11"
+### Community 13 - "Community 13"
+Cohesion: 0.15
+Nodes (11): _base_stmt(), find_mqp_mqobp_qualificacoes_expiring(), find_mqp_mqobp_tripulante_qualificacoes_presente(), QualificationsPreviewRepository, Get all users/tripulantes from database.          Args:             session: Dat, get_expiring_by_qualification(), Get flight statistics for dashboard.      ---     tags:       - Dashboard     su, QualificationsPreviewService (+3 more)
+
+### Community 14 - "Community 14"
 Cohesion: 0.16
 Nodes (19): API CLAUDE.md, SIQ 2.0 Root CLAUDE.md, JWT Access Token (15-min expiry), BA6 (Air Base Unit), Backend Layer Architecture, C-295 Aircraft Type, Esquadra 502 (Portuguese Air Force Unit), Feature Layer Architecture (+11 more)
 
-### Community 12 - "Community 12"
+### Community 15 - "Community 15"
 Cohesion: 0.13
 Nodes (9): DashboardPage(), getDefaultDateRange(), getTomorrow(), FlightCard(), formatDate(), formatDateISO(), formatHours(), useDashboardStats() (+1 more)
 
-### Community 13 - "Community 13"
-Cohesion: 0.17
-Nodes (16): download_file(), download_flights_from_drive(), find_folder_by_name(), get_drive_service(), get_folder_structure_from_filename(), list_files_in_folder(), main(), navigate_to_folder_path() (+8 more)
-
-### Community 14 - "Community 14"
+### Community 16 - "Community 16"
 Cohesion: 0.18
 Nodes (16): convert_old_crew_to_new(), convert_old_pilot_to_new(), load_qualification_cache(), main(), process_file(), Convert old format pilot data to new format.      Args:         pilot_data: Dict, Convert old format crew data to new format (as pilot format).      Args:, Transform old format flight data to new format.      Args:         old_flight_da (+8 more)
 
-### Community 15 - "Community 15"
+### Community 17 - "Community 17"
+Cohesion: 0.17
+Nodes (16): download_file(), download_flights_from_drive(), find_folder_by_name(), get_drive_service(), get_folder_structure_from_filename(), list_files_in_folder(), main(), navigate_to_folder_path() (+8 more)
+
+### Community 18 - "Community 18"
 Cohesion: 0.18
 Nodes (9): create_app(), Flask application factory., Create and configure Flask application.      Returns:         Configured Flask a, setup_database(), JWT configuration and error handlers., Configure JWT for the Flask application.      Args:         app: Flask applicati, Register JWT error handlers.      Args:         jwt: JWTManager instance, _register_jwt_error_handlers() (+1 more)
 
-### Community 16 - "Community 16"
+### Community 19 - "Community 19"
 Cohesion: 0.25
 Nodes (4): QualificationManagementPage(), useQualificationFilters(), useQualificationsQuery(), useReprocessFlights()
 
-### Community 17 - "Community 17"
+### Community 20 - "Community 20"
 Cohesion: 0.38
 Nodes (4): BackgroundWithOrbs(), ColorModeIcon(), useColorMode(), useColorModeValue()
 
-### Community 18 - "Community 18"
+### Community 21 - "Community 21"
 Cohesion: 0.33
 Nodes (2): QualificationsPreviewPage(), usePilotQualificationsPreview()
 
-### Community 19 - "Community 19"
+### Community 22 - "Community 22"
 Cohesion: 0.33
 Nodes (5): downgrade(), Rename CONTROLADOR_TATICO to COORDENADOR_TATICO in tipotripulante enum  Revision, Rename enum value CONTROLADOR_TATICO to COORDENADOR_TATICO (PostgreSQL 10+)., Revert enum value COORDENADOR_TATICO back to CONTROLADOR_TATICO (only if COORDEN, upgrade()
 
-### Community 20 - "Community 20"
+### Community 23 - "Community 23"
 Cohesion: 0.7
 Nodes (4): decodeJWT(), getTimeUntilExpiration(), getTokenExpiration(), isTokenExpiringSoon()
 
-### Community 21 - "Community 21"
+### Community 24 - "Community 24"
 Cohesion: 0.5
 Nodes (2): getPageTitle(), TopBar()
 
-### Community 22 - "Community 22"
-Cohesion: 0.5
-Nodes (2): DeleteFlightModal(), useDeleteFlight()
-
-### Community 23 - "Community 23"
-Cohesion: 0.5
-Nodes (2): FlightsByCrewSearchPage(), useFlightsByCrewSearch()
-
-### Community 24 - "Community 24"
-Cohesion: 0.5
-Nodes (2): DeleteQualModal(), useDeleteQualification()
-
 ### Community 25 - "Community 25"
 Cohesion: 0.5
-Nodes (2): DeleteYearModal(), useDeleteYear()
+Nodes (0): 
 
 ### Community 26 - "Community 26"
 Cohesion: 0.5
-Nodes (1): Add missing performance indexes  Revision ID: e1f2a3b4c5d6 Revises: d4d237e2471c
+Nodes (2): DeleteYearModal(), useDeleteYear()
 
 ### Community 27 - "Community 27"
 Cohesion: 0.5
-Nodes (1): Add payload_key to qualificacoes (landing quals: ATR, ATN, precapp, nprecapp)  R
+Nodes (2): DeleteFlightModal(), useDeleteFlight()
 
 ### Community 28 - "Community 28"
 Cohesion: 0.5
-Nodes (2): Initial schema  Revision ID: 88d1c145826b Revises: Create Date: 2026-01-22 19:28, upgrade()
+Nodes (2): FlightsByCrewSearchPage(), useFlightsByCrewSearch()
 
 ### Community 29 - "Community 29"
 Cohesion: 0.5
-Nodes (1): Add unique constraint on tripulante_qualificacoes (tripulante_id, qualificacao_i
+Nodes (2): DeleteQualModal(), useDeleteQualification()
 
 ### Community 30 - "Community 30"
 Cohesion: 0.5
-Nodes (1): Add flight_anomalies table for anomaly descriptions per flight.  Revision ID: f7
+Nodes (1): add performance indexes  Revision ID: d4d237e2471c Revises: a2b3c4d5e6f7 Create
 
 ### Community 31 - "Community 31"
 Cohesion: 0.5
-Nodes (1): add performance indexes  Revision ID: d4d237e2471c Revises: a2b3c4d5e6f7 Create
+Nodes (1): Add flight_anomalies table for anomaly descriptions per flight.  Revision ID: f7
 
 ### Community 32 - "Community 32"
 Cohesion: 0.5
-Nodes (1): Add unique constraint on flights_table (airtask, date, departure_time, tailnumbe
+Nodes (1): Add missing performance indexes  Revision ID: e1f2a3b4c5d6 Revises: d4d237e2471c
 
 ### Community 33 - "Community 33"
 Cohesion: 0.5
-Nodes (1): Add VIR, VN, CON time fields to flight_pilots  Revision ID: b2c3d4e5f6a7 Revises
+Nodes (1): Add unique constraint on tripulante_qualificacoes (tripulante_id, qualificacao_i
 
 ### Community 34 - "Community 34"
 Cohesion: 0.5
-Nodes (3): health_check(), Health check endpoint., Health check endpoint.      ---     tags:       - Health     summary: Health che
+Nodes (1): Add VIR, VN, CON time fields to flight_pilots  Revision ID: b2c3d4e5f6a7 Revises
 
 ### Community 35 - "Community 35"
-Cohesion: 0.67
-Nodes (3): decode_1m_file(), main(), Read a .1M file, base64-decode and parse as JSON.
+Cohesion: 0.5
+Nodes (1): Add payload_key to qualificacoes (landing quals: ATR, ATN, precapp, nprecapp)  R
 
 ### Community 36 - "Community 36"
 Cohesion: 0.5
-Nodes (4): Aviation Safety / Certification, Crew Qualifications, Flights Feature, Plane with Shield Icon
+Nodes (1): Add unique constraint on flights_table (airtask, date, departure_time, tailnumbe
 
 ### Community 37 - "Community 37"
 Cohesion: 0.67
-Nodes (4): Elephant Symbol, Esquadra 502, Esquadra 502 Emblem, Portuguese Air Force
+Nodes (3): decode_1m_file(), main(), Read a .1M file, base64-decode and parse as JSON.
 
 ### Community 38 - "Community 38"
-Cohesion: 0.83
-Nodes (4): Elephant (Visual Symbol), Esquadra 502 Emblem, Esquadra 502 (Portuguese Air Force Squadron), SIQ 2.0 - Sistema Integrado de Qualificações
+Cohesion: 0.5
+Nodes (3): parse_time_to_minutes(), Time utility functions., Parse time string in format 'HH:MM' to total minutes.      Args:         time_st
 
 ### Community 39 - "Community 39"
-Cohesion: 0.67
-Nodes (0):
+Cohesion: 0.5
+Nodes (3): health_check(), Health check endpoint., Health check endpoint.      ---     tags:       - Health     summary: Health che
 
 ### Community 40 - "Community 40"
-Cohesion: 0.67
-Nodes (0):
+Cohesion: 0.5
+Nodes (4): Aviation Safety / Certification, Crew Qualifications, Flights Feature, Plane with Shield Icon
 
 ### Community 41 - "Community 41"
 Cohesion: 0.67
-Nodes (1): Application configuration.
+Nodes (4): Elephant Symbol, Esquadra 502, Esquadra 502 Emblem, Portuguese Air Force
 
 ### Community 42 - "Community 42"
-Cohesion: 0.67
-Nodes (2): generate_jwt_key(), Generate a cryptographically secure random string for JWT_KEY.      Args:
+Cohesion: 0.83
+Nodes (4): Elephant (Visual Symbol), Esquadra 502 Emblem, Esquadra 502 (Portuguese Air Force Squadron), SIQ 2.0 - Sistema Integrado de Qualificações
 
 ### Community 43 - "Community 43"
-Cohesion: 1.0
-Nodes (0):
+Cohesion: 0.67
+Nodes (0): 
 
 ### Community 44 - "Community 44"
-Cohesion: 1.0
-Nodes (0):
+Cohesion: 0.67
+Nodes (0): 
 
 ### Community 45 - "Community 45"
 Cohesion: 1.0
-Nodes (0):
+Nodes (2): FlightActivityCard(), formatDate()
 
 ### Community 46 - "Community 46"
-Cohesion: 1.0
-Nodes (0):
+Cohesion: 0.67
+Nodes (0): 
 
 ### Community 47 - "Community 47"
-Cohesion: 1.0
-Nodes (0):
+Cohesion: 0.67
+Nodes (1): Application configuration.
 
 ### Community 48 - "Community 48"
-Cohesion: 1.0
-Nodes (0):
+Cohesion: 0.67
+Nodes (2): generate_jwt_key(), Generate a cryptographically secure random string for JWT_KEY.      Args:
 
 ### Community 49 - "Community 49"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 50 - "Community 50"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 51 - "Community 51"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 52 - "Community 52"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 53 - "Community 53"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 54 - "Community 54"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 55 - "Community 55"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 56 - "Community 56"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 57 - "Community 57"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 58 - "Community 58"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 59 - "Community 59"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 60 - "Community 60"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 61 - "Community 61"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 62 - "Community 62"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 63 - "Community 63"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 64 - "Community 64"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 65 - "Community 65"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 66 - "Community 66"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 67 - "Community 67"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 68 - "Community 68"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 69 - "Community 69"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 70 - "Community 70"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 71 - "Community 71"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 72 - "Community 72"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 73 - "Community 73"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 74 - "Community 74"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 75 - "Community 75"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 76 - "Community 76"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 77 - "Community 77"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 78 - "Community 78"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 79 - "Community 79"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 80 - "Community 80"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 81 - "Community 81"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 82 - "Community 82"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 83 - "Community 83"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 84 - "Community 84"
 Cohesion: 1.0
-Nodes (1): Constants for qualifications preview feature.
+Nodes (0): 
 
 ### Community 85 - "Community 85"
 Cohesion: 1.0
-Nodes (1): OpenAPI/Swagger configuration for the API.
+Nodes (0): 
 
 ### Community 86 - "Community 86"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 87 - "Community 87"
 Cohesion: 1.0
-Nodes (2): Chakra UI v2 → v3 Migration, Frontend Breaking Changes Report
+Nodes (0): 
 
 ### Community 88 - "Community 88"
 Cohesion: 1.0
-Nodes (1): Vite Logo SVG
+Nodes (0): 
 
 ### Community 89 - "Community 89"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 90 - "Community 90"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 91 - "Community 91"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 92 - "Community 92"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 93 - "Community 93"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 94 - "Community 94"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Constants for qualifications preview feature.
 
 ### Community 95 - "Community 95"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): OpenAPI/Swagger configuration for the API.
 
 ### Community 96 - "Community 96"
 Cohesion: 1.0
-Nodes (0):
+Nodes (2): Chakra UI v2 → v3 Migration, Frontend Breaking Changes Report
 
 ### Community 97 - "Community 97"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Vite Logo SVG
 
 ### Community 98 - "Community 98"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 99 - "Community 99"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 100 - "Community 100"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 101 - "Community 101"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 102 - "Community 102"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 103 - "Community 103"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 104 - "Community 104"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 105 - "Community 105"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 106 - "Community 106"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 107 - "Community 107"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 108 - "Community 108"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 109 - "Community 109"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 110 - "Community 110"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 111 - "Community 111"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 112 - "Community 112"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 113 - "Community 113"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 114 - "Community 114"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 115 - "Community 115"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 116 - "Community 116"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 117 - "Community 117"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 118 - "Community 118"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 119 - "Community 119"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 120 - "Community 120"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 121 - "Community 121"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 122 - "Community 122"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 123 - "Community 123"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 124 - "Community 124"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 125 - "Community 125"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 126 - "Community 126"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 127 - "Community 127"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 128 - "Community 128"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 129 - "Community 129"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 130 - "Community 130"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 131 - "Community 131"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 132 - "Community 132"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 133 - "Community 133"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 134 - "Community 134"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 135 - "Community 135"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 136 - "Community 136"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 137 - "Community 137"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 138 - "Community 138"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 139 - "Community 139"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 140 - "Community 140"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 141 - "Community 141"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 142 - "Community 142"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 143 - "Community 143"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 144 - "Community 144"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 145 - "Community 145"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 146 - "Community 146"
 Cohesion: 1.0
-Nodes (1): Get the numeric level for this role.
+Nodes (0): 
 
 ### Community 147 - "Community 147"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 148 - "Community 148"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 149 - "Community 149"
 Cohesion: 1.0
-Nodes (0):
+Nodes (0): 
 
 ### Community 150 - "Community 150"
 Cohesion: 1.0
-Nodes (1): Get all qualification groups that apply to a specific crew type.
+Nodes (0): 
 
 ### Community 151 - "Community 151"
 Cohesion: 1.0
-Nodes (1): Get all crew types that can use a specific qualification group.
+Nodes (0): 
 
 ### Community 152 - "Community 152"
 Cohesion: 1.0
-Nodes (1): Get all available qualification groups.
+Nodes (0): 
 
 ### Community 153 - "Community 153"
 Cohesion: 1.0
-Nodes (1): Get all available crew types.
+Nodes (0): 
 
 ### Community 154 - "Community 154"
 Cohesion: 1.0
-Nodes (1): Check if a qualification group is applicable to a specific crew type.
+Nodes (0): 
 
 ### Community 155 - "Community 155"
 Cohesion: 1.0
-Nodes (1): Configure JWT for the Flask application.      Args:         app: Flask applicati
+Nodes (0): 
 
 ### Community 156 - "Community 156"
 Cohesion: 1.0
-Nodes (1): Register JWT error handlers.      Args:         jwt: JWTManager instance
+Nodes (0): 
 
 ### Community 157 - "Community 157"
 Cohesion: 1.0
-Nodes (1): Email utilities for sending emails and password recovery.
+Nodes (0): 
 
 ### Community 158 - "Community 158"
 Cohesion: 1.0
-Nodes (1): Generate a random alphanumeric code of a given length.
+Nodes (0): 
 
 ### Community 159 - "Community 159"
 Cohesion: 1.0
-Nodes (1): Hash the given code using SHA-256.
+Nodes (0): 
 
 ### Community 160 - "Community 160"
 Cohesion: 1.0
-Nodes (1): Send an email with the provided subject, body, and recipient.
+Nodes (0): 
 
 ### Community 161 - "Community 161"
 Cohesion: 1.0
-Nodes (1): Create a JSON object with the hashed token and timestamp.
+Nodes (0): 
 
 ### Community 162 - "Community 162"
 Cohesion: 1.0
-Nodes (1): Send email of password recovery and create json data to add to DB.      Args:
+Nodes (0): 
 
 ### Community 163 - "Community 163"
 Cohesion: 1.0
-Nodes (1): Envia o ficheiro pdf para o google drive      Args:         mem_pdf (io.BytesIO)
+Nodes (0): 
 
 ### Community 164 - "Community 164"
 Cohesion: 1.0
-Nodes (1): Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict
+Nodes (0): 
 
 ### Community 165 - "Community 165"
 Cohesion: 1.0
-Nodes (1): Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.     Se não
+Nodes (0): 
 
 ### Community 166 - "Community 166"
 Cohesion: 1.0
-Nodes (1): Função geral de enviar os dados para os ficheiros no Google Drive.      Criada p
+Nodes (0): 
 
 ### Community 167 - "Community 167"
 Cohesion: 1.0
-Nodes (1): Parse time string in format 'HH:MM' to total minutes.      Args:         time_st
+Nodes (1): Get the numeric level for this role.
 
 ### Community 168 - "Community 168"
 Cohesion: 1.0
-Nodes (1): Schema for flight response.
+Nodes (1): Get all qualification groups that apply to a specific crew type.
 
 ### Community 169 - "Community 169"
 Cohesion: 1.0
-Nodes (1): Schema for reprocess qualifications response.
+Nodes (1): Get all crew types that can use a specific qualification group.
 
 ### Community 170 - "Community 170"
 Cohesion: 1.0
-Nodes (1): Turn Marshmallow field errors (possibly nested by index) into a single string.
+Nodes (1): Get all available qualification groups.
 
 ### Community 171 - "Community 171"
 Cohesion: 1.0
-Nodes (1): Convert Marshmallow validation error dict (or list) to a single human-readable s
+Nodes (1): Get all available crew types.
 
 ### Community 172 - "Community 172"
 Cohesion: 1.0
-Nodes (1): Validate request data against a schema.      Args:         schema: Marshmallow s
+Nodes (1): Check if a qualification group is applicable to a specific crew type.
 
 ### Community 173 - "Community 173"
 Cohesion: 1.0
-Nodes (1): Schema for password update request.
+Nodes (1): Configure JWT for the Flask application.      Args:         app: Flask applicati
 
 ### Community 174 - "Community 174"
 Cohesion: 1.0
-Nodes (1): Schema for password update response.
+Nodes (1): Register JWT error handlers.      Args:         jwt: JWTManager instance
 
 ### Community 175 - "Community 175"
 Cohesion: 1.0
-Nodes (1): Schema for forgot password request validation.
+Nodes (1): Email utilities for sending emails and password recovery.
 
 ### Community 176 - "Community 176"
 Cohesion: 1.0
-Nodes (1): Schema for expiring qualifications response.
+Nodes (1): Generate a random alphanumeric code of a given length.
 
 ### Community 177 - "Community 177"
 Cohesion: 1.0
-Nodes (1): Database README
+Nodes (1): Hash the given code using SHA-256.
 
 ### Community 178 - "Community 178"
 Cohesion: 1.0
-Nodes (1): Database SETUP Guide
+Nodes (1): Send an email with the provided subject, body, and recipient.
 
 ### Community 179 - "Community 179"
 Cohesion: 1.0
-Nodes (1): Frontend README
+Nodes (1): Create a JSON object with the hashed token and timestamp.
 
 ### Community 180 - "Community 180"
+Cohesion: 1.0
+Nodes (1): Send email of password recovery and create json data to add to DB.      Args:
+
+### Community 181 - "Community 181"
+Cohesion: 1.0
+Nodes (1): Envia o ficheiro pdf para o google drive      Args:         mem_pdf (io.BytesIO)
+
+### Community 182 - "Community 182"
+Cohesion: 1.0
+Nodes (1): Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict
+
+### Community 183 - "Community 183"
+Cohesion: 1.0
+Nodes (1): Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.     Se não
+
+### Community 184 - "Community 184"
+Cohesion: 1.0
+Nodes (1): Função geral de enviar os dados para os ficheiros no Google Drive.      Criada p
+
+### Community 185 - "Community 185"
+Cohesion: 1.0
+Nodes (1): Parse time string in format 'HH:MM' to total minutes.      Args:         time_st
+
+### Community 186 - "Community 186"
+Cohesion: 1.0
+Nodes (1): Schema for flight response.
+
+### Community 187 - "Community 187"
+Cohesion: 1.0
+Nodes (1): Schema for reprocess qualifications response.
+
+### Community 188 - "Community 188"
+Cohesion: 1.0
+Nodes (1): Turn Marshmallow field errors (possibly nested by index) into a single string.
+
+### Community 189 - "Community 189"
+Cohesion: 1.0
+Nodes (1): Convert Marshmallow validation error dict (or list) to a single human-readable s
+
+### Community 190 - "Community 190"
+Cohesion: 1.0
+Nodes (1): Validate request data against a schema.      Args:         schema: Marshmallow s
+
+### Community 191 - "Community 191"
+Cohesion: 1.0
+Nodes (1): Schema for password update request.
+
+### Community 192 - "Community 192"
+Cohesion: 1.0
+Nodes (1): Schema for password update response.
+
+### Community 193 - "Community 193"
+Cohesion: 1.0
+Nodes (1): Schema for forgot password request validation.
+
+### Community 194 - "Community 194"
+Cohesion: 1.0
+Nodes (1): Schema for expiring qualifications response.
+
+### Community 195 - "Community 195"
+Cohesion: 1.0
+Nodes (1): Database README
+
+### Community 196 - "Community 196"
+Cohesion: 1.0
+Nodes (1): Database SETUP Guide
+
+### Community 197 - "Community 197"
+Cohesion: 1.0
+Nodes (1): Frontend README
+
+### Community 198 - "Community 198"
 Cohesion: 1.0
 Nodes (1): API README
 
 ## Knowledge Gaps
-- **122 isolated node(s):** `Rename CONTROLADOR_TATICO to COORDENADOR_TATICO in tipotripulante enum  Revision`, `Rename enum value CONTROLADOR_TATICO to COORDENADOR_TATICO (PostgreSQL 10+).`, `Revert enum value COORDENADOR_TATICO back to CONTROLADOR_TATICO (only if COORDEN`, `Add missing performance indexes  Revision ID: e1f2a3b4c5d6 Revises: d4d237e2471c`, `Add payload_key to qualificacoes (landing quals: ATR, ATN, precapp, nprecapp)  R` (+117 more)
+- **122 isolated node(s):** `add performance indexes  Revision ID: d4d237e2471c Revises: a2b3c4d5e6f7 Create`, `Add flight_anomalies table for anomaly descriptions per flight.  Revision ID: f7`, `Add missing performance indexes  Revision ID: e1f2a3b4c5d6 Revises: d4d237e2471c`, `Add unique constraint on tripulante_qualificacoes (tripulante_id, qualificacao_i`, `Add VIR, VN, CON time fields to flight_pilots  Revision ID: b2c3d4e5f6a7 Revises` (+117 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 43`** (2 nodes): `App()`, `App.jsx`
+- **Thin community `Community 49`** (2 nodes): `App()`, `App.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (2 nodes): `toaster.jsx`, `Toaster()`
+- **Thin community `Community 50`** (2 nodes): `Header.jsx`, `Header()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (2 nodes): `Footer()`, `Footer.jsx`
+- **Thin community `Community 51`** (2 nodes): `Footer()`, `Footer.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (2 nodes): `Header.jsx`, `Header()`
+- **Thin community `Community 52`** (2 nodes): `AuthenticatedLayout()`, `AuthenticatedLayout.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 47`** (2 nodes): `Layout()`, `AppLayout.jsx`
+- **Thin community `Community 53`** (2 nodes): `Layout()`, `AppLayout.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 48`** (2 nodes): `AuthenticatedLayout()`, `AuthenticatedLayout.jsx`
+- **Thin community `Community 54`** (2 nodes): `BriefingLayout()`, `BriefingLayout.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 49`** (2 nodes): `FeatureBasePage()`, `FeatureBasePage.jsx`
+- **Thin community `Community 55`** (2 nodes): `toaster.jsx`, `Toaster()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 50`** (2 nodes): `AboutPage()`, `AboutPage.jsx`
+- **Thin community `Community 56`** (2 nodes): `AppProviders()`, `AppProviders.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 51`** (2 nodes): `StandardText.jsx`, `StandardText()`
+- **Thin community `Community 57`** (2 nodes): `PieChartCard.jsx`, `PieChartCard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 52`** (2 nodes): `StyledText.jsx`, `StyledText()`
+- **Thin community `Community 58`** (2 nodes): `StatCard.jsx`, `StatCard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 53`** (2 nodes): `ErrorBoundary()`, `ErrorBoundary.jsx`
+- **Thin community `Community 59`** (2 nodes): `SunTimesDisplay.jsx`, `SunTimesDisplay()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 54`** (2 nodes): `FormGrid()`, `FormGrid.jsx`
+- **Thin community `Community 60`** (2 nodes): `DateRangeSelector()`, `DateRangeSelector.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 55`** (2 nodes): `Field()`, `Field.jsx`
+- **Thin community `Community 61`** (2 nodes): `YearSelector.jsx`, `YearSelector()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 56`** (2 nodes): `FormSection()`, `FormSection.jsx`
+- **Thin community `Community 62`** (2 nodes): `useAvailableYears.jsx`, `useAvailableYears()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 57`** (2 nodes): `AppProviders()`, `AppProviders.jsx`
+- **Thin community `Community 63`** (2 nodes): `AuthCard()`, `AuthCard.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 58`** (2 nodes): `InfoMed.jsx`, `InfoMed()`
+- **Thin community `Community 64`** (2 nodes): `HealthCard.jsx`, `HealthCard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 59`** (2 nodes): `useQualificationsByType.js`, `useQualificationsByType()`
+- **Thin community `Community 65`** (2 nodes): `PlanningTab.jsx`, `PlanningTab()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 60`** (2 nodes): `usePilotQualifications.js`, `usePilotQualifications()`
+- **Thin community `Community 66`** (2 nodes): `SectionsTab.jsx`, `SectionsTab()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 61`** (2 nodes): `InsertInitQual.jsx`, `InsertInitQual()`
+- **Thin community `Community 67`** (2 nodes): `QualificationsTab.jsx`, `QualificationsTab()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 62`** (2 nodes): `FileUpload()`, `FileUpload.jsx`
+- **Thin community `Community 68`** (2 nodes): `BriefingPage()`, `BriefingPage.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 63`** (2 nodes): `QualificationsPanel.jsx`, `QualificationsPanel()`
+- **Thin community `Community 69`** (2 nodes): `InfoMed.jsx`, `InfoMed()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 64`** (2 nodes): `DaysLeftColumn()`, `DaysLeftColumn.jsx`
+- **Thin community `Community 70`** (2 nodes): `useQualificationsByType.js`, `useQualificationsByType()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 65`** (2 nodes): `pilots.service.js`, `crewTypeToApiFormat()`
+- **Thin community `Community 71`** (2 nodes): `usePilotQualifications.js`, `usePilotQualifications()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 66`** (2 nodes): `QualificationTablePage.jsx`, `QualificationTablePage()`
+- **Thin community `Community 72`** (2 nodes): `InsertInitQual.jsx`, `InsertInitQual()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 67`** (2 nodes): `PilotsPage.jsx`, `PilotsPage()`
+- **Thin community `Community 73`** (2 nodes): `FileUpload()`, `FileUpload.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 68`** (2 nodes): `AuthCard()`, `AuthCard.jsx`
+- **Thin community `Community 74`** (2 nodes): `QualificationTable.jsx`, `QualificationTable()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 69`** (2 nodes): `HealthCard.jsx`, `HealthCard()`
+- **Thin community `Community 75`** (2 nodes): `flightsToPlanesAnomalies()`, `flightsToPlanesAnomalies.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 70`** (2 nodes): `YearSelector.jsx`, `YearSelector()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 71`** (2 nodes): `DateRangeSelector()`, `DateRangeSelector.jsx`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 72`** (2 nodes): `SunTimesDisplay.jsx`, `SunTimesDisplay()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 73`** (2 nodes): `StatCard.jsx`, `StatCard()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 74`** (2 nodes): `PieChartCard.jsx`, `PieChartCard()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 75`** (2 nodes): `useAvailableYears.jsx`, `useAvailableYears()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 76`** (2 nodes): `QualificationTable.jsx`, `QualificationTable()`
+- **Thin community `Community 76`** (2 nodes): `StatusBadge.jsx`, `StatusBadge()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 77`** (2 nodes): `AnomalyAlertList()`, `AnomalyAlertList.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 78`** (2 nodes): `AnomalyFlightsDialog()`, `AnomalyFlightsDialog.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 79`** (2 nodes): `StatusBadge.jsx`, `StatusBadge()`
+- **Thin community `Community 79`** (2 nodes): `AnomaliasTable()`, `AnomaliasTable.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 80`** (2 nodes): `TableHeader.jsx`, `TableHeader()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 81`** (2 nodes): `TableRow.jsx`, `Anomalias()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 82`** (2 nodes): `AnomaliasTable()`, `AnomaliasTable.jsx`
+- **Thin community `Community 82`** (2 nodes): `pilots.service.js`, `crewTypeToApiFormat()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 83`** (2 nodes): `flightsToPlanesAnomalies()`, `flightsToPlanesAnomalies.js`
+- **Thin community `Community 83`** (2 nodes): `QualificationsPanel.jsx`, `QualificationsPanel()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 84`** (2 nodes): `constants.py`, `Constants for qualifications preview feature.`
+- **Thin community `Community 84`** (2 nodes): `DaysLeftColumn()`, `DaysLeftColumn.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 85`** (2 nodes): `openapi.py`, `OpenAPI/Swagger configuration for the API.`
+- **Thin community `Community 85`** (2 nodes): `PilotsPage.jsx`, `PilotsPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 86`** (2 nodes): `json_to_file.py`, `flight_to_file()`
+- **Thin community `Community 86`** (2 nodes): `StandardText.jsx`, `StandardText()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 87`** (2 nodes): `Chakra UI v2 → v3 Migration`, `Frontend Breaking Changes Report`
+- **Thin community `Community 87`** (2 nodes): `AboutPage()`, `AboutPage.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 88`** (1 nodes): `Vite Logo SVG`
+- **Thin community `Community 88`** (2 nodes): `FeatureBasePage()`, `FeatureBasePage.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 89`** (1 nodes): `vite.config.js`
+- **Thin community `Community 89`** (2 nodes): `StyledText.jsx`, `StyledText()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 90`** (1 nodes): `eslint.config.js`
+- **Thin community `Community 90`** (2 nodes): `ErrorBoundary()`, `ErrorBoundary.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 91`** (1 nodes): `main.jsx`
+- **Thin community `Community 91`** (2 nodes): `FormSection()`, `FormSection.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 92`** (1 nodes): `dialog.jsx`
+- **Thin community `Community 92`** (2 nodes): `FormGrid()`, `FormGrid.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 93`** (1 nodes): `close-button.jsx`
+- **Thin community `Community 93`** (2 nodes): `Field()`, `Field.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 94`** (1 nodes): `button.jsx`
+- **Thin community `Community 94`** (2 nodes): `constants.py`, `Constants for qualifications preview feature.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 95`** (1 nodes): `tooltip.jsx`
+- **Thin community `Community 95`** (2 nodes): `openapi.py`, `OpenAPI/Swagger configuration for the API.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 96`** (1 nodes): `navItems.js`
+- **Thin community `Community 96`** (2 nodes): `Chakra UI v2 → v3 Migration`, `Frontend Breaking Changes Report`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 97`** (1 nodes): `system.js`
+- **Thin community `Community 97`** (1 nodes): `Vite Logo SVG`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 98`** (1 nodes): `index.js`
+- **Thin community `Community 98`** (1 nodes): `vite.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 99`** (1 nodes): `sidebar.recipe.js`
+- **Thin community `Community 99`** (1 nodes): `eslint.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 100`** (1 nodes): `input.recipe.js`
+- **Thin community `Community 100`** (1 nodes): `main.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 101`** (1 nodes): `alert.recipe.js`
+- **Thin community `Community 101`** (1 nodes): `navItems.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 102`** (1 nodes): `card.recipe.js`
+- **Thin community `Community 102`** (1 nodes): `button.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 103`** (1 nodes): `tabs.recipe.js`
+- **Thin community `Community 103`** (1 nodes): `tooltip.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 104`** (1 nodes): `badge.recipe.js`
+- **Thin community `Community 104`** (1 nodes): `close-button.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 105`** (1 nodes): `nativeselect.recipe.js`
+- **Thin community `Community 105`** (1 nodes): `dialog.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 106`** (1 nodes): `segmentedgroup.recipe.js`
+- **Thin community `Community 106`** (1 nodes): `router.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 107`** (1 nodes): `index.js`
+- **Thin community `Community 107`** (1 nodes): `public.routes.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 108`** (1 nodes): `button.recipe.js`
+- **Thin community `Community 108`** (1 nodes): `protected.routes.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 109`** (1 nodes): `dialog.recipe.js`
+- **Thin community `Community 109`** (1 nodes): `setup.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 110`** (1 nodes): `form.recipe.js`
+- **Thin community `Community 110`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 111`** (1 nodes): `table.recipe.js`
+- **Thin community `Community 111`** (1 nodes): `dashboard.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 112`** (1 nodes): `enums.js`
+- **Thin community `Community 112`** (1 nodes): `TopPilotsSection.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 113`** (1 nodes): `Can.test.jsx`
+- **Thin community `Community 113`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 114`** (1 nodes): `toaster.js`
+- **Thin community `Community 114`** (1 nodes): `HealthCard.test.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 115`** (1 nodes): `setup.js`
+- **Thin community `Community 115`** (1 nodes): `constants.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 116`** (1 nodes): `router.jsx`
+- **Thin community `Community 116`** (1 nodes): `permissions.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 117`** (1 nodes): `protected.routes.jsx`
+- **Thin community `Community 117`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 118`** (1 nodes): `public.routes.jsx`
+- **Thin community `Community 118`** (1 nodes): `briefing.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 119`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 120`** (1 nodes): `PilotInput.jsx`
+- **Thin community `Community 120`** (1 nodes): `db-management.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 121`** (1 nodes): `CreateFlightModal.test.jsx`
+- **Thin community `Community 121`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 122`** (1 nodes): `flights.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 123`** (1 nodes): `flightDefaults.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 124`** (1 nodes): `index.js`
+- **Thin community `Community 124`** (1 nodes): `PilotInput.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 125`** (1 nodes): `CreateUserModal.test.jsx`
+- **Thin community `Community 125`** (1 nodes): `CreateFlightModal.test.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 126`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 127`** (1 nodes): `PilotCard.jsx`
+- **Thin community `Community 127`** (1 nodes): `CreateUserModal.test.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 128`** (1 nodes): `GroupedQualifications.jsx`
+- **Thin community `Community 128`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 129`** (1 nodes): `index.js`
+- **Thin community `Community 129`** (1 nodes): `qualifications.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 130`** (1 nodes): `HealthCard.test.jsx`
+- **Thin community `Community 130`** (1 nodes): `QualificationGroupFilter.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 131`** (1 nodes): `index.js`
+- **Thin community `Community 131`** (1 nodes): `CreateQualModal.test.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 132`** (1 nodes): `TopPilotsSection.jsx`
+- **Thin community `Community 132`** (1 nodes): `SegmentFilter.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 133`** (1 nodes): `dashboard.service.js`
+- **Thin community `Community 133`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 134`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 135`** (1 nodes): `QualificationGroupFilter.jsx`
+- **Thin community `Community 135`** (1 nodes): `PilotCard.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 136`** (1 nodes): `SegmentFilter.jsx`
+- **Thin community `Community 136`** (1 nodes): `GroupedQualifications.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 137`** (1 nodes): `CreateQualModal.test.jsx`
+- **Thin community `Community 137`** (1 nodes): `constants.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 138`** (1 nodes): `qualifications.service.js`
+- **Thin community `Community 138`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 139`** (1 nodes): `constants.js`
+- **Thin community `Community 139`** (1 nodes): `qualifications-preview.service.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 140`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 141`** (1 nodes): `qualifications-preview.service.js`
+- **Thin community `Community 141`** (1 nodes): `system.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 142`** (1 nodes): `index.js`
+- **Thin community `Community 142`** (1 nodes): `alert.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 143`** (1 nodes): `db-management.service.js`
+- **Thin community `Community 143`** (1 nodes): `card.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 144`** (1 nodes): `index.js`
+- **Thin community `Community 144`** (1 nodes): `tabs.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 145`** (1 nodes): `wsgi.py`
+- **Thin community `Community 145`** (1 nodes): `nativeselect.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 146`** (1 nodes): `Get the numeric level for this role.`
+- **Thin community `Community 146`** (1 nodes): `button.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 147`** (1 nodes): `__init__.py`
+- **Thin community `Community 147`** (1 nodes): `segmentedgroup.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 148`** (1 nodes): `__init__.py`
+- **Thin community `Community 148`** (1 nodes): `sidebar.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 149`** (1 nodes): `__init__.py`
+- **Thin community `Community 149`** (1 nodes): `form.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 150`** (1 nodes): `Get all qualification groups that apply to a specific crew type.`
+- **Thin community `Community 150`** (1 nodes): `input.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 151`** (1 nodes): `Get all crew types that can use a specific qualification group.`
+- **Thin community `Community 151`** (1 nodes): `dialog.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 152`** (1 nodes): `Get all available qualification groups.`
+- **Thin community `Community 152`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 153`** (1 nodes): `Get all available crew types.`
+- **Thin community `Community 153`** (1 nodes): `badge.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 154`** (1 nodes): `Check if a qualification group is applicable to a specific crew type.`
+- **Thin community `Community 154`** (1 nodes): `table.recipe.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 155`** (1 nodes): `Configure JWT for the Flask application.      Args:         app: Flask applicati`
+- **Thin community `Community 155`** (1 nodes): `enums.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 156`** (1 nodes): `Register JWT error handlers.      Args:         jwt: JWTManager instance`
+- **Thin community `Community 156`** (1 nodes): `Can.test.jsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 157`** (1 nodes): `Email utilities for sending emails and password recovery.`
+- **Thin community `Community 157`** (1 nodes): `toaster.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 158`** (1 nodes): `Generate a random alphanumeric code of a given length.`
+- **Thin community `Community 158`** (1 nodes): `wsgi.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 159`** (1 nodes): `Hash the given code using SHA-256.`
+- **Thin community `Community 159`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 160`** (1 nodes): `Send an email with the provided subject, body, and recipient.`
+- **Thin community `Community 160`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 161`** (1 nodes): `Create a JSON object with the hashed token and timestamp.`
+- **Thin community `Community 161`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 162`** (1 nodes): `Send email of password recovery and create json data to add to DB.      Args:`
+- **Thin community `Community 162`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 163`** (1 nodes): `Envia o ficheiro pdf para o google drive      Args:         mem_pdf (io.BytesIO)`
+- **Thin community `Community 163`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 164`** (1 nodes): `Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict`
+- **Thin community `Community 164`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 165`** (1 nodes): `Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.     Se não`
+- **Thin community `Community 165`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 166`** (1 nodes): `Função geral de enviar os dados para os ficheiros no Google Drive.      Criada p`
+- **Thin community `Community 166`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 167`** (1 nodes): `Parse time string in format 'HH:MM' to total minutes.      Args:         time_st`
+- **Thin community `Community 167`** (1 nodes): `Get the numeric level for this role.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 168`** (1 nodes): `Schema for flight response.`
+- **Thin community `Community 168`** (1 nodes): `Get all qualification groups that apply to a specific crew type.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 169`** (1 nodes): `Schema for reprocess qualifications response.`
+- **Thin community `Community 169`** (1 nodes): `Get all crew types that can use a specific qualification group.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 170`** (1 nodes): `Turn Marshmallow field errors (possibly nested by index) into a single string.`
+- **Thin community `Community 170`** (1 nodes): `Get all available qualification groups.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 171`** (1 nodes): `Convert Marshmallow validation error dict (or list) to a single human-readable s`
+- **Thin community `Community 171`** (1 nodes): `Get all available crew types.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 172`** (1 nodes): `Validate request data against a schema.      Args:         schema: Marshmallow s`
+- **Thin community `Community 172`** (1 nodes): `Check if a qualification group is applicable to a specific crew type.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 173`** (1 nodes): `Schema for password update request.`
+- **Thin community `Community 173`** (1 nodes): `Configure JWT for the Flask application.      Args:         app: Flask applicati`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 174`** (1 nodes): `Schema for password update response.`
+- **Thin community `Community 174`** (1 nodes): `Register JWT error handlers.      Args:         jwt: JWTManager instance`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 175`** (1 nodes): `Schema for forgot password request validation.`
+- **Thin community `Community 175`** (1 nodes): `Email utilities for sending emails and password recovery.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 176`** (1 nodes): `Schema for expiring qualifications response.`
+- **Thin community `Community 176`** (1 nodes): `Generate a random alphanumeric code of a given length.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 177`** (1 nodes): `Database README`
+- **Thin community `Community 177`** (1 nodes): `Hash the given code using SHA-256.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 178`** (1 nodes): `Database SETUP Guide`
+- **Thin community `Community 178`** (1 nodes): `Send an email with the provided subject, body, and recipient.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 179`** (1 nodes): `Frontend README`
+- **Thin community `Community 179`** (1 nodes): `Create a JSON object with the hashed token and timestamp.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 180`** (1 nodes): `API README`
+- **Thin community `Community 180`** (1 nodes): `Send email of password recovery and create json data to add to DB.      Args:`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 181`** (1 nodes): `Envia o ficheiro pdf para o google drive      Args:         mem_pdf (io.BytesIO)`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 182`** (1 nodes): `Uploads Flight JSON encoded data to Google Drive.      Args:         dados (dict`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 183`** (1 nodes): `Verifica se existe uma pasta com 'folder_name' dentro de 'parent_id'.     Se não`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 184`** (1 nodes): `Função geral de enviar os dados para os ficheiros no Google Drive.      Criada p`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 185`** (1 nodes): `Parse time string in format 'HH:MM' to total minutes.      Args:         time_st`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 186`** (1 nodes): `Schema for flight response.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 187`** (1 nodes): `Schema for reprocess qualifications response.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 188`** (1 nodes): `Turn Marshmallow field errors (possibly nested by index) into a single string.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 189`** (1 nodes): `Convert Marshmallow validation error dict (or list) to a single human-readable s`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 190`** (1 nodes): `Validate request data against a schema.      Args:         schema: Marshmallow s`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 191`** (1 nodes): `Schema for password update request.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 192`** (1 nodes): `Schema for password update response.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 193`** (1 nodes): `Schema for forgot password request validation.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 194`** (1 nodes): `Schema for expiring qualifications response.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 195`** (1 nodes): `Database README`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 196`** (1 nodes): `Database SETUP Guide`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 197`** (1 nodes): `Frontend README`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 198`** (1 nodes): `API README`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Tripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 4`, `Community 5`, `Community 6`, `Community 8`, `Community 9`?**
-  _High betweenness centrality (0.107) - this node is a cross-community bridge._
-- **Why does `TipoTripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 14`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
-- **Why does `Qualificacao` connect `Community 0` to `Community 1`, `Community 2`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 14`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
-- **Are the 313 inferred relationships involving `Tripulante` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
-  _`Tripulante` has 313 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `Tripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 10`, `Community 11`, `Community 13`?**
+  _High betweenness centrality (0.141) - this node is a cross-community bridge._
+- **Why does `TipoTripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 5`, `Community 6`, `Community 8`, `Community 10`, `Community 11`, `Community 13`, `Community 16`?**
+  _High betweenness centrality (0.095) - this node is a cross-community bridge._
+- **Why does `FlightService` connect `Community 8` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 9`, `Community 13`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Are the 330 inferred relationships involving `Tripulante` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
+  _`Tripulante` has 330 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 295 inferred relationships involving `Qualificacao` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
   _`Qualificacao` has 295 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 250 inferred relationships involving `Flight` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
-  _`Flight` has 250 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 235 inferred relationships involving `TripulanteQualificacao` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
-  _`TripulanteQualificacao` has 235 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 271 inferred relationships involving `Flight` (e.g. with `Run migrations in 'offline' mode.      This configures the context with just a U` and `Run migrations in 'online' mode.      In this scenario we need to create an Engi`) actually correct?**
+  _`Flight` has 271 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 252 inferred relationships involving `TipoTripulante` (e.g. with `Load all qualifications from database into a cache for validation.      Returns:` and `Check if a qualification exists in the database for the given type.      Args:`) actually correct?**
+  _`TipoTripulante` has 252 INFERRED edges - model-reasoned connections that need verification._
