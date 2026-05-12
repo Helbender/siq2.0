@@ -1,18 +1,41 @@
+import { sidebarRecipe } from "@/theme2/recipes/sidebar.recipe";
+import {
+  Box,
+  Button,
+  chakra,
+  HStack,
+  Text,
+  useSlotRecipe,
+  VStack,
+} from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  FaBinoculars,
+  FaBoxOpen,
+  FaBuilding,
+  FaBus,
+  FaCogs,
+  FaLifeRing,
+  FaShieldAlt,
+  FaTshirt,
+} from "react-icons/fa";
 
 const SECTIONS = [
-  "Secretaria",
-  "OPS",
-  "UNIF",
-  "SAM",
-  "LOG",
-  "SPA",
-  "SAR",
-  "VIMAR",
+  { key: "Secretaria", label: "Secretaria", icon: FaBuilding },
+  { key: "OPS", label: "Operações", icon: FaCogs },
+  { key: "UNIF", label: "Uniformização", icon: FaTshirt },
+  { key: "SAM", label: "Apoio e Mobilidade", icon: FaBus },
+  { key: "LOG", label: "Logística", icon: FaBoxOpen },
+  { key: "SPA", label: "Seg. e Prev. de Acidentes", icon: FaShieldAlt },
+  { key: "SAR", label: "Busca e Salvamento", icon: FaLifeRing },
+  { key: "VIMAR", label: "Vigilância Marítima", icon: FaBinoculars },
 ];
 
 function SectionsTab() {
+  const recipe = useSlotRecipe({ recipe: sidebarRecipe });
+  const [recipeProps] = recipe.splitVariantProps({});
+  const styles = recipe(recipeProps);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef(null);
 
@@ -43,31 +66,22 @@ function SectionsTab() {
         outline="none"
         _focusVisible={{ outline: "none" }}
       >
-        <VStack align="stretch" gap={0}>
-          {SECTIONS.map((section, index) => {
+        <VStack align="stretch" gap="1">
+          {SECTIONS.map(({ key, label, icon: Icon }, index) => {
             const isActive = index === activeIndex;
             return (
-              <Box
-                key={section}
-                px={4}
-                py={3}
-                cursor="pointer"
+              <chakra.div
+                key={key}
+                css={[
+                  styles.item,
+                  isActive && { bg: "brand.600", color: "white" },
+                ]}
+                data-active={isActive || undefined}
                 onClick={() => setActiveIndex(index)}
-                bg={isActive ? "blue.500" : "transparent"}
-                borderRadius="md"
-                transition="background 0.15s"
-                _hover={{ bg: isActive ? "blue.500" : "bg.subtle" }}
               >
-                <Text
-                  fontSize={isActive ? "2xl" : "md"}
-                  fontWeight={isActive ? "bold" : "normal"}
-                  color={isActive ? "white" : "fg"}
-                  transition="all 0.15s"
-                  letterSpacing={isActive ? "wide" : "normal"}
-                >
-                  {section}
-                </Text>
-              </Box>
+                <Box as={Icon} css={styles.itemIcon} flexShrink={0} />
+                <Box as="span">{label}</Box>
+              </chakra.div>
             );
           })}
         </VStack>
@@ -87,6 +101,7 @@ function SectionsTab() {
         </Text>
         <Button
           size="sm"
+          variant="outline"
           onClick={advance}
           disabled={activeIndex === SECTIONS.length - 1}
         >
