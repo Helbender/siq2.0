@@ -1,10 +1,12 @@
 import { ColorModeButton } from "@/components/ui/color-mode";
 import { getPageTitle } from "@/layout/constants/pageTitles";
-import { Box, Flex, Heading } from "@chakra-ui/react";
-import { useLocation } from "react-router";
+import { Box, Flex, Heading, IconButton } from "@chakra-ui/react";
+import { MdHome } from "react-icons/md";
+import { useLocation, useNavigate } from "react-router";
 
-export function TopBar() {
+export function TopBar({ showHome = false }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const pageTitle = getPageTitle(location.pathname);
 
   return (
@@ -25,11 +27,25 @@ export function TopBar() {
           {pageTitle}
         </Heading>
 
-        <ColorModeButton
-          size="md"
-          color="text.secondary"
-          _hover={{ bg: "bg.cardSubtle", color: "text.primary" }}
-        />
+        <Flex align="center" gap={2}>
+          {showHome && (
+            <IconButton
+              aria-label="Ir para Dashboard"
+              variant="ghost"
+              size="md"
+              color="text.secondary"
+              _hover={{ bg: "bg.cardSubtle", color: "text.primary" }}
+              onClick={() => navigate("/dashboard")}
+            >
+              <MdHome />
+            </IconButton>
+          )}
+          <ColorModeButton
+            size="md"
+            color="text.secondary"
+            _hover={{ bg: "bg.cardSubtle", color: "text.primary" }}
+          />
+        </Flex>
       </Flex>
     </Box>
   );

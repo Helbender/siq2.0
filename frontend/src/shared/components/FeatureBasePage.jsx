@@ -1,11 +1,11 @@
-import { Box, Heading } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
-export function FeatureBasePage({ title, children }) {
+export function FeatureBasePage({ children }) {
   return (
-    <Box w="100%" h="100%" p={6}>
-      <Heading textAlign="center" size="lg" mb={4} color="white">
+    <Box w="100%" h="100%" p={{ base: 2, md: 4 }}>
+      {/* <Heading textAlign="center" size="lg" mb={4} color="white">
         {title}
-      </Heading>
+      </Heading> */}
       <Box>{children}</Box>
     </Box>
   );

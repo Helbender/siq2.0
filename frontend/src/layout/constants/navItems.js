@@ -8,10 +8,11 @@ import {
   FaTools,
   FaUsers,
 } from "react-icons/fa";
-import { MdSpaceDashboard } from "react-icons/md";
+import { MdOutlineEventNote, MdSpaceDashboard } from "react-icons/md";
 
 export const NAV_ITEMS = [
   { label: "Dashboard", icon: MdSpaceDashboard, path: "/dashboard" },
+  { label: "Briefing Diário", icon: MdOutlineEventNote, path: "/briefing" },
   { label: "Voos", icon: FaPlaneArrival, path: "/flights" },
   { label: "Qualificações", icon: FaTable, path: "/crew-qualifications" },
   // {
