@@ -1,6 +1,6 @@
-import { Box, Card, SimpleGrid, Stat, Text, VStack } from "@chakra-ui/react";
+import { Box, Card, SimpleGrid, Spinner, Stat, Text, VStack } from "@chakra-ui/react";
 import { useMemo } from "react";
-import { MOCK_RECENT_FLIGHTS } from "../constants";
+import { useRecentFlights } from "../api/queries/useRecentFlights";
 import { FlightActivityCard } from "./FlightActivityCard";
 
 function minutesBetween(atd, ata) {
@@ -26,7 +26,7 @@ function StatCard({ label, value }) {
 }
 
 export function FlightActivityTab() {
-  const flights = MOCK_RECENT_FLIGHTS;
+  const { data: flights = [], isLoading, isError } = useRecentFlights();
 
   const stats = useMemo(() => {
     const totalMins = flights.reduce(
@@ -44,6 +44,22 @@ export function FlightActivityTab() {
       cargo: `${totalCargo} kg`,
     };
   }, [flights]);
+
+  if (isLoading) {
+    return (
+      <Box py={10} textAlign="center">
+        <Spinner />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box py={10} textAlign="center">
+        <Text color="fg.error">Erro ao carregar voos.</Text>
+      </Box>
+    );
+  }
 
   if (!flights.length) {
     return (
