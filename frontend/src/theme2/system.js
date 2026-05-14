@@ -10,6 +10,7 @@ import {
   nativeSelectRecipe,
   segmentGroupSlotRecipe,
   sidebarRecipe,
+  statRecipe,
   tableRecipe,
   tabsSlotRecipe,
 } from "./recipes";
@@ -65,6 +66,7 @@ export const system = createSystem(defaultConfig, {
       nativeSelect: nativeSelectRecipe,
       dialog: dialogRecipe,
       alert: alertRecipe,
+      stat: statRecipe,
     },
   },
 });

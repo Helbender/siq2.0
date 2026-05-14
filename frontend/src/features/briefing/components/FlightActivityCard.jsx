@@ -2,8 +2,8 @@ import {
   Badge,
   Box,
   Card,
+  DataList,
   HStack,
-  Separator,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -29,54 +29,88 @@ export function FlightActivityCard({ flight }) {
     passengers,
   } = flight;
 
-  const hasCargo = cargo && cargo > 0;
-  const hasPax = passengers && passengers > 0;
+  const POSITION_ORDER = [
+    "PI",
+    "PC",
+    "P",
+    "CP",
+    "PA",
+    "OCI",
+    "OC",
+    "OCA",
+    "CTI",
+    "CT",
+    "CTA",
+    "OPVI",
+    "OPV",
+    "OPVA",
+  ];
+  const sortedPilots = [...flight_pilots].sort(
+    (a, b) =>
+      POSITION_ORDER.indexOf(a.position) - POSITION_ORDER.indexOf(b.position),
+  );
+
+  const hasCargo = cargo > 0;
+  const hasPax = passengers > 0;
 
   return (
     <Card.Root variant="outline">
-      <Card.Body p={4}>
-        <VStack align="stretch" gap={2}>
-          {/* Header row */}
-          <HStack justify="space-between">
-            <HStack gap={2}>
-              <Text fontWeight="bold" fontSize="md">
-                {airtask}
-              </Text>
-              <Badge variant="subtle" colorPalette="gray" size="sm">
-                {formatDate(date)}
-              </Badge>
-            </HStack>
-            <Text fontSize="sm" color="fg.muted">
-              {ATD} → {ATA}
+      <Card.Header bg="emerald.900/30" borderTopRadius="md">
+        <HStack justify="space-between">
+          <Box></Box>
+          <Card.Title>
+            <Text
+            // fontWeight="bold" fontSize="md"
+            >
+              {airtask}
             </Text>
-          </HStack>
-
+          </Card.Title>
+          <Badge size="md" variant="gold">
+            {formatDate(date)}
+          </Badge>
+        </HStack>
+        {/* Header row */}
+        <HStack justify="space-between">
           {/* Route */}
           <Text fontSize="sm" fontWeight="medium">
             {origin} → {destination}
           </Text>
-
-          <Separator borderColor="border.subtle" />
-
+          <Text fontSize="sm" color="fg.muted">
+            {ATD} → {ATA}
+          </Text>
+        </HStack>
+      </Card.Header>
+      <Card.Body p={4}>
+        <VStack align="stretch" gap={2}>
+          <Text fontSize="md" color="fg">
+            Tripulação
+          </Text>
           {/* Crew + Cargo/PAX side by side */}
-          <HStack align="flex-start" gap={4}>
+          <HStack justify="space-between" align="flex-start" gap={4}>
             {/* Crew list */}
-            <VStack align="flex-start" gap={1} flex="1">
-              {flight_pilots.map((p) => (
-                <Text key={p.nip} fontSize="sm" color="fg.muted">
-                  <Text as="span" fontWeight="semibold" color="fg.default">
+            {/* <VStack align="flex-start" gap={1} flex="1"> */}
+            <DataList.Root orientation="horizontal" gap={0}>
+              {sortedPilots.map((p) => (
+                <DataList.Item key={p.nip}>
+                  <DataList.ItemLabel minWidth="20px">
                     {p.position}
-                  </Text>{" "}
-                  {p.name}
-                </Text>
+                  </DataList.ItemLabel>
+                  <DataList.ItemValue px={0}>{p.name}</DataList.ItemValue>
+                </DataList.Item>
+                // <Text key={p.nip} fontSize="sm" color="fg.muted">
+                //   <Text as="span" fontWeight="semibold" color="fg.default">
+                //     {p.position}
+                //   </Text>{" "}
+                //   {p.name}
+                // </Text>
               ))}
-            </VStack>
+            </DataList.Root>
+            {/* </VStack> */}
 
-            {/* Cargo + PAX */}
             {(hasCargo || hasPax) && (
               <VStack align="flex-end" gap={1} flexShrink={0}>
-                {hasCargo && (
-                  <Box textAlign="right">
+                {!!hasCargo && (
+                  <Box>
                     <Text fontSize="xs" color="fg.muted">
                       Carga
                     </Text>
@@ -85,7 +119,7 @@ export function FlightActivityCard({ flight }) {
                     </Text>
                   </Box>
                 )}
-                {hasPax && (
+                {!!hasPax && (
                   <Box textAlign="right">
                     <Text fontSize="xs" color="fg.muted">
                       PAX
