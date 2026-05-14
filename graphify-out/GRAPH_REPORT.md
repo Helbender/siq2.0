@@ -1,7 +1,7 @@
 # Graph Report - .  (2026-05-14)
 
 ## Corpus Check
-- 289 files · ~93,167 words
+- 289 files · ~126,816 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -187,16 +187,16 @@
 10. `GrupoQualificacoes` - 72 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Pre-process data to convert empty strings to None for optional fields.` --uses--> `StatusTripulante`  [INFERRED]
-  api/app/features/users/schemas.py → api/app/shared/enums.py
-- `Validate tipo field if present.` --uses--> `StatusTripulante`  [INFERRED]
-  api/app/features/users/schemas.py → api/app/shared/enums.py
-- `Service for qualifications preview business logic.` --uses--> `QualificationsPreviewRepository`  [INFERRED]
-  api/app/features/qualifications_preview/service.py → api/app/features/qualifications_preview/repository.py
-- `Get pilots with MQP/MQOBP qualifications expiring within preview_days, grouped b` --uses--> `QualificationsPreviewRepository`  [INFERRED]
-  api/app/features/qualifications_preview/service.py → api/app/features/qualifications_preview/repository.py
-- `Raised by AuthService when an operation fails with a known HTTP status.` --uses--> `AuthRepository`  [INFERRED]
-  api/app/features/auth/service.py → api/app/features/auth/repository.py
+- `StatusTripulante` --uses--> `Pre-process data to convert empty strings to None for optional fields.`  [INFERRED]
+  api/app/shared/enums.py → api/app/features/users/schemas.py
+- `StatusTripulante` --uses--> `Validate tipo field if present.`  [INFERRED]
+  api/app/shared/enums.py → api/app/features/users/schemas.py
+- `QualificationsPreviewRepository` --uses--> `Service for qualifications preview business logic.`  [INFERRED]
+  api/app/features/qualifications_preview/repository.py → api/app/features/qualifications_preview/service.py
+- `QualificationsPreviewRepository` --uses--> `Get pilots with MQP/MQOBP qualifications expiring within preview_days, grouped b`  [INFERRED]
+  api/app/features/qualifications_preview/repository.py → api/app/features/qualifications_preview/service.py
+- `AuthRepository` --uses--> `Raised by AuthService when an operation fails with a known HTTP status.`  [INFERRED]
+  api/app/features/auth/repository.py → api/app/features/auth/service.py
 
 ## Communities
 
@@ -1096,11 +1096,11 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `TipoTripulante` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 5`, `Community 8`, `Community 9`, `Community 12`, `Community 15`?**
-  _High betweenness centrality (0.103) - this node is a cross-community bridge._
-- **Why does `Tripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 6`, `Community 8`?**
-  _High betweenness centrality (0.086) - this node is a cross-community bridge._
+  _High betweenness centrality (0.092) - this node is a cross-community bridge._
 - **Why does `FlightService` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`, `Community 4`?**
-  _High betweenness centrality (0.074) - this node is a cross-community bridge._
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Why does `Tripulante` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 6`, `Community 8`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
 - **Are the 160 inferred relationships involving `Tripulante` (e.g. with `Shared pytest fixtures for SIQ 2.0 backend tests.` and `Create the test database if it doesn't exist.`) actually correct?**
   _`Tripulante` has 160 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 149 inferred relationships involving `TipoTripulante` (e.g. with `Shared pytest fixtures for SIQ 2.0 backend tests.` and `Create the test database if it doesn't exist.`) actually correct?**
