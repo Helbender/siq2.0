@@ -90,6 +90,7 @@ export const cardRecipe = defineSlotRecipe({
       },
       glass: {
         root: {
+          p: "0",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           _hover: {

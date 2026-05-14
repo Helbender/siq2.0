@@ -23,7 +23,7 @@ import { DeleteFlightModal } from "./modals/DeleteFlightModal";
 export function FlightCard({ flight }) {
   const isColumn = useBreakpointValue({ base: true, lg: false });
   return (
-    <Card.Root variant="glass">
+    <Card.Root variant="outline">
       <Card.Header>
         <Flex align={"center"}>
           {isColumn ? (
@@ -130,36 +130,56 @@ export function FlightCard({ flight }) {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {flight.flight_pilots.map((pilot, idx) => {
-                // Collect qualifications from QUAL1-QUAL6, filtering out empty strings
-                const qualifications = [1, 2, 3, 4, 5, 6]
-                  .map((n) => pilot[`QUAL${n}`])
-                  .filter((qual) => qual && qual.trim() !== "");
+              {[...flight.flight_pilots]
+                .sort((a, b) => {
+                  const ORDER = [
+                    "PI",
+                    "PC",
+                    "P",
+                    "CP",
+                    "PA",
+                    "OCI",
+                    "OC",
+                    "OCA",
+                    "CTI",
+                    "CT",
+                    "CTA",
+                    "OPVI",
+                    "OPV",
+                    "OPVA",
+                  ];
+                  return ORDER.indexOf(a.position) - ORDER.indexOf(b.position);
+                })
+                .map((pilot, idx) => {
+                  // Collect qualifications from QUAL1-QUAL6, filtering out empty strings
+                  const qualifications = [1, 2, 3, 4, 5, 6]
+                    .map((n) => pilot[`QUAL${n}`])
+                    .filter((qual) => qual && qual.trim() !== "");
 
-                // Join qualifications into a single string
-                const qualificationsText = qualifications.join(" ");
+                  // Join qualifications into a single string
+                  const qualificationsText = qualifications.join(" ");
 
-                return (
-                  <Table.Row key={pilot.id ?? pilot.nip ?? idx}>
-                    <Table.Cell textAlign={"center"}>{pilot.nip}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>
-                      {pilot.position}
-                    </Table.Cell>
-                    <Table.Cell>{pilot.name}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{pilot.ATR}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>{pilot.ATN}</Table.Cell>
-                    <Table.Cell textAlign={"center"}>
-                      {pilot.precapp}
-                    </Table.Cell>
-                    <Table.Cell textAlign={"center"}>
-                      {pilot.nprecapp}
-                    </Table.Cell>
-                    <Table.Cell textAlign={"center"}>
-                      {qualificationsText}
-                    </Table.Cell>
-                  </Table.Row>
-                );
-              })}
+                  return (
+                    <Table.Row key={pilot.id ?? pilot.nip ?? idx}>
+                      <Table.Cell textAlign={"center"}>{pilot.nip}</Table.Cell>
+                      <Table.Cell textAlign={"center"}>
+                        {pilot.position}
+                      </Table.Cell>
+                      <Table.Cell>{pilot.name}</Table.Cell>
+                      <Table.Cell textAlign={"center"}>{pilot.ATR}</Table.Cell>
+                      <Table.Cell textAlign={"center"}>{pilot.ATN}</Table.Cell>
+                      <Table.Cell textAlign={"center"}>
+                        {pilot.precapp}
+                      </Table.Cell>
+                      <Table.Cell textAlign={"center"}>
+                        {pilot.nprecapp}
+                      </Table.Cell>
+                      <Table.Cell textAlign={"center"}>
+                        {qualificationsText}
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                })}
             </Table.Body>
           </Table.Root>
         </Box>
