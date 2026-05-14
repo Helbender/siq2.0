@@ -12,7 +12,8 @@ export const tableRecipe = defineSlotRecipe({
     root: {
       width: "100%",
       minW: "700px",
-      borderCollapse: "collapse",
+      borderCollapse: "separate",
+      borderSpacing: "0",
     },
     wrapper: {
       overflowX: "auto",

@@ -251,17 +251,19 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               position: "sticky",
               zIndex: 1,
               bg: "bg.surface",
-            },
-            "& [data-sticky=end]": {
               _after: {
                 content: '""',
                 position: "absolute",
                 pointerEvents: "none",
                 top: "0",
-                bottom: "0",
+                bottom: "-1px",
+                width: "32px",
+              },
+            },
+            "& [data-sticky=end]": {
+              _after: {
                 insetInlineEnd: "0",
                 translate: "100% 0",
-                width: "8px",
                 shadow: "inset 8px 0 8px -8px rgba(0,0,0,0.45)",
               },
             },
@@ -270,12 +272,16 @@ export function QualificationTablePage({ pilotos = [], loading }) {
               top: "0",
               zIndex: 2,
               bg: "bg.surface",
+              borderBottom: "1px solid",
+              borderBottomColor: "border.solid",
             },
             "& thead tr:nth-of-type(2) th": {
               position: "sticky",
               top: "45px",
               zIndex: 2,
               bg: "bg.surface",
+              borderBottom: "2px solid",
+              borderBottomColor: "border.solid",
             },
             "& thead tr th[data-sticky]": {
               zIndex: 3,
@@ -289,11 +295,13 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                 rowSpan={2}
                 fontSize={"lg"}
                 data-sticky="inner"
+                position="sticky"
+                top="0"
                 left="0"
                 minW="50px"
                 whiteSpace="nowrap"
                 borderRight="1px solid"
-                borderColor="border.subtle"
+                borderColor="border.solid"
               >
                 FC
               </Table.ColumnHeader>
@@ -301,9 +309,11 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                 rowSpan={2}
                 fontSize={"lg"}
                 data-sticky="end"
+                position="sticky"
+                top="0"
                 left="50px"
                 borderRight="2px solid"
-                borderColor="border.strong"
+                borderColor="border.solid"
               >
                 Nome
               </Table.ColumnHeader>
@@ -317,7 +327,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                     textAlign="center"
                     bg="bg.surface"
                     borderRight="1px solid"
-                    borderColor="border.strong"
+                    borderColor="border.solid"
                   >
                     <Text fontWeight="bold">{grupo}</Text>
                   </Table.ColumnHeader>
@@ -340,7 +350,7 @@ export function QualificationTablePage({ pilotos = [], loading }) {
                       userSelect="none"
                       minW="20px"
                       borderRight="1px solid"
-                      borderColor="border.strong"
+                      borderColor="border.solid"
                       borderRightWidth={
                         quals[quals.length - 1] === qual ? "2px" : "1px"
                       }
