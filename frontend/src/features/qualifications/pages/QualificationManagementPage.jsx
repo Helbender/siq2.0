@@ -1,29 +1,23 @@
 import { Can } from "@/shared/components/Can";
 import { Role } from "@/shared/roles";
-import { toaster } from "@/shared/utils/toaster";
 import {
   Box,
-  Button,
   Card,
   Container,
-  Flex,
   HStack,
   Input,
   Spacer,
   Text,
 } from "@chakra-ui/react";
-import { BiRefresh } from "react-icons/bi";
 
 import { CreateQualModal } from "../components/CreateQualModal";
 import { QualificationTable } from "../components/QualificationTable";
 import { SegmentFilter } from "../components/SegmentFilter";
 import { useQualificationFilters } from "../hooks/useQualificationFilters";
-import { useReprocessFlights } from "../mutations/useReprocessFlights";
 import { useQualificationsQuery } from "../queries/useQualificationsQuery";
 
 export function QualificationManagementPage() {
   const { data: qualifications = [], isLoading } = useQualificationsQuery();
-  const reprocessFlights = useReprocessFlights();
 
   const {
     search,
@@ -36,31 +30,6 @@ export function QualificationManagementPage() {
     availableGroups,
     filtered,
   } = useQualificationFilters(qualifications);
-
-  const handleReprocessAllFlights = async () => {
-    const promise = reprocessFlights.mutateAsync();
-
-    toaster.promise(promise, {
-      loading: {
-        title: "A reprocessar voos",
-        description: "Por favor aguarde",
-      },
-      success: (res) => ({
-        title: "Sucesso!",
-        description: res?.message ?? "Reprocessamento concluído",
-      }),
-      error: (err) => ({
-        title: "Erro",
-        description: err.response?.data?.message ?? "Erro ao reprocessar",
-      }),
-    });
-
-    try {
-      await promise;
-    } catch {
-      // Error toast handled by toaster.promise
-    }
-  };
 
   return (
     <Can
@@ -79,25 +48,12 @@ export function QualificationManagementPage() {
       }
     >
       <Container maxW="90%" py={6} mb={35}>
-        <HStack mb={10}>
+        <HStack mb={4}>
           <Can minLevel={Role.UNIF}>
             <CreateQualModal />
           </Can>
-          <Spacer />
 
-          <Can minLevel={Role.UNIF}>
-            <Button
-              colorPalette="blue"
-              onClick={handleReprocessAllFlights}
-              loading={reprocessFlights.isPending}
-              disabled={reprocessFlights.isPending}
-            >
-              <BiRefresh />
-              {reprocessFlights.isPending
-                ? "A processar..."
-                : "Reprocessar Todas"}
-            </Button>
-          </Can>
+          <Spacer />
 
           <Input
             placeholder="Search..."
@@ -107,23 +63,21 @@ export function QualificationManagementPage() {
           />
         </HStack>
 
-        <Flex mb={6} gap={4} direction={{ base: "column", md: "row" }}>
+        <HStack mb={6} gap={3}>
           <SegmentFilter
-            title="Filtrar por Grupo"
-            options={availableGroups}
-            value={group}
-            onChange={setGroup}
-          />
-
-          <Spacer />
-
-          <SegmentFilter
-            title="Filtrar por Posição"
+            title="Posição"
             options={allTypes}
             value={type}
             onChange={setType}
           />
-        </Flex>
+
+          <SegmentFilter
+            title="Grupo"
+            options={availableGroups}
+            value={group}
+            onChange={setGroup}
+          />
+        </HStack>
 
         <Card.Root>
           <QualificationTable qualifications={filtered} />
