@@ -11,16 +11,21 @@ export const badgeRecipe = defineRecipe({
     display: "inline-flex",
     alignItems: "center",
     gap: "1.5",
-    _before: {
-      content: '""',
-      width: "6px",
-      height: "6px",
-      borderRadius: "full",
-    },
+    // _before: {
+    //   content: '""',
+    //   width: "6px",
+    //   height: "6px",
+    //   borderRadius: "full",
+    // },
   },
 
   variants: {
     variant: {
+      outline: {},
+      solid: {},
+      subtle: {},
+      surface: {},
+      plain: {},
       success: {
         bg: "success.subtle",
         color: "success.solid",

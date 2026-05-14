@@ -8,6 +8,7 @@ import { inputRecipe } from "./input.recipe";
 import { nativeSelectRecipe } from "./nativeselect.recipe";
 import { segmentGroupSlotRecipe } from "./segmentedgroup.recipe";
 import { sidebarRecipe } from "./sidebar.recipe";
+import { statRecipe } from "./stat.recipe";
 import { tableRecipe } from "./table.recipe";
 import { tabsSlotRecipe } from "./tabs.recipe";
 export {
@@ -21,6 +22,7 @@ export {
   nativeSelectRecipe,
   segmentGroupSlotRecipe,
   sidebarRecipe,
+  statRecipe,
   tableRecipe,
   tabsSlotRecipe,
 };

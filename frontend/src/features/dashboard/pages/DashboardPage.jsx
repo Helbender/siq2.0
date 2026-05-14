@@ -15,7 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { DateRangeSelector } from "../components/DateRangeSelector";
 import { PieChartCard } from "../components/PieChartCard";
-import { StatCard } from "../components/StatCard";
+import { StatCard } from "@/shared/components/StatCard";
 import { SunTimesDisplay } from "../components/SunTimesDisplay";
 import { TopPilotsSection } from "../components/TopPilotsSection";
 import { useDashboardStats } from "../hooks/useDashboardStats";
