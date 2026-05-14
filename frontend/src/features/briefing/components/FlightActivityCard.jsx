@@ -54,10 +54,9 @@ export function FlightActivityCard({ flight }) {
   const hasPax = passengers > 0;
 
   return (
-    <Card.Root variant="outline">
-      <Card.Header bg="emerald.900/30" borderTopRadius="md">
+    <Card.Root variant="glass">
+      <Card.Header bg="emerald.900/40" borderTopRadius="md">
         <HStack justify="space-between">
-          <Box></Box>
           <Card.Title>
             <Text
             // fontWeight="bold" fontSize="md"
