@@ -1,5 +1,6 @@
-import { Box, Card, SimpleGrid, Spinner, Stat, Text, VStack } from "@chakra-ui/react";
+import { Box, SimpleGrid, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useMemo } from "react";
+import { StatCard } from "@/shared/components/StatCard";
 import { useRecentFlights } from "../api/queries/useRecentFlights";
 import { FlightActivityCard } from "./FlightActivityCard";
 
@@ -10,19 +11,6 @@ function minutesBetween(atd, ata) {
   const start = h1 * 60 + m1;
   if (end < start) end += 24 * 60;
   return end - start;
-}
-
-function StatCard({ label, value }) {
-  return (
-    <Card.Root variant="glass">
-      <Card.Body py={3}>
-        <Stat.Root>
-          <Stat.Label fontSize="xs">{label}</Stat.Label>
-          <Stat.ValueText fontSize="xl">{value}</Stat.ValueText>
-        </Stat.Root>
-      </Card.Body>
-    </Card.Root>
-  );
 }
 
 export function FlightActivityTab() {
@@ -39,9 +27,9 @@ export function FlightActivityTab() {
     const totalCargo = flights.reduce((sum, f) => sum + (f.cargo || 0), 0);
     return {
       flights: flights.length,
-      hours: `${h}h ${m}m`,
+      hours: [h, m],
       pax: totalPax,
-      cargo: `${totalCargo} kg`,
+      cargo: totalCargo,
     };
   }, [flights]);
 
@@ -73,9 +61,9 @@ export function FlightActivityTab() {
     <VStack align="stretch" gap={3} p={3}>
       <SimpleGrid columns={4} gap={3}>
         <StatCard label="Voos (7 dias)" value={stats.flights} />
-        <StatCard label="Horas de voo" value={stats.hours} />
+        <StatCard label="Horas de voo" value={stats.hours} unit={["h", "m"]} />
         <StatCard label="Passageiros" value={stats.pax} />
-        <StatCard label="Carga" value={stats.cargo} />
+        <StatCard label="Carga" value={stats.cargo} unit="kg" />
       </SimpleGrid>
 
       <SimpleGrid columns={2} gap={3}>
