@@ -2,6 +2,35 @@
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true
   },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run lint *)",
+      "Bash(uv run ruff check *)",
+      "Bash(uv run mypy *)",
+      "Bash(playwright-cli open *)",
+      "Bash(playwright-cli goto *)",
+      "Bash(playwright-cli goto)",
+      "Bash(playwright-cli snapshot *)",
+      "Bash(playwright-cli snapshot)",
+      "Bash(playwright-cli console *)",
+      "Bash(playwright-cli console)",
+      "Bash(playwright-cli network *)",
+      "Bash(playwright-cli network)",
+      "Bash(playwright-cli screenshot *)",
+      "Bash(playwright-cli screenshot)",
+      "Bash(playwright-cli fill *)",
+      "Bash(playwright-cli click *)",
+      "Bash(playwright-cli tab-list)",
+      "Bash(playwright-cli tab-list *)",
+      "Bash(playwright-cli close *)",
+      "Bash(playwright-cli close)",
+      "mcp__stitch__list_screens",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__get_screen",
+      "mcp__stitch__get_project"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
