@@ -1,5 +1,5 @@
-import { Box, SegmentGroup, Text } from "@chakra-ui/react";
-import { memo, useMemo } from "react";
+import { NativeSelect } from "@chakra-ui/react";
+import { memo } from "react";
 
 export const SegmentFilter = memo(function SegmentFilter({
   title,
@@ -7,52 +7,21 @@ export const SegmentFilter = memo(function SegmentFilter({
   value,
   onChange,
 }) {
-  const items = useMemo(
-    () => [
-      { value: "all", label: "Todos" },
-      ...options.map((opt) => ({
-        value: opt,
-        label: opt.charAt(0).toUpperCase() + opt.slice(1),
-      })),
-    ],
-    [options],
-  );
-
   return (
-    <Box
-      p={4}
-      bg="whiteAlpha.400"
-      borderRadius="md"
-      border="1 solid"
-      borderColor="#4A5568"
-      boxShadow="sm"
-      minW="200px"
-    >
-      <Text fontWeight="bold" mb={3} fontSize="sm" color="text.secondary">
-        {title}
-      </Text>
-
-      <SegmentGroup.Root
-        bg="#2D3748"
-        color="white"
+    <NativeSelect.Root size="sm" minW="160px">
+      <NativeSelect.Field
         value={value}
-        onValueChange={(d) => onChange(d.value)}
-        size="sm"
-        css={{
-          "--segment-indicator-bg": "colors.teal.500",
-          "& [data-selected]": {
-            bg: "teal.500",
-            color: "white",
-          },
-          //   "& [data-part='item']:not([data-selected])": {
-          //     bg: "#2D3748",
-          //     color: "white",
-          //   },
-        }}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={title}
       >
-        <SegmentGroup.Items items={items} />
-        <SegmentGroup.Indicator />
-      </SegmentGroup.Root>
-    </Box>
+        <option value="all">{title}: Todos</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </NativeSelect.Field>
+      <NativeSelect.Indicator />
+    </NativeSelect.Root>
   );
 });

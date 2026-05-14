@@ -77,6 +77,12 @@ export const baseSemanticTokens = defineSemanticTokens({
           _dark: "rgba(255, 255, 255, 0.15)",
         },
       },
+      solid: {
+        value: {
+          _light: "{colors.gray.300}",
+          _dark: "{colors.gray.600}",
+        },
+      },
       focus: { value: "{colors.emerald.400}" },
     },
 

@@ -18,12 +18,14 @@ import {
 } from "@chakra-ui/react";
 import { useState, useRef } from "react";
 import { FaCloud, FaDownload, FaUpload } from "react-icons/fa";
+import { BiRefresh } from "react-icons/bi";
 import { YearStatsTable } from "../components/YearStatsTable";
 import { useFlightsByYear } from "../hooks/useFlightsByYear";
 import { useExportQualifications } from "../mutations/useExportQualifications";
 import { useExportUsers } from "../mutations/useExportUsers";
 import { useImportQualifications } from "../mutations/useImportQualifications";
 import { useRebackupFlights } from "../mutations/useRebackupFlights";
+import { useReprocessFlights } from "@features/qualifications";
 
 export function DatabaseManagementPage() {
   const { user } = useAuth();
@@ -36,11 +38,37 @@ export function DatabaseManagementPage() {
   });
 
   const rebackupFlights = useRebackupFlights();
+  const reprocessFlights = useReprocessFlights();
   const exportQualifications = useExportQualifications();
   const exportUsers = useExportUsers();
   const importQualifications = useImportQualifications();
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  const handleReprocessAllFlights = async () => {
+    const promise = reprocessFlights.mutateAsync();
+
+    toaster.promise(promise, {
+      loading: {
+        title: "A reprocessar voos",
+        description: "Por favor aguarde",
+      },
+      success: (res) => ({
+        title: "Sucesso!",
+        description: res?.message ?? "Reprocessamento concluído",
+      }),
+      error: (err) => ({
+        title: "Erro",
+        description: err.response?.data?.message ?? "Erro ao reprocessar",
+      }),
+    });
+
+    try {
+      await promise;
+    } catch {
+      // Error handled by toaster.promise
+    }
+  };
 
   const handleRebackupFlights = async () => {
     // Show loading toast
@@ -195,6 +223,30 @@ export function DatabaseManagementPage() {
                     disabled={rebackupFlights.isPending}
                   >
                     Rebackup All Flights to Google Drive
+                  </Button>
+                </Box>
+
+                <Separator />
+
+                <Box>
+                  <Text mb={2} fontWeight="semibold">
+                    Reprocessar Qualificações
+                  </Text>
+                  <Text fontSize="sm" color="gray.500" mb={3}>
+                    Recalcula o estado de todas as qualificações de tripulantes
+                    com base no histórico de voos actual.
+                  </Text>
+                  <Button
+                    onClick={handleReprocessAllFlights}
+                    loading={reprocessFlights.isPending}
+                    disabled={reprocessFlights.isPending}
+                    colorPalette="teal"
+                    variant="subtle"
+                  >
+                    <BiRefresh />
+                    {reprocessFlights.isPending
+                      ? "A processar..."
+                      : "Reprocessar Todas as Qualificações"}
                   </Button>
                 </Box>
 
