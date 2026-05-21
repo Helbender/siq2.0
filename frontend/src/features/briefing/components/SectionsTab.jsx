@@ -16,6 +16,7 @@ import {
   FaBus,
   FaCogs,
   FaLifeRing,
+  FaNewspaper,
   FaShieldAlt,
   FaTshirt,
 } from "react-icons/fa";
@@ -25,6 +26,7 @@ const SECTIONS = [
   { key: "OPS", label: "Operações", icon: FaCogs },
   { key: "UNIF", label: "Uniformização", icon: FaTshirt },
   { key: "SAM", label: "Apoio e Mobilidade", icon: FaBus },
+  { key: "PUBS", label: "Navegação e Publicações", icon: FaNewspaper },
   { key: "LOG", label: "Logística", icon: FaBoxOpen },
   { key: "SPA", label: "Seg. e Prev. de Acidentes", icon: FaShieldAlt },
   { key: "SAR", label: "Busca e Salvamento", icon: FaLifeRing },
